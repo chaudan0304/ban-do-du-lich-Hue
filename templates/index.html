@@ -1,47 +1,107 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Huế - Bản đồ Du lịch Thông minh</title>
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
 
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
     <div id="sidebar">
-        <div class="sidebar-header">
-            <h2><span>🏰</span> Khám phá Huế</h2>
-            <div class="ai-box">
-                <label class="ai-label">✨ Gợi ý thông minh (AI)</label>
-                <div class="search-group">
-                    <input type="text" id="usernameInput" placeholder="Nhập tên User..." value="SinhVienHue">
-                    <button class="btn-ai" onclick="getRecommendations()">Gợi ý</button>
-                </div>
-                <div id="results" class="result-box"></div>
-            </div>
+      <div class="sidebar-header">
+        <h2><span>🏰</span> Khám phá Huế</h2>
+        <div class="ai-box">
+          <label class="ai-label">✨ Gợi ý thông minh (AI)</label>
+          <div class="search-group">
+            <input
+              type="text"
+              id="usernameInput"
+              placeholder="Nhập tên User..."
+              value="SinhVienHue"
+            />
+            <button class="btn-ai" onclick="getRecommendations()">Gợi ý</button>
+          </div>
+          <div id="results" class="result-box"></div>
         </div>
 
-        <div class="filter-container">
-            <button class="filter-btn active" onclick="filterData('All', this)">Tất cả</button>
-            <button class="filter-btn" onclick="filterData('Di tích', this)">🏛️ Di tích</button>
-            <button class="filter-btn" onclick="filterData('Ẩm thực', this)">🍜 Ẩm thực</button>
-            <button class="filter-btn" onclick="filterData('Tâm linh', this)">🛕 Tâm linh</button>
-            <button class="filter-btn" onclick="filterData('Thiên nhiên', this)">🌳 Thiên nhiên</button>
-            <button class="filter-btn" onclick="filterData('Mua sắm', this)">🛍️ Mua sắm</button>
+        <div
+          class="ai-box"
+          style="
+            margin-top: 10px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+          "
+        >
+          <label class="ai-label" style="color: #1565c0"
+            >📍 Tìm kiếm theo tọa độ</label
+          >
+          <div class="search-group">
+            <input
+              type="text"
+              id="coordInput"
+              placeholder="VD: 16.4650, 107.5700"
+            />
+            <button
+              class="btn-ai"
+              onclick="searchCoordinate()"
+              style="background: #1565c0"
+            >
+              Tìm
+            </button>
+          </div>
         </div>
+      </div>
 
-        <div id="locationList">
-            <div class="list-title">Danh sách địa điểm</div>
-        </div>
+      <div class="filter-container">
+        <button class="filter-btn active" onclick="filterData('All', this)">
+          Tất cả
+        </button>
+        <button class="filter-btn" onclick="filterData('Di tích', this)">
+          🏛️ Di tích
+        </button>
+        <button class="filter-btn" onclick="filterData('Tâm linh', this)">
+          🛕 Tâm linh
+        </button>
+        <button class="filter-btn" onclick="filterData('Lăng tẩm', this)">
+          🏯 Lăng tẩm
+        </button>
+        <button class="filter-btn" onclick="filterData('Thiên nhiên', this)">
+          🌳 Thiên nhiên
+        </button>
+        <button class="filter-btn" onclick="filterData('Ẩm thực', this)">
+          🍜 Ẩm thực
+        </button>
+        <button class="filter-btn" onclick="filterData('Mua sắm', this)">
+          🛍️ Mua sắm
+        </button>
+        <button class="filter-btn" onclick="filterData('Tham quan', this)">
+          🎡 Tham quan
+        </button>
+        <button class="filter-btn" onclick="filterData('Thiên nhiên', this)">
+          🌳 Thiên nhiên
+        </button>
+        <button class="filter-btn" onclick="filterData('Bãi biển', this)">
+          🏖️ Bãi biển
+        </button>
+      </div>
+
+      <div id="locationList">
+        <div class="list-title">Danh sách địa điểm</div>
+      </div>
     </div>
 
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
+  </body>
 </html>
