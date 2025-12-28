@@ -61,21 +61,51 @@ function loadLocations(category = 'All') {
         });
 }
 
-// Hàm tạo icon marker theo category
+// ==========================================
+// HÀM TẠO ICON CHẤM TRÒN ĐỔI MÀU
+// ==========================================
 function getMarkerIcon(category) {
+    // 1. Bảng màu cho từng danh mục
     const colors = {
-        'Di tích': '#e74c3c',
-        'Ẩm thực': '#f39c12',
-        'Thiên nhiên': '#27ae60',
-        'Lưu trú': '#3498db',
-        'default': '#95a5a6'
+        'Di tích':     '#e74c3c', // Đỏ (Red)
+        'Tâm linh':    '#f1c40f', // Vàng (Yellow)
+        'Lăng tẩm':    '#8e44ad', // Tím (Purple)
+        'Ẩm thực':     '#e67e22', // Cam (Orange)
+        'Mua sắm':     '#3498db', // Xanh dương (Blue)
+        'Nhà vườn':    '#1abc9c', // Xanh ngọc (Teal)
+        'Tham quan':   '#16a085', // Xanh đậm
+        'Thiên nhiên': '#27ae60', // Xanh lá (Green)
+        'Bãi biển':    '#2980b9', // Xanh biển đậm
+        'default':     '#95a5a6'  // Xám (Mặc định nếu không khớp)
     };
+
+    // 2. Lấy màu dựa trên danh mục (nếu không có thì lấy màu default)
     const color = colors[category] || colors.default;
+
+    // 3. Trả về DivIcon (Vẽ bằng code HTML/CSS)
     return L.divIcon({
-        className: 'custom-div-icon',
-        html: `<div style="background-color:${color};width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,0.4);"></div>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
+        className: 'custom-dot-icon', // Class rỗng để xóa style mặc định của Leaflet
+        
+        // Đoạn HTML vẽ hình tròn
+        html: `
+            <div style="
+                background-color: ${color};
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                border: 2px solid #ffffff;
+                box-shadow: 0 0 4px rgba(0,0,0,0.4);
+            "></div>
+        `,
+        
+        // Kích thước thật của icon (18px + 2px viền trái + 2px viền phải = 22px)
+        iconSize: [22, 22],
+        
+        // Điểm neo (Căn giữa: 22 chia 2 = 11)
+        iconAnchor: [11, 11],
+        
+        // Vị trí hiện bảng tên khi click (cao hơn chấm một chút)
+        popupAnchor: [0, -12]
     });
 }
 
@@ -206,8 +236,6 @@ function onMapClick(e) {
     var lat = e.latlng.lat.toFixed(5); // Lấy 5 số thập phân
     var lng = e.latlng.lng.toFixed(5);
 
-    // Định dạng chuỗi cần copy: 'lat': 16.xxxx, 'lng': 107.xxxx
-    // Sử dụng &apos; để đại diện cho dấu nháy đơn (') trong HTML
     var copyText = `'lat': ${lat}, 'lng': ${lng}`;
     
     popup

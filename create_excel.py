@@ -20,8 +20,8 @@ locations = [
         "description": "Biệt thự cổ kiến trúc Châu Âu độc đáo, nơi ở của gia đình vua Bảo Đại.",
         "category": "Di tích",
         "rating": 4.7,
-        "lat": 16.45659,
-        "lng": 107.59832,
+        "lat": 16.45722,
+        "lng": 107.59802,
         "image": "/static/images/cung-an-dinh.png",
     },
     {
