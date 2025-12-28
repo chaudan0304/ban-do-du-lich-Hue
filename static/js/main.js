@@ -31,32 +31,33 @@ function loadLocations(category = 'All') {
             listContainer.innerHTML = `<div class="list-title">Tìm thấy ${data.length} địa điểm</div>`;
             
             data.forEach(loc => {
-                // A. Tạo thẻ Card bên trái
-                var card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <img class="card-img" src="${loc.image}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png'">
-                    <div class="card-body">
-                        <div class="card-name">${loc.name}</div>
-                        <div class="card-meta">
-                            <span class="card-cat">${loc.category}</span>
+                var marker = L.marker([loc.lat, loc.lng], {
+                    icon: getIconByCategory(loc.category) // Gọi hàm icon vừa viết
+                });
+
+                var popupContent = `
+                    <div class="popup-body">
+                        <img src="${loc.image}" class="popup-img" onerror="this.src='https://via.placeholder.com/300x150?text=Hue+Tourism'">
+                        <b>${loc.name}</b>
+                        <div style="font-size:12px; color:#666; margin:5px 0;">${loc.description.substring(0, 60)}...</div>
+                        
+                        <div style="display:flex; justify-content:space-between; margin-top:8px;">
                             <span class="card-rating">⭐ ${loc.rating}</span>
+                            <span style="font-size:11px; background:#eee; padding:2px 6px; border-radius:4px;">${loc.category}</span>
                         </div>
+                        
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}" 
+                        target="_blank" 
+                        style="display:block; margin-top:10px; text-decoration:none; background:#3498db; color:white; padding:5px; border-radius:4px; font-size:12px; font-weight:bold;">
+                        🗺️ Chỉ đường tới đây
+                        </a>
                     </div>
                 `;
-                card.onclick = () => { map.flyTo([loc.lat, loc.lng], 16); };
-                listContainer.appendChild(card);
-                
-                // B. Tạo Marker trên bản đồ
-                var marker = addMarker(loc);
-                
-                // C. Highlight khi hover card
-                card.onmouseover = () => {
-                    marker.openPopup();
-                };
-                card.onmouseout = () => {
-                    marker.closePopup();
-                };
+
+                marker.bindPopup(popupContent);
+                marker.addTo(markerLayer);
+
+// ...
             });
         });
 }
@@ -304,6 +305,36 @@ function searchCoordinate() {
     } else {
         alert("⚠️ Vui lòng nhập đúng định dạng: Vĩ độ, Kinh độ");
     }
+}
+
+// Hàm lấy Icon theo danh mục
+function getIconByCategory(category) {
+    let cssClass = 'pin-khac';
+    let iconSymbol = '📍';
+
+    // Logic gán màu và biểu tượng
+    if (category === 'Di tích' || category === 'Lăng tẩm') {
+        cssClass = 'pin-ditich';
+        iconSymbol = '🏛️';
+    } else if (category === 'Ẩm thực') {
+        cssClass = 'pin-amthuc';
+        iconSymbol = '🍜';
+    } else if (category === 'Tâm linh') {
+        cssClass = 'pin-tamlinh';
+        iconSymbol = '🛕';
+    } else if (category === 'Thiên nhiên' || category === 'Bãi biển') {
+        cssClass = 'pin-thiennhien';
+        iconSymbol = '🌳';
+    }
+
+    // Tạo DivIcon của Leaflet
+    return L.divIcon({
+        className: 'custom-div-icon', // Class rỗng để tránh Leaflet gán style mặc định
+        html: `<div class='custom-pin ${cssClass}'><i>${iconSymbol}</i></div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42], // Điểm nhọn của marker
+        popupAnchor: [0, -40] // Vị trí popup hiện ra so với marker
+    });
 }
 // ==========================================
 // 6. CHẠY LẦN ĐẦU
