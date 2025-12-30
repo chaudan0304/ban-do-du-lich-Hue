@@ -11,8 +11,8 @@ locations = [
         "description": "Hoàng thành cổ kính, di sản UNESCO với cung điện và thành lũy Nguyễn triều.",
         "category": "Di tích",
         "rating": 4.9,
-        "lat": 16.47005,
-        "lng": 107.57738,
+        "lat": 16.46883,
+        "lng": 107.57815,
         "image": "/static/images/dai-noi-hue.png",
     },
     {
@@ -154,7 +154,7 @@ locations = [
         "image": "/static/images/che-hem-hue.png",
     },
     {
-        "name": "Nem Lủi Bà Tý",
+        "name": "Nem Lụi Bà Tý",
         "description": "Quán nem lủi nướng nổi tiếng, ăn kèm bánh tráng và rau sống.",
         "category": "Ẩm thực",
         "rating": 4.6,
@@ -212,7 +212,7 @@ locations = [
     {
         "name": "Nhà vườn An Hiên",
         "description": "Nhà vườn truyền thống Huế đẹp nhất, kiến trúc cổ.",
-        "category": "Nhà vườn",
+        "category": "Tham quan",
         "rating": 4.8,
         "lat": 16.45532,
         "lng": 107.55378,

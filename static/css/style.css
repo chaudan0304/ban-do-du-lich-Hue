@@ -4,7 +4,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
 * {
-    box-sizing: border-box;
+    box-sizing: border-box; 
     margin: 0;
     padding: 0;
 }
@@ -319,4 +319,66 @@ h2 span {
     #locationList {
         padding: 0 15px 15px 15px;
     }
+}
+
+/* =========================================
+   8. CUSTOM MARKER (ICON TÙY CHỈNH)
+   ========================================= */
+.custom-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0;
+    /* Tạo hình giọt nước */
+    background: #3498db;
+    position: absolute;
+    transform: rotate(-45deg);
+    /* Xoay để đáy nhọn chỉ xuống */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid white;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+/* Icon bên trong ghim */
+.custom-pin i {
+    transform: rotate(45deg);
+    /* Xoay ngược lại để icon đứng thẳng */
+    font-style: normal;
+    font-size: 14px;
+    color: white;
+}
+
+/* Màu sắc theo danh mục */
+.pin-ditich {
+    background-color: #e74c3c;
+}
+
+/* Đỏ */
+.pin-amthuc {
+    background-color: #f39c12;
+}
+
+/* Cam */
+.pin-tamlinh {
+    background-color: #8e44ad;
+}
+
+/* Tím */
+.pin-thiennhien {
+    background-color: #27ae60;
+}
+
+/* Xanh lá */
+.pin-khac {
+    background-color: #34495e;
+}
+
+/* Xám */
+
+/* Hiệu ứng khi trỏ chuột vào marker */
+.custom-pin:hover {
+    transform: rotate(-45deg) scale(1.2);
+    z-index: 999 !important;
 }
