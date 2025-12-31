@@ -12,91 +12,95 @@ var markerLayer = L.layerGroup().addTo(map);
 
 // Biến lưu marker để tra cứu khi click từ danh sách
 var markersMap = {};
+
+// BIẾN QUẢN LÝ ĐƯỜNG ĐI
+var routingControl = null;
 // ==========================================
 // 2. CÁC HÀM XỬ LÝ DỮ LIỆU (Load, Marker, AI)
 // ==========================================
 // Hàm tải danh sách địa điểm
 function loadLocations(category = "All") {
   markerLayer.clearLayers();
+  markersMap = {}; // Reset để tránh lỗi cũ
 
   var listContainer = document.getElementById("locationList");
   listContainer.innerHTML = '<div class="list-title">Đang tải dữ liệu...</div>';
+
   var url = "/api/locations";
-  if (category !== "All") url += `?category=${category}`;
+  if (category !== "All") url += `?category=${encodeURIComponent(category)}`;
+
   fetch(url)
     .then((response) => response.json())
     .then((data) => {
       if (data.length === 0) {
-        listContainer.innerHTML =
-          '<div class="list-title">Không tìm thấy địa điểm nào 😔</div>';
+        listContainer.innerHTML = '<div class="list-title">Không tìm thấy địa điểm nào 😔</div>';
         return;
       }
+
       listContainer.innerHTML = `<div class="list-title">Tìm thấy ${data.length} địa điểm</div>`;
 
       data.forEach((loc) => {
-        // A. Tạo thẻ Card bên trái
-        var card = document.createElement("div");
+        // === 1. Tạo CARD ===
+        const card = document.createElement("div"); // Dùng const để scope rõ ràng
         card.className = "card";
         card.innerHTML = `
-                    <img class="card-img" src="${loc.image}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png'">
-                    <div class="card-body">
-                        <div class="card-name">${loc.name}</div>
-                        <div class="card-meta">
-                            <span class="card-cat">${loc.category}</span>
-                            <span class="card-rating">⭐ ${loc.rating}</span>
-                        </div>
-                    </div>
-                `;
-        card.onclick = () => {
-          flyToLocation(loc.lat, loc.lng, loc.name);
-        };
+          <img class="card-img" src="${loc.image}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png'">
+          <div class="card-body">
+            <div class="card-name">${loc.name}</div>
+            <div class="card-meta">
+              <span class="card-cat">${loc.category}</span>
+              <span class="card-rating">⭐ ${loc.rating}</span>
+            </div>
+          </div>
+        `;
+
+        // Click card → bay đến địa điểm
+        card.onclick = () => flyToLocation(loc.lat, loc.lng, loc.name);
         listContainer.appendChild(card);
 
-        // B. Thêm Marker lên bản đồ
-        var marker = L.marker([loc.lat, loc.lng], {
-          icon: getIconByCategory(loc.category), // Gọi hàm icon vừa viết
+        // === 2. Tạo MARKER ===
+        const marker = L.marker([loc.lat, loc.lng], {
+          icon: getIconByCategory(loc.category),
         });
 
-        var popupContent = `
-            <div class="popup-body">
-                        <img src="${
-                          loc.image
-                        }" class="popup-img" onerror="this.src='https://via.placeholder.com/300x150?text=Hue+Tourism'">
-                        <b>${loc.name}</b>
-                        <div style="font-size:12px; color:#666; margin:5px 0;">${loc.description.substring(
-                          0,
-                          60
-                        )}...</div>
-                        
-                        <div style="display:flex; justify-content:space-between; margin-top:8px;">
-                            <span class="card-rating">⭐ ${loc.rating}</span>
-                            <span style="font-size:11px; background:#eee; padding:2px 6px; border-radius:4px;">${
-                              loc.category
-                            }</span>
-                        </div>
-                        
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${
-                          loc.lat
-                        },${loc.lng}" 
-                        target="_blank" 
-                        style="display:block; margin-top:10px; text-decoration:none; background:#3498db; color:white; padding:5px; border-radius:4px; font-size:12px; font-weight:bold;">
-                        🗺️ Chỉ đường tới đây
-                        </a>
-                    </div>
-                `;
+        // Popup content
+        const popupContent = `
+          <div class="popup-body">
+            <img src="${loc.image}" class="popup-img" onerror="this.src='https://via.placeholder.com/300x150?text=Hue'">
+            <b>${loc.name}</b>
+            <div style="font-size:12px; color:#666; margin:5px 0;">${loc.description.substring(0, 60)}...</div>
+            
+            <div style="display:flex; justify-content:space-between; margin-top:8px;">
+              <span class="card-rating">⭐ ${loc.rating}</span>
+              <span style="font-size:11px; background:#eee; padding:2px 6px; border-radius:4px;">${loc.category}</span>
+            </div>
+            
+            <button onclick="showRoute(${loc.lat}, ${loc.lng})" 
+               style="cursor:pointer; width:100%; margin-top:8px; border:none; background:#27ae60; color:white; padding:6px; border-radius:4px; font-weight:bold;">
+               🚗 Dẫn đường từ Ga Huế
+            </button>
+
+            <a href="https://www.google.com/maps?q=${loc.lat},${loc.lng}" target="_blank"
+               style="display:block; margin-top:5px; text-decoration:none; background:#3498db; color:white; padding:5px; border-radius:4px; font-size:12px; font-weight:bold; text-align:center;">
+               🗺️ Mở Google Maps
+            </a>
+          </div>
+        `;
 
         marker.bindPopup(popupContent);
         marker.addTo(markerLayer);
 
+        // Lưu marker để flyTo và hover
         markersMap[loc.name] = marker;
+
+        // === 3. Hover effect: card hover → mở popup marker ===
+        card.addEventListener("mouseenter", () => marker.openPopup());
+        card.addEventListener("mouseleave", () => marker.closePopup());
       });
-      // C. Highlight khi hover card
-      card.onmouseover = () => {
-        marker.openPopup();
-      };
-      card.onmouseout = () => {
-        marker.closePopup();
-      };
+    })
+    .catch((err) => {
+      console.error("Lỗi tải locations:", err);
+      listContainer.innerHTML = '<div class="list-title">Lỗi kết nối server 😢</div>';
     });
 }
 
@@ -122,9 +126,7 @@ function flyToLocation(lat, lng, name) {
 
 // Hàm xử lý khi bấm nút bộ lọc
 function filterData(cat, btn) {
-  document
-    .querySelectorAll(".filter-btn")
-    .forEach((b) => b.classList.remove("active"));
+  document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
   btn.classList.add("active");
   loadLocations(cat);
 }
@@ -141,8 +143,7 @@ function getRecommendations() {
         resBox.innerHTML = "<small>Không có gợi ý.</small>";
         return;
       }
-      resBox.innerHTML =
-        '<small style="color:#27ae60; font-weight:bold">🔥 Dành riêng cho bạn:</small>';
+      resBox.innerHTML = '<small style="color:#27ae60; font-weight:bold">🔥 Dành riêng cho bạn:</small>';
       data.forEach((loc) => {
         var div = document.createElement("div");
         div.className = "card rec-card";
@@ -153,14 +154,10 @@ function getRecommendations() {
                           loc.image
                         }" style="width:50px; height:50px; border-radius:8px; object-fit:cover; margin-right:10px" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png'">
                         <div>
-                            <div style="font-weight:bold; font-size:14px">${
-                              loc.name
-                            }</div>
-                            <div style="font-size:11px; color:#555">${
-                              loc.score
-                                ? "Có " + loc.score + " người giống bạn"
-                                : "Địa điểm Hot"
-                            }</div>
+                            <div style="font-weight:bold; font-size:14px">${loc.name}</div>
+                            <div style="font-size:11px; color:#555">
+                              ${loc.common_users ? loc.common_users + " người cùng sở thích" : "Địa điểm nổi bật (PageRank cao)"}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -321,7 +318,7 @@ function getIconByCategory(category) {
   let iconSymbol = "📍";
 
   // Logic gán màu và biểu tượng
-  if (category === "Di tích" || category === "Lăng tẩm") {
+  if (category === "Di tích") {
     cssClass = "pin-ditich";
     iconSymbol = "🏛️";
   } else if (category === "Tâm linh") {
@@ -356,7 +353,60 @@ function getIconByCategory(category) {
     popupAnchor: [0, -40], // Vị trí popup hiện ra so với marker
   });
 }
+
 // ==========================================
-// 6. CHẠY LẦN ĐẦU
+// 6. HÀM VẼ ĐƯỜNG ĐI (ROUTING)
 // ==========================================
+function showRoute(destLat, destLng) {
+  if (routingControl) {
+    map.removeControl(routingControl);
+    routingControl = null;
+  }
+
+  // Điểm xuất phát: Ga Huế
+  const startName = "Ga Huế"; // Bạn cần thêm điểm này vào Neo4j trước
+  const endName = prompt("Nhập tên địa điểm đích (phải có trong dữ liệu):"); // Tạm dùng prompt để test
+
+  if (!endName) return;
+
+  fetch(`/api/route?start=${encodeURIComponent(startName)}&end=${encodeURIComponent(endName)}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.error) {
+        alert("Lỗi: " + data.error);
+        return;
+      }
+
+      const latlngs = data.path_nodes.map((node) => [node.lat, node.lng]);
+
+      // Vẽ polyline đơn giản (không cần Routing Machine)
+      const polyline = L.polyline(latlngs, {
+        color: "#3498db",
+        weight: 6,
+        opacity: 0.8,
+        smoothFactor: 1,
+      }).addTo(map);
+
+      // Fit bounds để thấy toàn bộ đường đi
+      map.fitBounds(polyline.getBounds());
+
+      // Thêm marker điểm đầu và cuối
+      L.marker(latlngs[0]).addTo(map).bindPopup("🚂 Ga Huế (Điểm xuất phát)").openPopup();
+      L.marker(latlngs[latlngs.length - 1])
+        .addTo(map)
+        .bindPopup("📍 Điểm đến")
+        .openPopup();
+
+      // Lưu để xóa lần sau
+      routingControl = { remove: () => polyline.remove() };
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("Lỗi tính đường đi từ Neo4j");
+    });
+}
+// ==========================================
+// THE END. KHỞI CHẠY ỨNG DỤNG
+// ==========================================
+// Khởi chạy lần đầu: Load tất cả địa điểm
 loadLocations("All");

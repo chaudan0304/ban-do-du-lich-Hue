@@ -79,6 +79,52 @@ def recommend(user_name):
     return jsonify(results)
 
 
+# API Tìm đường đi ngắn nhất giữa 2 điểm (Dùng thuật toán Dijkstra của Neo4j)
+@app.route("/api/route", methods=["GET"])
+def get_route():
+    # Lấy tên 2 địa điểm từ URL
+    start_name = request.args.get("start")  # Ví dụ: Hoàng Thành Huế
+    end_name = request.args.get("end")  # Ví dụ: Chùa Thiên Mụ
+
+    if not start_name or not end_name:
+        return jsonify({"error": "Vui lòng cung cấp điểm đi và điểm đến"}), 400
+
+    query = """
+    MATCH (source:Location {name: $start}), (target:Location {name: $end})
+    
+    -- Gọi thuật toán Dijkstra tìm đường ngắn nhất
+    CALL gds.shortestPath.dijkstra.stream('roadGraph', {
+        sourceNode: source,
+        targetNode: target,
+        relationshipWeightProperty: 'distance'
+    })
+    YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
+    
+    -- Trả về chi tiết các điểm trên đường đi
+    RETURN [nodeId IN nodeIds | {
+        name: gds.util.asNode(nodeId).name,
+        lat: gds.util.asNode(nodeId).lat,
+        lng: gds.util.asNode(nodeId).lng
+    }] AS path_nodes, totalCost
+    """
+
+    try:
+        data = run_query(query, {"start": start_name, "end": end_name})
+        if not data:
+            return (
+                jsonify(
+                    {
+                        "error": "Không tìm thấy đường đi giữa 2 điểm này (quá xa hoặc không kết nối)"
+                    }
+                ),
+                404,
+            )
+        return jsonify(data[0])  # Trả về mảng tọa độ để Leaflet vẽ
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     print("🚀 Server Du lịch đang chạy tại: http://127.0.0.1:5000")
     app.run(port=5000, debug=True)
+5
