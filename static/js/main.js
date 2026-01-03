@@ -115,7 +115,7 @@ function loadLocations(category = "All") {
             
             <button onclick="showRoute(${loc.lat}, ${loc.lng}, '${loc.name.replace(/'/g, "\\'")}')" 
               style="cursor:pointer; width:100%; margin-top:8px; border:none; background:#27ae60; color:white; padding:8px; border-radius:8px; font-weight:bold; font-size:14px;">
-              🚗 Dẫn đường từ Ga Huế → ${loc.name}
+              🚗 Tìm đường đi đến → ${loc.name}
             </button>
 
             <a href="https://www.google.com/maps?q=${loc.lat},${loc.lng}" target="_blank"
@@ -354,7 +354,7 @@ function searchCoordinate() {
 // ==========================================
 // 6. HÀM VẼ ĐƯỜNG ĐI TỐI ƯU (ROUTING)
 // ==========================================
-let routingLayer = null; // Quản lý layer đường đi (dễ xóa hơn control)
+let routingLayer = null; // Quản lý layer đường đi
 
 function showRoute(destLat, destLng, destName) {
   if (routingLayer) {
@@ -362,8 +362,6 @@ function showRoute(destLat, destLng, destName) {
     routingLayer = null;
   }
 
-  // Điểm xuất phát cố định: Ga Huế (phải tồn tại trong Neo4j)
-  const startName = "Ga Huế";
   const endName = destName.trim();
 
   if (!endName) {
@@ -374,26 +372,73 @@ function showRoute(destLat, destLng, destName) {
   // Hiển thị loading nhẹ (tùy chọn nâng cao)
   const loadingPopup = L.popup({ closeOnClick: false, closeButton: false })
     .setLatLng([destLat, destLng])
-    .setContent("<small>⏳ Đang tính đường đi từ Ga Huế...</small>")
+    .setContent("<small>⏳ Đang xác định điểm xuất phát và tính đường đi...</small>")
     .openOn(map);
 
-  fetch(`/api/route?start=${encodeURIComponent(startName)}&end=${encodeURIComponent(endName)}`)
+  // Ưu tiên lấy vị trí hiện tại của người dùng
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const startLat = position.coords.latitude;
+        const startLng = position.coords.longitude;
+        calculateRoute(startLat, startLng, null, endName, loadingPopup); // null nghĩa là dùng tọa độ thực
+      },
+      (error) => {
+        console.warn("Không lấy được vị trí hiện tại:", error);
+        map.closePopup(loadingPopup);
+        // Fallback: Cho phép người dùng nhập tên điểm xuất phát
+        const startName = prompt(
+          "Không lấy được vị trí hiện tại.\nVui lòng nhập tên điểm xuất phát (ví dụ: Hoàng Thành Huế hoặc Ga Huế):",
+          "Hoàng Thành Huế"
+        );
+        if (!startName || startName.trim() === "") {
+          alert("⚠️ Vui lòng nhập điểm xuất phát hợp lệ!");
+          return;
+        }
+        calculateRoute(null, null, startName.trim(), endName, null);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  } else {
+    // Nếu browser không hỗ trợ geolocation
+    map.closePopup(loadingPopup);
+    const startName = prompt("Trình duyệt không hỗ trợ định vị.\nVui lòng nhập tên điểm xuất phát:", "Hoàng Thành Huế");
+    if (!startName || startName.trim() === "") {
+      alert("⚠️ Vui lòng nhập điểm xuất phát hợp lệ!");
+      return;
+    }
+    calculateRoute(null, null, startName.trim(), endName, null);
+  }
+}
+
+// Hàm tách riêng để tính đường đi (hỗ trợ cả tọa độ và tên)
+function calculateRoute(startLat, startLng, startName, endName, loadingPopup) {
+  let url;
+  if (startLat && startLng) {
+    alert("Backend hiện tại chỉ hỗ trợ tên địa điểm. Hãy nhập tên gần nhất.");
+    const fallbackName = prompt("Nhập tên điểm xuất phát gần vị trí hiện tại:", "Ga Huế");
+    url = `/api/route?start=${encodeURIComponent(fallbackName)}&end=${encodeURIComponent(endName)}`;
+  } else {
+    url = `/api/route?start=${encodeURIComponent(startName)}&end=${encodeURIComponent(endName)}`;
+  }
+
+  fetch(url)
     .then((res) => {
       if (!res.ok) throw new Error("Server lỗi");
       return res.json();
     })
     .then((data) => {
-      map.closePopup(loadingPopup);
+      console.log("👉 Dữ liệu Server trả về:", data);
+
+      if (loadingPopup) map.closePopup(loadingPopup);
 
       if (data.error) {
         alert(`❌ Không tìm thấy đường đi:\n${data.error}`);
         return;
       }
 
-      // Tạo mảng tọa độ từ đường đi Neo4j trả về
       const latlngs = data.path_nodes.map((node) => [node.lat, node.lng]);
 
-      // Vẽ đường đi bằng Polyline đẹp
       const polyline = L.polyline(latlngs, {
         color: "#3498db",
         weight: 6,
@@ -401,26 +446,47 @@ function showRoute(destLat, destLng, destName) {
         smoothFactor: 1,
       });
 
-      // Tạo layer group chứa polyline + marker đầu/cuối
       routingLayer = L.layerGroup([polyline]).addTo(map);
 
-      // Marker điểm đầu (Ga Huế)
-      L.marker(latlngs[0], { icon: getIconByCategory("Tham quan") })
+      // 1. Kiểm tra xem có totalCost không (phòng trường hợp lỗi)
+      if (data.totalCost !== undefined) {
+        // 2. Đổi từ mét sang km và làm tròn 2 số thập phân
+        var distanceKm = (data.totalCost / 1000).toFixed(2);
+
+        // 3. Tạo nội dung Popup đẹp mắt
+        var popupContent = `
+              <div style="text-align:center; min-width: 150px">
+                  <b style="color:#2c3e50">🏁 Lộ trình tham quan</b><br>
+                  <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
+                  Khoảng cách: <b style="color:#e67e22; font-size:15px">${distanceKm} km</b>
+              </div>
+          `;
+
+        // 4. Gắn popup vào đường đi và tự động mở ra
+        polyline.bindPopup(popupContent).openPopup();
+      }
+      // ---------------------
+      // Marker điểm đầu (xanh lá để phân biệt là start)
+      const startIcon = L.divIcon({
+        className: "custom-pin pin-thiennhien", // Sử dụng class xanh lá có sẵn trong CSS
+        iconSize: [30, 30],
+        html: "<i>🚩</i>",
+      });
+      L.marker(latlngs[0], { icon: startIcon })
         .addTo(routingLayer)
-        .bindPopup("🚂 <b>Ga Huế</b><br>Điểm xuất phát")
+        .bindPopup(`🚩 <b>${startLat ? "Vị trí hiện tại của bạn" : startName || "Điểm xuất phát"}</b><br>Start`)
         .openPopup();
 
-      // Marker điểm cuối (địa điểm người dùng chọn)
+      // Marker điểm cuối (giữ icon category hoặc mặc định)
       L.marker(latlngs[latlngs.length - 1], { icon: getIconByCategory("Tham quan") })
         .addTo(routingLayer)
         .bindPopup(`📍 <b>${endName}</b><br>Điểm đến`)
         .openPopup();
 
-      // Zoom tự động vừa khung toàn bộ đường đi
       map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
     })
     .catch((err) => {
-      map.closePopup(loadingPopup);
+      if (loadingPopup) map.closePopup(loadingPopup);
       console.error("Lỗi routing:", err);
       alert("🔌 Lỗi kết nối đến Neo4j hoặc không có đường đi khả dụng.");
     });

@@ -16,6 +16,11 @@ if not all([URI, USER, PASS]):
 AUTH = (USER, PASS)
 
 
+# File: setup_routing.py
+
+# ... (các phần import giữ nguyên)
+
+
 def create_road_network():
     driver = GraphDatabase.driver(URI, auth=AUTH)
 
@@ -23,36 +28,37 @@ def create_road_network():
         with driver.session() as session:
             print("⏳ Đang tạo mạng lưới đường đi ảo (Distance Graph)...")
 
-            # 1. Tạo relationship NEAR dựa trên khoảng cách < 5km
+            # Xóa các quan hệ NEAR cũ để tạo lại
+            session.run("MATCH ()-[r:NEAR]-() DELETE r")
+            # Tạo các quan hệ NEAR dựa trên khoảng cách địa lý
             query_create_roads = """
             MATCH (l1:Location), (l2:Location)
-            WHERE elementId(l1) < elementId(l2)  // Tránh tạo cạnh trùng lặp A-B và B-A
-
+            WHERE elementId(l1) < elementId(l2) 
+            
             WITH l1, l2,
                  point.distance(
                      point({latitude: l1.lat, longitude: l1.lng}),
                      point({latitude: l2.lat, longitude: l2.lng})
                  ) AS dist
-
-            WHERE dist < 5000  // 5km
+            WHERE dist < 100000 
 
             MERGE (l1)-[r:NEAR {distance: dist}]-(l2)
-
             RETURN count(r) AS connections
             """
+            # -----------------------
 
             result = session.run(query_create_roads)
             count = result.single()["connections"]
-            print(f"✅ Đã tạo {count} đường nối giữa các địa điểm (NEAR)!")
+            print(f"✅ Đã tạo {count} đường nối (NEAR)!")
 
-            # 2. Xóa graph cũ nếu tồn tại
+            # Xóa graph GDS cũ
             try:
                 session.run("CALL gds.graph.drop('roadGraph', false)")
-                print("🗑️  Đã xóa graph cũ 'roadGraph'")
+                print("🗑️  Đã xóa graph ảo cũ.")
             except Exception:
                 pass
 
-            # 3. Tạo graph mới cho GDS (Graph Data Science)
+            # Tạo graph mới
             print("🗺️  Đang nạp bản đồ vào bộ nhớ GDS...")
             session.run(
                 """
@@ -69,10 +75,10 @@ def create_road_network():
                 )
             """
             )
-            print("🚀 Đã sẵn sàng cho thuật toán tìm đường ngắn nhất (Dijkstra)!")
+            print("🚀 Đã sẵn sàng cho thuật toán tìm đường!")
 
     except Exception as e:
-        print(f"❌ Lỗi khi tạo road network: {e}")
+        print(f"❌ Lỗi: {e}")
     finally:
         driver.close()
 

@@ -80,27 +80,61 @@ def recommend(user_name):
 
 
 # API Tìm đường đi ngắn nhất giữa 2 điểm (Dùng thuật toán Dijkstra của Neo4j)
+# File: app.py
+
+
 @app.route("/api/route", methods=["GET"])
 def get_route():
-    # Lấy tên 2 địa điểm từ URL
-    start_name = request.args.get("start")  # Ví dụ: Hoàng Thành Huế
-    end_name = request.args.get("end")  # Ví dụ: Chùa Thiên Mụ
+    start_name = request.args.get("start")
+    end_name = request.args.get("end")
 
     if not start_name or not end_name:
         return jsonify({"error": "Vui lòng cung cấp điểm đi và điểm đến"}), 400
 
+    print(f"🔍 Đang tìm đường từ: '{start_name}' đến '{end_name}'")  # Log để debug
+
+    # 1. Kiểm tra xem Graph ảo đã được nạp chưa
+    try:
+        check_graph = run_query(
+            "CALL gds.graph.exists('roadGraph') YIELD exists RETURN exists"
+        )
+        if not check_graph or not check_graph[0]["exists"]:
+            return (
+                jsonify(
+                    {
+                        "error": "Đồ thị chưa được nạp vào RAM. Hãy chạy lại file setup_routing.py!"
+                    }
+                ),
+                500,
+            )
+    except Exception as e:
+        return jsonify({"error": f"Lỗi kết nối Neo4j: {str(e)}"}), 500
+
+    # 2. Kiểm tra xem địa điểm có tồn tại không TRƯỚC khi tìm đường
+    check_node_query = """
+    MATCH (n:Location) WHERE n.name IN [$start, $end]
+    RETURN count(n) as count
+    """
+    node_check = run_query(check_node_query, {"start": start_name, "end": end_name})
+    if node_check[0]["count"] < 2:
+        return (
+            jsonify(
+                {
+                    "error": f"Không tìm thấy địa điểm. Hãy chắc chắn tên nhập vào chính xác: '{start_name}' và '{end_name}'"
+                }
+            ),
+            404,
+        )
+
+    # 3. Tìm đường đi
     query = """
     MATCH (source:Location {name: $start}), (target:Location {name: $end})
-    
-    -- Gọi thuật toán Dijkstra tìm đường ngắn nhất
     CALL gds.shortestPath.dijkstra.stream('roadGraph', {
         sourceNode: source,
         targetNode: target,
         relationshipWeightProperty: 'distance'
     })
-    YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
-    
-    -- Trả về chi tiết các điểm trên đường đi
+    YIELD nodeIds, totalCost
     RETURN [nodeId IN nodeIds | {
         name: gds.util.asNode(nodeId).name,
         lat: gds.util.asNode(nodeId).lat,
@@ -110,17 +144,21 @@ def get_route():
 
     try:
         data = run_query(query, {"start": start_name, "end": end_name})
+
+        # --- SỬA LỖI TẠI ĐÂY ---
         if not data:
             return (
                 jsonify(
                     {
-                        "error": "Không tìm thấy đường đi giữa 2 điểm này (quá xa hoặc không kết nối)"
+                        "error": "Không tìm thấy đường đi giữa 2 điểm này (có thể do quá xa hoặc không kết nối)."
                     }
                 ),
                 404,
             )
-        return jsonify(data[0])  # Trả về mảng tọa độ để Leaflet vẽ
+
+        return jsonify(data[0])
     except Exception as e:
+        print(f"❌ Lỗi server: {e}")
         return jsonify({"error": str(e)}), 500
 
 
