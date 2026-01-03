@@ -13,7 +13,7 @@ locations = [
         "rating": 4.9,
         "lat": 16.46883,
         "lng": 107.57815,
-        "image": "/static/images/dai-noi-hue.png",
+        "image": "/static/images/hoang-thanh-hue.png",
     },
     {
         "name": "Cung An Định",
@@ -263,6 +263,24 @@ locations = [
         "lng": 107.58335,
         "image": "/static/images/truong-quoc-hoc-hue.png",
     },
+    {
+        "name": "Ga Huế",
+        "description": "Nhà ga cổ kính xây dựng từ thời Pháp thuộc, điểm check-in hoài cổ và là đầu mối giao thông quan trọng.",
+        "category": "Tham quan",
+        "rating": 4.6,
+        "lat": 16.45648,
+        "lng": 107.57805,
+        "image": "/static/images/ga-hue.png",
+    },
+    {
+        "name": "Cầu Gỗ Lim",
+        "description": "Tuyến đường đi bộ lát gỗ lim bên bờ sông Hương, điểm ngắm hoàng hôn và check-in cực hot.",
+        "category": "Tham quan",
+        "rating": 4.8,
+        "lat": 16.46561,
+        "lng": 107.58744,
+        "image": "/static/images/cau-go-lim.png",
+    },
     # --- Thiên nhiên ---
     {
         "name": "Đồi Vọng Cảnh",
@@ -362,10 +380,28 @@ df_locations["city"] = "Huế"
 name_to_id = df_locations.set_index("name")["id"].to_dict()
 
 user_data_raw = [
-    ("SinhVienHue", ["Hoàng Thành Huế", "Lăng Khải Định"]),
-    ("KhachTayBalo", ["Bún Bò Mệ Kéo", "Chè Hẻm Huế"]),
-    ("HoiYeuThienNhien", ["Cầu Trường Tiền", "Vườn Quốc gia Bạch Mã"]),
-    ("YeuTamLinh", ["Chùa Thiên Mụ", "Điện Hòn Chén"]),
+    # Sinh viên thích ăn uống và check-in, nhưng cũng thích Đại Nội
+    (
+        "SinhVienHue",
+        ["Hoàng Thành Huế", "Chè Hẻm Huế", "Bún Bò Mệ Kéo", "Cầu Trường Tiền"],
+    ),
+    # Khách Tây thích di tích và thiên nhiên, cũng thích Đại Nội
+    (
+        "KhachTayBalo",
+        ["Hoàng Thành Huế", "Lăng Khải Định", "Vườn Quốc gia Bạch Mã", "Đầm Lập An"],
+    ),
+    # Người yêu thiên nhiên, thích Bạch Mã nhưng cũng ghé Cầu Trường Tiền
+    (
+        "HoiYeuThienNhien",
+        ["Cầu Trường Tiền", "Vườn Quốc gia Bạch Mã", "Đồi Vọng Cảnh", "Biển Thuận An"],
+    ),
+    # Người tâm linh, thích chùa chiền và lăng tẩm
+    ("YeuTamLinh", ["Chùa Thiên Mụ", "Điện Hòn Chén", "Chùa Từ Đàm", "Lăng Khải Định"]),
+    # [MỚI] Một hướng dẫn viên du lịch thích TẤT CẢ các điểm hot
+    (
+        "HuongDanVien",
+        ["Hoàng Thành Huế", "Chùa Thiên Mụ", "Bún Bò Mệ Kéo", "Cầu Trường Tiền"],
+    ),
 ]
 
 # Chuyển đổi dữ liệu user sang dạng chuẩn (có ID)
