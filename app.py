@@ -1,13 +1,69 @@
 # File: app.py
-from flask import request
-from flask import Flask, jsonify, render_template
+from flask import request, Flask, jsonify, render_template
 from db import run_query, close_driver
 import atexit
 
 app = Flask(__name__)
+
+# Đóng kết nối database khi tắt app
 atexit.register(close_driver)
 
 
+# =======================================================
+# 1. HÀM TỰ ĐỘNG NẠP GRAPH (AUTO-LOADER)
+# =======================================================
+def auto_load_graph():
+    """
+    Hàm này kiểm tra xem đồ thị 'roadGraph' đã có trong RAM chưa.
+    Nếu chưa (do vừa khởi động lại Neo4j), nó sẽ tự động nạp lại.
+    Giúp tính năng tìm đường luôn hoạt động mà không cần chạy lại setup_routing.py.
+    """
+    print("🔄 [System] Đang kiểm tra trạng thái GDS (Graph Data Science)...")
+    try:
+        # Bước 1: Kiểm tra xem graph đã tồn tại chưa
+        check_query = "CALL gds.graph.exists('roadGraph') YIELD exists RETURN exists"
+        data = run_query(check_query)
+
+        if data and data[0]["exists"]:
+            print("✅ [System] Graph 'roadGraph' đã có sẵn trong RAM. Sẵn sàng!")
+            return
+
+        # Bước 2: Nếu chưa có, nạp lại (Project) từ dữ liệu ổ cứng
+        print("⚠️ [System] Graph chưa có trong RAM. Đang nạp lại từ Database...")
+
+        # Lệnh này giống hệt phần cuối của setup_routing.py
+        project_query = """
+        CALL gds.graph.project(
+            'roadGraph',
+            'Location',
+            {
+                NEAR: {
+                    type: 'NEAR',
+                    orientation: 'UNDIRECTED',
+                    properties: 'distance'
+                }
+            }
+        ) YIELD graphName, nodeCount, relationshipCount
+        """
+        result = run_query(project_query)
+
+        if result:
+            info = result[0]
+            print(
+                f"🚀 [System] Đã nạp thành công! ({info['nodeCount']} nodes, {info['relationshipCount']} edges)"
+            )
+        else:
+            print(
+                "❌ [System] Không thể nạp graph. Hãy chắc chắn bạn đã chạy setup_routing.py ít nhất một lần để tạo cạnh NEAR."
+            )
+
+    except Exception as e:
+        print(f"❌ [System] Lỗi khởi tạo GDS: {e}")
+
+
+# =======================================================
+# 2. CÁC API FLASK
+# =======================================================
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -15,19 +71,15 @@ def index():
 
 @app.route("/api/locations", methods=["GET"])
 def get_locations():
-    # Lấy tham số category từ URL (VD: /api/locations?category=Ẩm thực)
     category_filter = request.args.get("category")
 
-    # Câu lệnh cơ bản
     query = """
     MATCH (l:Location)
     MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
     """
-    # Nếu có lọc, thêm điều kiện WHERE
     if category_filter and category_filter != "All":
         query += f" WHERE cat.name = '{category_filter}' "
 
-    # Phần trả về (Kết thúc câu lệnh)
     query += """
     RETURN l.name AS name, l.desc AS description, 
            l.rating AS rating, l.lat AS lat, l.lng AS lng,
@@ -40,6 +92,7 @@ def get_locations():
 
 @app.route("/api/recommend/<user_name>", methods=["GET"])
 def recommend(user_name):
+    # Logic gợi ý: Dựa trên người dùng có cùng sở thích (Collaborative Filtering đơn giản)
     cypher_query = """
     MATCH (me:User {name: $name})-[:LIKED]->(my_place:Location)
     MATCH (other:User)-[:LIKED]->(my_place)
@@ -63,7 +116,7 @@ def recommend(user_name):
 
     results = run_query(cypher_query, {"name": user_name})
 
-    # Fallback nếu không có kết quả
+    # Fallback: Nếu user mới chưa có dữ liệu, gợi ý theo PageRank (độ nổi tiếng)
     if not results:
         fallback_query = """
         MATCH (l:Location) 
@@ -79,10 +132,6 @@ def recommend(user_name):
     return jsonify(results)
 
 
-# API Tìm đường đi ngắn nhất giữa 2 điểm (Dùng thuật toán Dijkstra của Neo4j)
-# File: app.py
-
-
 @app.route("/api/route", methods=["GET"])
 def get_route():
     start_name = request.args.get("start")
@@ -91,50 +140,25 @@ def get_route():
     if not start_name or not end_name:
         return jsonify({"error": "Vui lòng cung cấp điểm đi và điểm đến"}), 400
 
-    print(f"🔍 Đang tìm đường từ: '{start_name}' đến '{end_name}'")  # Log để debug
-
-    # 1. Kiểm tra xem Graph ảo đã được nạp chưa
+    # Kiểm tra xem graph đã nạp chưa (phòng hờ)
     try:
-        check_graph = run_query(
-            "CALL gds.graph.exists('roadGraph') YIELD exists RETURN exists"
-        )
-        if not check_graph or not check_graph[0]["exists"]:
-            return (
-                jsonify(
-                    {
-                        "error": "Đồ thị chưa được nạp vào RAM. Hãy chạy lại file setup_routing.py!"
-                    }
-                ),
-                500,
-            )
-    except Exception as e:
-        return jsonify({"error": f"Lỗi kết nối Neo4j: {str(e)}"}), 500
-
-    # 2. Kiểm tra xem địa điểm có tồn tại không TRƯỚC khi tìm đường
-    check_node_query = """
-    MATCH (n:Location) WHERE n.name IN [$start, $end]
-    RETURN count(n) as count
-    """
-    node_check = run_query(check_node_query, {"start": start_name, "end": end_name})
-    if node_check[0]["count"] < 2:
+        run_query("CALL gds.graph.exists('roadGraph')")
+    except:
         return (
-            jsonify(
-                {
-                    "error": f"Không tìm thấy địa điểm. Hãy chắc chắn tên nhập vào chính xác: '{start_name}' và '{end_name}'"
-                }
-            ),
-            404,
+            jsonify({"error": "Graph ảo chưa được nạp. Vui lòng restart server."}),
+            500,
         )
 
-    # 3. Tìm đường đi
     query = """
     MATCH (source:Location {name: $start}), (target:Location {name: $end})
+    
     CALL gds.shortestPath.dijkstra.stream('roadGraph', {
         sourceNode: source,
         targetNode: target,
         relationshipWeightProperty: 'distance'
     })
-    YIELD nodeIds, totalCost
+    YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
+    
     RETURN [nodeId IN nodeIds | {
         name: gds.util.asNode(nodeId).name,
         lat: gds.util.asNode(nodeId).lat,
@@ -144,24 +168,25 @@ def get_route():
 
     try:
         data = run_query(query, {"start": start_name, "end": end_name})
-
-        # --- SỬA LỖI TẠI ĐÂY ---
         if not data:
             return (
                 jsonify(
-                    {
-                        "error": "Không tìm thấy đường đi giữa 2 điểm này (có thể do quá xa hoặc không kết nối)."
-                    }
+                    {"error": "Không tìm thấy đường đi (quá xa hoặc không kết nối)"}
                 ),
                 404,
             )
-
         return jsonify(data[0])
     except Exception as e:
-        print(f"❌ Lỗi server: {e}")
         return jsonify({"error": str(e)}), 500
 
 
+# =======================================================
+# 3. MAIN RUN
+# =======================================================
 if __name__ == "__main__":
+    # --- GỌI HÀM TỰ ĐỘNG NẠP ---
+    with app.app_context():
+        auto_load_graph()
+
     print("🚀 Server Du lịch đang chạy tại: http://127.0.0.1:5000")
     app.run(port=5000, debug=True)

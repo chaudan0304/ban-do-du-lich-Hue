@@ -6,7 +6,7 @@ def main():
     print("⏳ Đang đọc file Excel...")
     try:
         # Xóa dữ liệu cũ
-        # run_query("MATCH (n) DETACH DELETE n")
+        run_query("MATCH (n) DETACH DELETE n")
 
         # Nạp Locations (QUAN TRỌNG: Có nạp image)
         df_loc = pd.read_excel("data.xlsx", sheet_name="Locations")
