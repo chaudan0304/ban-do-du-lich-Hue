@@ -1,5 +1,5 @@
 // ==========================================
-// 1. KHỞI TẠO BẢN ĐỒ
+// 1. KHỞI TẠO BẢN ĐỒ LEAFLET
 // ==========================================
 var map = L.map("map", { zoomControl: false }).setView([16.4637, 107.5909], 14);
 L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -12,91 +12,133 @@ var markerLayer = L.layerGroup().addTo(map);
 
 // Biến lưu marker để tra cứu khi click từ danh sách
 var markersMap = {};
+
+// BIẾN QUẢN LÝ ĐƯỜNG ĐI
+var routingControl = null;
 // ==========================================
 // 2. CÁC HÀM XỬ LÝ DỮ LIỆU (Load, Marker, AI)
 // ==========================================
+// Hàm lấy Icon theo danh mục
+function getIconByCategory(category) {
+  // Map trực tiếp category → {class màu, emoji}
+  const iconMap = {
+    "Di tích": { class: "pin-ditich", symbol: "🏛️" },
+    "Tâm linh": { class: "pin-tamlinh", symbol: "🛕" },
+    "Lăng tẩm": { class: "pin-langtam", symbol: "🏯" },
+    "Ẩm thực": { class: "pin-amthuc", symbol: "🍜" },
+    "Mua sắm": { class: "pin-muasam", symbol: "🛍️" },
+    "Tham quan": { class: "pin-thamquan", symbol: "🎡" },
+    "Thiên nhiên": { class: "pin-thiennhien", symbol: "🌳" },
+    "Bãi biển": { class: "pin-baibien", symbol: "🏖️" },
+  };
+
+  // Lấy config tương ứng, nếu không có thì dùng mặc định
+  const config = iconMap[category] || { class: "pin-khac", symbol: "📍" };
+
+  return L.divIcon({
+    className: "custom-div-icon",
+    html: `<div class='custom-pin ${config.class}'><i>${config.symbol}</i></div>`,
+    iconSize: [30, 42],
+    iconAnchor: [15, 42],
+    popupAnchor: [0, -40],
+  });
+}
+
+// Hàm helper tạo thẻ img với fallback no-image.png (local, nhanh, đẹp)
+function createPlaceImage(src, alt = "Địa điểm du lịch Huế") {
+  return `<img src="${src}" alt="${alt}" onerror="this.src='/static/images/no-image.png'" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">`;
+}
+
 // Hàm tải danh sách địa điểm
 function loadLocations(category = "All") {
   markerLayer.clearLayers();
+  markersMap = {}; // Reset để tránh lỗi cũ
 
   var listContainer = document.getElementById("locationList");
   listContainer.innerHTML = '<div class="list-title">Đang tải dữ liệu...</div>';
+
   var url = "/api/locations";
-  if (category !== "All") url += `?category=${category}`;
+  if (category !== "All") url += `?category=${encodeURIComponent(category)}`;
+
   fetch(url)
     .then((response) => response.json())
     .then((data) => {
       if (data.length === 0) {
-        listContainer.innerHTML =
-          '<div class="list-title">Không tìm thấy địa điểm nào 😔</div>';
+        listContainer.innerHTML = '<div class="list-title">Không tìm thấy địa điểm nào 😔</div>';
         return;
       }
+
       listContainer.innerHTML = `<div class="list-title">Tìm thấy ${data.length} địa điểm</div>`;
 
       data.forEach((loc) => {
-        // A. Tạo thẻ Card bên trái
-        var card = document.createElement("div");
+        // === 1. Tạo CARD ===
+        const card = document.createElement("div"); // Dùng const để scope rõ ràng
         card.className = "card";
         card.innerHTML = `
-                    <img class="card-img" src="${loc.image}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png'">
-                    <div class="card-body">
-                        <div class="card-name">${loc.name}</div>
-                        <div class="card-meta">
-                            <span class="card-cat">${loc.category}</span>
-                            <span class="card-rating">⭐ ${loc.rating}</span>
-                        </div>
-                    </div>
-                `;
-        card.onclick = () => {
-          flyToLocation(loc.lat, loc.lng, loc.name);
-        };
+          <div class="card-img">${createPlaceImage(loc.image)}</div>
+          <div class="card-body">
+            <div class="card-name">${loc.name}</div>
+            <div class="card-meta">
+              <span class="card-cat">${loc.category}</span>
+              <span class="card-rating">⭐ ${loc.rating}</span>
+            </div>
+          </div>
+        `;
+
+        // Click card → bay đến địa điểm
+        card.onclick = () => flyToLocation(loc.lat, loc.lng, loc.name);
         listContainer.appendChild(card);
 
-        // B. Thêm Marker lên bản đồ
-        var marker = L.marker([loc.lat, loc.lng], {
-          icon: getIconByCategory(loc.category), // Gọi hàm icon vừa viết
+        // === 2. Tạo MARKER ===
+        const marker = L.marker([loc.lat, loc.lng], {
+          icon: getIconByCategory(loc.category),
         });
 
-        var popupContent = `
-            <div class="popup-body">
-                        <img src="${
-                          loc.image
-                        }" class="popup-img" onerror="this.src='https://via.placeholder.com/300x150?text=Hue+Tourism'">
-                        <b>${loc.name}</b>
-                        <div style="font-size:12px; color:#666; margin:5px 0;">${loc.description.substring(
-                          0,
-                          60
-                        )}...</div>
-                        
-                        <div style="display:flex; justify-content:space-between; margin-top:8px;">
-                            <span class="card-rating">⭐ ${loc.rating}</span>
-                            <span style="font-size:11px; background:#eee; padding:2px 6px; border-radius:4px;">${
-                              loc.category
-                            }</span>
-                        </div>
-                        
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${
-                          loc.lat
-                        },${loc.lng}" 
-                        target="_blank" 
-                        style="display:block; margin-top:10px; text-decoration:none; background:#3498db; color:white; padding:5px; border-radius:4px; font-size:12px; font-weight:bold;">
-                        🗺️ Chỉ đường tới đây
-                        </a>
-                    </div>
-                `;
+        // Popup content
+        const popupContent = `
+          <div class="popup-body">
+            <div style="height:120px; overflow:hidden; border-radius:12px 12px 0 0;">
+              ${createPlaceImage(loc.image)}
+            </div>
+
+            <b>${loc.name}</b>
+            <div style="font-size:12px; color:#666; margin:5px 0;">
+              ${loc.description.substring(0, 60)}...
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; margin-top:8px;">
+              <span class="card-rating">⭐ ${loc.rating}</span>
+              <span style="font-size:11px; background:#eee; padding:2px 6px; border-radius:4px;">
+                ${loc.category}
+              </span>
+            </div>
+            
+            <button onclick="showRoute(${loc.lat}, ${loc.lng}, '${loc.name.replace(/'/g, "\\'")}')" 
+              style="cursor:pointer; width:100%; margin-top:8px; border:none; background:#27ae60; color:white; padding:8px; border-radius:8px; font-weight:bold; font-size:14px;">
+              🚗 Tìm đường đi đến → ${loc.name}
+            </button>
+
+            <a href="https://www.google.com/maps?q=${loc.lat},${loc.lng}" target="_blank"
+               style="display:block; margin-top:5px; text-decoration:none; background:#3498db; color:white; padding:5px; border-radius:4px; font-size:12px; font-weight:bold; text-align:center;">
+               🗺️ Mở Google Maps
+            </a>
+          </div>
+        `;
 
         marker.bindPopup(popupContent);
         marker.addTo(markerLayer);
 
+        // Lưu marker để flyTo và hover
         markersMap[loc.name] = marker;
+
+        // === 3. Hover effect: card hover → mở popup marker ===
+        card.addEventListener("mouseenter", () => marker.openPopup());
+        card.addEventListener("mouseleave", () => marker.closePopup());
       });
-      // C. Highlight khi hover card
-      card.onmouseover = () => {
-        marker.openPopup();
-      };
-      card.onmouseout = () => {
-        marker.closePopup();
-      };
+    })
+    .catch((err) => {
+      console.error("Lỗi tải locations:", err);
+      listContainer.innerHTML = '<div class="list-title">Lỗi kết nối server 😢</div>';
     });
 }
 
@@ -122,9 +164,7 @@ function flyToLocation(lat, lng, name) {
 
 // Hàm xử lý khi bấm nút bộ lọc
 function filterData(cat, btn) {
-  document
-    .querySelectorAll(".filter-btn")
-    .forEach((b) => b.classList.remove("active"));
+  document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
   btn.classList.add("active");
   loadLocations(cat);
 }
@@ -141,33 +181,86 @@ function getRecommendations() {
         resBox.innerHTML = "<small>Không có gợi ý.</small>";
         return;
       }
-      resBox.innerHTML =
-        '<small style="color:#27ae60; font-weight:bold">🔥 Dành riêng cho bạn:</small>';
+      resBox.innerHTML = '<small style="color:#27ae60; font-weight:bold">🔥 Dành riêng cho bạn:</small>';
       data.forEach((loc) => {
+        let labelText = "";
+        let labelColor = "#555";
+
+        if (!loc.common_users) {
+          labelText = "⭐ Địa điểm nổi bật (PageRank cao)";
+        } else if (loc.common_users >= 3) {
+          labelText = "👥 Nhiều người cùng sở thích với bạn đã đến đây";
+          labelColor = "#d35400";
+        } else {
+          labelText = "👤 " + loc.common_users + " người cùng sở thích với bạn đã đến đây";
+        }
+
         var div = document.createElement("div");
         div.className = "card rec-card";
         div.style.marginBottom = "5px";
         div.innerHTML = `
-                    <div style="display:flex; padding:8px; align-items:center">
-                        <img src="${
-                          loc.image
-                        }" style="width:50px; height:50px; border-radius:8px; object-fit:cover; margin-right:10px" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png'">
-                        <div>
-                            <div style="font-weight:bold; font-size:14px">${
-                              loc.name
-                            }</div>
-                            <div style="font-size:11px; color:#555">${
-                              loc.score
-                                ? "Có " + loc.score + " người giống bạn"
-                                : "Địa điểm Hot"
-                            }</div>
-                        </div>
-                    </div>
-                `;
-        div.onclick = () => map.flyTo([loc.lat, loc.lng], 16);
+            <div style="display:flex; padding:8px; align-items:center">
+              <div style="width:50px; height:50px; border-radius:8px; overflow:hidden; margin-right:10px; flex-shrink:0;">
+                ${createPlaceImage(loc.image)}
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-weight:bold; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  ${loc.name}
+                </div>
+                <div style="font-size:11px; color:${labelColor}; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  ${labelText}
+                </div>
+              </div>
+            </div>
+          `;
+        div.onclick = () => flyToLocation(loc.lat, loc.lng, loc.name);
         resBox.appendChild(div);
       });
     });
+}
+
+// ==========================================
+// 7. TÍNH NĂNG ẨN/HIỆN AI BOX
+// ==========================================
+function toggleAI() {
+  var content = document.getElementById("ai-content");
+  var arrow = document.getElementById("ai-arrow");
+
+  // Toggle class 'expanded' để mở/đóng
+  if (content.classList.contains("expanded")) {
+    content.classList.remove("expanded");
+    arrow.style.transform = "rotate(-90deg)"; // Xoay mũi tên ngang
+  } else {
+    content.classList.add("expanded");
+    arrow.style.transform = "rotate(0deg)"; // Xoay mũi tên xuống
+  }
+}
+
+// ==========================================
+// TÍNH NĂNG: ẨN/HIỆN TOÀN BỘ SIDEBAR
+// ==========================================
+function toggleSidebar() {
+  var sidebar = document.getElementById("sidebar");
+  var btn = document.getElementById("toggleSidebarBtn");
+
+  // 1. Toggle class để ẩn/hiện
+  sidebar.classList.toggle("collapsed");
+
+  // 2. Đổi icon nút bấm
+  if (sidebar.classList.contains("collapsed")) {
+    btn.innerHTML = "➜"; // Mũi tên chỉ ra (Mở lại)
+    btn.style.left = "15px"; // Đảm bảo nút vẫn nằm góc trái màn hình
+  } else {
+    btn.innerHTML = "⬅"; // Icon menu (Đóng lại)
+    btn.style.left = "350px"; // (Tùy chọn) Đẩy nút sang phải nếu muốn nó nằm trên header
+    // Nhưng để đơn giản, bạn cứ để nút cố định ở góc trái cũng được
+  }
+
+  // 3. QUAN TRỌNG: Báo cho bản đồ biết kích thước đã thay đổi
+  // Phải set timeout để chờ hiệu ứng trượt CSS (0.4s) chạy xong thì mới vẽ lại map
+  setTimeout(function () {
+    map.invalidateSize();
+  }, 400);
 }
 
 // ==========================================
@@ -186,7 +279,7 @@ if (slider) {
 
     e.preventDefault();
     const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
-    slider.scrollLeft += delta * 1.5; // Điều chỉnh tốc độ tại đây nếu cần
+    slider.scrollLeft += delta * 1.5; // Điều chỉnh tốc độ
   });
 
   // 2. Kéo thả bằng chuột (desktop)
@@ -232,6 +325,7 @@ if (slider) {
   });
 }
 
+/* Tắt tính năng lấy toạ độ (mục 4 và 5)
 // ==========================================
 // 4. CÔNG CỤ LẤY TỌA ĐỘ (DEV TOOL)
 // ==========================================
@@ -314,49 +408,150 @@ function searchCoordinate() {
     alert("⚠️ Vui lòng nhập đúng định dạng: Vĩ độ, Kinh độ");
   }
 }
+*/
 
-// Hàm lấy Icon theo danh mục
-function getIconByCategory(category) {
-  let cssClass = "pin-khac";
-  let iconSymbol = "📍";
+// ==========================================
+// 6. HÀM VẼ ĐƯỜNG ĐI TỐI ƯU (ROUTING)
+// ==========================================
+let routingLayer = null; // Quản lý layer đường đi
 
-  // Logic gán màu và biểu tượng
-  if (category === "Di tích" || category === "Lăng tẩm") {
-    cssClass = "pin-ditich";
-    iconSymbol = "🏛️";
-  } else if (category === "Tâm linh") {
-    cssClass = "pin-tamlinh";
-    iconSymbol = "🛕";
-  } else if (category === "Lăng tẩm") {
-    cssClass = "pin-langtam";
-    iconSymbol = "🏯";
-  } else if (category === "Ẩm thực") {
-    cssClass = "pin-amthuc";
-    iconSymbol = "🍜";
-  } else if (category === "Mua sắm") {
-    cssClass = "pin-muasam";
-    iconSymbol = "🛍️";
-  } else if (category === "Tham quan") {
-    cssClass = "pin-thamquan";
-    iconSymbol = "🎡";
-  } else if (category === "Thiên nhiên") {
-    cssClass = "pin-thiennhien";
-    iconSymbol = "🌳";
-  } else if (category === "Bãi biển") {
-    cssClass = "pin-baibien";
-    iconSymbol = "🏖️";
+function showRoute(destLat, destLng, destName) {
+  if (routingLayer) {
+    map.removeLayer(routingLayer);
+    routingLayer = null;
   }
 
-  // Tạo DivIcon của Leaflet
-  return L.divIcon({
-    className: "custom-div-icon", // Class rỗng để tránh Leaflet gán style mặc định
-    html: `<div class='custom-pin ${cssClass}'><i>${iconSymbol}</i></div>`,
-    iconSize: [30, 42],
-    iconAnchor: [15, 42], // Điểm nhọn của marker
-    popupAnchor: [0, -40], // Vị trí popup hiện ra so với marker
-  });
+  const endName = destName.trim();
+
+  if (!endName) {
+    alert("⚠️ Tên địa điểm đích không hợp lệ!");
+    return;
+  }
+
+  // Hiển thị loading nhẹ (tùy chọn nâng cao)
+  const loadingPopup = L.popup({ closeOnClick: false, closeButton: false })
+    .setLatLng([destLat, destLng])
+    .setContent("<small>⏳ Đang xác định điểm xuất phát và tính đường đi...</small>")
+    .openOn(map);
+
+  // Ưu tiên lấy vị trí hiện tại của người dùng
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const startLat = position.coords.latitude;
+        const startLng = position.coords.longitude;
+        calculateRoute(startLat, startLng, null, endName, loadingPopup); // null nghĩa là dùng tọa độ thực
+      },
+      (error) => {
+        console.warn("Không lấy được vị trí hiện tại:", error);
+        map.closePopup(loadingPopup);
+        // Fallback: Cho phép người dùng nhập tên điểm xuất phát
+        const startName = prompt(
+          "Không lấy được vị trí hiện tại.\nVui lòng nhập tên điểm xuất phát (ví dụ: Hoàng Thành Huế hoặc Ga Huế):",
+          "Hoàng Thành Huế"
+        );
+        if (!startName || startName.trim() === "") {
+          alert("⚠️ Vui lòng nhập điểm xuất phát hợp lệ!");
+          return;
+        }
+        calculateRoute(null, null, startName.trim(), endName, null);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  } else {
+    // Nếu browser không hỗ trợ geolocation
+    map.closePopup(loadingPopup);
+    const startName = prompt("Trình duyệt không hỗ trợ định vị.\nVui lòng nhập tên điểm xuất phát:", "Hoàng Thành Huế");
+    if (!startName || startName.trim() === "") {
+      alert("⚠️ Vui lòng nhập điểm xuất phát hợp lệ!");
+      return;
+    }
+    calculateRoute(null, null, startName.trim(), endName, null);
+  }
+}
+
+// Hàm tách riêng để tính đường đi (hỗ trợ cả tọa độ và tên)
+function calculateRoute(startLat, startLng, startName, endName, loadingPopup) {
+  let url;
+  if (startLat && startLng) {
+    alert("Backend hiện tại chỉ hỗ trợ tên địa điểm. Hãy nhập tên gần nhất.");
+    const fallbackName = prompt("Nhập tên điểm xuất phát gần vị trí hiện tại:", "Ga Huế");
+    url = `/api/route?start=${encodeURIComponent(fallbackName)}&end=${encodeURIComponent(endName)}`;
+  } else {
+    url = `/api/route?start=${encodeURIComponent(startName)}&end=${encodeURIComponent(endName)}`;
+  }
+
+  fetch(url)
+    .then((res) => {
+      if (!res.ok) throw new Error("Server lỗi");
+      return res.json();
+    })
+    .then((data) => {
+      console.log("👉 Dữ liệu Server trả về:", data);
+
+      if (loadingPopup) map.closePopup(loadingPopup);
+
+      if (data.error) {
+        alert(`❌ Không tìm thấy đường đi:\n${data.error}`);
+        return;
+      }
+
+      const latlngs = data.path_nodes.map((node) => [node.lat, node.lng]);
+
+      const polyline = L.polyline(latlngs, {
+        color: "#3498db",
+        weight: 6,
+        opacity: 0.9,
+        smoothFactor: 1,
+      });
+
+      routingLayer = L.layerGroup([polyline]).addTo(map);
+
+      // 1. Kiểm tra xem có totalCost không (phòng trường hợp lỗi)
+      if (data.totalCost !== undefined) {
+        // 2. Đổi từ mét sang km và làm tròn 2 số thập phân
+        var distanceKm = (data.totalCost / 1000).toFixed(2);
+
+        // 3. Tạo nội dung Popup đẹp mắt
+        var popupContent = `
+              <div style="text-align:center; min-width: 150px">
+                  <b style="color:#2c3e50">🏁 Lộ trình tham quan</b><br>
+                  <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
+                  Khoảng cách: <b style="color:#e67e22; font-size:15px">${distanceKm} km</b>
+              </div>
+          `;
+
+        // 4. Gắn popup vào đường đi và tự động mở ra
+        polyline.bindPopup(popupContent).openPopup();
+      }
+      // ---------------------
+      // Marker điểm đầu (xanh lá để phân biệt là start)
+      const startIcon = L.divIcon({
+        className: "custom-pin pin-thiennhien", // Sử dụng class xanh lá có sẵn trong CSS
+        iconSize: [30, 30],
+        html: "<i>🚩</i>",
+      });
+      L.marker(latlngs[0], { icon: startIcon })
+        .addTo(routingLayer)
+        .bindPopup(`🚩 <b>${startLat ? "Vị trí hiện tại của bạn" : startName || "Điểm xuất phát"}</b><br>Start`)
+        .openPopup();
+
+      // Marker điểm cuối (giữ icon category hoặc mặc định)
+      L.marker(latlngs[latlngs.length - 1], { icon: getIconByCategory("Tham quan") })
+        .addTo(routingLayer)
+        .bindPopup(`📍 <b>${endName}</b><br>Điểm đến`)
+        .openPopup();
+
+      map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+    })
+    .catch((err) => {
+      if (loadingPopup) map.closePopup(loadingPopup);
+      console.error("Lỗi routing:", err);
+      alert("🔌 Lỗi kết nối đến Neo4j hoặc không có đường đi khả dụng.");
+    });
 }
 // ==========================================
-// 6. CHẠY LẦN ĐẦU
+// THE END. KHỞI CHẠY ỨNG DỤNG
 // ==========================================
+// Khởi chạy lần đầu: Load tất cả địa điểm
 loadLocations("All");
