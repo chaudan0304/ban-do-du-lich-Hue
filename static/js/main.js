@@ -183,6 +183,18 @@ function getRecommendations() {
       }
       resBox.innerHTML = '<small style="color:#27ae60; font-weight:bold">🔥 Dành riêng cho bạn:</small>';
       data.forEach((loc) => {
+        let labelText = "";
+        let labelColor = "#555";
+
+        if (!loc.common_users) {
+          labelText = "⭐ Địa điểm nổi bật (PageRank cao)";
+        } else if (loc.common_users >= 3) {
+          labelText = "👥 Nhiều người cùng sở thích với bạn đã đến đây";
+          labelColor = "#d35400";
+        } else {
+          labelText = "👤 " + loc.common_users + " người cùng sở thích với bạn đã đến đây";
+        }
+
         var div = document.createElement("div");
         div.className = "card rec-card";
         div.style.marginBottom = "5px";
@@ -195,8 +207,8 @@ function getRecommendations() {
                 <div style="font-weight:bold; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                   ${loc.name}
                 </div>
-                <div style="font-size:11px; color:#555;">
-                  ${loc.common_users ? loc.common_users + " người cùng sở thích" : "Địa điểm nổi bật (PageRank cao)"}
+                <div style="font-size:11px; color:${labelColor}; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  ${labelText}
                 </div>
               </div>
             </div>
@@ -205,6 +217,50 @@ function getRecommendations() {
         resBox.appendChild(div);
       });
     });
+}
+
+// ==========================================
+// 7. TÍNH NĂNG ẨN/HIỆN AI BOX
+// ==========================================
+function toggleAI() {
+  var content = document.getElementById("ai-content");
+  var arrow = document.getElementById("ai-arrow");
+
+  // Toggle class 'expanded' để mở/đóng
+  if (content.classList.contains("expanded")) {
+    content.classList.remove("expanded");
+    arrow.style.transform = "rotate(-90deg)"; // Xoay mũi tên ngang
+  } else {
+    content.classList.add("expanded");
+    arrow.style.transform = "rotate(0deg)"; // Xoay mũi tên xuống
+  }
+}
+
+// ==========================================
+// TÍNH NĂNG: ẨN/HIỆN TOÀN BỘ SIDEBAR
+// ==========================================
+function toggleSidebar() {
+  var sidebar = document.getElementById("sidebar");
+  var btn = document.getElementById("toggleSidebarBtn");
+
+  // 1. Toggle class để ẩn/hiện
+  sidebar.classList.toggle("collapsed");
+
+  // 2. Đổi icon nút bấm
+  if (sidebar.classList.contains("collapsed")) {
+    btn.innerHTML = "➜"; // Mũi tên chỉ ra (Mở lại)
+    btn.style.left = "15px"; // Đảm bảo nút vẫn nằm góc trái màn hình
+  } else {
+    btn.innerHTML = "⬅"; // Icon menu (Đóng lại)
+    btn.style.left = "350px"; // (Tùy chọn) Đẩy nút sang phải nếu muốn nó nằm trên header
+    // Nhưng để đơn giản, bạn cứ để nút cố định ở góc trái cũng được
+  }
+
+  // 3. QUAN TRỌNG: Báo cho bản đồ biết kích thước đã thay đổi
+  // Phải set timeout để chờ hiệu ứng trượt CSS (0.4s) chạy xong thì mới vẽ lại map
+  setTimeout(function () {
+    map.invalidateSize();
+  }, 400);
 }
 
 // ==========================================
@@ -223,7 +279,7 @@ if (slider) {
 
     e.preventDefault();
     const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
-    slider.scrollLeft += delta * 1.5; // Điều chỉnh tốc độ tại đây nếu cần
+    slider.scrollLeft += delta * 1.5; // Điều chỉnh tốc độ
   });
 
   // 2. Kéo thả bằng chuột (desktop)
@@ -269,6 +325,7 @@ if (slider) {
   });
 }
 
+/* Tắt tính năng lấy toạ độ (mục 4 và 5)
 // ==========================================
 // 4. CÔNG CỤ LẤY TỌA ĐỘ (DEV TOOL)
 // ==========================================
@@ -351,6 +408,8 @@ function searchCoordinate() {
     alert("⚠️ Vui lòng nhập đúng định dạng: Vĩ độ, Kinh độ");
   }
 }
+*/
+
 // ==========================================
 // 6. HÀM VẼ ĐƯỜNG ĐI TỐI ƯU (ROUTING)
 // ==========================================

@@ -1,5 +1,5 @@
 /* =========================================
-   1. IMPORT FONT & CẤU HÌNH CHUNG
+   1. IMPORT FONT & CẤU HÌNH CHUNG (RESET)
    ========================================= */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
@@ -17,24 +17,6 @@ body {
   display: flex;
 }
 
-/* =========================================
-   2. SIDEBAR (CỘT TRÁI)
-   ========================================= */
-#sidebar {
-  width: 400px;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: white;
-  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
-}
-
-.sidebar-header {
-  padding: 20px 20px 10px 20px;
-  border-bottom: 1px solid #eee;
-}
-
 h2 {
   color: #4b2c82;
   font-weight: 600;
@@ -50,7 +32,68 @@ h2 span {
 }
 
 /* =========================================
-   3. AI BOX (GỢI Ý THÔNG MINH)
+   2. NÚT TOGGLE SIDEBAR (Nổi trên cùng)
+   ========================================= */
+#toggleSidebarBtn {
+  position: absolute;
+  top: 15px;
+  left: 340px;
+  z-index: 2000;
+  /* Cao hơn sidebar (1001) */
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #4b2c82;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#toggleSidebarBtn:hover {
+  background: #6a1b9a;
+  transform: scale(1.1);
+}
+
+/* =========================================
+   3. SIDEBAR LAYOUT & ANIMATION
+   ========================================= */
+#sidebar {
+  width: 400px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  /* Hiệu ứng trượt */
+  transition: margin-left 0.4s ease-in-out;
+}
+
+.sidebar-header {
+  padding: 20px 20px 10px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Trạng thái ẩn sidebar */
+#sidebar.collapsed {
+  margin-left: -400px;
+}
+
+/* Di chuyển nút bấm khi Sidebar đóng */
+#sidebar.collapsed ~ #toggleSidebarBtn {
+  left: 15px;
+  background: #fff;
+  color: #333;
+}
+
+/* =========================================
+   4. AI BOX (GỢI Ý THÔNG MINH & ACCORDION)
    ========================================= */
 .ai-box {
   background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
@@ -59,14 +102,40 @@ h2 span {
   margin: 15px 20px 0 20px;
 }
 
+/* --- Header AI Box (Click để đóng mở) --- */
+.ai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding-bottom: 5px;
+}
+
 .ai-label {
   font-size: 13px;
   color: #6a1b9a;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 0;
+  /* Override margin cũ */
   display: block;
 }
 
+/* --- Nội dung AI Box (Ẩn/Hiện) --- */
+.ai-content {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.1s ease-in-out;
+}
+
+.ai-content.expanded {
+  max-height: 500px;
+  opacity: 1;
+  margin-top: 10px;
+  /* Thêm khoảng cách khi mở */
+}
+
+/* --- Form Search & Input --- */
 .search-group {
   display: flex;
   gap: 8px;
@@ -98,6 +167,7 @@ h2 span {
   transform: translateY(-2px);
 }
 
+/* --- Kết quả gợi ý (Cards nhỏ) --- */
 .result-box {
   margin-top: 12px;
   max-height: 200px;
@@ -119,7 +189,7 @@ h2 span {
 }
 
 /* =========================================
-   4. BỘ LỌC CATEGORY - CUỘN NGANG MƯỢT
+   5. BỘ LỌC CATEGORY (SCROLL NGANG)
    ========================================= */
 .filter-container {
   display: flex;
@@ -129,13 +199,13 @@ h2 span {
   flex-wrap: nowrap;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
-  cursor: grab; /* Mặc định con trỏ tay nắm */
+  scrollbar-width: none;
+  cursor: grab;
   user-select: none;
 }
 
 .filter-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  display: none;
 }
 
 .filter-container.active {
@@ -170,7 +240,7 @@ h2 span {
 }
 
 /* =========================================
-   5. DANH SÁCH ĐỊA ĐIỂM
+   6. DANH SÁCH ĐỊA ĐIỂM (LOCATION LIST)
    ========================================= */
 #locationList {
   flex: 1;
@@ -187,6 +257,7 @@ h2 span {
   border-bottom: 1px solid #eee;
 }
 
+/* --- Card Địa điểm --- */
 .card {
   display: flex;
   flex-direction: column;
@@ -244,7 +315,7 @@ h2 span {
 }
 
 /* =========================================
-   6. BẢN ĐỒ & POPUP LEAFLET
+   7. BẢN ĐỒ & LEAFLET CUSTOMIZATION
    ========================================= */
 #map {
   flex: 1;
@@ -252,7 +323,7 @@ h2 span {
   width: 100%;
 }
 
-/* Popup đẹp hơn */
+/* Popup Leaflet */
 .leaflet-popup-content-wrapper {
   border-radius: 12px !important;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
@@ -290,8 +361,73 @@ h2 span {
   color: #666;
 }
 
+/* Routing Container (Bảng chỉ đường) */
+.leaflet-routing-container {
+  background-color: white;
+  padding: 10px;
+  width: 250px !important;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
 /* =========================================
-   7. RESPONSIVE (Mobile)
+   8. CUSTOM MARKER (ICON GIỌT NƯỚC)
+   ========================================= */
+.custom-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  background: #3498db;
+  position: absolute;
+  transform: rotate(-45deg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid white;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+/* Icon bên trong ghim */
+.custom-pin i {
+  transform: rotate(45deg);
+  font-style: normal;
+  font-size: 14px;
+  color: white;
+}
+
+/* Hover Marker */
+.custom-pin:hover {
+  transform: rotate(-45deg) scale(1.2);
+  z-index: 999 !important;
+}
+
+/* --- Màu sắc theo Category --- */
+.pin-ditich {
+  background-color: #e74c3c;
+}
+
+.pin-amthuc {
+  background-color: #f39c12;
+}
+
+.pin-tamlinh {
+  background-color: #8e44ad;
+}
+
+.pin-thiennhien {
+  background-color: #27ae60;
+}
+
+.pin-khac {
+  background-color: #34495e;
+}
+
+/* =========================================
+   9. RESPONSIVE (MOBILE)
    ========================================= */
 @media (max-width: 768px) {
   body {
@@ -302,6 +438,11 @@ h2 span {
     width: 100%;
     height: auto;
     max-height: 60vh;
+  }
+
+  /* Ẩn nút toggle trên mobile vì giao diện khác */
+  #toggleSidebarBtn {
+    display: none;
   }
 
   #map {
@@ -319,78 +460,4 @@ h2 span {
   #locationList {
     padding: 0 15px 15px 15px;
   }
-}
-
-/* =========================================
-   8. CUSTOM MARKER (ICON TÙY CHỈNH)
-   ========================================= */
-.custom-pin {
-  width: 30px;
-  height: 30px;
-  border-radius: 50% 50% 50% 0;
-  /* Tạo hình giọt nước */
-  background: #3498db;
-  position: absolute;
-  transform: rotate(-45deg);
-  /* Xoay để đáy nhọn chỉ xuống */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 2px solid white;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-
-/* Icon bên trong ghim */
-.custom-pin i {
-  transform: rotate(45deg);
-  /* Xoay ngược lại để icon đứng thẳng */
-  font-style: normal;
-  font-size: 14px;
-  color: white;
-}
-
-/* Màu sắc theo danh mục */
-.pin-ditich {
-  background-color: #e74c3c;
-}
-
-/* Đỏ */
-.pin-amthuc {
-  background-color: #f39c12;
-}
-
-/* Cam */
-.pin-tamlinh {
-  background-color: #8e44ad;
-}
-
-/* Tím */
-.pin-thiennhien {
-  background-color: #27ae60;
-}
-
-/* Xanh lá */
-.pin-khac {
-  background-color: #34495e;
-}
-
-/* Xám */
-
-/* Hiệu ứng khi trỏ chuột vào marker */
-.custom-pin:hover {
-  transform: rotate(-45deg) scale(1.2);
-  z-index: 999 !important;
-}
-
-/* Thu nhỏ bảng chỉ đường */
-.leaflet-routing-container {
-  background-color: white;
-  padding: 10px;
-  width: 250px !important; /* Nhỏ lại chút */
-  max-height: 300px;
-  overflow-y: auto;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-  font-size: 13px;
 }

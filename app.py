@@ -13,11 +13,6 @@ atexit.register(close_driver)
 # 1. HÀM TỰ ĐỘNG NẠP GRAPH (AUTO-LOADER)
 # =======================================================
 def auto_load_graph():
-    """
-    Hàm này kiểm tra xem đồ thị 'roadGraph' đã có trong RAM chưa.
-    Nếu chưa (do vừa khởi động lại Neo4j), nó sẽ tự động nạp lại.
-    Giúp tính năng tìm đường luôn hoạt động mà không cần chạy lại setup_routing.py.
-    """
     print("🔄 [System] Đang kiểm tra trạng thái GDS (Graph Data Science)...")
     try:
         # Bước 1: Kiểm tra xem graph đã tồn tại chưa
@@ -31,7 +26,6 @@ def auto_load_graph():
         # Bước 2: Nếu chưa có, nạp lại (Project) từ dữ liệu ổ cứng
         print("⚠️ [System] Graph chưa có trong RAM. Đang nạp lại từ Database...")
 
-        # Lệnh này giống hệt phần cuối của setup_routing.py
         project_query = """
         CALL gds.graph.project(
             'roadGraph',
@@ -54,7 +48,7 @@ def auto_load_graph():
             )
         else:
             print(
-                "❌ [System] Không thể nạp graph. Hãy chắc chắn bạn đã chạy setup_routing.py ít nhất một lần để tạo cạnh NEAR."
+                "❌ [System] Không thể nạp graph. Vui lòng kiểm tra lại quá trình thiết lập ban đầu."
             )
 
     except Exception as e:
@@ -140,7 +134,7 @@ def get_route():
     if not start_name or not end_name:
         return jsonify({"error": "Vui lòng cung cấp điểm đi và điểm đến"}), 400
 
-    # Kiểm tra xem graph đã nạp chưa (phòng hờ)
+    # Kiểm tra xem graph đã nạp chưa (auto-loader)
     try:
         run_query("CALL gds.graph.exists('roadGraph')")
     except:
@@ -188,5 +182,5 @@ if __name__ == "__main__":
     with app.app_context():
         auto_load_graph()
 
-    print("🚀 Server Du lịch đang chạy tại: http://127.0.0.1:5000")
+    print("🚀 Server đang chạy tại: http://127.0.0.1:5000")
     app.run(port=5000, debug=True)

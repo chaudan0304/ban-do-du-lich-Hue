@@ -11,16 +11,33 @@
   </head>
 
   <body>
+    <button id="toggleSidebarBtn" onclick="toggleSidebar()">⬅</button>
     <div id="sidebar">
       <div class="sidebar-header">
         <h2><span>🏰</span> Khám phá Huế</h2>
         <div class="ai-box">
-          <label class="ai-label">✨ Gợi ý thông minh (AI)</label>
-          <div class="search-group">
-            <input type="text" id="usernameInput" placeholder="Nhập tên User..." value="SinhVienHue" />
-            <button class="btn-ai" onclick="getRecommendations()">Gợi ý</button>
+          <div
+            class="ai-header"
+            onclick="toggleAI()"
+            style="
+              cursor: pointer;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding-bottom: 10px;
+            "
+          >
+            <label class="ai-label" style="cursor: pointer; margin: 0">✨ Gợi ý thông minh (AI)</label>
+            <span id="ai-arrow" style="font-size: 12px; transition: transform 0.3s">▼</span>
           </div>
-          <div id="results" class="result-box"></div>
+
+          <div id="ai-content" class="ai-content expanded">
+            <div class="search-group">
+              <input type="text" id="usernameInput" placeholder="Nhập tên User..." value="SinhVienHue" />
+              <button class="btn-ai" onclick="getRecommendations()">Gợi ý</button>
+            </div>
+            <div id="results" class="result-box"></div>
+          </div>
         </div>
 
         {# Tạm thời ẩn tìm kiếm theo tọa độ #} {#

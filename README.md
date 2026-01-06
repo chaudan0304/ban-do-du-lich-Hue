@@ -3,7 +3,9 @@
 Xây dựng website khám phá địa điểm du lịch sử dụng Graph Database và hệ khuyến nghị
 
 - đã xong và hiểu cơ bản thuật toán PageRank
-- Thuật toán đường đi: chạy được nhưng thấy ko ổn lắm, chưa cách chạy
+- Thuật toán đường đi: chạy được nhưng thấy ko ổn lắm, chỉ làm được đường chim bay và chưa có khoảng cách
+- đã có thể ẩn thanh sider-bar
+- tiếp tục chỉnh sửa phần đường đi
 
 # Chỉnh sửa file nào.
 
