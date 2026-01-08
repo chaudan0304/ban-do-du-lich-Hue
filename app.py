@@ -10,53 +10,7 @@ atexit.register(close_driver)
 
 
 # =======================================================
-# 1. HÀM TỰ ĐỘNG NẠP GRAPH (AUTO-LOADER)
-# =======================================================
-def auto_load_graph():
-    print("🔄 [System] Đang kiểm tra trạng thái GDS (Graph Data Science)...")
-    try:
-        # Bước 1: Kiểm tra xem graph đã tồn tại chưa
-        check_query = "CALL gds.graph.exists('roadGraph') YIELD exists RETURN exists"
-        data = run_query(check_query)
-
-        if data and data[0]["exists"]:
-            print("✅ [System] Graph 'roadGraph' đã có sẵn trong RAM. Sẵn sàng!")
-            return
-
-        # Bước 2: Nếu chưa có, nạp lại (Project) từ dữ liệu ổ cứng
-        print("⚠️ [System] Graph chưa có trong RAM. Đang nạp lại từ Database...")
-
-        project_query = """
-        CALL gds.graph.project(
-            'roadGraph',
-            'Location',
-            {
-                NEAR: {
-                    type: 'NEAR',
-                    orientation: 'UNDIRECTED',
-                    properties: 'distance'
-                }
-            }
-        ) YIELD graphName, nodeCount, relationshipCount
-        """
-        result = run_query(project_query)
-
-        if result:
-            info = result[0]
-            print(
-                f"🚀 [System] Đã nạp thành công! ({info['nodeCount']} nodes, {info['relationshipCount']} edges)"
-            )
-        else:
-            print(
-                "❌ [System] Không thể nạp graph. Vui lòng kiểm tra lại quá trình thiết lập ban đầu."
-            )
-
-    except Exception as e:
-        print(f"❌ [System] Lỗi khởi tạo GDS: {e}")
-
-
-# =======================================================
-# 2. CÁC API FLASK
+# 1. CÁC API FLASK
 # =======================================================
 @app.route("/")
 def index():
@@ -86,7 +40,6 @@ def get_locations():
 
 @app.route("/api/recommend/<user_name>", methods=["GET"])
 def recommend(user_name):
-    # Logic gợi ý: Dựa trên người dùng có cùng sở thích (Collaborative Filtering đơn giản)
     cypher_query = """
     MATCH (me:User {name: $name})-[:LIKED]->(my_place:Location)
     MATCH (other:User)-[:LIKED]->(my_place)
@@ -126,61 +79,9 @@ def recommend(user_name):
     return jsonify(results)
 
 
-@app.route("/api/route", methods=["GET"])
-def get_route():
-    start_name = request.args.get("start")
-    end_name = request.args.get("end")
-
-    if not start_name or not end_name:
-        return jsonify({"error": "Vui lòng cung cấp điểm đi và điểm đến"}), 400
-
-    # Kiểm tra xem graph đã nạp chưa (auto-loader)
-    try:
-        run_query("CALL gds.graph.exists('roadGraph')")
-    except:
-        return (
-            jsonify({"error": "Graph ảo chưa được nạp. Vui lòng restart server."}),
-            500,
-        )
-
-    query = """
-    MATCH (source:Location {name: $start}), (target:Location {name: $end})
-    
-    CALL gds.shortestPath.dijkstra.stream('roadGraph', {
-        sourceNode: source,
-        targetNode: target,
-        relationshipWeightProperty: 'distance'
-    })
-    YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
-    
-    RETURN [nodeId IN nodeIds | {
-        name: gds.util.asNode(nodeId).name,
-        lat: gds.util.asNode(nodeId).lat,
-        lng: gds.util.asNode(nodeId).lng
-    }] AS path_nodes, totalCost
-    """
-
-    try:
-        data = run_query(query, {"start": start_name, "end": end_name})
-        if not data:
-            return (
-                jsonify(
-                    {"error": "Không tìm thấy đường đi (quá xa hoặc không kết nối)"}
-                ),
-                404,
-            )
-        return jsonify(data[0])
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 # =======================================================
-# 3. MAIN RUN
+# 2. MAIN RUN
 # =======================================================
 if __name__ == "__main__":
-    # --- GỌI HÀM TỰ ĐỘNG NẠP ---
-    with app.app_context():
-        auto_load_graph()
-
     print("🚀 Server đang chạy tại: http://127.0.0.1:5000")
     app.run(port=5000, debug=True)

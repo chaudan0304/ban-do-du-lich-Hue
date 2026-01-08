@@ -397,7 +397,7 @@ user_data_raw = [
     ),
     # Người tâm linh, thích chùa chiền và lăng tẩm
     ("YeuTamLinh", ["Chùa Thiên Mụ", "Điện Hòn Chén", "Chùa Từ Đàm", "Lăng Khải Định"]),
-    # [MỚI] Một hướng dẫn viên du lịch thích TẤT CẢ các điểm hot
+    # Một hướng dẫn viên du lịch thích TẤT CẢ các điểm hot
     (
         "HuongDanVien",
         ["Hoàng Thành Huế", "Chùa Thiên Mụ", "Bún Bò Mệ Kéo", "Cầu Trường Tiền"],

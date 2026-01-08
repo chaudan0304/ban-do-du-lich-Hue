@@ -13,10 +13,8 @@ var markerLayer = L.layerGroup().addTo(map);
 // Biến lưu marker để tra cứu khi click từ danh sách
 var markersMap = {};
 
-// BIẾN QUẢN LÝ ĐƯỜNG ĐI
-var routingControl = null;
 // ==========================================
-// 2. CÁC HÀM XỬ LÝ DỮ LIỆU (Load, Marker, AI)
+// 2. CÁC HÀM XỬ LÝ DỮ LIỆU VÀ TƯƠNG TÁC
 // ==========================================
 // Hàm lấy Icon theo danh mục
 function getIconByCategory(category) {
@@ -44,12 +42,31 @@ function getIconByCategory(category) {
   });
 }
 
-// Hàm helper tạo thẻ img với fallback no-image.png (local, nhanh, đẹp)
+// Hàm helper tạo thẻ img với fallback no-image.png
 function createPlaceImage(src, alt = "Địa điểm du lịch Huế") {
   return `<img src="${src}" alt="${alt}" onerror="this.src='/static/images/no-image.png'" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">`;
 }
 
-// Hàm tải danh sách địa điểm
+// Hàm bay đến vị trí và mở Popup
+function flyToLocation(lat, lng, name) {
+  // 1. Bay đến vị trí
+  map.flyTo([lat, lng], 16, {
+    duration: 1.5,
+    easeLinearity: 0.25,
+  });
+
+  // 2. Tìm marker tương ứng và mở Popup
+  var marker = markersMap[name];
+  if (marker) {
+    setTimeout(() => {
+      marker.openPopup();
+    }, 1200);
+  }
+}
+
+// ==========================================
+// 3. LOGIC CHÍNH: TẢI ĐỊA ĐIỂM & GỢI Ý
+// ==========================================
 function loadLocations(category = "All") {
   markerLayer.clearLayers();
   markersMap = {}; // Reset để tránh lỗi cũ
@@ -71,6 +88,8 @@ function loadLocations(category = "All") {
       listContainer.innerHTML = `<div class="list-title">Tìm thấy ${data.length} địa điểm</div>`;
 
       data.forEach((loc) => {
+        const safeDesc = loc.description ? loc.description : "Chưa có mô tả.";
+        const shortDesc = safeDesc.length > 60 ? safeDesc.substring(0, 60) + "..." : safeDesc;
         // === 1. Tạo CARD ===
         const card = document.createElement("div"); // Dùng const để scope rõ ràng
         card.className = "card";
@@ -112,13 +131,8 @@ function loadLocations(category = "All") {
                 ${loc.category}
               </span>
             </div>
-            
-            <button onclick="showRoute(${loc.lat}, ${loc.lng}, '${loc.name.replace(/'/g, "\\'")}')" 
-              style="cursor:pointer; width:100%; margin-top:8px; border:none; background:#27ae60; color:white; padding:8px; border-radius:8px; font-weight:bold; font-size:14px;">
-              🚗 Tìm đường đi đến → ${loc.name}
-            </button>
 
-            <a href="https://www.google.com/maps?q=${loc.lat},${loc.lng}" target="_blank"
+            <a href="https://www.google.com/maps/search/api=1?query=${loc.lat},${loc.lng}" target="_blank"
                style="display:block; margin-top:5px; text-decoration:none; background:#3498db; color:white; padding:5px; border-radius:4px; font-size:12px; font-weight:bold; text-align:center;">
                🗺️ Mở Google Maps
             </a>
@@ -133,33 +147,12 @@ function loadLocations(category = "All") {
 
         // === 3. Hover effect: card hover → mở popup marker ===
         card.addEventListener("mouseenter", () => marker.openPopup());
-        card.addEventListener("mouseleave", () => marker.closePopup());
       });
     })
     .catch((err) => {
       console.error("Lỗi tải locations:", err);
       listContainer.innerHTML = '<div class="list-title">Lỗi kết nối server 😢</div>';
     });
-}
-
-// ==========================================
-// HÀM HELPER: BAY ĐẾN & MỞ POPUP
-// ==========================================
-function flyToLocation(lat, lng, name) {
-  // 1. Bay đến vị trí
-  map.flyTo([lat, lng], 16, {
-    duration: 1.5,
-    easeLinearity: 0.25,
-  });
-
-  // 2. Tìm marker tương ứng và mở Popup
-  var marker = markersMap[name];
-  if (marker) {
-    // Đợi 1.2s cho bay gần tới nơi rồi mới bung popup ra
-    setTimeout(() => {
-      marker.openPopup();
-    }, 1200);
-  }
 }
 
 // Hàm xử lý khi bấm nút bộ lọc
@@ -248,16 +241,13 @@ function toggleSidebar() {
 
   // 2. Đổi icon nút bấm
   if (sidebar.classList.contains("collapsed")) {
-    btn.innerHTML = "➜"; // Mũi tên chỉ ra (Mở lại)
-    btn.style.left = "15px"; // Đảm bảo nút vẫn nằm góc trái màn hình
+    btn.innerHTML = "➜";
+    btn.style.left = "15px";
   } else {
-    btn.innerHTML = "⬅"; // Icon menu (Đóng lại)
-    btn.style.left = "350px"; // (Tùy chọn) Đẩy nút sang phải nếu muốn nó nằm trên header
-    // Nhưng để đơn giản, bạn cứ để nút cố định ở góc trái cũng được
+    btn.innerHTML = "⬅";
+    btn.style.left = "350px";
   }
 
-  // 3. QUAN TRỌNG: Báo cho bản đồ biết kích thước đã thay đổi
-  // Phải set timeout để chờ hiệu ứng trượt CSS (0.4s) chạy xong thì mới vẽ lại map
   setTimeout(function () {
     map.invalidateSize();
   }, 400);
@@ -411,147 +401,6 @@ function searchCoordinate() {
 */
 
 // ==========================================
-// 6. HÀM VẼ ĐƯỜNG ĐI TỐI ƯU (ROUTING)
-// ==========================================
-let routingLayer = null; // Quản lý layer đường đi
-
-function showRoute(destLat, destLng, destName) {
-  if (routingLayer) {
-    map.removeLayer(routingLayer);
-    routingLayer = null;
-  }
-
-  const endName = destName.trim();
-
-  if (!endName) {
-    alert("⚠️ Tên địa điểm đích không hợp lệ!");
-    return;
-  }
-
-  // Hiển thị loading nhẹ (tùy chọn nâng cao)
-  const loadingPopup = L.popup({ closeOnClick: false, closeButton: false })
-    .setLatLng([destLat, destLng])
-    .setContent("<small>⏳ Đang xác định điểm xuất phát và tính đường đi...</small>")
-    .openOn(map);
-
-  // Ưu tiên lấy vị trí hiện tại của người dùng
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const startLat = position.coords.latitude;
-        const startLng = position.coords.longitude;
-        calculateRoute(startLat, startLng, null, endName, loadingPopup); // null nghĩa là dùng tọa độ thực
-      },
-      (error) => {
-        console.warn("Không lấy được vị trí hiện tại:", error);
-        map.closePopup(loadingPopup);
-        // Fallback: Cho phép người dùng nhập tên điểm xuất phát
-        const startName = prompt(
-          "Không lấy được vị trí hiện tại.\nVui lòng nhập tên điểm xuất phát (ví dụ: Hoàng Thành Huế hoặc Ga Huế):",
-          "Hoàng Thành Huế"
-        );
-        if (!startName || startName.trim() === "") {
-          alert("⚠️ Vui lòng nhập điểm xuất phát hợp lệ!");
-          return;
-        }
-        calculateRoute(null, null, startName.trim(), endName, null);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-    );
-  } else {
-    // Nếu browser không hỗ trợ geolocation
-    map.closePopup(loadingPopup);
-    const startName = prompt("Trình duyệt không hỗ trợ định vị.\nVui lòng nhập tên điểm xuất phát:", "Hoàng Thành Huế");
-    if (!startName || startName.trim() === "") {
-      alert("⚠️ Vui lòng nhập điểm xuất phát hợp lệ!");
-      return;
-    }
-    calculateRoute(null, null, startName.trim(), endName, null);
-  }
-}
-
-// Hàm tách riêng để tính đường đi (hỗ trợ cả tọa độ và tên)
-function calculateRoute(startLat, startLng, startName, endName, loadingPopup) {
-  let url;
-  if (startLat && startLng) {
-    alert("Backend hiện tại chỉ hỗ trợ tên địa điểm. Hãy nhập tên gần nhất.");
-    const fallbackName = prompt("Nhập tên điểm xuất phát gần vị trí hiện tại:", "Ga Huế");
-    url = `/api/route?start=${encodeURIComponent(fallbackName)}&end=${encodeURIComponent(endName)}`;
-  } else {
-    url = `/api/route?start=${encodeURIComponent(startName)}&end=${encodeURIComponent(endName)}`;
-  }
-
-  fetch(url)
-    .then((res) => {
-      if (!res.ok) throw new Error("Server lỗi");
-      return res.json();
-    })
-    .then((data) => {
-      console.log("👉 Dữ liệu Server trả về:", data);
-
-      if (loadingPopup) map.closePopup(loadingPopup);
-
-      if (data.error) {
-        alert(`❌ Không tìm thấy đường đi:\n${data.error}`);
-        return;
-      }
-
-      const latlngs = data.path_nodes.map((node) => [node.lat, node.lng]);
-
-      const polyline = L.polyline(latlngs, {
-        color: "#3498db",
-        weight: 6,
-        opacity: 0.9,
-        smoothFactor: 1,
-      });
-
-      routingLayer = L.layerGroup([polyline]).addTo(map);
-
-      // 1. Kiểm tra xem có totalCost không (phòng trường hợp lỗi)
-      if (data.totalCost !== undefined) {
-        // 2. Đổi từ mét sang km và làm tròn 2 số thập phân
-        var distanceKm = (data.totalCost / 1000).toFixed(2);
-
-        // 3. Tạo nội dung Popup đẹp mắt
-        var popupContent = `
-              <div style="text-align:center; min-width: 150px">
-                  <b style="color:#2c3e50">🏁 Lộ trình tham quan</b><br>
-                  <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
-                  Khoảng cách: <b style="color:#e67e22; font-size:15px">${distanceKm} km</b>
-              </div>
-          `;
-
-        // 4. Gắn popup vào đường đi và tự động mở ra
-        polyline.bindPopup(popupContent).openPopup();
-      }
-      // ---------------------
-      // Marker điểm đầu (xanh lá để phân biệt là start)
-      const startIcon = L.divIcon({
-        className: "custom-pin pin-thiennhien", // Sử dụng class xanh lá có sẵn trong CSS
-        iconSize: [30, 30],
-        html: "<i>🚩</i>",
-      });
-      L.marker(latlngs[0], { icon: startIcon })
-        .addTo(routingLayer)
-        .bindPopup(`🚩 <b>${startLat ? "Vị trí hiện tại của bạn" : startName || "Điểm xuất phát"}</b><br>Start`)
-        .openPopup();
-
-      // Marker điểm cuối (giữ icon category hoặc mặc định)
-      L.marker(latlngs[latlngs.length - 1], { icon: getIconByCategory("Tham quan") })
-        .addTo(routingLayer)
-        .bindPopup(`📍 <b>${endName}</b><br>Điểm đến`)
-        .openPopup();
-
-      map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
-    })
-    .catch((err) => {
-      if (loadingPopup) map.closePopup(loadingPopup);
-      console.error("Lỗi routing:", err);
-      alert("🔌 Lỗi kết nối đến Neo4j hoặc không có đường đi khả dụng.");
-    });
-}
-// ==========================================
 // THE END. KHỞI CHẠY ỨNG DỤNG
 // ==========================================
-// Khởi chạy lần đầu: Load tất cả địa điểm
 loadLocations("All");

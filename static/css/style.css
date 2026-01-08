@@ -361,18 +361,6 @@ h2 span {
   color: #666;
 }
 
-/* Routing Container (Bảng chỉ đường) */
-.leaflet-routing-container {
-  background-color: white;
-  padding: 10px;
-  width: 250px !important;
-  max-height: 300px;
-  overflow-y: auto;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-  font-size: 13px;
-}
-
 /* =========================================
    8. CUSTOM MARKER (ICON GIỌT NƯỚC)
    ========================================= */
