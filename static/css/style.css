@@ -1,8 +1,4 @@
-/* =========================================
-   1. IMPORT FONT & CẤU HÌNH CHUNG (RESET)
-   ========================================= */
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
-
+/* Reset & Font */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -10,442 +6,812 @@
 }
 
 body {
-  font-family: "Poppins", sans-serif;
-  background-color: #fdfdfd;
+  font-family: 'Inter', sans-serif;
   height: 100vh;
   overflow: hidden;
+  color: #1f2937;
+  background: #f3f4f6;
+}
+
+/* LAYOUT CHÍNH */
+.app-layout {
   display: flex;
+  height: 100%;
+  width: 100%;
 }
 
-h2 {
-  color: #4b2c82;
-  font-weight: 600;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-}
-
-h2 span {
-  margin-right: 10px;
-  font-size: 26px;
-}
-
-/* =========================================
-   2. NÚT TOGGLE SIDEBAR (Nổi trên cùng)
-   ========================================= */
-#toggleSidebarBtn {
-  position: absolute;
-  top: 15px;
-  left: 340px;
-  z-index: 2000;
-  /* Cao hơn sidebar (1001) */
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: #4b2c82;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#toggleSidebarBtn:hover {
-  background: #6a1b9a;
-  transform: scale(1.1);
-}
-
-/* =========================================
-   3. SIDEBAR LAYOUT & ANIMATION
-   ========================================= */
-#sidebar {
-  width: 400px;
-  height: 100vh;
+/* === SIDEBAR (LEFT) === */
+.sidebar {
+  width: 45%;
+  /* Chiều rộng cố định lý tưởng */
+  flex-shrink: 0;
+  background: white;
   display: flex;
   flex-direction: column;
-  background: white;
-  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
-  /* Hiệu ứng trượt */
-  transition: margin-left 0.4s ease-in-out;
+  border-right: 1px solid #e5e7eb;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
 }
 
+/* 1. Header */
 .sidebar-header {
-  padding: 20px 20px 10px 20px;
-  border-bottom: 1px solid #eee;
+  padding: 20px 24px;
+  background: #111827;
+  /* Màu tối sang trọng */
+  color: white;
 }
 
-/* Trạng thái ẩn sidebar */
-#sidebar.collapsed {
-  margin-left: -400px;
-}
-
-/* Di chuyển nút bấm khi Sidebar đóng */
-#sidebar.collapsed ~ #toggleSidebarBtn {
-  left: 15px;
-  background: #fff;
-  color: #333;
-}
-
-/* =========================================
-   4. AI BOX (GỢI Ý THÔNG MINH & ACCORDION)
-   ========================================= */
-.ai-box {
-  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-  padding: 15px;
-  border-radius: 12px;
-  margin: 15px 20px 0 20px;
-}
-
-/* --- Header AI Box (Click để đóng mở) --- */
-.ai-header {
+.brand {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  cursor: pointer;
-  padding-bottom: 5px;
+  gap: 15px;
 }
 
-.ai-label {
+.logo-icon {
+  font-size: 28px;
+  color: #3b82f6;
+}
+
+.brand h1 {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.brand p {
   font-size: 13px;
-  color: #6a1b9a;
-  font-weight: 600;
-  margin-bottom: 0;
-  /* Override margin cũ */
+  opacity: 0.7;
+  font-weight: 300;
+}
+
+/* 2. Search Box */
+.search-box {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
+}
+
+.box-label {
   display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
 
-/* --- Nội dung AI Box (Ẩn/Hiện) --- */
-.ai-content {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: all 0.1s ease-in-out;
-}
-
-.ai-content.expanded {
-  max-height: 500px;
-  opacity: 1;
-  margin-top: 10px;
-  /* Thêm khoảng cách khi mở */
-}
-
-/* --- Form Search & Input --- */
-.search-group {
+.input-group {
   display: flex;
   gap: 8px;
 }
 
 #usernameInput {
   flex: 1;
-  padding: 10px 12px;
-  border: 1px solid #fff;
+  padding: 10px 14px;
+  border: 2px solid #e5e7eb;
   border-radius: 8px;
-  outline: none;
   font-size: 14px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
 }
 
-.btn-ai {
-  padding: 0 18px;
-  background: #6a1b9a;
+#usernameInput:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+.btn-submit {
+  padding: 0 20px;
+  background: #2563eb;
   color: white;
   border: none;
   border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  transition: 0.2s;
 }
 
-.btn-ai:hover {
-  background: #4a148c;
-  transform: translateY(-2px);
+.btn-submit:hover {
+  background: #1d4ed8;
 }
 
-/* --- Kết quả gợi ý (Cards nhỏ) --- */
-.result-box {
-  margin-top: 12px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.rec-card {
-  border-left: 4px solid #27ae60;
-  background: #f9fffb;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-}
-
-.rec-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 12px rgba(39, 174, 96, 0.2);
-}
-
-/* =========================================
-   5. BỘ LỌC CATEGORY (SCROLL NGANG)
-   ========================================= */
-.filter-container {
-  display: flex;
-  gap: 10px;
-  padding: 15px 20px;
-  overflow-x: auto;
-  flex-wrap: nowrap;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  cursor: grab;
-  user-select: none;
-}
-
-.filter-container::-webkit-scrollbar {
-  display: none;
-}
-
-.filter-container.active {
-  cursor: grabbing;
-}
-
-.filter-btn {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  padding: 8px 18px;
-  border: 1px solid #e0e0e0;
-  background: #f8f9fa;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #555;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.filter-btn:hover {
-  background: #e1bee7;
-  border-color: #d1c4e9;
-  transform: translateY(-2px);
-}
-
-.filter-btn.active {
-  background: #4b2c82;
-  color: white;
-  border-color: #4b2c82;
-  box-shadow: 0 4px 10px rgba(75, 44, 130, 0.3);
-}
-
-/* =========================================
-   6. DANH SÁCH ĐỊA ĐIỂM (LOCATION LIST)
-   ========================================= */
-#locationList {
+/* 3. Results Container (Scrollable) */
+.results-container {
   flex: 1;
   overflow-y: auto;
-  padding: 0 20px 20px 20px;
+  padding: 20px 24px;
+  background: #f9fafb;
+  min-height: 200px;
 }
 
-.list-title {
-  font-size: 14px;
-  color: #888;
-  font-weight: 500;
-  margin: 15px 0 10px 0;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #eee;
-}
-
-/* --- Card Địa điểm --- */
-.card {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 16px;
-  border-radius: 12px;
-  background: white;
-  cursor: pointer;
-  overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
-  border: 1px solid #f0f0f0;
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-
-.card-img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-}
-
-.card-body {
-  padding: 14px;
-}
-
-.card-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 6px;
-  line-height: 1.3;
-}
-
-.card-meta {
+.section-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
-  color: #666;
+  margin-bottom: 15px;
 }
 
-.card-cat {
-  background: #eee;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-weight: 500;
+.section-head h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111;
 }
 
-.card-rating {
-  color: #f1c40f;
-  font-weight: bold;
+.badge-counter {
+  background: #e5e7eb;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
-/* =========================================
-   7. BẢN ĐỒ & LEAFLET CUSTOMIZATION
-   ========================================= */
-#map {
-  flex: 1;
-  height: 100vh;
-  width: 100%;
+/* CARD KẾT QUẢ (HORIZONTAL) */
+.cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* Popup Leaflet */
-.leaflet-popup-content-wrapper {
-  border-radius: 12px !important;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+.ai-card {
+  display: flex;
+  background: white;
+  border-radius: 12px;
   overflow: hidden;
-  padding: 0 !important;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 110px;
+  /* Chiều cao cố định */
 }
 
-.leaflet-popup-content {
-  margin: 0 !important;
-  width: 240px !important;
-  line-height: 1.4;
+.ai-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
 }
 
-.popup-img {
+.card-thumb {
+  width: 110px;
+  flex-shrink: 0;
+  background: #eee;
+}
+
+.card-thumb img {
   width: 100%;
-  height: 120px;
+  height: 100%;
   object-fit: cover;
 }
 
-.popup-body {
+.card-content {
+  flex: 1;
   padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 4px;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-desc {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* BADGES (Điểm nhấn Thuật toán) */
+.algo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  align-self: flex-start;
+}
+
+.badge-pr {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
+}
+
+/* Cam */
+.badge-collab {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #dbeafe;
+}
+
+/* Xanh */
+
+/* Empty State */
+.empty-state {
   text-align: center;
+  padding: 40px 10px;
+  color: #9ca3af;
+}
+
+.empty-state img {
+  width: 64px;
+  margin-bottom: 15px;
+  opacity: 0.6;
+}
+
+.empty-state h3 {
+  font-size: 16px;
+  color: #374151;
+  margin-bottom: 5px;
+}
+
+.empty-state p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* 4. Footer Data Explorer */
+.data-explorer {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: white;
+  height: 35%;
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.chip {
+  white-space: nowrap;
+  padding: 6px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background: white;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.chip:hover {
+  background: #f3f4f6;
+}
+
+.chip.active {
+  background: #1f2937;
+  color: white;
+  border-color: #1f2937;
+}
+
+.mini-list {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-content: start;
+}
+
+.mini-item {
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  cursor: pointer;
   background: white;
 }
 
-.popup-body b {
-  font-size: 15px;
-  color: #333;
-  display: block;
+.mini-item:hover {
+  border-color: #3b82f6;
+}
+
+.mini-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+  margin-right: 8px;
+}
+
+.mini-name {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* === MAP CONTAINER (RIGHT) === */
+.map-container {
+  flex: 1;
+  position: relative;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* Map Legend */
+.map-legend {
+  position: absolute;
+  bottom: 30px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 4px;
 }
 
-.popup-body small {
+.legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-pr {
+  background: #f97316;
+}
+
+.dot-collab {
+  background: #3b82f6;
+}
+
+/* Map Popup */
+.leaflet-popup-content {
+  width: 220px !important;
+  margin: 10px !important;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.leaflet-popup-content img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.popup-btn {
+  display: block;
+  margin-top: 8px;
+  background: #2563eb;
+  color: white !important;
+  padding: 6px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* File: static/css/style.css (Thêm vào cuối file) */
+
+/* --- HISTORY SECTION --- */
+.history-section {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.history-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.history-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hist-chip {
+  font-size: 11px;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hist-chip img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* --- DETAIL PANEL (SLIDING) --- */
+.sidebar {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Quan trọng để panel trượt bên trong sidebar */
+
+.detail-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 2000;
+  transform: translateX(100%);
+  /* Ẩn sang phải */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-panel.active {
+  transform: translateX(0);
+}
+
+.btn-back {
+  padding: 15px 20px;
+  border: none;
+  background: white;
+  text-align: left;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-back:hover {
+  background: #f8fafc;
+}
+
+#detail-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* Detail Content Styling */
+.detail-hero {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.detail-body {
+  padding: 20px;
+}
+
+.detail-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #111;
+}
+
+.detail-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  font-size: 13px;
+  color: #555;
+}
+
+.detail-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 20px;
+}
+
+.detail-actions .btn-action {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  text-align: center;
+  background: #2563eb;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.detail-actions .btn-action:hover {
+  background: #1d4ed8;
+}
+
+/* --- LOGIN PROMO (Khách) --- */
+.login-promo p {
   font-size: 13px;
   color: #666;
+  margin-bottom: 10px;
+  line-height: 1.4;
 }
 
-/* =========================================
-   8. CUSTOM MARKER (ICON GIỌT NƯỚC)
-   ========================================= */
-.custom-pin {
-  width: 30px;
-  height: 30px;
-  border-radius: 50% 50% 50% 0;
-  background: #3498db;
-  position: absolute;
-  transform: rotate(-45deg);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 2px solid white;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-
-/* Icon bên trong ghim */
-.custom-pin i {
-  transform: rotate(45deg);
-  font-style: normal;
-  font-size: 14px;
+.btn-login-trigger {
+  width: 100%;
+  background: #111827;
   color: white;
 }
 
-/* Hover Marker */
-.custom-pin:hover {
-  transform: rotate(-45deg) scale(1.2);
-  z-index: 999 !important;
+.btn-login-trigger:hover {
+  background: #000;
 }
 
-/* --- Màu sắc theo Category --- */
-.pin-ditich {
-  background-color: #e74c3c;
+.divider-text {
+  text-align: center;
+  margin: 15px 0;
+  border-bottom: 1px solid #eee;
+  line-height: 0.1em;
 }
 
-.pin-amthuc {
-  background-color: #f39c12;
+.divider-text span {
+  background: #fff;
+  padding: 0 10px;
+  color: #999;
+  font-size: 11px;
 }
 
-.pin-tamlinh {
-  background-color: #8e44ad;
+/* --- LOGGED IN USER CARD --- */
+.user-info-card {
+  display: flex;
+  align-items: center;
+  background: #eff6ff;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #dbeafe;
+  margin-bottom: 10px;
 }
 
-.pin-thiennhien {
-  background-color: #27ae60;
+.user-avatar {
+  width: 35px;
+  height: 35px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
 }
 
-.pin-khac {
-  background-color: #34495e;
+.user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-/* =========================================
-   9. RESPONSIVE (MOBILE)
-   ========================================= */
-@media (max-width: 768px) {
-  body {
-    flex-direction: column;
+.welcome-text {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.username-text {
+  font-size: 14px;
+  color: #1e3a8a;
+}
+
+.btn-logout {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.btn-logout:hover {
+  background: #fee2e2;
+  border-radius: 4px;
+}
+
+.btn-analyze-me {
+  width: 100%;
+  background: #2563eb;
+  margin-bottom: 15px;
+}
+
+/* --- MODAL STYLING --- */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.active {
+  display: flex;
+  animation: fadeIn 0.2s;
+}
+
+.modal-content {
+  background: white;
+  width: 360px;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.close-modal {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  margin-bottom: -2px;
+}
+
+.tab-btn.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.form-group i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 12px 12px 35px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.btn-full {
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-outline {
+  background: white;
+  border: 2px solid #2563eb;
+  color: #2563eb;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
 
-  #sidebar {
-    width: 100%;
-    height: auto;
-    max-height: 60vh;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
+}
 
-  /* Ẩn nút toggle trên mobile vì giao diện khác */
-  #toggleSidebarBtn {
-    display: none;
-  }
+/* [File: style.css] - Thêm vào cuối file */
 
-  #map {
-    height: 40vh;
-  }
+.detail-actions {
+  display: flex;
+  gap: 10px;
+  /* Khoảng cách giữa 2 nút */
+}
 
-  .ai-box {
-    margin: 15px 15px 0 15px;
-  }
+.btn-action {
+  flex: 1;
+  /* Chia đều chiều rộng */
+  padding: 12px;
+  text-align: center;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: 0.2s;
+}
 
-  .filter-container {
-    padding: 15px;
-  }
+/* Style cho nút Like */
+.btn-like {
+  background: #ffe4e6;
+  /* Màu hồng nhạt */
+  color: #e11d48;
+  /* Chữ đỏ */
+  border: 1px solid #fecdd3;
+}
 
-  #locationList {
-    padding: 0 15px 15px 15px;
-  }
+.btn-like:hover {
+  background: #fda4af;
+  color: #9f1239;
+}
+
+/* Style cho nút Maps (sửa lại class cũ nếu cần) */
+.btn-maps {
+  background: #2563eb;
+  /* Xanh dương */
+  color: white;
+}
+
+.btn-maps:hover {
+  background: #1d4ed8;
 }

@@ -3,71 +3,146 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Huế - Bản đồ Du lịch Thông minh</title>
+    <title>Hệ thống Gợi ý Du lịch Thông minh - Huế AI</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   </head>
-
   <body>
-    <button id="toggleSidebarBtn" onclick="toggleSidebar()">⬅</button>
-    <div id="sidebar">
-      <div class="sidebar-header">
-        <h2><span>🏰</span> Khám phá Huế</h2>
-        <div class="ai-box">
-          <div
-            class="ai-header"
-            onclick="toggleAI()"
-            style="
-              cursor: pointer;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding-bottom: 10px;
-            "
-          >
-            <label class="ai-label" style="cursor: pointer; margin: 0">✨ Gợi ý thông minh (AI)</label>
-            <span id="ai-arrow" style="font-size: 12px; transition: transform 0.3s">▼</span>
-          </div>
-
-          <div id="ai-content" class="ai-content expanded">
-            <div class="search-group">
-              <input type="text" id="usernameInput" placeholder="Nhập tên User..." value="SinhVienHue" />
-              <button class="btn-ai" onclick="getRecommendations()">Gợi ý</button>
+    <div class="app-layout">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="brand">
+            <div class="logo-icon"><i class="fas fa-map-marked-alt"></i></div>
+            <div>
+              <h1>Huế Travel AI</h1>
+              <p>Graph-based Recommender</p>
             </div>
-            <div id="results" class="result-box"></div>
           </div>
         </div>
 
-        {# Tạm thời ẩn tìm kiếm theo tọa độ #} {#
-        <div class="ai-box" style="margin-top: 10px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)">
-          <label class="ai-label" style="color: #1565c0">📍 Tìm kiếm theo tọa độ</label>
-          <div class="search-group">
-            <input type="text" id="coordInput" placeholder="VD: 16.4650, 107.5700" />
-            <button class="btn-ai" onclick="searchCoordinate()" style="background: #1565c0">Tìm</button>
+        <div id="main-view">
+          <div class="search-box">
+            <label class="box-label"><i class="fas fa-user-circle"></i> Hồ sơ người dùng</label>
+
+            <div id="guest-view">
+              <div class="login-promo">
+                <p>Đăng nhập để hệ thống lưu lại lịch sử chuyến đi và gợi ý chính xác hơn.</p>
+                <button class="btn-submit btn-login-trigger" onclick="openAuthModal()">
+                  <i class="fas fa-sign-in-alt"></i> Đăng nhập / Đăng ký
+                </button>
+              </div>
+
+              <div class="divider-text"><span>Hoặc dùng thử</span></div>
+
+              <div class="input-group">
+                <input
+                  type="text"
+                  id="usernameInput"
+                  placeholder="Nhập tên User ảo (VD: SinhVienHue)..."
+                  value="SinhVienHue"
+                />
+                <button class="btn-submit" onclick="analyzeUser()">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
+            </div>
+
+            <div id="logged-view" style="display: none">
+              <div class="user-info-card">
+                <div class="user-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                  <span class="welcome-text">Xin chào,</span>
+                  <strong id="displayUsername" class="username-text">User</strong>
+                </div>
+                <button onclick="handleLogout()" class="btn-logout" title="Đăng xuất">
+                  <i class="fas fa-sign-out-alt"></i>
+                </button>
+              </div>
+
+              <button class="btn-submit btn-analyze-me" onclick="analyzeUser(true)">
+                <i class="fas fa-magic"></i> Phân tích sở thích của tôi
+              </button>
+
+              <div id="user-history" class="history-section" style="display: none">
+                <div class="history-title"><i class="fas fa-history"></i> Đã thích / Ghé thăm:</div>
+                <div class="history-chips" id="history-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="results-container">
+            <div class="section-head">
+              <h2>🎯 Gợi ý cho bạn</h2>
+              <span class="badge-counter" id="recCount">0</span>
+            </div>
+            <div id="recommendation-area" class="cards-list">
+              <div class="empty-state">
+                <img src="https://cdn-icons-png.flaticon.com/512/1086/1086933.png" alt="AI" />
+                <h3>Sẵn sàng phân tích</h3>
+                <p>Nhập User ID để xem gợi ý dựa trên Lịch sử & PageRank.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="data-explorer">
+            <div class="filter-chips">
+              <button class="chip active" onclick="filterData('All', this)">Tất cả</button>
+              <button class="chip" onclick="filterData('Di tích', this)">🏛️ Di tích</button>
+              <button class="chip" onclick="filterData('Ẩm thực', this)">🍜 Ẩm thực</button>
+              <button class="chip" onclick="filterData('Thiên nhiên', this)">🌳 Thiên nhiên</button>
+            </div>
+            <div id="locationList" class="mini-list"></div>
           </div>
         </div>
-        #}
-      </div>
 
-      <div class="filter-container">
-        <button class="filter-btn active" onclick="filterData('All', this)">Tất cả</button>
-        <button class="filter-btn" onclick="filterData('Di tích', this)">🏛️ Di tích</button>
-        <button class="filter-btn" onclick="filterData('Tâm linh', this)">🛕 Tâm linh</button>
-        <button class="filter-btn" onclick="filterData('Lăng tẩm', this)">🏯 Lăng tẩm</button>
-        <button class="filter-btn" onclick="filterData('Ẩm thực', this)">🍜 Ẩm thực</button>
-        <button class="filter-btn" onclick="filterData('Mua sắm', this)">🛍️ Mua sắm</button>
-        <button class="filter-btn" onclick="filterData('Tham quan', this)">🎡 Tham quan</button>
-        <button class="filter-btn" onclick="filterData('Thiên nhiên', this)">🌳 Thiên nhiên</button>
-        <button class="filter-btn" onclick="filterData('Bãi biển', this)">🏖️ Bãi biển</button>
-      </div>
+        <div id="detail-panel" class="detail-panel">
+          <button class="btn-back" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Quay lại</button>
+          <div id="detail-content"></div>
+        </div>
+      </aside>
 
-      <div id="locationList">
-        <div class="list-title">Danh sách địa điểm</div>
-      </div>
+      <main class="map-container">
+        <div id="map"></div>
+
+        <div class="map-legend">
+          <div class="legend-item"><span class="dot dot-pr"></span> PageRank Cao</div>
+          <div class="legend-item"><span class="dot dot-collab"></span> Cùng sở thích</div>
+        </div>
+      </main>
     </div>
 
-    <div id="map"></div>
+    <div id="authModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeAuthModal()">&times;</span>
+
+        <div class="auth-tabs">
+          <button class="tab-btn active" onclick="switchTab('login')">Đăng nhập</button>
+          <button class="tab-btn" onclick="switchTab('register')">Đăng ký</button>
+        </div>
+
+        <div id="loginForm" class="auth-form">
+          <h2>Chào mừng trở lại! 👋</h2>
+          <input type="text" id="loginUser" placeholder="Tên đăng nhập" />
+          <input type="password" id="loginPass" placeholder="Mật khẩu" />
+          <button class="btn-full" onclick="handleLogin()">Đăng nhập</button>
+          <p id="loginMsg" class="error-msg"></p>
+        </div>
+
+        <div id="registerForm" class="auth-form" style="display: none">
+          <h2>Tạo tài khoản mới 🚀</h2>
+          <input type="text" id="regUser" placeholder="Tên đăng nhập mới" />
+          <input type="password" id="regPass" placeholder="Mật khẩu" />
+          <button class="btn-full btn-outline" onclick="handleRegister()">Đăng ký ngay</button>
+          <p id="regMsg" class="error-msg"></p>
+        </div>
+      </div>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

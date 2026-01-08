@@ -6,3 +6,5 @@ Xây dựng website khám phá địa điểm du lịch sử dụng Graph Databa
 - Độ tương đồng trong neo4j
 
 # Chỉnh sửa file.
+
+- Cần chỉnh sửa lại các hiệu ứng
