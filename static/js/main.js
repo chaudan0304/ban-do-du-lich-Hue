@@ -56,11 +56,11 @@ function flyToLocation(lat, lng, name) {
   });
 
   // 2. Tìm marker tương ứng và mở Popup
-  var marker = markersMap[name];
+  const marker = markersMap[name];
   if (marker) {
-    setTimeout(() => {
+    map.once("moveend", () => {
       marker.openPopup();
-    }, 1200);
+    });
   }
 }
 
@@ -69,7 +69,7 @@ function flyToLocation(lat, lng, name) {
 // ==========================================
 function loadLocations(category = "All") {
   markerLayer.clearLayers();
-  markersMap = {}; // Reset để tránh lỗi cũ
+  markersMap = {}; // Reset bản đồ marker
 
   var listContainer = document.getElementById("locationList");
   listContainer.innerHTML = '<div class="list-title">Đang tải dữ liệu...</div>';
@@ -122,7 +122,7 @@ function loadLocations(category = "All") {
 
             <b>${loc.name}</b>
             <div style="font-size:12px; color:#666; margin:5px 0;">
-              ${loc.description.substring(0, 60)}...
+              ${shortDesc}
             </div>
             
             <div style="display:flex; justify-content:space-between; margin-top:8px;">
@@ -132,7 +132,7 @@ function loadLocations(category = "All") {
               </span>
             </div>
 
-            <a href="https://www.google.com/maps/search/api=1?query=${loc.lat},${loc.lng}" target="_blank"
+            <a href="https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}" target="_blank"
                style="display:block; margin-top:5px; text-decoration:none; background:#3498db; color:white; padding:5px; border-radius:4px; font-size:12px; font-weight:bold; text-align:center;">
                🗺️ Mở Google Maps
             </a>
@@ -147,6 +147,7 @@ function loadLocations(category = "All") {
 
         // === 3. Hover effect: card hover → mở popup marker ===
         card.addEventListener("mouseenter", () => marker.openPopup());
+        card.addEventListener("mouseleave", () => marker.closePopup());
       });
     })
     .catch((err) => {
@@ -164,9 +165,15 @@ function filterData(cat, btn) {
 
 // Hàm gọi ý thông minh (AI)
 function getRecommendations() {
-  var user = document.getElementById("usernameInput").value;
+  var user = document.getElementById("usernameInput").value.trim();
+  if (!user) {
+    document.getElementById("results").innerHTML = "<small>Vui lòng nhập tên người dùng.</small>";
+    return;
+  }
+
   var resBox = document.getElementById("results");
   resBox.innerHTML = "<small>⏳ Đang phân tích sở thích của bạn...</small>";
+
   fetch(`/api/recommend/${user}`)
     .then((res) => res.json())
     .then((data) => {
@@ -179,13 +186,16 @@ function getRecommendations() {
         let labelText = "";
         let labelColor = "#555";
 
-        if (!loc.common_users) {
-          labelText = "⭐ Địa điểm nổi bật (PageRank cao)";
+        if (!loc.common_users || loc.common_users === 0) {
+          let score = loc.pr ? loc.pr.toFixed(2) : "N/A";
+          labelText = "🏆 Địa điểm nổi bật (PR: " + score + ")";
+          labelColor = "#e67e22";
         } else if (loc.common_users >= 3) {
-          labelText = "👥 Nhiều người cùng sở thích với bạn đã đến đây";
-          labelColor = "#d35400";
+          labelText = "👥 Nhiều người cùng gu đã đến đây";
+          labelColor = "#26e615ff";
         } else {
           labelText = "👤 " + loc.common_users + " người cùng sở thích với bạn đã đến đây";
+          labelColor = "#3498db";
         }
 
         var div = document.createElement("div");
@@ -219,7 +229,6 @@ function toggleAI() {
   var content = document.getElementById("ai-content");
   var arrow = document.getElementById("ai-arrow");
 
-  // Toggle class 'expanded' để mở/đóng
   if (content.classList.contains("expanded")) {
     content.classList.remove("expanded");
     arrow.style.transform = "rotate(-90deg)"; // Xoay mũi tên ngang
@@ -248,31 +257,33 @@ function toggleSidebar() {
     btn.style.left = "350px";
   }
 
-  setTimeout(function () {
-    map.invalidateSize();
-  }, 400);
+  setTimeout(() => map.invalidateSize(), 400); // Cập nhật lại kích thước bản đồ sau khi ẩn/hiện sidebar
 }
 
 // ==========================================
 // 3. TÍNH NĂNG KÉO THẢ & CUỘN NGANG (Desktop + Mobile + Touchpad)
 // ==========================================
 const slider = document.querySelector(".filter-container");
-let isDown = false;
-let startX;
-let scrollLeft;
-
 if (slider) {
-  // 1. FIX: Wheel + Touchpad gesture (2-ngón trượt)
-  slider.addEventListener("wheel", (e) => {
-    if (slider.scrollWidth <= slider.clientWidth) return;
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+  // Wheel + Touchpad (ngăn scroll trang)
+  slider.addEventListener(
+    "wheel",
+    (e) => {
+      if (slider.scrollWidth <= slider.clientWidth) return;
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
 
-    e.preventDefault();
-    const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
-    slider.scrollLeft += delta * 1.5; // Điều chỉnh tốc độ
-  });
+      e.preventDefault();
+      const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
+      slider.scrollLeft += delta * 1.5;
+    },
+    { passive: false }
+  );
 
-  // 2. Kéo thả bằng chuột (desktop)
+  // Kéo thả bằng chuột
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
   slider.addEventListener("mousedown", (e) => {
     isDown = true;
     slider.classList.add("active");
@@ -298,7 +309,7 @@ if (slider) {
     slider.scrollLeft = scrollLeft - walk;
   });
 
-  // 3. Touch cho mobile/tablet
+  // Touch cho mobile/tablet
   slider.addEventListener("touchstart", (e) => {
     isDown = true;
     startX = e.touches[0].pageX - slider.offsetLeft;
@@ -314,91 +325,6 @@ if (slider) {
     isDown = false;
   });
 }
-
-/* Tắt tính năng lấy toạ độ (mục 4 và 5)
-// ==========================================
-// 4. CÔNG CỤ LẤY TỌA ĐỘ (DEV TOOL)
-// ==========================================
-var popup = L.popup();
-
-function onMapClick(e) {
-  var lat = e.latlng.lat.toFixed(5); // Lấy 5 số thập phân
-  var lng = e.latlng.lng.toFixed(5);
-
-  var copyText = `'lat': ${lat}, 'lng': ${lng}`;
-
-  popup
-    .setLatLng(e.latlng)
-    .setContent(
-      `
-           <div style="text-align:center">
-                <b>Tọa độ vị trí này:</b><br>
-                <code style="background:#eee; padding:2px 5px; border-radius:3px; font-size:12px">${copyText}</code><br>
-                <button onclick="navigator.clipboard.writeText(&quot;${copyText}&quot;)" style="margin-top:5px; cursor:pointer; border:1px solid #ccc; background:#fff; padding:2px 8px; border-radius:4px;">
-                    📋 Copy ngay
-                </button>
-            </div>
-        `
-    )
-    .openOn(map);
-
-  console.log(`Bạn vừa click tại: ${lat}, ${lng}`);
-}
-map.on("click", onMapClick);
-
-// ==========================================
-// 5. TÍNH NĂNG TÌM KIẾM TỌA ĐỘ (ĐÃ NÂNG CẤP)
-// ==========================================
-function searchCoordinate() {
-  var input = document.getElementById("coordInput").value.trim();
-
-  // 1. Làm sạch chuỗi nhập vào
-  // Cho phép nhập: "16.123, 107.123" hoặc "['lat': 16.123, 'lng': 107.123]" đều được
-  input = input.replace(/[\[\]'":a-zA-Z]/g, "");
-
-  var parts = input.split(/[ ,]+/);
-  parts = parts.filter((item) => item !== "");
-
-  if (parts.length >= 2) {
-    var lat = parseFloat(parts[0]);
-    var lng = parseFloat(parts[1]);
-
-    if (!isNaN(lat) && !isNaN(lng)) {
-      // Định dạng số liệu đẹp (5 số thập phân)
-      var latFixed = lat.toFixed(5);
-      var lngFixed = lng.toFixed(5);
-
-      // Chuẩn định dạng copy: 'lat': 16.xxxxx, 'lng': 107.xxxxx
-      var copyText = `'lat': ${latFixed}, 'lng': ${lngFixed}`;
-
-      // Bay đến vị trí
-      map.flyTo([lat, lng], 18);
-
-      // Tạo marker + Popup có nút Copy
-      L.marker([lat, lng])
-        .addTo(map)
-        .bindPopup(
-          `
-                    <div style="text-align:center; min-width: 200px">
-                        <b style="color:#2c3e50">📍 Vị trí tìm kiếm</b><br>
-                        <div style="background:#f8f9fa; border:1px solid #eee; padding:5px; margin:5px 0; border-radius:4px; font-family:monospace; color:#c0392b">
-                            ${copyText}
-                        </div>
-                        <button onclick="navigator.clipboard.writeText(&quot;${copyText}&quot;)" style="cursor:pointer; border:1px solid #2980b9; background:#3498db; color:white; padding:4px 12px; border-radius:4px; font-weight:bold; width:100%">
-                            📋 Sao chép
-                        </button>
-                    </div>
-                `
-        )
-        .openPopup();
-    } else {
-      alert("❌ Tọa độ không hợp lệ!");
-    }
-  } else {
-    alert("⚠️ Vui lòng nhập đúng định dạng: Vĩ độ, Kinh độ");
-  }
-}
-*/
 
 // ==========================================
 // THE END. KHỞI CHẠY ỨNG DỤNG
