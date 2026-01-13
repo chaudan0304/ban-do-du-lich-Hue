@@ -1,48 +1,90 @@
-// ================================================================
-// FILE: main.js
-// Mô tả: Xử lý Map, Auth (Đăng nhập/Đăng ký) và Logic Gợi ý AI
-// ================================================================
-
 // BIẾN TOÀN CỤC
+let cachedAllLocations = null;
 var map;
 var markerLayer;
 var markersMap = {};
-var currentUser = null; // Lưu tên user đang đăng nhập
+var currentUser = null;
+var userRole = "user";
+var userLikedSet = new Set();
+var currentOpenLoc = null;
 
 // ================================================================
-// 1. KHỞI TẠO BẢN ĐỒ & SỰ KIỆN LOAD TRANG
+// 0. HÀM GỌI API CHUNG VỚI LOG VÀ XỬ LÝ LỖI
 // ================================================================
+async function apiFetch(url, options = {}) {
+  try {
+    console.log(`[API CALL] ${url}`);
+    const response = await fetch(url, options);
 
+    // Nếu có lỗi từ Server (400, 401, 403, 500...)
+    if (!response.ok) {
+      let errorMessage = `Lỗi ${response.status}`;
+
+      // 1. Cố gắng đọc nội dung lỗi dưới dạng JSON (để lấy message từ Python)
+      try {
+        const errorData = await response.json();
+        // Backend trả về: {"error": "Tên tài khoản đã tồn tại!"}
+        if (errorData && errorData.error) {
+          errorMessage = errorData.error;
+        }
+      } catch (e) {
+        // Nếu không phải JSON, đọc dưới dạng text thường
+        const text = await response.text();
+        if (text) errorMessage = text;
+      }
+
+      // Ném lỗi ra ngoài với nội dung sạch sẽ (đã decode unicode)
+      throw new Error(errorMessage);
+    }
+
+    // Nếu thành công
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error(`[API FAIL] ${url}:`, err);
+
+    throw err;
+  }
+}
+
+// ================================================================
+// 1. KHỞI TẠO BẢN ĐỒ
+// ================================================================
+// Khởi tạo khi DOM sẵn sàng
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
-  checkLoginStatus(); // Kiểm tra xem đã đăng nhập chưa
-  loadLocations("All"); // Tải dữ liệu mặc định
+  checkLoginStatus();
+  loadLocations("All");
 });
-
+// Khởi tạo bản đồ Leaflet
 function initMap() {
   map = L.map("map", { zoomControl: false }).setView([16.4637, 107.5909], 14);
   L.control.zoom({ position: "topright" }).addTo(map);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap contributors",
   }).addTo(map);
-
   markerLayer = L.layerGroup().addTo(map);
 }
 
 // ================================================================
-// 2. AUTHENTICATION (ĐĂNG NHẬP / ĐĂNG KÝ / ĐĂNG XUẤT)
+// 2. AUTHENTICATION
 // ================================================================
-
-// --- Kiểm tra trạng thái đăng nhập ---
+// Kiểm tra trạng thái đăng nhập
 function checkLoginStatus() {
-  fetch("/api/current_user")
-    .then((r) => r.json())
+  apiFetch("/api/current_user")
     .then((data) => {
-      if (data.is_logged_in) {
+      if (data && data.is_logged_in) {
         currentUser = data.username;
+        console.log("Đã đăng nhập với user:", currentUser);
+
         showLoggedView(data.username);
-        // Tự động phân tích hồ sơ của user này
         analyzeUser(true);
+        // Nếu panel chi tiết đang mở, cập nhật lại nội dung
+        const detailPanel = document.getElementById("detail-panel");
+        if (detailPanel && detailPanel.classList.contains("active") && currentOpenLoc) {
+          // Gọi lại showDetail để nó cập nhật giao diện theo user mới
+          showDetail(currentOpenLoc);
+        }
       } else {
         currentUser = null;
         showGuestView();
@@ -51,37 +93,93 @@ function checkLoginStatus() {
     .catch((err) => console.error("Lỗi kiểm tra Auth:", err));
 }
 
-// --- Xử lý Giao diện (UI) ---
+// Hiển thị giao diện khi đã đăng nhập
 function showLoggedView(username) {
-  document.getElementById("guest-view").style.display = "none";
-  document.getElementById("logged-view").style.display = "block";
-  document.getElementById("displayUsername").innerText = username;
+  // 1. Ẩn các thành phần của khách
+  const guestView = document.getElementById("guest-view");
+  const searchBox = document.getElementById("guest-search-box");
+
+  if (guestView) guestView.style.display = "none";
+  if (searchBox) searchBox.style.display = "none"; //
+
+  // 2. Hiện giao diện User
+  const loggedView = document.getElementById("logged-view");
+  if (loggedView) loggedView.style.display = "block";
+
+  // 3. Xử lý Header (Ẩn nút login, hiện info user)
+  const btnLogin = document.getElementById("header-login-btn");
+  if (btnLogin) btnLogin.style.display = "none";
+
+  const userInfo = document.getElementById("header-user-info");
+  if (userInfo) {
+    userInfo.style.display = "flex";
+    const nameSpan = document.getElementById("header-username");
+    if (nameSpan) nameSpan.innerText = username;
+
+    // Xử lý nút Admin
+    const adminBtn = document.getElementById("btn-admin-panel");
+    if (adminBtn) {
+      if (username === "admin" || (typeof userRole !== "undefined" && userRole === "admin")) {
+        adminBtn.style.display = "block";
+      } else {
+        adminBtn.style.display = "none";
+      }
+    }
+  }
 }
 
 function showGuestView() {
-  document.getElementById("guest-view").style.display = "block";
-  document.getElementById("logged-view").style.display = "none";
+  // 1. Header (Hiện nút login)
+  const btnLogin = document.getElementById("header-login-btn");
+  const userInfo = document.getElementById("header-user-info");
 
-  // Xóa dữ liệu cũ
-  document.getElementById("recommendation-area").innerHTML = `
+  if (btnLogin) btnLogin.style.display = "flex";
+  if (userInfo) userInfo.style.display = "none";
+
+  // 2. Sidebar (Ẩn giao diện user, hiện giao diện khách)
+  const loggedView = document.getElementById("logged-view");
+  const guestView = document.getElementById("guest-view");
+  const searchBox = document.getElementById("guest-search-box"); // [MỚI]
+
+  if (loggedView) loggedView.style.display = "none";
+  if (guestView) guestView.style.display = "block";
+
+  // [QUAN TRỌNG] Hiện lại ô tìm kiếm, dùng 'flex' để không bị vỡ giao diện
+  if (searchBox) searchBox.style.display = "flex";
+
+  // Reset kết quả
+  const recArea = document.getElementById("recommendation-area");
+  if (recArea) {
+    recArea.innerHTML = `
         <div class="empty-state">
             <img src="https://cdn-icons-png.flaticon.com/512/1086/1086933.png" alt="AI">
             <h3>Sẵn sàng phân tích</h3>
-            <p>Đăng nhập hoặc nhập tên User ảo để xem gợi ý.</p>
+            <p>Nhập tên User hoặc Đăng nhập để xem gợi ý.</p>
         </div>`;
-  document.getElementById("user-history").style.display = "none";
+  }
+  const histDiv = document.getElementById("user-history");
+  if (histDiv) histDiv.style.display = "none";
 }
 
-// --- Modal Logic ---
+// -----MODAL AUTH-----
+// Mở modal
 function openAuthModal() {
   document.getElementById("authModal").classList.add("active");
+  // Xóa thông báo lỗi cũ
+  document.getElementById("loginMsg").innerText = "";
+  document.getElementById("regMsg").innerText = "";
+  // Xóa dữ liệu cũ
+  document.getElementById("loginUser").value = "";
+  document.getElementById("loginPass").value = "";
+  document.getElementById("regUser").value = "";
+  document.getElementById("regPass").value = "";
 }
+// Đóng modal
 function closeAuthModal() {
   document.getElementById("authModal").classList.remove("active");
 }
-
+// Chuyển tab trong modal
 function switchTab(tab) {
-  // Reset active buttons
   document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
   document.querySelectorAll(".auth-form").forEach((f) => (f.style.display = "none"));
 
@@ -93,10 +191,9 @@ function switchTab(tab) {
     document.getElementById("registerForm").style.display = "block";
   }
 }
-
-// --- API Calls ---
+// Xử lý đăng nhập
 function handleLogin() {
-  const u = document.getElementById("loginUser").value;
+  const u = document.getElementById("loginUser").value.trim();
   const p = document.getElementById("loginPass").value;
   const msg = document.getElementById("loginMsg");
 
@@ -106,161 +203,207 @@ function handleLogin() {
   }
   msg.innerText = "Đang xử lý...";
 
-  fetch("/api/login", {
+  apiFetch("/api/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: u, password: p }),
   })
-    .then((r) => r.json().then((data) => ({ status: r.status, body: data })))
     .then((res) => {
-      if (res.status === 200) {
+      if (res && res.message) {
+        // Lưu role
+        userRole = res.role || "user";
         closeAuthModal();
-        checkLoginStatus(); // Refresh giao diện
+        checkLoginStatus();
       } else {
-        msg.innerText = res.body.error || "Lỗi đăng nhập";
+        msg.innerText = res?.error || "Lỗi đăng nhập";
       }
+    })
+    .catch((err) => {
+      msg.innerText = err.message;
+      msg.style.color = "red";
+      console.error("Login error logic:", err);
     });
 }
 
+// Xử lý đăng ký
 function handleRegister() {
-  const u = document.getElementById("regUser").value;
+  // Lấy dữ liệu
+  const u = document.getElementById("regUser").value.trim();
   const p = document.getElementById("regPass").value;
   const msg = document.getElementById("regMsg");
 
+  // Kiểm tra dữ liệu
   if (!u || !p) {
     msg.innerText = "Vui lòng nhập đủ thông tin";
+    msg.style.color = "red";
     return;
   }
-  msg.innerText = "Đang đăng ký...";
 
-  fetch("/api/register", {
+  // Gửi yêu cầu đăng ký
+  msg.innerText = "Đang đăng ký...";
+  msg.style.color = "#6b7280";
+
+  // Gọi API
+  apiFetch("/api/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: u, password: p }),
   })
-    .then((r) => r.json().then((data) => ({ status: r.status, body: data })))
     .then((res) => {
-      if (res.status === 200) {
-        alert("✅ Đăng ký thành công! Bạn có thể đăng nhập ngay.");
-        switchTab("login");
-      } else {
-        msg.innerText = res.body.error || "Tên tài khoản đã tồn tại";
+      if (!res) {
+        msg.innerText = "Lỗi đăng ký";
+        msg.style.color = "red";
+        return;
       }
+
+      if (res.success === true) {
+        showNotification({
+          type: "success",
+          title: "Đăng ký thành công!",
+          message: `Tài khoản <b>${u}</b> đã được tạo. Bạn có thể đăng nhập ngay bây giờ.`,
+          btnText: "Đăng nhập ngay",
+          onConfirm: () => {
+            switchTab("login");
+            document.getElementById("loginUser").value = u;
+            document.getElementById("loginPass").value = "";
+            document.getElementById("loginPass").focus();
+          },
+        });
+        msg.innerText = "";
+      } else {
+        msg.innerText = "Đăng ký thất bại (Tên tài khoản có thể đã tồn tại)";
+        msg.style.color = "red";
+      }
+    })
+    .catch((err) => {
+      msg.innerText = err.message;
+      msg.style.color = "red";
+      console.error("Register error logic:", err);
     });
 }
-
+// Xử lý đăng xuất
 function handleLogout() {
-  fetch("/api/logout", { method: "POST" }).then(() => {
-    checkLoginStatus(); // Quay về giao diện khách
+  apiFetch("/api/logout", { method: "POST" }).then(() => {
+    checkLoginStatus();
   });
 }
 
 // ================================================================
-// 3. LOGIC CHÍNH: PHÂN TÍCH USER (PROFILE + RECOMMENDATION)
+// 3. RECOMMENDATION & HISTORY
 // ================================================================
-
+// Hàm debounce để giảm tần suất gọi hàm khi gõ input
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+// Lắng nghe sự kiện gõ phím trong ô tìm kiếm User
+document.getElementById("usernameInput").addEventListener(
+  "input",
+  debounce(() => {
+    const val = document.getElementById("usernameInput").value.trim();
+    if (val.length > 2) analyzeUser(false);
+  }, 800)
+);
+// Phân tích User (đã đăng nhập hoặc nhập tên)
 function analyzeUser(isLoggedInUser = false) {
-  // Nếu bấm nút "Phân tích của tôi" -> Lấy currentUser
-  // Nếu bấm nút ở Input khách -> Lấy value input
-  let targetUser = isLoggedInUser ? currentUser : document.getElementById("usernameInput").value.trim();
-
+  const targetUser = isLoggedInUser ? currentUser : document.getElementById("usernameInput").value.trim();
   if (!targetUser) return alert("Vui lòng nhập tên User!");
 
-  // --- A. Tải Lịch sử (User History) ---
-  fetch(`/api/history/${targetUser}`)
-    .then((r) => r.json())
+  // History
+  apiFetch(`/api/history/${targetUser}`)
     .then((data) => {
-      const histDiv = document.getElementById("user-history");
-      const histList = document.getElementById("history-list");
-
-      // Chỉ hiện lịch sử nếu có dữ liệu
-      if (data.length > 0) {
+      userLikedSet.clear();
+      if (data && data.length > 0) {
+        data.forEach((item) => userLikedSet.add(item.name));
+        const histDiv = document.getElementById("user-history");
+        const histList = document.getElementById("history-list");
         histDiv.style.display = "block";
         histList.innerHTML = data
           .map(
             (place) => `
-                    <div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
-                        <img src="${place.image}" onerror="this.src='/static/images/no-image.png'">
-                        ${place.name}
-                    </div>
-                `
+            <div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
+              <img src="${place.image}" onerror="this.src='/static/images/no-image.png'">
+              ${place.name}
+            </div>
+          `
           )
           .join("");
       } else {
-        histDiv.style.display = "none";
+        document.getElementById("user-history").style.display = "none";
       }
-    });
+    })
+    .catch((err) => console.error("History error:", err));
 
-  // --- B. Tải Gợi ý (Recommendations) ---
   getRecommendations(targetUser);
 }
-
+// Lấy gợi ý cho User
 function getRecommendations(user) {
-  var recArea = document.getElementById("recommendation-area");
-  // Loading State
+  const recArea = document.getElementById("recommendation-area");
   recArea.innerHTML = `
-        <div style="text-align:center; padding:40px; color:#6b7280;">
-            <i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>
-            Đang phân tích đồ thị tri thức...
-        </div>`;
+    <div style="text-align:center; padding:60px 20px; color:#6b7280;">
+      <i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>
+      Đang phân tích sở thích của <strong>${user}</strong>...
+    </div>`;
 
-  fetch(`/api/recommend/${user}`)
-    .then((res) => res.json())
+  apiFetch(`/api/recommend/${user}`)
     .then((data) => {
-      recArea.innerHTML = ""; // Xóa loading
-
-      if (data.length === 0) {
+      console.log("Recommendation data:", data);
+      recArea.innerHTML = "";
+      if (!data || data.length === 0) {
         recArea.innerHTML = `
-                    <div class="empty-state">
-                        <p>❌ Không tìm thấy dữ liệu gợi ý.</p>
-                    </div>`;
+          <div class="empty-state">
+            <p>Chưa có gợi ý nào cho ${user}. Hãy thích thêm địa điểm!</p>
+          </div>`;
         return;
       }
 
-      // Render Thẻ
       data.forEach((loc) => {
-        // Logic Badge
         let badgeHTML = "";
         if (!loc.common_users || loc.common_users === 0) {
           let score = loc.pr ? loc.pr.toFixed(2) : "N/A";
           badgeHTML = `<div class="algo-badge badge-pr"><i class="fas fa-chart-line"></i> PageRank: ${score}</div>`;
         } else {
-          badgeHTML = `<div class="algo-badge badge-collab"><i class="fas fa-users"></i> ${loc.common_users} người cùng gu</div>`;
+          badgeHTML = `<div class="algo-badge badge-collab"><i class="fas fa-users"></i> ${loc.common_users} người cùng sở thích</div>`;
         }
 
-        // Thẻ Card Ngang
         const card = document.createElement("div");
         card.className = "ai-card";
         card.innerHTML = `
-                    <div class="card-thumb">${createPlaceImage(loc.image)}</div>
-                    <div class="card-content">
-                        <div class="card-title">${loc.name}</div>
-                        <div class="card-desc">${loc.description || "Đang cập nhật..."}</div>
-                        ${badgeHTML}
-                    </div>
-                `;
+          <div class="card-thumb">${createPlaceImage(loc.image)}</div>
+          <div class="card-content">
+            <div class="card-title">${loc.name}</div>
+            <div class="card-desc">${loc.description || "Đang cập nhật..."}</div>
+            ${badgeHTML}
+          </div>
+        `;
         card.onclick = () => showDetail(loc);
         recArea.appendChild(card);
       });
     })
     .catch((err) => {
-      console.error(err);
-      recArea.innerHTML = `<div style="text-align:center; color:red; padding:20px;">Lỗi kết nối Server!</div>`;
+      console.error("Recommend error:", err);
+      recArea.innerHTML = `<div style="text-align:center; color:red; padding:20px;">Lỗi tải gợi ý: ${err.message}</div>`;
     });
 }
 
 // ================================================================
-// 4. HELPER & DETAIL VIEW
+// 4. HELPER & DETAIL
 // ================================================================
-
+// Tạo thẻ img với xử lý lỗi ảnh
 function createPlaceImage(src) {
   return `<img src="${src}" onerror="this.src='/static/images/no-image.png'">`;
 }
-
+// Lấy icon theo category
 function getIconByCategory(category) {
   const iconMap = {
     "Di tích": { class: "pin-ditich", symbol: "🏛️" },
     "Tâm linh": { class: "pin-tamlinh", symbol: "🛕" },
+    "Lăng tẩm": { class: "pin-langtam", symbol: "🏯" },
+    "Bãi biển": { class: "pin-bien", symbol: "🏖️" },
+    "Tham quan": { class: "pin-thamquan", symbol: "🏞️" },
     "Ẩm thực": { class: "pin-amthuc", symbol: "🍜" },
     "Thiên nhiên": { class: "pin-thiennhien", symbol: "🌳" },
   };
@@ -273,66 +416,103 @@ function getIconByCategory(category) {
     popupAnchor: [0, -42],
   });
 }
-
+// Di chuyển bản đồ đến vị trí và mở popup
 function flyToLocation(lat, lng, name) {
-  map.flyTo([lat, lng], 16, { duration: 1.2 });
-  if (markersMap[name]) setTimeout(() => markersMap[name].openPopup(), 1200);
+  map.flyTo([lat, lng], 16, { duration: 1 });
+  if (markersMap[name]) {
+    map.once("moveend", () => markersMap[name].openPopup());
+  }
 }
-
-// Hàm mở chi tiết từ dữ liệu đầy đủ
+// Hiển thị chi tiết địa điểm
 function showDetail(loc) {
-  flyToLocation(loc.lat, loc.lng, loc.name);
+  console.log("Đang mở chi tiết địa điểm:", loc.name); // Log kiểm tra
+  currentOpenLoc = loc; // [QUAN TRỌNG] Lưu lại để dùng sau khi login
 
+  flyToLocation(loc.lat, loc.lng, loc.name);
   const panel = document.getElementById("detail-panel");
   const content = document.getElementById("detail-content");
-  const googleLink = `https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`;
 
+  const googleLink = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
+
+  // Thẻ badge thuật toán
   let badgeInfo = "";
   if (loc.common_users !== undefined) {
-    if (!loc.common_users) badgeInfo = `<span class="algo-badge badge-pr">🏆 Địa điểm nổi bật (PageRank Top)</span>`;
-    else badgeInfo = `<span class="algo-badge badge-collab">👥 ${loc.common_users} người cùng sở thích</span>`;
+    badgeInfo =
+      loc.common_users === 0
+        ? `<span class="algo-badge badge-pr">🏆 Địa điểm nổi bật (PageRank Top)</span>`
+        : `<span class="algo-badge badge-collab">👥 ${loc.common_users} người cùng sở thích</span>`;
   }
+
+  // Nút thích địa điểm
+  let likeButton = currentUser
+    ? `<button class="${userLikedSet.has(loc.name) ? "btn-action btn-like liked" : "btn-action btn-like"}"
+               onclick="handleLike(this, '${loc.name}')">
+        <i class="${userLikedSet.has(loc.name) ? "fas" : "far"} fa-heart"></i> 
+        ${userLikedSet.has(loc.name) ? "Đã thích" : "Yêu thích"}
+      </button>`
+    : `<button class="btn-action btn-like" onclick="openAuthModal()">
+        <i class="fas fa-lock"></i> Đăng nhập để thích
+      </button>`;
 
   content.innerHTML = `
     <img src="${loc.image}" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
     <div class="detail-body">
-        <div style="margin-bottom:10px;">${badgeInfo}</div>
-        <h1 class="detail-title">${loc.name}</h1>
-        <div class="detail-meta">
-            <span>⭐ ${loc.rating || 5}/5</span> • <span>${loc.category || "Địa điểm"}</span>
-        </div>
-        <p class="detail-desc">${loc.description || "Chưa có mô tả."}</p>
-        
-        <div class="detail-actions">
-            <button onclick="handleLike('${loc.name}')" class="btn-action btn-like">
-                <i class="fas fa-heart"></i> Yêu thích
-            </button>
-            
-            <a href="${googleLink}" target="_blank" class="btn-action btn-maps">
-                <i class="fas fa-directions"></i> Chỉ đường
-            </a>
-        </div>
+      <div style="margin-bottom:10px;">${badgeInfo}</div>
+      <h1 class="detail-title">${loc.name}</h1>
+      <div class="detail-meta">
+        <span>⭐ ${loc.rating || 5}/5</span> • <span>${loc.category || "Địa điểm"}</span>
+      </div>
+      <p class="detail-desc">${loc.description || "Chưa có mô tả."}</p>
+      <div class="detail-actions">
+        ${likeButton}
+        <a href="${googleLink}" target="_blank" class="btn-action btn-maps">
+          <i class="fas fa-directions"></i> Chỉ đường
+        </a>
+      </div>
     </div>
-`;
+  `;
   panel.classList.add("active");
 }
+// Xử lý thích địa điểm
+function handleLike(btnElement, locName) {
+  const icon = btnElement.querySelector("i");
+  icon.className = "fas fa-spinner fa-spin";
 
-// Helper: Mở chi tiết từ lịch sử (dữ liệu ít hơn)
+  apiFetch("/api/like", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ location_name: locName }),
+  })
+    .then((data) => {
+      if (data && data.liked) {
+        btnElement.classList.add("liked");
+        btnElement.innerHTML = `<i class="fas fa-heart"></i> Đã thích`;
+      } else {
+        btnElement.classList.remove("liked");
+        btnElement.innerHTML = `<i class="far fa-heart"></i> Yêu thích`;
+      }
+      analyzeUser(true);
+    })
+    .catch((err) => {
+      console.error("Like error:", err);
+      alert("Lỗi khi thích địa điểm!");
+      icon.className = userLikedSet.has(locName) ? "fas fa-heart" : "far fa-heart";
+    });
+}
+// Hiển thị chi tiết từ dữ liệu thô (không có marker)
 function showDetailFromData(name, lat, lng, image) {
-  // Tạo object giả lập để dùng chung hàm showDetail
-  // Vì API history trả về ít trường hơn
   const fakeLoc = {
-    name: name,
-    lat: lat,
-    lng: lng,
-    image: image,
+    name,
+    lat,
+    lng,
+    image,
     description: "Bạn đã thích địa điểm này.",
     category: "Đã ghé thăm",
     rating: 5,
   };
   showDetail(fakeLoc);
 }
-
+// Đóng panel chi tiết
 function closeDetail() {
   document.getElementById("detail-panel").classList.remove("active");
 }
@@ -340,72 +520,252 @@ function closeDetail() {
 // ================================================================
 // 5. DATA EXPLORER
 // ================================================================
-
-function loadLocations(category = "All") {
+// Tải và hiển thị địa điểm theo category
+async function loadLocations(category = "All") {
   markerLayer.clearLayers();
   markersMap = {};
+
   const list = document.getElementById("locationList");
-  list.innerHTML = `<div style="text-align:center; font-size:12px; color:#999; grid-column:1/-1;">Đang tải...</div>`;
+  list.innerHTML = `
+    <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #6b7280;">
+      <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+      <p style="margin-top: 12px;">Đang tải địa điểm${category !== "All" ? ` (${category})` : ""}...</p>
+    </div>`;
 
-  let url = "/api/locations";
-  if (category !== "All") url += `?category=${encodeURIComponent(category)}`;
+  try {
+    let data;
+    if (category === "All" && cachedAllLocations) {
+      data = cachedAllLocations;
+      console.log("[Cache Hit] Locations");
+    } else {
+      let url = "/api/locations";
+      if (category !== "All") url += `?category=${encodeURIComponent(category)}`;
+      data = await apiFetch(url);
+      if (!data) throw new Error("Không nhận được dữ liệu");
+      if (category === "All") cachedAllLocations = data;
+    }
 
-  fetch(url)
-    .then((r) => r.json())
-    .then((data) => {
-      list.innerHTML = "";
-      data.forEach((loc) => {
-        // Mini item
-        const div = document.createElement("div");
-        div.className = "mini-item";
-        div.innerHTML = `
-                <img src="${loc.image}" class="mini-img" onerror="this.src='/static/images/no-image.png'">
-                <div class="mini-name">${loc.name}</div>
-            `;
-        div.onclick = () => showDetail(loc);
-        list.appendChild(div);
+    list.innerHTML = "";
+    if (!Array.isArray(data) || data.length === 0) {
+      list.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align:center; padding:40px; color:#9ca3af;">
+          <i class="fas fa-map-marker-alt" style="font-size:48px; opacity:0.5;"></i><br><br>
+          Không tìm thấy địa điểm nào.
+        </div>`;
+      return;
+    }
 
-        // Marker
-        const m = L.marker([loc.lat, loc.lng], { icon: getIconByCategory(loc.category) });
-        m.bindPopup(`<div style="text-align:center"><b>${loc.name}</b><br>${loc.category}</div>`);
-        m.on("click", () => showDetail(loc));
-        m.addTo(markerLayer);
-        markersMap[loc.name] = m;
-      });
+    const latLngs = [];
+    data.forEach((loc) => {
+      const div = document.createElement("div");
+      div.className = "mini-item";
+      div.innerHTML = `
+        <img src="${loc.image}" class="mini-img" alt="${loc.name}" onerror="this.src='/static/images/no-image.png'">
+        <div style="flex:1; overflow:hidden;">
+          <div class="mini-name">${loc.name}</div>
+          <div style="font-size:11px; color:#f59e0b; margin-top:2px;">⭐ ${
+            loc.rating ? loc.rating.toFixed(1) : "5.0"
+          }</div>
+        </div>
+      `;
+      div.onclick = () => showDetail(loc);
+      list.appendChild(div);
+
+      const marker = L.marker([loc.lat, loc.lng], { icon: getIconByCategory(loc.category) });
+
+      const popupContent = document.createElement("div");
+      popupContent.innerHTML = `
+        <img src="${loc.image}" class="popup-hero" alt="${loc.name}" onerror="this.src='/static/images/no-image.png'">
+        <div class="popup-body">
+          <div class="popup-title">${loc.name}</div>
+          <div class="popup-cat">${loc.category || "Địa điểm"}</div>
+          <button class="view-detail-btn">Xem chi tiết</button>
+        </div>
+      `;
+      popupContent.querySelector(".view-detail-btn").onclick = () => showDetail(loc);
+
+      marker.bindPopup(popupContent);
+      marker.on("click", () => showDetail(loc));
+      marker.addTo(markerLayer);
+      markersMap[loc.name] = marker;
+      latLngs.push([loc.lat, loc.lng]);
     });
-}
 
+    if (latLngs.length > 0) {
+      map.fitBounds(latLngs, { padding: [60, 60], maxZoom: 15 });
+    }
+
+    setTimeout(() => map.invalidateSize(), 300);
+  } catch (err) {
+    console.error("Load locations error:", err);
+    list.innerHTML = `
+      <div style="color:#ef4444; text-align:center; grid-column: 1 / -1; padding:30px;">
+        <i class="fas fa-exclamation-triangle" style="font-size:36px;"></i><br><br>
+        Lỗi: ${err.message}
+      </div>`;
+  }
+}
+// Lọc dữ liệu theo category
 function filterData(cat, btn) {
   document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
   btn.classList.add("active");
   loadLocations(cat);
 }
 
-// [File: main.js] - Thêm vào cuối file
+// ================================================================
+// 6. ADMIN PANEL
+// ================================================================
+function openAdminModal() {
+  document.getElementById("adminModal").classList.add("active");
+  loadAdminUsers();
+}
+// Đóng modal
+function closeAdminModal() {
+  document.getElementById("adminModal").classList.remove("active");
+}
+// Tải danh sách user
+function loadAdminUsers() {
+  const tbody = document.getElementById("adminUserList");
+  tbody.innerHTML = '<tr><td style="padding:15px; text-align:center;">Đang tải...</td></tr>';
 
-function handleLike(locationName) {
-  // 1. Kiểm tra nếu chưa đăng nhập thì báo lỗi
-  if (!currentUser) {
-    alert("⚠️ Bạn cần đăng nhập để lưu sở thích!");
-    openAuthModal(); // Mở modal đăng nhập
-    return;
+  apiFetch("/api/admin/users").then((data) => {
+    tbody.innerHTML = "";
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td style="padding:15px; text-align:center;">Chưa có user nào.</td></tr>';
+      return;
+    }
+
+    data.forEach((u) => {
+      const tr = document.createElement("tr");
+      tr.style.borderBottom = "1px solid #eee";
+      tr.innerHTML = `
+                <td style="padding: 10px; font-weight: 600;">${u.name}</td>
+                <td style="padding: 10px; color: #666; font-size: 12px;">❤️ ${u.liked_count} thích</td>
+                <td style="padding: 10px; text-align: right;">
+                    <button onclick="deleteUser('${u.name}')" style="background: #fee2e2; color: #dc2626; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                </td>
+            `;
+      tbody.appendChild(tr);
+    });
+  });
+}
+// Xóa user
+function deleteUser(username) {
+  if (!confirm(`Bạn có chắc muốn xóa tài khoản "${username}" không? Hành động này không thể hoàn tác.`)) return;
+
+  apiFetch(`/api/admin/users/${username}`, { method: "DELETE" }).then((res) => {
+    if (res) {
+      showNotification({
+        type: "delete",
+        title: "Xóa tài khoản thành công",
+        message: `Tài khoản <b>${username}</b> đã được xóa.`,
+        btnText: "Đóng",
+      });
+      loadAdminUsers(); // Load lại danh sách
+    }
+  });
+}
+
+// --- HÀM HIỂN THỊ THÔNG BÁO ĐA NĂNG ---
+function showNotification({ type, title, message, btnText, onConfirm }) {
+  const modal = document.getElementById("notificationModal");
+  const icon = document.getElementById("notif-icon");
+  const titleEl = document.getElementById("notif-title");
+  const msgEl = document.getElementById("notif-msg");
+  const btn = document.getElementById("notif-btn");
+
+  // 1. Cài đặt nội dung
+  titleEl.innerText = title;
+  msgEl.innerHTML = message; // Dùng innerHTML để hỗ trợ xuống dòng <br> hoặc bôi đậm <b>
+  btn.innerText = btnText || "Đóng";
+
+  // 2. Cài đặt giao diện theo Loại (type)
+  if (type === "success") {
+    // Màu Xanh (Đăng ký thành công)
+    icon.className = "fas fa-check-circle";
+    icon.style.color = "#10b981"; // Xanh lá
+    btn.style.backgroundColor = "#2563eb"; // Xanh dương
+  } else if (type === "delete") {
+    // Màu Đỏ (Xóa thành công)
+    icon.className = "fas fa-trash-alt";
+    icon.style.color = "#ef4444"; // Đỏ
+    btn.style.backgroundColor = "#ef4444"; // Nút màu đỏ
   }
 
-  // 2. Gọi API
-  fetch("/api/like", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ location_name: locationName }),
-  })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data.message) {
-        alert("❤️ " + data.message);
-        // Tùy chọn: Tải lại phân tích ngay lập tức để thấy gợi ý thay đổi
-        analyzeUser(true);
-      } else {
-        alert("Lỗi: " + data.error);
-      }
-    })
-    .catch((err) => console.error("Lỗi Like:", err));
+  // 3. Xử lý sự kiện nút bấm
+  // Trước khi gán sự kiện mới, ta clone nút để xóa sạch các sự kiện cũ (tránh bị lặp)
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+
+  newBtn.onclick = () => {
+    modal.classList.remove("active"); // Luôn đóng modal trước
+    if (onConfirm) onConfirm(); // Chạy hàm callback nếu có
+  };
+
+  // 4. Hiện Modal
+  modal.classList.add("active");
+}
+
+// ================================================================
+// 7. TÍNH NĂNG KÉO THẢ & CUỘN NGANG (dành cho mobile + desktop + touchpad)
+// ================================================================
+const slider = document.querySelector(".filter-chips");
+let isDown = false;
+let startX;
+let scrollLeft;
+
+if (slider) {
+  // Cuộn ngang với touchpad / bánh xe chuột
+  slider.addEventListener("wheel", (e) => {
+    if (slider.scrollWidth <= slider.clientWidth) return;
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+    e.preventDefault();
+    const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
+    slider.scrollLeft += delta * 1.5; // Điều chỉnh tốc độ
+  });
+
+  // Kéo thả với chuột
+  slider.addEventListener("mousedown", (e) => {
+    isDown = true;
+    slider.classList.add("active");
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+    slider.style.cursor = "grabbing";
+  });
+  slider.addEventListener("mouseleave", () => {
+    isDown = false;
+    slider.classList.remove("active");
+    slider.style.cursor = "grab";
+  });
+  slider.addEventListener("mouseup", () => {
+    isDown = false;
+    slider.classList.remove("active");
+    slider.style.cursor = "grab";
+  });
+  slider.addEventListener("mousemove", (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 2; // Tốc độ cuộn
+    slider.scrollLeft = scrollLeft - walk;
+  });
+
+  // Kéo thả với cảm ứng (touch)
+  slider.addEventListener("touchstart", (e) => {
+    isDown = true;
+    startX = e.touches[0].pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+  slider.addEventListener("touchend", () => {
+    isDown = false;
+  });
+  slider.addEventListener("touchmove", (e) => {
+    if (!isDown) return;
+    const x = e.touches[0].pageX - slider.offsetLeft;
+    const walk = (x - startX) * 2; // Tốc độ cuộn
+    slider.scrollLeft = scrollLeft - walk;
+  });
 }

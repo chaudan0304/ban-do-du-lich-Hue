@@ -10,7 +10,8 @@ from flask_login import (
 )
 from db import run_query, close_driver, register_user, verify_user
 import atexit
-from db import add_user_like
+from db import get_all_users, delete_user_by_name
+from db import toggle_like_location
 
 app = Flask(__name__)
 app.secret_key = "khoa_luan_bi_mat_123"  # Key để mã hóa session cookie
@@ -34,7 +35,7 @@ def load_user(user_id):
 # --- ROUTE API ---
 @app.route("/api/register", methods=["POST"])
 def api_register():
-    data = request.json
+    data = request.get_json()
     username = data.get("username")
     password = data.get("password")
 
@@ -43,9 +44,9 @@ def api_register():
 
     success, message = register_user(username, password)
     if success:
-        return jsonify({"message": message}), 200
+        return jsonify({"success": True, "message": message}), 201
     else:
-        return jsonify({"error": message}), 409
+        return jsonify({"success": False, "error": message}), 400
 
 
 @app.route("/api/login", methods=["POST"])
@@ -54,12 +55,22 @@ def api_login():
     username = data.get("username")
     password = data.get("password")
 
-    user_data = verify_user(username, password)
+    user_data = verify_user(username, password)  # Hàm này đã sửa ở Bước 1
 
     if user_data:
         user = User(id=user_data["name"])
-        login_user(user)  # Tạo session
-        return jsonify({"message": "Đăng nhập thành công!", "username": username}), 200
+        login_user(user)
+        # Trả về role cho frontend biết
+        return (
+            jsonify(
+                {
+                    "message": "Đăng nhập thành công!",
+                    "username": username,
+                    "role": user_data["role"],
+                }
+            ),
+            200,
+        )
     else:
         return jsonify({"error": "Sai tài khoản hoặc mật khẩu"}), 401
 
@@ -79,22 +90,40 @@ def get_current_user():
         return jsonify({"is_logged_in": False})
 
 
+# --- 5. API ADMIN: QUẢN LÝ NGƯỜI DÙNG ---
+@app.route("/api/admin/users", methods=["GET"])
+@login_required
+def api_get_users():
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền truy cập"}), 403
+
+    users = get_all_users()
+    return jsonify(users)
+
+
+@app.route("/api/admin/users/<username>", methods=["DELETE"])
+@login_required
+def api_delete_user(username):
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền truy cập"}), 403
+
+    delete_user_by_name(username)
+    return jsonify({"message": f"Đã xóa user {username}"}), 200
+
+
 @app.route("/api/like", methods=["POST"])
-@login_required  # Chỉ user đã đăng nhập mới được like
-def api_like_location():
+@login_required  # Chỉ user đăng nhập mới được like
+def api_toggle_like():
     data = request.json
     location_name = data.get("location_name")
 
     if not location_name:
         return jsonify({"error": "Thiếu tên địa điểm"}), 400
 
-    # Gọi DB
-    success, message = add_user_like(current_user.id, location_name)
+    # current_user.id chính là username (do setup ở User class)
+    is_liked, msg = toggle_like_location(current_user.id, location_name)
 
-    if success:
-        return jsonify({"message": message}), 200
-    else:
-        return jsonify({"error": message}), 500
+    return jsonify({"liked": is_liked, "message": msg}), 200
 
 
 # --- 1. ROUTE GIAO DIỆN CHÍNH ---
@@ -147,6 +176,7 @@ def get_user_history(user_name):
 
 
 # --- 4. API: GỢI Ý THÔNG MINH (CORE AI) ---
+# Gợi ý dựa trên PageRank + Collaborative Filtering
 @app.route("/api/recommend/<user_name>", methods=["GET"])
 def recommend(user_name):
     # Chiến thuật: Tìm người tương đồng (Collaborative Filtering) + PageRank
@@ -163,7 +193,7 @@ def recommend(user_name):
            suggestion.rating AS rating,
            suggestion.lat AS lat,      
            suggestion.lng AS lng,
-           suggestion.pagerankScore AS pr,
+           suggestion.PageRankScore AS pr,
            suggestion.image AS image, 
            suggestion.category AS category,
            count(other) AS common_users
@@ -179,11 +209,11 @@ def recommend(user_name):
         fallback_query = """
         MATCH (l:Location) 
         RETURN l.name AS name, l.desc AS description, l.rating AS rating, 
-               l.lat AS lat, l.lng AS lng, l.pagerankScore as pr,
+               l.lat AS lat, l.lng AS lng, l.PageRankScore as pr,
                l.image as image,
                l.category as category,
                0 as common_users
-        ORDER BY l.pagerankScore DESC
+        ORDER BY l.PageRankScore DESC
         LIMIT 6
         """
         results = run_query(fallback_query)
