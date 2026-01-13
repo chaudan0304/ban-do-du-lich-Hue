@@ -21,12 +21,16 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "index"  # Chuyển hướng đến trang chính nếu chưa đăng nhập
 
+# Đóng driver Neo4j khi ứng dụng kết thúc
+atexit.register(close_driver)
+
 
 class User(UserMixin):
     def __init__(self, id):
         self.id = id
 
 
+# Hàm tải user từ session
 @login_manager.user_loader
 def load_user(user_id):
     return User(user_id)
@@ -49,13 +53,14 @@ def api_register():
         return jsonify({"success": False, "error": message}), 400
 
 
+# API: Đăng nhập
 @app.route("/api/login", methods=["POST"])
 def api_login():
     data = request.json
     username = data.get("username")
     password = data.get("password")
 
-    user_data = verify_user(username, password)  # Hàm này đã sửa ở Bước 1
+    user_data = verify_user(username, password)
 
     if user_data:
         user = User(id=user_data["name"])
@@ -75,6 +80,7 @@ def api_login():
         return jsonify({"error": "Sai tài khoản hoặc mật khẩu"}), 401
 
 
+# API: Đăng xuất
 @app.route("/api/logout", methods=["POST"])
 @login_required
 def api_logout():
@@ -82,6 +88,7 @@ def api_logout():
     return jsonify({"message": "Đã đăng xuất"}), 200
 
 
+# API: Lấy thông tin người dùng hiện tại
 @app.route("/api/current_user", methods=["GET"])
 def get_current_user():
     if current_user.is_authenticated:

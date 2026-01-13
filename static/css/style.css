@@ -352,35 +352,42 @@ body {
   gap: 12px;
 }
 
+/* --- CẬP NHẬT GIAO DIỆN THẺ GỢI Ý (NHỎ GỌN HƠN) --- */
+
 .ai-card {
   /* Bố cục */
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 80px;
+  /* Căn giữa theo chiều dọc */
+  gap: 10px;
+  /* Giảm khoảng cách giữa ảnh và chữ (cũ 12px) */
+  min-height: 60px;
+  /* Giảm chiều cao tối thiểu (cũ 80px) */
 
   /* Khoảng cách */
-  padding: 10px;
+  padding: 8px 10px;
+  /* Giảm padding (cũ 10px) */
 
   /* Giao diện */
   background: white;
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
+  /* Bo góc nhẹ hơn (cũ radius-lg) */
   cursor: pointer;
   transition: var(--trans-fast);
 }
 
 .ai-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border-color: #3b82f6;
 }
 
 .card-thumb {
-  width: 80px;
-  height: 60px;
+  width: 60px;
+  height: 45px;
   flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   overflow: hidden;
   background: #f3f4f6;
 }
@@ -389,6 +396,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .card-content {
@@ -397,38 +405,46 @@ body {
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
-  /* Ngăn chữ tràn ra ngoài */
 }
 
 .card-title {
-  font-size: 15px;
+  font-size: 13.5px;
+  /* Giảm cỡ chữ tiêu đề (cũ 15px) */
   font-weight: 700;
   color: var(--text-main);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  /* Kéo sát mô tả lên */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .card-desc {
-  font-size: 12px;
+  font-size: 11px;
+  /* Giảm cỡ chữ mô tả (cũ 12px) */
   color: var(--text-muted);
-  margin-bottom: 6px;
-  /* Cắt dòng văn bản (Multi-line truncation) */
+  margin-bottom: 4px;
+  line-height: 1.3;
+  /* Khoảng cách dòng khít hơn */
+
+  /* Cắt dòng văn bản: Giữ tối đa 2 dòng */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Nhãn trên thẻ (Badges) */
+/* Thu nhỏ Badge thuật toán */
 .algo-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 10px;
+  gap: 3px;
+  padding: 1px 6px;
+  /* Badge mỏng hơn */
+  border-radius: 4px;
+  /* Bo góc vuông vức hơn chút */
+  font-size: 9px;
+  /* Chữ bé lại (cũ 10px) */
   font-weight: 600;
   width: fit-content;
 }
@@ -526,6 +542,42 @@ body {
   border-top: 1px solid var(--border-light);
 }
 
+/* Style cho ô tìm kiếm nhỏ */
+.mini-search-box {
+  position: relative;
+  width: 160px;
+}
+
+.mini-search-box input {
+  width: 100%;
+  padding: 6px 30px 6px 12px;
+  /* Padding phải để chừa chỗ cho icon */
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  /* Bo tròn giống các nút filter */
+  font-size: 13px;
+  outline: none;
+  background: #f9fafb;
+  transition: var(--trans-fast);
+}
+
+.mini-search-box input:focus {
+  background: #fff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.mini-search-box i {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 12px;
+  pointer-events: none;
+  /* Để bấm xuyên qua icon vào input */
+}
+
 .filter-chips {
   display: flex;
   flex-shrink: 0;
@@ -589,6 +641,7 @@ body {
   border-radius: 4px;
   object-fit: cover;
   margin-right: 8px;
+  flex-shrink: 0;
 }
 
 .mini-name {
