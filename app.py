@@ -1,68 +1,138 @@
 # File: app.py
-from flask import request, Flask, jsonify, render_template
-from db import run_query, close_driver
+from flask import Flask, jsonify, render_template, request, redirect, url_for
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    login_user,
+    login_required,
+    logout_user,
+    current_user,
+)
+from db import run_query, close_driver, register_user, verify_user
 import atexit
+from db import get_all_users, delete_user_by_name
+from db import toggle_like_location
 
 app = Flask(__name__)
+app.secret_key = "khoa_luan_bi_mat_123"  # Key để mã hóa session cookie
 
-# Đóng kết nối database khi tắt app
-atexit.register(close_driver)
+# --- CẤU HÌNH FLASK-LOGIN ---
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "index"  # Chuyển hướng đến trang chính nếu chưa đăng nhập
 
 
-# =======================================================
-# 1. HÀM TỰ ĐỘNG NẠP GRAPH (AUTO-LOADER)
-# =======================================================
-def auto_load_graph():
-    print("🔄 [System] Đang kiểm tra trạng thái GDS (Graph Data Science)...")
-    try:
-        # Bước 1: Kiểm tra xem graph đã tồn tại chưa
-        check_query = "CALL gds.graph.exists('roadGraph') YIELD exists RETURN exists"
-        data = run_query(check_query)
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = id
 
-        if data and data[0]["exists"]:
-            print("✅ [System] Graph 'roadGraph' đã có sẵn trong RAM. Sẵn sàng!")
-            return
 
-        # Bước 2: Nếu chưa có, nạp lại (Project) từ dữ liệu ổ cứng
-        print("⚠️ [System] Graph chưa có trong RAM. Đang nạp lại từ Database...")
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
 
-        project_query = """
-        CALL gds.graph.project(
-            'roadGraph',
-            'Location',
-            {
-                NEAR: {
-                    type: 'NEAR',
-                    orientation: 'UNDIRECTED',
-                    properties: 'distance'
+
+# --- ROUTE API ---
+@app.route("/api/register", methods=["POST"])
+def api_register():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        return jsonify({"error": "Thiếu thông tin"}), 400
+
+    success, message = register_user(username, password)
+    if success:
+        return jsonify({"success": True, "message": message}), 201
+    else:
+        return jsonify({"success": False, "error": message}), 400
+
+
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    data = request.json
+    username = data.get("username")
+    password = data.get("password")
+
+    user_data = verify_user(username, password)  # Hàm này đã sửa ở Bước 1
+
+    if user_data:
+        user = User(id=user_data["name"])
+        login_user(user)
+        # Trả về role cho frontend biết
+        return (
+            jsonify(
+                {
+                    "message": "Đăng nhập thành công!",
+                    "username": username,
+                    "role": user_data["role"],
                 }
-            }
-        ) YIELD graphName, nodeCount, relationshipCount
-        """
-        result = run_query(project_query)
-
-        if result:
-            info = result[0]
-            print(
-                f"🚀 [System] Đã nạp thành công! ({info['nodeCount']} nodes, {info['relationshipCount']} edges)"
-            )
-        else:
-            print(
-                "❌ [System] Không thể nạp graph. Vui lòng kiểm tra lại quá trình thiết lập ban đầu."
-            )
-
-    except Exception as e:
-        print(f"❌ [System] Lỗi khởi tạo GDS: {e}")
+            ),
+            200,
+        )
+    else:
+        return jsonify({"error": "Sai tài khoản hoặc mật khẩu"}), 401
 
 
-# =======================================================
-# 2. CÁC API FLASK
-# =======================================================
+@app.route("/api/logout", methods=["POST"])
+@login_required
+def api_logout():
+    logout_user()
+    return jsonify({"message": "Đã đăng xuất"}), 200
+
+
+@app.route("/api/current_user", methods=["GET"])
+def get_current_user():
+    if current_user.is_authenticated:
+        return jsonify({"is_logged_in": True, "username": current_user.id})
+    else:
+        return jsonify({"is_logged_in": False})
+
+
+# --- 5. API ADMIN: QUẢN LÝ NGƯỜI DÙNG ---
+@app.route("/api/admin/users", methods=["GET"])
+@login_required
+def api_get_users():
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền truy cập"}), 403
+
+    users = get_all_users()
+    return jsonify(users)
+
+
+@app.route("/api/admin/users/<username>", methods=["DELETE"])
+@login_required
+def api_delete_user(username):
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền truy cập"}), 403
+
+    delete_user_by_name(username)
+    return jsonify({"message": f"Đã xóa user {username}"}), 200
+
+
+@app.route("/api/like", methods=["POST"])
+@login_required  # Chỉ user đăng nhập mới được like
+def api_toggle_like():
+    data = request.json
+    location_name = data.get("location_name")
+
+    if not location_name:
+        return jsonify({"error": "Thiếu tên địa điểm"}), 400
+
+    # current_user.id chính là username (do setup ở User class)
+    is_liked, msg = toggle_like_location(current_user.id, location_name)
+
+    return jsonify({"liked": is_liked, "message": msg}), 200
+
+
+# --- 1. ROUTE GIAO DIỆN CHÍNH ---
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
+# --- 2. API: LẤY DANH SÁCH ĐỊA ĐIỂM (CÓ LỌC) ---
 @app.route("/api/locations", methods=["GET"])
 def get_locations():
     category_filter = request.args.get("category")
@@ -80,13 +150,36 @@ def get_locations():
            l.image AS image, cat.name AS category
     """
 
-    data = run_query(query)
-    return jsonify(data)
+    try:
+        data = run_query(query)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
+# --- 3. API: LẤY LỊCH SỬ NGƯỜI DÙNG (MỚI) ---
+@app.route("/api/history/<user_name>", methods=["GET"])
+def get_user_history(user_name):
+    query = """
+    MATCH (u:User {name: $name})-[:LIKED]->(l:Location)
+    RETURN l.name AS name, 
+           l.image AS image, 
+           l.lat AS lat, 
+           l.lng AS lng
+    LIMIT 10
+    """
+    try:
+        results = run_query(query, {"name": user_name})
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# --- 4. API: GỢI Ý THÔNG MINH (CORE AI) ---
+# Gợi ý dựa trên PageRank + Collaborative Filtering
 @app.route("/api/recommend/<user_name>", methods=["GET"])
 def recommend(user_name):
-    # Logic gợi ý: Dựa trên người dùng có cùng sở thích (Collaborative Filtering đơn giản)
+    # Chiến thuật: Tìm người tương đồng (Collaborative Filtering) + PageRank
     cypher_query = """
     MATCH (me:User {name: $name})-[:LIKED]->(my_place:Location)
     MATCH (other:User)-[:LIKED]->(my_place)
@@ -100,87 +193,34 @@ def recommend(user_name):
            suggestion.rating AS rating,
            suggestion.lat AS lat,      
            suggestion.lng AS lng,
-           suggestion.pagerankScore AS pr,
+           suggestion.PageRankScore AS pr,
            suggestion.image AS image, 
+           suggestion.category AS category,
            count(other) AS common_users
            
     ORDER BY common_users DESC, pr DESC 
-    LIMIT 5
+    LIMIT 6
     """
 
     results = run_query(cypher_query, {"name": user_name})
 
-    # Fallback: Nếu user mới chưa có dữ liệu, gợi ý theo PageRank (độ nổi tiếng)
+    # Fallback: Nếu user mới (Cold Start), gợi ý theo PageRank thuần túy
     if not results:
         fallback_query = """
         MATCH (l:Location) 
         RETURN l.name AS name, l.desc AS description, l.rating AS rating, 
-               l.lat AS lat, l.lng AS lng, l.pagerankScore as pr,
+               l.lat AS lat, l.lng AS lng, l.PageRankScore as pr,
                l.image as image,
-               'Dia diem noi bat' as reason
-        ORDER BY l.pagerankScore DESC
-        LIMIT 3
+               l.category as category,
+               0 as common_users
+        ORDER BY l.PageRankScore DESC
+        LIMIT 6
         """
         results = run_query(fallback_query)
 
     return jsonify(results)
 
 
-@app.route("/api/route", methods=["GET"])
-def get_route():
-    start_name = request.args.get("start")
-    end_name = request.args.get("end")
-
-    if not start_name or not end_name:
-        return jsonify({"error": "Vui lòng cung cấp điểm đi và điểm đến"}), 400
-
-    # Kiểm tra xem graph đã nạp chưa (auto-loader)
-    try:
-        run_query("CALL gds.graph.exists('roadGraph')")
-    except:
-        return (
-            jsonify({"error": "Graph ảo chưa được nạp. Vui lòng restart server."}),
-            500,
-        )
-
-    query = """
-    MATCH (source:Location {name: $start}), (target:Location {name: $end})
-    
-    CALL gds.shortestPath.dijkstra.stream('roadGraph', {
-        sourceNode: source,
-        targetNode: target,
-        relationshipWeightProperty: 'distance'
-    })
-    YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
-    
-    RETURN [nodeId IN nodeIds | {
-        name: gds.util.asNode(nodeId).name,
-        lat: gds.util.asNode(nodeId).lat,
-        lng: gds.util.asNode(nodeId).lng
-    }] AS path_nodes, totalCost
-    """
-
-    try:
-        data = run_query(query, {"start": start_name, "end": end_name})
-        if not data:
-            return (
-                jsonify(
-                    {"error": "Không tìm thấy đường đi (quá xa hoặc không kết nối)"}
-                ),
-                404,
-            )
-        return jsonify(data[0])
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# =======================================================
-# 3. MAIN RUN
-# =======================================================
 if __name__ == "__main__":
-    # --- GỌI HÀM TỰ ĐỘNG NẠP ---
-    with app.app_context():
-        auto_load_graph()
-
     print("🚀 Server đang chạy tại: http://127.0.0.1:5000")
     app.run(port=5000, debug=True)
