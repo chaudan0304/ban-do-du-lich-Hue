@@ -306,6 +306,7 @@ document.getElementById("usernameInput").addEventListener(
   }, 800)
 );
 // Phân tích User (đã đăng nhập hoặc nhập tên)
+// Phân tích User (đã đăng nhập hoặc nhập tên)
 function analyzeUser(isLoggedInUser = false) {
   const targetUser = isLoggedInUser ? currentUser : document.getElementById("usernameInput").value.trim();
   if (!targetUser) return alert("Vui lòng nhập tên User!");
@@ -315,33 +316,33 @@ function analyzeUser(isLoggedInUser = false) {
     .then((data) => {
       userLikedSet.clear();
 
-      // Cập nhật lịch sử
       const histDiv = document.getElementById("user-history");
       const histList = document.getElementById("history-list");
-      const mainSearchBox = document.querySelector("search-box");
 
-      // Hiện/ẩn khu vực lịch sử
+      // [QUAN TRỌNG] Đã sửa lỗi logic cũ ở đây:
+      // Không cần gọi search-box hay mainBox nữa vì layout đã tách biệt.
+
       if (data && data.length > 0) {
-        if (mainBox) mainBox.style.display = "block";
-
         data.forEach((item) => userLikedSet.add(item.name));
-        histDiv.style.display = "block";
-        histList.innerHTML = data
-          .map(
-            (place) => `
-            <div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
-              <img src="${place.image}" onerror="this.src='/static/images/no-image.png'">
-              ${place.name}
-            </div>
-          `
-          )
-          .join("");
-      } else {
-        histDiv.style.display = "none";
 
-        if (isLoggedInUser && mainBox) {
-          mainBox.style.display = "none";
+        // Hiện nội dung lịch sử
+        if (histDiv) histDiv.style.display = "block";
+
+        // Vẽ danh sách
+        if (histList) {
+          histList.innerHTML = data
+            .map(
+              (place) => `
+              <div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
+                <img src="${place.image}" onerror="this.src='/static/images/no-image.png'">
+                ${place.name}
+              </div>`
+            )
+            .join("");
         }
+      } else {
+        // Không có dữ liệu thì ẩn div con đi
+        if (histDiv) histDiv.style.display = "none";
       }
     })
     .catch((err) => console.error("History error:", err));
@@ -425,13 +426,29 @@ function getIconByCategory(category) {
     popupAnchor: [0, -42],
   });
 }
+
 // Di chuyển bản đồ đến vị trí và mở popup
 function flyToLocation(lat, lng, name) {
-  map.flyTo([lat, lng], 16, { duration: 1 });
-  if (markersMap[name]) {
-    map.once("moveend", () => markersMap[name].openPopup());
+  // 1. Nếu đang ở Mobile (màn hình nhỏ hơn 768px),
+  if (window.innerWidth <= 768) {
+    console.log("Mobile mode: Skip map flying");
+    return;
+  }
+
+  // 2. Kiểm tra an toàn xem map có tồn tại không
+  if (!map) return;
+
+  // 3. Thực hiện bay trên Desktop
+  try {
+    map.flyTo([lat, lng], 16, { duration: 1 });
+    if (markersMap[name]) {
+      map.once("moveend", () => markersMap[name].openPopup());
+    }
+  } catch (err) {
+    console.warn("Lỗi khi di chuyển bản đồ:", err);
   }
 }
+
 // Hiển thị chi tiết địa điểm
 function showDetail(loc) {
   console.log("Đang mở chi tiết địa điểm:", loc.name); // Log kiểm tra
