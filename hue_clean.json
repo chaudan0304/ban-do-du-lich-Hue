@@ -1,0 +1,666 @@
+[
+    {
+        "id": 669249193,
+        "name": "Lăng Tự Đức",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4331813,
+        "lon": 107.5645857
+    },
+    {
+        "id": 2899189013,
+        "name": "Tử Cấm Thành",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4694914,
+        "lon": 107.577755
+    },
+    {
+        "id": 4405542490,
+        "name": "Temple of Literature",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.452965,
+        "lon": 107.538902
+    },
+    {
+        "id": 4430357690,
+        "name": "Tượng đài Quan Thế Âm Bồ Tát",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.3920792,
+        "lon": 107.5841879
+    },
+    {
+        "id": 4555464591,
+        "name": "Điềm Phùng Thį",
+        "category": "Bảo tàng",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4578346,
+        "lon": 107.5842155
+    },
+    {
+        "id": 4555491489,
+        "name": "Tượng đài Phan Bội Châu",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.46715,
+        "lon": 107.5898061
+    },
+    {
+        "id": 4729199352,
+        "name": "Anh Nguyen Tat Thanh",
+        "category": "Khác",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4678206,
+        "lon": 107.5912729
+    },
+    {
+        "id": 4791640322,
+        "name": "Tô Quôc Ghi Công",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.3962863,
+        "lon": 107.5887
+    },
+    {
+        "id": 4935194821,
+        "name": "Đồi Vọng Cảnh",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4352692,
+        "lon": 107.562407
+    },
+    {
+        "id": 5182931945,
+        "name": "Hoàng Thành Huế",
+        "category": "Bảo tàng",
+        "address": "23 Tháng 8",
+        "lat": 16.4689726,
+        "lon": 107.5781266
+    },
+    {
+        "id": 5236780092,
+        "name": "Holy Cannons of the Citadel of Hue",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4679198,
+        "lon": 107.5812344
+    },
+    {
+        "id": 5236780093,
+        "name": "Holy Cannons of the Citadel of Hue",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.46592,
+        "lon": 107.5783717
+    },
+    {
+        "id": 5285085021,
+        "name": "Phá Tam Giang",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.589672,
+        "lon": 107.5600626
+    },
+    {
+        "id": 5285954624,
+        "name": "Lăng vua Gia Long",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.3620472,
+        "lon": 107.5969243
+    },
+    {
+        "id": 5291054227,
+        "name": "Bac Khuyet Dai",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4719956,
+        "lon": 107.5758125
+    },
+    {
+        "id": 5295611830,
+        "name": "Boi Lang",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4342482,
+        "lon": 107.5666428
+    },
+    {
+        "id": 5299153429,
+        "name": "Quoc Hoc",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4609446,
+        "lon": 107.5825343
+    },
+    {
+        "id": 5314371122,
+        "name": "Cầu Chợ Dinh",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4929675,
+        "lon": 107.5924182
+    },
+    {
+        "id": 5320014421,
+        "name": "Cau Tam Giang",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.5821907,
+        "lon": 107.5885002
+    },
+    {
+        "id": 5323683221,
+        "name": "Cầu Vĩ Dạ",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4714657,
+        "lon": 107.5997497
+    },
+    {
+        "id": 5326790724,
+        "name": "To Quoc Ghi Cong",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4725391,
+        "lon": 107.6419051
+    },
+    {
+        "id": 5326790725,
+        "name": "Cau Thuy Van",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4824922,
+        "lon": 107.6040878
+    },
+    {
+        "id": 5326790726,
+        "name": "Cau Van Duong",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4741464,
+        "lon": 107.6078971
+    },
+    {
+        "id": 5326810021,
+        "name": "Cau Chau Son",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4183309,
+        "lon": 107.6536678
+    },
+    {
+        "id": 5811652238,
+        "name": "Nguyen Chi Thanh Satue",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.5740947,
+        "lon": 107.5094706
+    },
+    {
+        "id": 5841077608,
+        "name": "Đại Cung Môn",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4691166,
+        "lon": 107.5780681
+    },
+    {
+        "id": 6099306388,
+        "name": "Tượng đài vua Quang Trung",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4420037,
+        "lon": 107.5914458
+    },
+    {
+        "id": 6114438287,
+        "name": "Khai Dinh",
+        "category": "Điểm tham quan",
+        "address": "Khải Định, Thủy Bằng, Hương Thủy",
+        "lat": 16.3989537,
+        "lon": 107.5902801
+    },
+    {
+        "id": 6533792207,
+        "name": "Đàn Xã Tắc",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4650415,
+        "lon": 107.5712089
+    },
+    {
+        "id": 6535217831,
+        "name": "Bia Tiên động phương tung",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.471778,
+        "lon": 107.5782705
+    },
+    {
+        "id": 7973115090,
+        "name": "Hồ Sơn Thọ",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.3515757,
+        "lon": 107.5882024
+    },
+    {
+        "id": 9960049118,
+        "name": "Làng mây tre đan Bao La",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.5394551,
+        "lon": 107.4709349
+    },
+    {
+        "id": 9960090217,
+        "name": "Đúc đồng Dương Xuân",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4532498,
+        "lon": 107.5632941
+    },
+    {
+        "id": 9960092017,
+        "name": "Làng tránh Sình",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.5217578,
+        "lon": 107.5774757
+    },
+    {
+        "id": 9960092018,
+        "name": "Làng rèn Hiền Lương",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.5582703,
+        "lon": 107.4691259
+    },
+    {
+        "id": 9960134617,
+        "name": "Làng nghề sơn mài thếp vàng Tiên Nộn",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4983321,
+        "lon": 107.5798678
+    },
+    {
+        "id": 9960137317,
+        "name": "Làng nghề hoa giấy Thanh Tiên",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.5053321,
+        "lon": 107.5785503
+    },
+    {
+        "id": 9960139117,
+        "name": "Liễn làng Chuồn",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.5073733,
+        "lon": 107.6357846
+    },
+    {
+        "id": 9960156917,
+        "name": "Làng hương Thủy Xuân",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.435508,
+        "lon": 107.562289
+    },
+    {
+        "id": 10248738509,
+        "name": "Ho Thuy Tien Waterpark Space Simulator",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4112974,
+        "lon": 107.5738937
+    },
+    {
+        "id": 11171467430,
+        "name": "Khai Dinh",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.3992686,
+        "lon": 107.5905785
+    },
+    {
+        "id": 11171564836,
+        "name": "Thích Quảng Đức xe",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4532504,
+        "lon": 107.544583
+    },
+    {
+        "id": 11212153237,
+        "name": "Quan Tượng Đài",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4621728,
+        "lon": 107.5707363
+    },
+    {
+        "id": 12318159702,
+        "name": "Stele Pavilion",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4331868,
+        "lon": 107.5653998
+    },
+    {
+        "id": 12411930072,
+        "name": "Bi Đình",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.3616686,
+        "lon": 107.5975047
+    },
+    {
+        "id": 12411957519,
+        "name": "Lăng Dục Đức",
+        "category": "Di tích lịch sử",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4510937,
+        "lon": 107.5931525
+    },
+    {
+        "id": 12622178803,
+        "name": "illegal entrance to palace, climb over",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4565984,
+        "lon": 107.5981417
+    },
+    {
+        "id": 39411515,
+        "name": "Điện Biên Phủ",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4566552,
+        "lon": 107.5809463
+    },
+    {
+        "id": 39414469,
+        "name": "Cầu Ga",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4572126,
+        "lon": 107.5788716
+    },
+    {
+        "id": 118540998,
+        "name": "Trung tâm Nghệ thuật Điềm Phùng Thị",
+        "category": "Bảo tàng",
+        "address": "Lê Lợi",
+        "lat": 16.4669715,
+        "lon": 107.5895601
+    },
+    {
+        "id": 118541971,
+        "name": "Trung tâm Thanh thiếu nhi Huế",
+        "category": "Bảo tàng",
+        "address": "Lê Lợi",
+        "lat": 16.4592467,
+        "lon": 107.5822457
+    },
+    {
+        "id": 161714451,
+        "name": "Chợ Đông Ba",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4725333,
+        "lon": 107.5886564
+    },
+    {
+        "id": 172657562,
+        "name": "Ngọ Môn",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4676824,
+        "lon": 107.5791834
+    },
+    {
+        "id": 172657563,
+        "name": "Duyệt Thị Đường",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4703036,
+        "lon": 107.5784839
+    },
+    {
+        "id": 172657565,
+        "name": "Hưng Tổ Miếu",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4675459,
+        "lon": 107.5764287
+    },
+    {
+        "id": 172657566,
+        "name": "Thái Miếu",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4699025,
+        "lon": 107.5803251
+    },
+    {
+        "id": 172657570,
+        "name": "Triệu Miếu",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4701991,
+        "lon": 107.5800933
+    },
+    {
+        "id": 172763419,
+        "name": "Phủ Nội Vụ",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4706162,
+        "lon": 107.5797647
+    },
+    {
+        "id": 172763420,
+        "name": "Cung Diên Thọ",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4688916,
+        "lon": 107.5754008
+    },
+    {
+        "id": 172763427,
+        "name": "Cung Trường Sanh",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4697182,
+        "lon": 107.5746783
+    },
+    {
+        "id": 218427614,
+        "name": "Kỳ Đài",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4663574,
+        "lon": 107.5802462
+    },
+    {
+        "id": 239568223,
+        "name": "Thương Bạc",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4680333,
+        "lon": 107.5855685
+    },
+    {
+        "id": 240266284,
+        "name": "Bảo tàng Hồ Chí Minh",
+        "category": "Bảo tàng",
+        "address": "Lê Lợi",
+        "lat": 16.4596249,
+        "lon": 107.5811082
+    },
+    {
+        "id": 369017963,
+        "name": "Nha Trung Bay Nong Cu",
+        "category": "Bảo tàng",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4667817,
+        "lon": 107.6421227
+    },
+    {
+        "id": 531031513,
+        "name": "Đông Khuyết Đài",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.471596,
+        "lon": 107.5800406
+    },
+    {
+        "id": 531031518,
+        "name": "Quốc Tử Giám",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4705977,
+        "lon": 107.5824866
+    },
+    {
+        "id": 531031566,
+        "name": "Điện Thái Hòa",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4687434,
+        "lon": 107.5783867
+    },
+    {
+        "id": 617437880,
+        "name": "Tây Khuyết Đài",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.468038,
+        "lon": 107.5750678
+    },
+    {
+        "id": 618267901,
+        "name": "Trường An Môn",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.470085,
+        "lon": 107.5752197
+    },
+    {
+        "id": 683524977,
+        "name": "Cầu ngói Thanh Toàn",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4667921,
+        "lon": 107.6426953
+    },
+    {
+        "id": 695775607,
+        "name": "Trung tâm Thanh thiếu nhi Huế",
+        "category": "Bảo tàng",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4592349,
+        "lon": 107.5823079
+    },
+    {
+        "id": 695810695,
+        "name": "Di tích Nhà Lưu niệm Chủ tịch Hồ Chí Minh",
+        "category": "Bảo tàng",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4756171,
+        "lon": 107.5806219
+    },
+    {
+        "id": 695810698,
+        "name": "Viện Cơ Mật - Tam Toà",
+        "category": "Bảo tàng",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4719593,
+        "lon": 107.583647
+    },
+    {
+        "id": 695810704,
+        "name": "Museum of history and revolution of thua thien hue province",
+        "category": "Bảo tàng",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4698535,
+        "lon": 107.5825025
+    },
+    {
+        "id": 695810710,
+        "name": "Bảo tàng Cổ vật Cung đình Huế",
+        "category": "Bảo tàng",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4713073,
+        "lon": 107.5819424
+    },
+    {
+        "id": 695810733,
+        "name": "Không gian Văn hoá Lục Bộ",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4729593,
+        "lon": 107.5807931
+    },
+    {
+        "id": 771244228,
+        "name": "Quoc Tu Dieu De",
+        "category": "Điểm tham quan",
+        "address": "Bạch Đằng",
+        "lat": 16.4779515,
+        "lon": 107.5875648
+    },
+    {
+        "id": 1167513732,
+        "name": "Ironwood Foot Bridge",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4640341,
+        "lon": 107.5857605
+    },
+    {
+        "id": 1167513742,
+        "name": "Ironwood Foot Bridge",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4636435,
+        "lon": 107.5855555
+    },
+    {
+        "id": 1170979640,
+        "name": "Chùa Báo Quốc",
+        "category": "Điểm tham quan",
+        "address": "Bảo Quốc",
+        "lat": 16.4542377,
+        "lon": 107.5796821
+    },
+    {
+        "id": 1173741401,
+        "name": "Nhà Thờ Phủ Cam",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4528612,
+        "lon": 107.5876632
+    },
+    {
+        "id": 1453749845,
+        "name": "Ho Thuy Tien",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4099498,
+        "lon": 107.576389
+    },
+    {
+        "id": 8537575,
+        "name": "Hồ Nội Kim Thủy",
+        "category": "Điểm tham quan",
+        "address": "Thừa Thiên Huế",
+        "lat": 16.4715813,
+        "lon": 107.5763379
+    }
+]
