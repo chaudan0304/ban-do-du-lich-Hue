@@ -393,7 +393,12 @@ user_data_raw = [
     # Người yêu thiên nhiên, thích Bạch Mã nhưng cũng ghé Cầu Trường Tiền
     (
         "HoiYeuThienNhien",
-        ["Cầu Trường Tiền", "Vườn Quốc gia Bạch Mã", "Đồi Vọng Cảnh", "Biển Thuận An"],
+        [
+            "Cầu Trường Tiền",
+            "Vườn Quốc gia Bạch Mã",
+            "Đồi Vọng Cảnh",
+            "Bãi biển Thuận An",
+        ],
     ),
     # Người tâm linh, thích chùa chiền và lăng tẩm
     ("YeuTamLinh", ["Chùa Thiên Mụ", "Điện Hòn Chén", "Chùa Từ Đàm", "Lăng Khải Định"]),

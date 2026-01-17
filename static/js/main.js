@@ -95,18 +95,7 @@ function checkLoginStatus() {
 
 // Hiển thị giao diện khi đã đăng nhập
 function showLoggedView(username) {
-  // 1. Ẩn các thành phần của khách
-  const guestView = document.getElementById("guest-view");
-  const searchBox = document.getElementById("guest-search-box");
-
-  if (guestView) guestView.style.display = "none";
-  if (searchBox) searchBox.style.display = "none"; //
-
-  // 2. Hiện giao diện User
-  const loggedView = document.getElementById("logged-view");
-  if (loggedView) loggedView.style.display = "block";
-
-  // 3. Xử lý Header (Ẩn nút login, hiện info user)
+  // 1. Cập nhật header
   const btnLogin = document.getElementById("header-login-btn");
   if (btnLogin) btnLogin.style.display = "none";
 
@@ -116,7 +105,7 @@ function showLoggedView(username) {
     const nameSpan = document.getElementById("header-username");
     if (nameSpan) nameSpan.innerText = username;
 
-    // Xử lý nút Admin
+    // Nút Admin
     const adminBtn = document.getElementById("btn-admin-panel");
     if (adminBtn) {
       if (username === "admin" || (typeof userRole !== "undefined" && userRole === "admin")) {
@@ -126,26 +115,35 @@ function showLoggedView(username) {
       }
     }
   }
+
+  // 2. Ẩn toàn bộ khung tìm kiếm cho khách
+  const searchBox = document.querySelector(".search-box");
+  if (searchBox) searchBox.style.display = "none";
+
+  // 3. Hiện khung lịch sử người dùng
+  const loggedView = document.getElementById("logged-view");
+  if (loggedView) loggedView.style.display = "block";
 }
 
+// Hiển thị giao diện khi chưa đăng nhập
 function showGuestView() {
-  // 1. Header (Hiện nút login)
+  // 1. Cập nhật header
   const btnLogin = document.getElementById("header-login-btn");
-  const userInfo = document.getElementById("header-user-info");
-
   if (btnLogin) btnLogin.style.display = "flex";
+
+  const userInfo = document.getElementById("header-user-info");
   if (userInfo) userInfo.style.display = "none";
 
-  // 2. Sidebar (Ẩn giao diện user, hiện giao diện khách)
+  //2. Hiện khung tìm kiếm chính
+  const searchBox = document.querySelector(".search-box");
+  if (searchBox) searchBox.style.display = "block";
+
+  const guestSearchBox = document.getElementById("guest-search-box");
+  if (guestSearchBox) guestSearchBox.style.display = "flex";
+
+  // 3. Ẩn khung lịch sử người dùng
   const loggedView = document.getElementById("logged-view");
-  const guestView = document.getElementById("guest-view");
-  const searchBox = document.getElementById("guest-search-box"); // [MỚI]
-
   if (loggedView) loggedView.style.display = "none";
-  if (guestView) guestView.style.display = "block";
-
-  // [QUAN TRỌNG] Hiện lại ô tìm kiếm, dùng 'flex' để không bị vỡ giao diện
-  if (searchBox) searchBox.style.display = "flex";
 
   // Reset kết quả
   const recArea = document.getElementById("recommendation-area");
@@ -154,7 +152,7 @@ function showGuestView() {
         <div class="empty-state">
             <img src="https://cdn-icons-png.flaticon.com/512/1086/1086933.png" alt="AI">
             <h3>Sẵn sàng phân tích</h3>
-            <p>Nhập tên User hoặc Đăng nhập để xem gợi ý.</p>
+            <p>Hệ thống sử dụng <b>PageRank</b> & <b>Collaborative Filtering</b>.</p>
         </div>`;
   }
   const histDiv = document.getElementById("user-history");
@@ -308,6 +306,7 @@ document.getElementById("usernameInput").addEventListener(
   }, 800)
 );
 // Phân tích User (đã đăng nhập hoặc nhập tên)
+// Phân tích User (đã đăng nhập hoặc nhập tên)
 function analyzeUser(isLoggedInUser = false) {
   const targetUser = isLoggedInUser ? currentUser : document.getElementById("usernameInput").value.trim();
   if (!targetUser) return alert("Vui lòng nhập tên User!");
@@ -316,23 +315,34 @@ function analyzeUser(isLoggedInUser = false) {
   apiFetch(`/api/history/${targetUser}`)
     .then((data) => {
       userLikedSet.clear();
+
+      const histDiv = document.getElementById("user-history");
+      const histList = document.getElementById("history-list");
+
+      // [QUAN TRỌNG] Đã sửa lỗi logic cũ ở đây:
+      // Không cần gọi search-box hay mainBox nữa vì layout đã tách biệt.
+
       if (data && data.length > 0) {
         data.forEach((item) => userLikedSet.add(item.name));
-        const histDiv = document.getElementById("user-history");
-        const histList = document.getElementById("history-list");
-        histDiv.style.display = "block";
-        histList.innerHTML = data
-          .map(
-            (place) => `
-            <div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
-              <img src="${place.image}" onerror="this.src='/static/images/no-image.png'">
-              ${place.name}
-            </div>
-          `
-          )
-          .join("");
+
+        // Hiện nội dung lịch sử
+        if (histDiv) histDiv.style.display = "block";
+
+        // Vẽ danh sách
+        if (histList) {
+          histList.innerHTML = data
+            .map(
+              (place) => `
+              <div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
+                <img src="${place.image}" onerror="this.src='/static/images/no-image.png'">
+                ${place.name}
+              </div>`
+            )
+            .join("");
+        }
       } else {
-        document.getElementById("user-history").style.display = "none";
+        // Không có dữ liệu thì ẩn div con đi
+        if (histDiv) histDiv.style.display = "none";
       }
     })
     .catch((err) => console.error("History error:", err));
@@ -416,13 +426,29 @@ function getIconByCategory(category) {
     popupAnchor: [0, -42],
   });
 }
+
 // Di chuyển bản đồ đến vị trí và mở popup
 function flyToLocation(lat, lng, name) {
-  map.flyTo([lat, lng], 16, { duration: 1 });
-  if (markersMap[name]) {
-    map.once("moveend", () => markersMap[name].openPopup());
+  // 1. Nếu đang ở Mobile (màn hình nhỏ hơn 768px),
+  if (window.innerWidth <= 768) {
+    console.log("Mobile mode: Skip map flying");
+    return;
+  }
+
+  // 2. Kiểm tra an toàn xem map có tồn tại không
+  if (!map) return;
+
+  // 3. Thực hiện bay trên Desktop
+  try {
+    map.flyTo([lat, lng], 16, { duration: 1 });
+    if (markersMap[name]) {
+      map.once("moveend", () => markersMap[name].openPopup());
+    }
+  } catch (err) {
+    console.warn("Lỗi khi di chuyển bản đồ:", err);
   }
 }
+
 // Hiển thị chi tiết địa điểm
 function showDetail(loc) {
   console.log("Đang mở chi tiết địa điểm:", loc.name); // Log kiểm tra
@@ -518,98 +544,145 @@ function closeDetail() {
 }
 
 // ================================================================
-// 5. DATA EXPLORER
+// 5. DATA EXPLORER (BỘ LỌC & TÌM KIẾM)
 // ================================================================
-// Tải và hiển thị địa điểm theo category
-async function loadLocations(category = "All") {
-  markerLayer.clearLayers();
-  markersMap = {};
 
+// Biến lưu trữ dữ liệu hiện tại của danh sách (để tìm kiếm client-side)
+let currentListData = [];
+
+// --- HÀM 1: LỌC THEO CATEGORY (Gắn vào các nút bấm) ---
+function filterData(cat, btn) {
+  // 1. Cập nhật giao diện nút bấm (Active state)
+  document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+
+  // 2. Xóa nội dung ô tìm kiếm (để tránh gây nhầm lẫn khi chuyển danh mục)
+  const searchInput = document.getElementById("miniSearchInput");
+  if (searchInput) searchInput.value = "";
+
+  // 3. Tải dữ liệu theo danh mục mới
+  loadLocations(cat);
+}
+
+// --- HÀM 2: TẢI DỮ LIỆU TỪ API ---
+async function loadLocations(category = "All") {
+  // Reset UI loading
   const list = document.getElementById("locationList");
   list.innerHTML = `
     <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #6b7280;">
       <i class="fas fa-circle-notch fa-spin fa-2x"></i>
-      <p style="margin-top: 12px;">Đang tải địa điểm${category !== "All" ? ` (${category})` : ""}...</p>
+      <p style="margin-top: 12px;">Đang tải...</p>
     </div>`;
 
   try {
     let data;
+    // Kiểm tra cache nếu chọn All (để đỡ gọi API nhiều lần)
     if (category === "All" && cachedAllLocations) {
       data = cachedAllLocations;
-      console.log("[Cache Hit] Locations");
     } else {
       let url = "/api/locations";
       if (category !== "All") url += `?category=${encodeURIComponent(category)}`;
+
       data = await apiFetch(url);
-      if (!data) throw new Error("Không nhận được dữ liệu");
-      if (category === "All") cachedAllLocations = data;
+      if (category === "All") cachedAllLocations = data; // Lưu cache
     }
 
-    list.innerHTML = "";
-    if (!Array.isArray(data) || data.length === 0) {
-      list.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align:center; padding:40px; color:#9ca3af;">
-          <i class="fas fa-map-marker-alt" style="font-size:48px; opacity:0.5;"></i><br><br>
-          Không tìm thấy địa điểm nào.
-        </div>`;
-      return;
-    }
+    // [QUAN TRỌNG] Lưu data vào biến toàn cục để dùng cho Search
+    currentListData = data || [];
 
-    const latLngs = [];
-    data.forEach((loc) => {
-      const div = document.createElement("div");
-      div.className = "mini-item";
-      div.innerHTML = `
-        <img src="${loc.image}" class="mini-img" alt="${loc.name}" onerror="this.src='/static/images/no-image.png'">
-        <div style="flex:1; overflow:hidden;">
-          <div class="mini-name">${loc.name}</div>
-          <div style="font-size:11px; color:#f59e0b; margin-top:2px;">⭐ ${
-            loc.rating ? loc.rating.toFixed(1) : "5.0"
-          }</div>
-        </div>
-      `;
-      div.onclick = () => showDetail(loc);
-      list.appendChild(div);
-
-      const marker = L.marker([loc.lat, loc.lng], { icon: getIconByCategory(loc.category) });
-
-      const popupContent = document.createElement("div");
-      popupContent.innerHTML = `
-        <img src="${loc.image}" class="popup-hero" alt="${loc.name}" onerror="this.src='/static/images/no-image.png'">
-        <div class="popup-body">
-          <div class="popup-title">${loc.name}</div>
-          <div class="popup-cat">${loc.category || "Địa điểm"}</div>
-          <button class="view-detail-btn">Xem chi tiết</button>
-        </div>
-      `;
-      popupContent.querySelector(".view-detail-btn").onclick = () => showDetail(loc);
-
-      marker.bindPopup(popupContent);
-      marker.on("click", () => showDetail(loc));
-      marker.addTo(markerLayer);
-      markersMap[loc.name] = marker;
-      latLngs.push([loc.lat, loc.lng]);
-    });
-
-    if (latLngs.length > 0) {
-      map.fitBounds(latLngs, { padding: [60, 60], maxZoom: 15 });
-    }
-
-    setTimeout(() => map.invalidateSize(), 300);
+    // Gọi hàm hiển thị
+    renderLocations(currentListData);
   } catch (err) {
     console.error("Load locations error:", err);
-    list.innerHTML = `
-      <div style="color:#ef4444; text-align:center; grid-column: 1 / -1; padding:30px;">
-        <i class="fas fa-exclamation-triangle" style="font-size:36px;"></i><br><br>
-        Lỗi: ${err.message}
-      </div>`;
+    list.innerHTML = `<div style="text-align:center; color:red; grid-column: 1 / -1;">Lỗi tải dữ liệu</div>`;
   }
 }
-// Lọc dữ liệu theo category
-function filterData(cat, btn) {
-  document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
-  btn.classList.add("active");
-  loadLocations(cat);
+
+// --- HÀM 3: HIỂN THỊ DANH SÁCH & MARKER ---
+function renderLocations(data) {
+  const list = document.getElementById("locationList");
+
+  // Xóa marker cũ & list cũ
+  if (markerLayer) markerLayer.clearLayers();
+  markersMap = {};
+  list.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    list.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align:center; padding:20px; color:#9ca3af;">
+          Không tìm thấy địa điểm nào.
+        </div>`;
+    return;
+  }
+
+  const latLngs = [];
+
+  data.forEach((loc) => {
+    // A. Tạo thẻ bên trái (List Item)
+    const div = document.createElement("div");
+    div.className = "mini-item";
+    div.innerHTML = `
+      <img src="${loc.image}" class="mini-img" onerror="this.src='/static/images/no-image.png'">
+      <div style="flex:1; overflow:hidden;">
+        <div class="mini-name">${loc.name}</div>
+        <div style="font-size:11px; color:#f59e0b;">⭐ ${loc.rating ? loc.rating.toFixed(1) : "5.0"}</div>
+      </div>
+    `;
+    div.onclick = () => showDetail(loc);
+    list.appendChild(div);
+
+    // B. Tạo Marker trên bản đồ
+    const marker = L.marker([loc.lat, loc.lng], { icon: getIconByCategory(loc.category) });
+
+    // Popup rút gọn khi bấm vào marker
+    const popupContent = document.createElement("div");
+    popupContent.innerHTML = `
+        <div style="text-align:center; cursor:pointer;">
+            <b style="font-size:13px">${loc.name}</b><br>
+            <span style="font-size:11px; color:#666">${loc.category}</span>
+        </div>
+    `;
+    popupContent.onclick = () => showDetail(loc);
+
+    marker.bindPopup(popupContent);
+    marker.on("click", () => showDetail(loc));
+
+    marker.addTo(markerLayer);
+    markersMap[loc.name] = marker;
+    latLngs.push([loc.lat, loc.lng]);
+  });
+
+  // Fit bản đồ để nhìn thấy các điểm vừa load (nếu có điểm)
+  if (latLngs.length > 0 && map) {
+    // Dùng setTimeout để tránh lỗi khi map chưa render xong
+    setTimeout(() => {
+      map.fitBounds(latLngs, { padding: [50, 50], maxZoom: 15 });
+    }, 100);
+  }
+}
+
+// --- HÀM 4: XỬ LÝ TÌM KIẾM KHI GÕ PHÍM (Search Box) ---
+function handleLocalSearch() {
+  const input = document.getElementById("miniSearchInput");
+  if (!input) return;
+
+  const keyword = input.value.toLowerCase().trim();
+
+  if (!keyword) {
+    // Nếu xóa hết chữ -> Hiển thị lại toàn bộ danh sách hiện tại
+    renderLocations(currentListData);
+    return;
+  }
+
+  // Lọc dữ liệu trong RAM
+  const filteredData = currentListData.filter((loc) => {
+    const nameMatch = loc.name.toLowerCase().includes(keyword);
+    // Nếu có description thì tìm cả trong description
+    const descMatch = loc.description ? loc.description.toLowerCase().includes(keyword) : false;
+    return nameMatch || descMatch;
+  });
+
+  renderLocations(filteredData);
 }
 
 // ================================================================

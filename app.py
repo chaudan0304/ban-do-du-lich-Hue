@@ -21,12 +21,16 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "index"  # Chuyển hướng đến trang chính nếu chưa đăng nhập
 
+# Đóng driver Neo4j khi ứng dụng kết thúc
+atexit.register(close_driver)
+
 
 class User(UserMixin):
     def __init__(self, id):
         self.id = id
 
 
+# Hàm tải user từ session
 @login_manager.user_loader
 def load_user(user_id):
     return User(user_id)
@@ -49,13 +53,14 @@ def api_register():
         return jsonify({"success": False, "error": message}), 400
 
 
+# API: Đăng nhập
 @app.route("/api/login", methods=["POST"])
 def api_login():
     data = request.json
     username = data.get("username")
     password = data.get("password")
 
-    user_data = verify_user(username, password)  # Hàm này đã sửa ở Bước 1
+    user_data = verify_user(username, password)
 
     if user_data:
         user = User(id=user_data["name"])
@@ -75,6 +80,7 @@ def api_login():
         return jsonify({"error": "Sai tài khoản hoặc mật khẩu"}), 401
 
 
+# API: Đăng xuất
 @app.route("/api/logout", methods=["POST"])
 @login_required
 def api_logout():
@@ -82,6 +88,7 @@ def api_logout():
     return jsonify({"message": "Đã đăng xuất"}), 200
 
 
+# API: Lấy thông tin người dùng hiện tại
 @app.route("/api/current_user", methods=["GET"])
 def get_current_user():
     if current_user.is_authenticated:
@@ -176,7 +183,7 @@ def get_user_history(user_name):
 
 
 # --- 4. API: GỢI Ý THÔNG MINH (CORE AI) ---
-# Gợi ý dựa trên PageRank + Collaborative Filtering
+# --- 4. API: GỢI Ý THÔNG MINH (CORE AI) ---
 @app.route("/api/recommend/<user_name>", methods=["GET"])
 def recommend(user_name):
     # Chiến thuật: Tìm người tương đồng (Collaborative Filtering) + PageRank
@@ -188,17 +195,22 @@ def recommend(user_name):
     MATCH (other)-[:LIKED]->(suggestion:Location)
     WHERE NOT (me)-[:LIKED]->(suggestion)
     
+    OPTIONAL MATCH (suggestion)-[:HAS_CATEGORY]->(cat:Category)
+    
     RETURN suggestion.name AS name, 
            suggestion.desc AS description, 
            suggestion.rating AS rating,
            suggestion.lat AS lat,      
            suggestion.lng AS lng,
-           suggestion.PageRankScore AS pr,
+           
+           coalesce(suggestion.pagerankScore, 0.15) AS pr_pop,
+           coalesce(suggestion.pagerankConnect, 0.15) AS pr_conn,
+           
            suggestion.image AS image, 
-           suggestion.category AS category,
+           cat.name AS category,
            count(other) AS common_users
            
-    ORDER BY common_users DESC, pr DESC 
+    ORDER BY common_users DESC, (pr_pop + pr_conn) DESC 
     LIMIT 6
     """
 
@@ -208,15 +220,30 @@ def recommend(user_name):
     if not results:
         fallback_query = """
         MATCH (l:Location) 
+        OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+        
         RETURN l.name AS name, l.desc AS description, l.rating AS rating, 
-               l.lat AS lat, l.lng AS lng, l.PageRankScore as pr,
+               l.lat AS lat, l.lng AS lng, 
+               
+               coalesce(l.pagerankScore, 0.15) AS pr_pop,
+               coalesce(l.pagerankConnect, 0.15) AS pr_conn,
+               
                l.image as image,
-               l.category as category,
+               cat.name as category,
                0 as common_users
-        ORDER BY l.PageRankScore DESC
+        
+        ORDER BY (pr_pop + pr_conn) DESC
         LIMIT 6
         """
         results = run_query(fallback_query)
+
+    # Đảm bảo results không phải là None trước khi xử lý
+    if results:
+        for item in results:
+            # Cộng gộp điểm để hiển thị ra ngoài (nếu cần)
+            item["pr"] = item.get("pr_pop", 0) + item.get("pr_conn", 0)
+    else:
+        results = []  # Trả về danh sách rỗng nếu lỗi để không sập app
 
     return jsonify(results)
 

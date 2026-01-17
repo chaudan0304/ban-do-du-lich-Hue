@@ -50,23 +50,20 @@
         </div>
 
         <!-- Search box & User actions -->
-        <div class="search-box">
+        <div class="search-box" id="main-search-box">
           <div class="input-group" id="guest-search-box">
             <input type="text" id="usernameInput" placeholder="Nhập tên User để phân tích..." />
             <button class="btn-submit" onclick="analyzeUser(false)">
               <i class="fas fa-search"></i>
             </button>
           </div>
+        </div>
 
-          <div id="logged-view" style="display: none; margin-top: 10px">
-            <button class="btn-full btn-analyze-me" onclick="analyzeUser(true)">
-              <i class="fas fa-magic"></i> Phân tích sở thích của tôi
-            </button>
-
-            <div id="user-history" class="history-section" style="display: none">
-              <div class="history-title"><i class="fas fa-history"></i> Bạn đã thích:</div>
-              <div class="history-chips" id="history-list"></div>
-            </div>
+        <!-- Lịch sử người dùng đã thích -->
+        <div id="logged-view" style="display: none; margin: 10px 24px">
+          <div id="user-history" class="history-section" style="display: none">
+            <div class="history-title"><i class="fas fa-history"></i> Địa điểm đã thích:</div>
+            <div class="history-chips" id="history-list"></div>
           </div>
         </div>
 
@@ -93,8 +90,14 @@
 
         <div class="data-explorer">
           <div class="section-head">
-            <h2>Khám phá dữ liệu</h2>
+            <h2>Khám phá địa điểm</h2>
+            <div class="mini-search-box">
+              <input type="text" id="miniSearchInput" placeholder="Tìm nhanh..." onkeyup="handleLocalSearch()" />
+              <i class="fas fa-search"></i>
+            </div>
           </div>
+
+          <!-- Bộ lọc danh mục -->
           <div class="filter-chips">
             <button class="chip active" onclick="filterData('All', this)">Tất cả</button>
             <button class="chip" onclick="filterData('Di tích', this)">🏛️ Di tích</button>
