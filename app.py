@@ -12,6 +12,7 @@ from db import run_query, close_driver, register_user, verify_user
 import atexit
 from db import get_all_users, delete_user_by_name
 from db import toggle_like_location
+import setup_algo
 
 app = Flask(__name__)
 app.secret_key = "khoa_luan_bi_mat_123"  # Key để mã hóa session cookie
@@ -133,6 +134,51 @@ def api_toggle_like():
     return jsonify({"liked": is_liked, "message": msg}), 200
 
 
+#
+@app.route("/api/admin/stats", methods=["GET"])
+def get_admin_stats():
+    """API lấy thống kê tổng quan cho Dashboard"""
+    query = """
+    CALL () {
+        MATCH (u:User) RETURN count(u) as user_count
+    }
+    CALL () {
+        MATCH (l:Location) RETURN count(l) as location_count
+    }
+    CALL () {
+        MATCH ()-[r:LIKED]->() RETURN count(r) as like_count
+    }
+    CALL () {
+        MATCH ()-[r:RELATED_TO]->() RETURN count(r) as link_count
+    }
+    RETURN user_count, location_count, like_count, link_count
+    """
+    try:
+        result = run_query(query)
+        if result:
+            return jsonify(result[0])
+        return jsonify({})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/run-algo", methods=["POST"])
+def run_algo_trigger():
+    """API để Admin bấm nút chạy lại thuật toán tính điểm"""
+    try:
+        # Gọi hàm chạy thuật toán từ file setup_algo.py
+        setup_algo.run_hybrid_algo()
+        return jsonify(
+            {
+                "message": "✅ Đã huấn luyện lại mô hình AI thành công!",
+                "status": "success",
+            }
+        )
+    except Exception as e:
+        print(f"Lỗi Algo: {e}")
+        return jsonify({"message": f"❌ Lỗi: {str(e)}", "status": "error"}), 500
+
+
 # --- 1. ROUTE GIAO DIỆN CHÍNH ---
 @app.route("/")
 def index():
@@ -182,7 +228,6 @@ def get_user_history(user_name):
         return jsonify({"error": str(e)}), 500
 
 
-# --- 4. API: GỢI Ý THÔNG MINH (CORE AI) ---
 # --- 4. API: GỢI Ý THÔNG MINH (CORE AI) ---
 @app.route("/api/recommend/<user_name>", methods=["GET"])
 def recommend(user_name):

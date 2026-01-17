@@ -22,7 +22,7 @@ def run_hybrid_algo():
             """
             MATCH (u:User)-[:LIKED]->(l1:Location)
             MATCH (u)-[:LIKED]->(l2:Location)
-            WHERE id(l1) < id(l2)
+            WHERE elementId(l1) < elementId(l2)
             MERGE (l1)-[:RELATED_TO]-(l2)
         """
         )
@@ -30,7 +30,7 @@ def run_hybrid_algo():
         # --- PHẦN 2: CHẠY PAGERANK PHỔ BIẾN (User Vote) ---
         print("2️⃣  Tính điểm 'Phổ biến' (Dựa trên LIKED)...")
         try:
-            session.run("CALL gds.graph.drop('graphUser', false)")
+            session.run("CALL gds.graph.drop('graphUser', false) YIELD graphName")
         except:
             pass
 
@@ -55,9 +55,9 @@ def run_hybrid_algo():
         )
 
         # --- PHẦN 3: CHẠY PAGERANK KẾT NỐI (Location Network) ---
-        print("3️⃣  Tính điểm 'Kết nối' (Dựa trên RELATED_TO)...")
+        print("3️⃣ Tính điểm 'Kết nối' (Dựa trên RELATED_TO)...")
         try:
-            session.run("CALL gds.graph.drop('graphLoc', false)")
+            session.run("CALL gds.graph.drop('graphLoc', false) YIELD graphName")
         except:
             pass
 

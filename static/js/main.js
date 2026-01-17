@@ -55,7 +55,56 @@ document.addEventListener("DOMContentLoaded", () => {
   initMap();
   checkLoginStatus();
   loadLocations("All");
+  setupEnterKey();
 });
+
+function setupEnterKey() {
+  // 1. Tại ô nhập mật khẩu Đăng nhập -> Gọi hàm handleLogin()
+  const loginPassInput = document.getElementById("loginPass");
+  if (loginPassInput) {
+    loginPassInput.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleLogin();
+      }
+    });
+  }
+
+  // 2. Tại ô nhập mật khẩu Đăng ký -> Gọi hàm handleRegister()
+  const regPass = document.getElementById("regPass");
+  if (regPass) {
+    regPass.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleRegister();
+      }
+    });
+  }
+
+  // 3. Tại ô tìm kiếm User (để xem gợi ý) -> Gọi hàm analyzeUser()
+  const usernameInput = document.getElementById("usernameInput");
+  if (usernameInput) {
+    usernameInput.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        // Hủy debounce (nếu đang chờ) và chạy ngay
+        analyzeUser(false);
+      }
+    });
+  }
+
+  // 4. Tại ô tìm kiếm địa điểm (Mini search) -> Ẩn bàn phím mobile
+  const miniSearch = document.getElementById("miniSearchInput");
+  if (miniSearch) {
+    miniSearch.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        this.blur(); // Bỏ focus để ẩn bàn phím ảo trên điện thoại
+      }
+    });
+  }
+}
+
 // Khởi tạo bản đồ Leaflet
 function initMap() {
   map = L.map("map", { zoomControl: false }).setView([16.4637, 107.5909], 14);
@@ -123,6 +172,11 @@ function showLoggedView(username) {
   // 3. Hiện khung lịch sử người dùng
   const loggedView = document.getElementById("logged-view");
   if (loggedView) loggedView.style.display = "block";
+
+  // 4. Hiện bảng thống kê Admin
+  if (typeof checkAdminAccess === "function") {
+    checkAdminAccess(username);
+  }
 }
 
 // Hiển thị giao diện khi chưa đăng nhập
@@ -157,6 +211,12 @@ function showGuestView() {
   }
   const histDiv = document.getElementById("user-history");
   if (histDiv) histDiv.style.display = "none";
+
+  // 4. Ẩn bảng Admin Panel
+  const adminPanel = document.getElementById("admin-panel");
+  if (adminPanel) {
+    adminPanel.style.display = "none";
+  }
 }
 
 // -----MODAL AUTH-----
@@ -841,4 +901,65 @@ if (slider) {
     const walk = (x - startX) * 2; // Tốc độ cuộn
     slider.scrollLeft = scrollLeft - walk;
   });
+}
+
+// Hàm kiểm tra Admin khi đăng nhập
+function checkAdminAccess(username) {
+  const adminPanel = document.getElementById("admin-panel");
+  if (username === "admin") {
+    adminPanel.style.display = "block";
+    loadAdminStats(); // Tải số liệu ngay
+  } else {
+    adminPanel.style.display = "none";
+  }
+}
+
+// Gọi hàm này khi người dùng đăng nhập thành công
+// (Bạn tìm chỗ xử lý login trong main.js và thêm dòng: checkAdminAccess(username);)
+
+// Hàm tải thống kê
+async function loadAdminStats() {
+  try {
+    const res = await fetch("/api/admin/stats");
+    const data = await res.json();
+
+    document.getElementById("stat-user").innerText = data.user_count || 0;
+    document.getElementById("stat-loc").innerText = data.location_count || 0;
+    document.getElementById("stat-like").innerText = data.like_count || 0;
+    document.getElementById("stat-link").innerText = data.link_count || 0;
+  } catch (err) {
+    console.error("Lỗi tải stats admin", err);
+  }
+}
+
+// Hàm kích hoạt thuật toán AI
+async function triggerAI() {
+  const btn = document.querySelector("#admin-panel button");
+  const status = document.getElementById("algo-status");
+
+  // Hiệu ứng đang chạy
+  btn.disabled = true;
+  btn.innerText = "⏳ Đang tính toán (Vui lòng đợi)...";
+  btn.style.background = "#95a5a6";
+  status.innerText = "Server đang chạy PageRank...";
+
+  try {
+    const res = await fetch("/api/admin/run-algo", { method: "POST" });
+    const data = await res.json();
+
+    if (data.status === "success") {
+      alert("Thành công! Dữ liệu gợi ý đã được cập nhật.");
+      status.innerText = "✅ Hoàn tất lúc " + new Date().toLocaleTimeString();
+      loadAdminStats(); // Cập nhật lại số liệu nếu có thay đổi
+    } else {
+      alert("Lỗi: " + data.message);
+    }
+  } catch (err) {
+    alert("Lỗi kết nối server!");
+  } finally {
+    // Reset nút bấm
+    btn.disabled = false;
+    btn.innerText = "🚀 Chạy lại thuật toán AI";
+    btn.style.background = "#e74c3c";
+  }
 }

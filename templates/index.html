@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
@@ -13,6 +13,49 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   </head>
   <body>
+    <div
+      id="admin-panel"
+      style="
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #2c3e50;
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        z-index: 99999;
+        width: 300px;
+      "
+    >
+      <h4 style="margin-top: 0; border-bottom: 1px solid #ecf0f1; padding-bottom: 10px">🛡️ Admin Control</h4>
+
+      <div style="margin-bottom: 15px; font-size: 14px">
+        <p>👥 Users: <b id="stat-user">0</b></p>
+        <p>📍 Locations: <b id="stat-loc">0</b></p>
+        <p>❤️ Total Likes: <b id="stat-like">0</b></p>
+        <p>🔗 Connections: <b id="stat-link">0</b></p>
+      </div>
+
+      <button
+        onclick="triggerAI()"
+        style="
+          width: 100%;
+          background: #e74c3c;
+          color: white;
+          border: none;
+          padding: 10px;
+          border-radius: 5px;
+          cursor: pointer;
+          font-weight: bold;
+        "
+      >
+        🚀 Chạy lại thuật toán AI
+      </button>
+      <p id="algo-status" style="margin-top: 10px; font-size: 12px; color: #f1c40f"></p>
+    </div>
+
     <div class="app-layout">
       <aside class="sidebar">
         <div class="sidebar-header">
