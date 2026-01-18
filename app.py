@@ -15,6 +15,7 @@ from db import toggle_like_location
 import setup_algo
 
 app = Flask(__name__)
+app.config["JSON_AS_ASCII"] = False
 app.secret_key = "khoa_luan_bi_mat_123"  # Key để mã hóa session cookie
 
 # --- CẤU HÌNH FLASK-LOGIN ---
@@ -128,55 +129,125 @@ def api_toggle_like():
     if not location_name:
         return jsonify({"error": "Thiếu tên địa điểm"}), 400
 
-    # current_user.id chính là username (do setup ở User class)
+    # current_user.id chính là usernam
     is_liked, msg = toggle_like_location(current_user.id, location_name)
 
     return jsonify({"liked": is_liked, "message": msg}), 200
 
 
-#
+# ==========================================================
+# 5. API ADMIN: QUẢN TRỊ HỆ THỐNG & CRUD ĐỊA ĐIỂM
+# ==========================================================
+
+
+# --- API LẤY THỐNG KÊ (Đã fix lỗi cú pháp CALL) ---
 @app.route("/api/admin/stats", methods=["GET"])
 def get_admin_stats():
-    """API lấy thống kê tổng quan cho Dashboard"""
     query = """
-    CALL () {
-        MATCH (u:User) RETURN count(u) as user_count
-    }
-    CALL () {
-        MATCH (l:Location) RETURN count(l) as location_count
-    }
-    CALL () {
-        MATCH ()-[r:LIKED]->() RETURN count(r) as like_count
-    }
-    CALL () {
-        MATCH ()-[r:RELATED_TO]->() RETURN count(r) as link_count
-    }
+    CALL () { MATCH (u:User) RETURN count(u) as user_count }
+    CALL () { MATCH (l:Location) RETURN count(l) as location_count }
+    CALL () { MATCH ()-[r:LIKED]->() RETURN count(r) as like_count }
+    CALL () { MATCH ()-[r:RELATED_TO]->() RETURN count(r) as link_count }
     RETURN user_count, location_count, like_count, link_count
     """
     try:
         result = run_query(query)
-        if result:
-            return jsonify(result[0])
-        return jsonify({})
+        return jsonify(result[0] if result else {})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
+# --- API CHẠY LẠI THUẬT TOÁN (TRIGGER AI) ---
 @app.route("/api/admin/run-algo", methods=["POST"])
 def run_algo_trigger():
-    """API để Admin bấm nút chạy lại thuật toán tính điểm"""
     try:
-        # Gọi hàm chạy thuật toán từ file setup_algo.py
+        import setup_algo
+
         setup_algo.run_hybrid_algo()
-        return jsonify(
-            {
-                "message": "✅ Đã huấn luyện lại mô hình AI thành công!",
-                "status": "success",
-            }
-        )
+        return jsonify({"status": "success", "message": "Đã cập nhật điểm PageRank!"})
     except Exception as e:
-        print(f"Lỗi Algo: {e}")
-        return jsonify({"message": f"❌ Lỗi: {str(e)}", "status": "error"}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# --- API THÊM ĐỊA ĐIỂM MỚI (CREATE) ---
+@app.route("/api/admin/location/add", methods=["POST"])
+def add_location():
+    data = request.json
+    try:
+        query = """
+        MERGE (c:City {name: "Huế"})
+        MERGE (cat:Category {name: $category})
+        CREATE (l:Location {
+            id: randomUUID(), name: $name, desc: $desc, rating: $rating,
+            image: $image, lat: $lat, lng: $lng,
+            pagerankScore: 0.15, pagerankConnect: 0.15
+        })
+        MERGE (l)-[:LOCATED_IN]->(c)
+        MERGE (l)-[:HAS_CATEGORY]->(cat)
+        """
+        run_query(
+            query,
+            {
+                "name": data.get("name"),
+                "category": data.get("category"),
+                "desc": data.get("description", ""),
+                "image": data.get("image", ""),
+                "rating": float(data.get("rating", 5.0)),
+                "lat": float(data.get("lat")),
+                "lng": float(data.get("lng")),
+            },
+        )
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# --- API SỬA ĐỊA ĐIỂM (UPDATE) ---
+@app.route("/api/admin/location/update", methods=["PUT"])
+def update_location():
+    data = request.json
+    try:
+        query = """
+        MATCH (l:Location {name: $old_name})
+        SET l.name = $name, 
+            l.desc = $desc,
+            l.lat = $lat, 
+            l.lng = $lng,
+            l.rating = $rating, 
+            l.image = $image
+        WITH l
+        OPTIONAL MATCH (l)-[r:HAS_CATEGORY]->(:Category) DELETE r
+        WITH l
+        MERGE (c:Category {name: $category})
+        MERGE (l)-[:HAS_CATEGORY]->(c)
+        """
+        run_query(
+            query,
+            {
+                "old_name": data.get("old_name"),
+                "name": data.get("name"),
+                "lat": data.get("lat", 0),
+                "lng": data.get("lng", 0),
+                "category": data.get("category"),
+                "desc": data.get("description"),
+                "image": data.get("image"),
+                "rating": float(data.get("rating", 0)),
+            },
+        )
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# --- API XÓA ĐỊA ĐIỂM (DELETE) ---
+@app.route("/api/admin/location/delete", methods=["DELETE"])
+def delete_location():
+    try:
+        query = "MATCH (l:Location {name: $name}) DETACH DELETE l"
+        run_query(query, {"name": request.json.get("name")})
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # --- 1. ROUTE GIAO DIỆN CHÍNH ---
