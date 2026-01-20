@@ -4,12 +4,13 @@
 let cachedAllLocations = null;
 var map, markerLayer;
 var markersMap = {};
+var tempMarker = null;
 var currentUser = null;
 var currentListData = [];
 var userRole = "user";
 var userLikedSet = new Set();
 var currentOpenLoc = null;
-var isPickingMode = false;
+var isPickingMode = null;
 
 // Hàm gọi API chung
 async function apiFetch(url, options = {}) {
@@ -56,14 +57,67 @@ function initMap() {
   }).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
 
-  // Sự kiện click bản đồ (Admin chọn tọa độ)
+  // Sự kiện click bản đồ
   map.on("click", (e) => {
-    if (isPickingMode) {
-      document.getElementById("addLat").value = e.latlng.lat.toFixed(5);
-      document.getElementById("addLng").value = e.latlng.lng.toFixed(5);
-      isPickingMode = false;
-      document.getElementById("map").style.cursor = "grab";
-      openAddModal();
+    // Lấy tọa độ và làm tròn 5 số cho đẹp
+    const lat = e.latlng.lat.toFixed(5);
+    const lng = e.latlng.lng.toFixed(5);
+
+    // --- TRƯỜNG HỢP 1: ĐANG THÊM MỚI (ADD) ---
+    if (isPickingMode === "add" || document.getElementById("addModal").classList.contains("active")) {
+      document.getElementById("addLat").value = lat;
+      document.getElementById("addLng").value = lng;
+
+      // Reset trạng thái
+      isPickingMode = null;
+      document.getElementById("map").style.cursor = ""; // Trả lại con trỏ chuột
+
+      // Đảm bảo form thêm hiện lên
+      document.getElementById("addModal").classList.add("active");
+
+      // (Tùy chọn) Hiện popup xác nhận nhanh
+      L.popup().setLatLng(e.latlng).setContent("Đã chọn vị trí này cho địa điểm mới!").openOn(map);
+    }
+
+    // --- TRƯỜNG HỢP 2: ĐANG CHỈNH SỬA (EDIT) ---
+    else if (isPickingMode === "edit") {
+      document.getElementById("editLat").value = lat;
+      document.getElementById("editLng").value = lng;
+
+      // 1. Xóa marker tạm cũ nếu đã có (để tránh trên map có nhiều ghim rác)
+      if (tempMarker) {
+        map.removeLayer(tempMarker);
+      }
+
+      // 2. Tạo Marker mới tại vị trí vừa click
+      tempMarker = L.marker([lat, lng], {
+        draggable: true, // Cho phép kéo thả để chỉnh lại cho chuẩn
+      }).addTo(map);
+
+      // 3. Gắn popup cho nó để dễ nhìn
+      tempMarker.bindPopup("<b>📍 Vị trí mới</b><br>Đang chờ lưu...").openPopup();
+
+      // 4. (Tùy chọn) Cập nhật lại tọa độ khi kéo thả marker này
+      tempMarker.on("dragend", function (event) {
+        var marker = event.target;
+        var position = marker.getLatLng();
+        document.getElementById("editLat").value = position.lat.toFixed(5);
+        document.getElementById("editLng").value = position.lng.toFixed(5);
+      });
+
+      // Reset trạng thái
+      isPickingMode = null;
+      document.getElementById("map").style.cursor = "";
+
+      // QUAN TRỌNG: Bật lại Modal Sửa (lúc nãy đã bị ẩn đi để nhìn bản đồ)
+      document.getElementById("editModal").classList.add("active");
+
+      // Đóng thông báo hướng dẫn phía trên (nếu có)
+      const notifModal = document.getElementById("notificationModal");
+      if (notifModal) notifModal.classList.remove("active");
+
+      // Thông báo nhỏ
+      L.popup().setLatLng(e.latlng).setContent("Đã thay đổi vị trí cho địa điểm hiện tại!").openOn(map);
     }
   });
 }
@@ -397,15 +451,7 @@ function renderLocations(data) {
 function showDetail(loc) {
   currentOpenLoc = loc;
 
-  let mapLink = "";
-  if (loc.lat && loc.lng) {
-    // ⚠️ QUAN TRỌNG: Phải dùng dấu HUYỀN (`) - Phím nằm dưới phím Esc
-    // Link này dùng chế độ "Search" để ghim đúng tọa độ (không bị tự động bắt vào đường)
-    mapLink = `https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`;
-  } else {
-    // Tìm kiếm theo tên nếu thiếu tọa độ
-    mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.name + " Thừa Thiên Huế")}`;
-  }
+  let mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.name + " Thừa Thiên Huế")}`;
 
   flyToLocation(loc.lat, loc.lng, loc.name);
   const panel = document.getElementById("detail-panel");
@@ -620,12 +666,31 @@ function closeAddModal() {
 function activateMapPicker() {
   closeAddModal();
   closeAdminModal();
-  isPickingMode = true;
+  isPickingMode = "add";
 
   showNotification({
     type: "success",
     title: "Chế độ chọn vị trí",
     message: "Hãy click chuột vào điểm bạn muốn chọn trên bản đồ.",
+    btnText: "Đóng",
+  });
+
+  document.getElementById("addLat").value = "";
+  document.getElementById("addLng").value = "";
+  document.getElementById("map").style.cursor = "crosshair";
+}
+
+function activateEditMapPicker() {
+  // Ẩn form sửa đi để nhìn thấy bản đồ
+  document.getElementById("editModal").classList.remove("active");
+
+  // Gán trạng thái là edit
+  isPickingMode = "edit";
+
+  showNotification({
+    type: "info",
+    title: "Chọn vị trí mới",
+    message: "Click vào vị trí mới trên bản đồ để cập nhật.",
     btnText: "Đóng",
   });
 
@@ -650,7 +715,14 @@ async function submitAddLocation() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  alert("✅ Thêm thành công!");
+
+  showNotification({
+    type: "success",
+    title: "Thành công",
+    message: "Đã thêm địa điểm mới vào hệ thống.",
+    btnText: "OK",
+  });
+
   closeAddModal();
   loadLocations("All");
   cachedAllLocations = null;
@@ -659,45 +731,133 @@ async function submitAddLocation() {
 
 function openEditModal() {
   if (!currentOpenLoc) return;
-  document.getElementById("editModal").classList.add("active");
+
+  // 1. Điền các thông tin văn bản (Tên, mô tả...)
   document.getElementById("editOldName").value = currentOpenLoc.name;
   document.getElementById("editName").value = currentOpenLoc.name;
-  document.getElementById("editLat").value = currentOpenLoc.lat;
-  document.getElementById("editLng").value = currentOpenLoc.lng;
   document.getElementById("editCategory").value = currentOpenLoc.category;
   document.getElementById("editRating").value = currentOpenLoc.rating;
   document.getElementById("editImage").value = currentOpenLoc.image;
   document.getElementById("editDesc").value = currentOpenLoc.description;
+
+  // 2. Tính toán tọa độ (Logic quan trọng)
+  let finalLat = currentOpenLoc.lat; // Mặc định lấy từ Database
+  let finalLng = currentOpenLoc.lng;
+
+  // Kiểm tra xem có ghim tạm thời đang cắm trên bản đồ không?
+  if (tempMarker) {
+    const pos = tempMarker.getLatLng();
+    finalLat = pos.lat.toFixed(5);
+    finalLng = pos.lng.toFixed(5);
+    console.log("👉 Đã phát hiện ghim tạm, ưu tiên sử dụng tọa độ mới:", finalLat, finalLng);
+  } else {
+    console.log("ℹ️ Không có ghim tạm, sử dụng tọa độ gốc từ Database.");
+  }
+
+  // 3. GÁN GIÁ TRỊ VÀO Ô INPUT (Chỉ làm 1 lần tại đây)
+  // Dùng setTimeout 0ms để đẩy việc này xuống cuối hàng đợi xử lý của trình duyệt
+  // Giúp khắc phục lỗi giao diện chưa kịp cập nhật
+  setTimeout(() => {
+    document.getElementById("editLat").value = finalLat;
+    document.getElementById("editLng").value = finalLng;
+  }, 0);
+
+  // 4. Hiển thị Modal
+  document.getElementById("editModal").classList.add("active");
 }
+
 function closeEditModal() {
   document.getElementById("editModal").classList.remove("active");
+
+  isPickingMode = null;
+  document.getElementById("map").style.cursor = "";
+
+  const notifModal = document.getElementById("notificationModal");
+  if (notifModal) notifModal.classList.remove("active");
 }
 
 async function submitEditLocation() {
+  // 1. Lấy dữ liệu (Logic ưu tiên Marker như bài trước)
+  let submitLat = document.getElementById("editLat").value;
+  let submitLng = document.getElementById("editLng").value;
+
+  if (tempMarker) {
+    const pos = tempMarker.getLatLng();
+    submitLat = pos.lat;
+    submitLng = pos.lng;
+  }
+
   const body = {
     old_name: document.getElementById("editOldName").value,
     name: document.getElementById("editName").value,
-    lat: document.getElementById("editLat").value,
-    lng: document.getElementById("editLng").value,
+    lat: submitLat,
+    lng: submitLng,
     category: document.getElementById("editCategory").value,
     rating: document.getElementById("editRating").value,
     image: document.getElementById("editImage").value,
     description: document.getElementById("editDesc").value,
   };
-  await apiFetch("/api/admin/location/update", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  alert("✅ Cập nhật xong!");
-  closeEditModal();
-  closeDetail();
-  loadLocations("All");
-  cachedAllLocations = null;
 
-  // Reset nút bộ lọc về tất cả
-  document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
-  document.querySelector(".chip:first-child").classList.add("active");
+  try {
+    // Gọi API cập nhật
+    await apiFetch("/api/admin/location/update", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    // --- ✅ KHẮC PHỤC LỖI KHÔNG CẬP NHẬT NGAY ---
+
+    // 1. Xóa ghim tạm (Temp Marker)
+    if (tempMarker) {
+      map.removeLayer(tempMarker);
+      tempMarker = null;
+    }
+
+    // 2. XÓA BỘ NHỚ ĐỆM DỮ LIỆU
+    cachedAllLocations = null;
+    currentListData = [];
+
+    // 3. XÓA SẠCH CÁC GHIM CŨ TRÊN BẢN ĐỒ (Quan trọng)
+    // Nếu bạn dùng markerLayer (như khai báo đầu file), hãy xóa nó
+    if (typeof markerLayer !== "undefined" && markerLayer) {
+      markerLayer.clearLayers();
+    }
+
+    // 4. CẬP NHẬT BIẾN currentOpenLoc (Quan trọng)
+    // Để nếu bạn click vào xem chi tiết ngay, nó sẽ hiển thị dữ liệu mới
+    if (currentOpenLoc && currentOpenLoc.name === body.old_name) {
+      // Gán đè dữ liệu mới vào biến hiện tại
+      currentOpenLoc.name = body.name;
+      currentOpenLoc.lat = body.lat;
+      currentOpenLoc.lng = body.lng;
+      currentOpenLoc.image = body.image;
+      currentOpenLoc.category = body.category;
+      currentOpenLoc.description = body.description;
+    }
+    // ----------------------------------------------
+
+    showNotification({
+      type: "success",
+      title: "Thành công",
+      message: "Đã cập nhật dữ liệu mới.",
+      btnText: "OK",
+    });
+
+    closeEditModal();
+    closeDetail();
+
+    // 5. Tải lại dữ liệu mới từ Server
+    // Thêm await để đảm bảo tải xong mới làm việc khác
+    await loadLocations("All");
+
+    // Reset bộ lọc UI
+    document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+    document.querySelector(".chip:first-child").classList.add("active");
+  } catch (error) {
+    console.error(error);
+    showNotification({ type: "error", title: "Lỗi", message: "Lỗi lưu: " + error.message });
+  }
 }
 
 async function deleteLocation(name) {
@@ -707,7 +867,14 @@ async function deleteLocation(name) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
   });
-  alert("✅ Đã xóa!");
+
+  showNotification({
+    type: "delete",
+    title: "Thành công",
+    message: "Đã xóa địa điểm khỏi hệ thống.",
+    btnText: "OK",
+  });
+
   closeDetail();
   loadLocations("All");
   cachedAllLocations = null;
