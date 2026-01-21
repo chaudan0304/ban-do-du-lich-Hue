@@ -81,7 +81,7 @@ def register_user(username, password):
 
     # 3. Tạo User mới + kiểm tra kết quả thực sự
     create_query = """
-    CREATE (u:User {name: $name, password: $pw_hash, role: 'user'})
+    CREATE (u:User {name: $name, password: $pw_hash, role: 'user', create_at: datetime()})
     RETURN u.name AS name
     """
 
@@ -122,9 +122,10 @@ def get_all_users():
     query = """
     MATCH (u:User)
     WHERE u.role IS NULL OR u.role <> 'admin'
-    RETURN DISTINCT u.name AS name,
-       size([(u)-[:LIKED]->(l) | l]) AS liked_count
-    ORDER BY name ASC
+    RETURN u.name AS name,
+           size([(u)-[:LIKED]->(l) | l]) AS liked_count,
+           toString(u.create_at) AS create_at
+    ORDER BY u.create_at DESC
     """
     return run_query(query)
 

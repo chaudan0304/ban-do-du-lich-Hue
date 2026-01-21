@@ -214,46 +214,70 @@ function switchTab(tab) {
   }
 }
 
+// --- Login & Register Logic ---
 function handleLogin() {
   const u = document.getElementById("loginUser").value.trim();
   const p = document.getElementById("loginPass").value;
+
+  // 1. Kiểm tra đầu vào
   if (!u || !p) {
     showNotification({
       type: "error",
       title: "Cảnh báo",
-      message: "Thiếu tài khoản hoặc mật khẩu",
+      message: "Vui lòng nhập đầy đủ tài khoản và mật khẩu!",
       btnText: "Đóng",
     });
     return;
   }
 
-  document.getElementById("loginMsg").innerText = "";
-  apiFetch("/api/login", {
+  // Lấy thẻ thông báo lỗi để dùng nhiều lần
+  const msgElement = document.getElementById("loginMsg");
+  msgElement.innerText = "Đang xử lý...";
+
+  // 2. Dùng FETCH chuẩn (Thay vì apiFetch để tránh lỗi stream)
+  fetch("/api/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: u, password: p }),
   })
-    .then((res) => {
-      if (res.message) {
-        currentUser = res.username;
-        userRole = res.role;
+    .then(async (response) => {
+      // ✅ ĐỌC DỮ LIỆU 1 LẦN DUY NHẤT VÀO BIẾN 'data'
+      const data = await response.json();
+
+      // Kiểm tra HTTP Status (200 là thành công)
+      if (response.ok) {
+        // --- XỬ LÝ THÀNH CÔNG ---
+        currentUser = data.username;
+        userRole = data.role;
+
         closeAuthModal();
         checkLoginStatus();
 
-        if (currentOpenLoc) {
+        // Load lại chi tiết địa điểm nếu đang mở (để cập nhật nút Like)
+        if (typeof currentOpenLoc !== "undefined" && currentOpenLoc !== null) {
           showDetail(currentOpenLoc);
         }
+
         showNotification({
           type: "success",
           title: "Đăng nhập thành công",
-          message: `Chào mừng <b>${res.username}</b>! đã quay trở lại.`,
+          message: `Chào mừng <b>${data.username}</b>!`,
           btnText: "Bắt đầu",
         });
+
+        msgElement.innerText = ""; // Xóa thông báo lỗi
       } else {
-        document.getElementById("loginMsg").innerText = res.error;
+        // --- XỬ LÝ LỖI ---
+        // Dùng biến 'data' đã đọc ở trên, lấy thuộc tính .error
+        msgElement.innerText = data.error || "Đăng nhập thất bại";
+        msgElement.style.color = "red";
       }
     })
-    .catch((err) => (document.getElementById("loginMsg").innerText = err.message));
+    .catch((err) => {
+      console.error("Login Error:", err);
+      msgElement.innerText = "Lỗi kết nối đến máy chủ!";
+      msgElement.style.color = "red";
+    });
 }
 
 function handleRegister() {
@@ -623,6 +647,16 @@ async function loadAdminUsersList() {
   tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">⏳ Đang tải...</td></tr>';
   try {
     const users = await apiFetch("/api/admin/users");
+
+    console.log("👉 Tổng số user Server trả về:", users.length);
+    console.log(
+      "👉 Danh sách tên:",
+      users.map((u) => u.name),
+    );
+
+    // Kiểm tra xem có user nào tên là "admin" trong này không?
+    const hasAdmin = users.find((u) => u.name === "admin");
+    console.log("👉 Có user 'admin' trong danh sách không?", hasAdmin ? "CÓ" : "KHÔNG");
     tbody.innerHTML = "";
     users.forEach((u) => {
       if (u.name === "admin") return;

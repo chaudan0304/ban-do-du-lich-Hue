@@ -9,10 +9,10 @@ from flask_login import (
     current_user,
 )
 from db import run_query, close_driver, register_user, verify_user
-import atexit
 from db import get_all_users, delete_user_by_name
 from db import toggle_like_location
 import setup_algo
+import atexit
 
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
@@ -28,8 +28,9 @@ atexit.register(close_driver)
 
 
 class User(UserMixin):
-    def __init__(self, id):
+    def __init__(self, id, role=None):
         self.id = id
+        self.role = "role"
 
 
 # Hàm tải user từ session
@@ -65,7 +66,7 @@ def api_login():
     user_data = verify_user(username, password)
 
     if user_data:
-        user = User(id=user_data["name"])
+        user = User(id=user_data["name"], role=user_data["role"])
         login_user(user)
         # Trả về role cho frontend biết
         return (

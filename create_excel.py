@@ -1,4 +1,5 @@
 import pandas as pd
+import random
 
 # ============================================================
 # 1. DANH SÁCH ĐỊA ĐIỂM)
@@ -379,44 +380,27 @@ df_locations["city"] = "Huế"
 # Dictionary giúp tìm ID nhanh từ tên: "Hoàng Thành Huế" -> 1
 name_to_id = df_locations.set_index("name")["id"].to_dict()
 
-user_data_raw = [
-    # Sinh viên thích ăn uống và check-in, nhưng cũng thích Đại Nội
-    (
-        "SinhVienHue",
-        ["Hoàng Thành Huế", "Chè Hẻm Huế", "Bún Bò Mệ Kéo", "Cầu Trường Tiền"],
-    ),
-    # Khách Tây thích di tích và thiên nhiên, cũng thích Đại Nội
-    (
-        "KhachTayBalo",
-        ["Hoàng Thành Huế", "Lăng Khải Định", "Vườn Quốc gia Bạch Mã", "Đầm Lập An"],
-    ),
-    # Người yêu thiên nhiên, thích Bạch Mã nhưng cũng ghé Cầu Trường Tiền
-    (
-        "HoiYeuThienNhien",
-        [
-            "Cầu Trường Tiền",
-            "Vườn Quốc gia Bạch Mã",
-            "Đồi Vọng Cảnh",
-            "Bãi biển Thuận An",
-        ],
-    ),
-    # Người tâm linh, thích chùa chiền và lăng tẩm
-    ("YeuTamLinh", ["Chùa Thiên Mụ", "Điện Hòn Chén", "Chùa Từ Đàm", "Lăng Khải Định"]),
-    # Một hướng dẫn viên du lịch thích TẤT CẢ các điểm hot
-    (
-        "HuongDanVien",
-        ["Hoàng Thành Huế", "Chùa Thiên Mụ", "Bún Bò Mệ Kéo", "Cầu Trường Tiền"],
-    ),
-]
+# Lấy danh sách tất cả tên địa điểm
+all_location_names = df_locations["name"].tolist()
+user_data_raw = []
+
+for i in range(1, 11):
+    user_name = f"User {i}"
+    pass_word = "123"
+    num_like = random.randint(3, 8)
+    liked_locations = random.sample(all_location_names, num_like)
+
+    user_data_raw.append((user_name, pass_word, liked_locations))
 
 # Chuyển đổi dữ liệu user sang dạng chuẩn (có ID)
 user_list = []
-for user_name, liked_places in user_data_raw:
-    for place_name in liked_places:
+for user_name, pass_word, liked_locations in user_data_raw:
+    for place_name in liked_locations:
         if place_name in name_to_id:
             user_list.append(
                 {
                     "user_name": user_name,
+                    "pass_word": pass_word,
                     "liked_id": name_to_id[place_name],  # Tự động lấy ID chuẩn
                 }
             )

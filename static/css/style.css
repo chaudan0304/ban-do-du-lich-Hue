@@ -1267,6 +1267,7 @@ body {
   max-width: 550px;
   /* Độ rộng vừa phải */
   max-height: 85vh;
+  height: 85vh;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -1330,10 +1331,12 @@ body {
 /* Body Styling */
 .modal-body-fancy {
   padding: 32px;
+  padding-bottom: 20px;
   background: #f8fafc;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Form Groups */
@@ -1583,7 +1586,9 @@ body {
 
 /* Danh sách user */
 .user-list-scroll {
-  max-height: 250px;
+  flex: 1;
+  max-height: none;
+  min-height: 0;
   overflow-y: auto;
   border: 1px solid #e2e8f0;
   border-radius: 8px;

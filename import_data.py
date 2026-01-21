@@ -1,14 +1,16 @@
 import pandas as pd
 from db import run_query, close_driver
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 def main():
     print("⏳ Đang đọc file Excel...")
     try:
-        # Xóa dữ liệu cũ
+        # 1. Xóa dữ liệu cũ (Reset Database)
+        print("🧹 Đang dọn dẹp dữ liệu cũ...")
         run_query("MATCH (n) DETACH DELETE n")
 
-        # Nạp Locations (QUAN TRỌNG: Có nạp image)
+        # 2. Nạp Locations
         df_loc = pd.read_excel("data.xlsx", sheet_name="Locations")
         print(f"📥 Đang nạp {len(df_loc)} địa điểm...")
 
@@ -38,18 +40,66 @@ def main():
                 },
             )
 
-        # Nạp Users
+        # 3. Nạp Users (Mã hóa mật khẩu)
         df_user = pd.read_excel("data.xlsx", sheet_name="Users")
+        print(f"👤 Đang nạp {len(df_user)} User (đang mã hóa mật khẩu)...")
+
+        row_count_users = 0
         for i, row in df_user.iterrows():
+            # Mã hóa mật khẩu
+            raw_pass = str(row["pass_word"])
+            hash_pass = generate_password_hash(raw_pass)
+
             q_user = """
             MERGE (u:User {name: $name})
+            
+            ON CREATE SET 
+                u.password = $pass, 
+                u.role = 'user',
+                u.created_at = datetime()
+            ON MATCH SET 
+                u.password = $pass
+
             WITH u
             MATCH (l:Location {id: $lid})
             MERGE (u)-[:LIKED]->(l)
             """
-            run_query(q_user, {"name": row["user_name"], "lid": row["liked_id"]})
 
-        print("✅ NẠP DỮ LIỆU THÀNH CÔNG! (Đã có ảnh)")
+            run_query(
+                q_user,
+                {
+                    "name": row["user_name"],
+                    "pass": hash_pass,
+                    "lid": row["liked_id"],
+                },
+            )
+            row_count_users += 1
+
+        # 4. Tự động tạo tài khoản Admin (Để bạn đăng nhập)
+        print("🔑 Đang tạo tài khoản Admin (Mã hóa)...")
+
+        admin_pass = "admin"
+        admin_hass = generate_password_hash(admin_pass)
+        run_query(
+            """
+            MERGE (a:User {name: 'admin'})
+            SET a.password = $pass, 
+                a.role = 'admin', 
+                a.created_at = datetime()
+        """,
+            {"pass": admin_hass},
+        )
+
+        # Tính toán số liệu
+        total_users = df_user["user_name"].nunique()
+
+        print("-" * 30)
+        print("✅ NẠP DỮ LIỆU THÀNH CÔNG!")
+        print(f"- Tổng địa điểm: {len(df_loc)}")
+        print(f"- Tổng User thực tế: {total_users}")
+        print(f"- Tổng số lượt thích : {row_count_users}")
+        print("- Tài khoản Admin: admin / {admin_pass}")
+        print("-" * 30)
 
     except Exception as e:
         print(f"❌ Lỗi: {e}")

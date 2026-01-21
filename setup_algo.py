@@ -88,23 +88,27 @@ def run_hybrid_algo():
         # --- PHẦN 4: HIỂN THỊ KẾT QUẢ SO SÁNH ---
         print("\n✅ SO SÁNH KẾT QUẢ:")
         print(
-            f"{'Tên địa điểm':<30} | {'Phổ biến (User)':<15} | {'Kết nối (Mạng lưới)':<15}"
+            f"{'Tên địa điểm':<35} | {'Phổ biến (User)':^15} | {'Kết nối (Mạng lưới)':^20} | {'Tổng điểm':^12} |"
         )
-        print("-" * 70)
+        print("-" * 93)
 
         result = session.run(
             """
             MATCH (l:Location)
             RETURN l.name AS name, 
                    coalesce(l.pagerankScore, 0) AS score1, 
-                   coalesce(l.pagerankConnect, 0) AS score2
-            ORDER BY score1 DESC
-            LIMIT 10
+                   coalesce(l.pagerankConnect, 0) AS score2,
+                   coalesce(l.pagerankScore, 0) + coalesce(l.pagerankConnect, 0) AS total_score
+            ORDER BY total_score DESC
+            LIMIT 50
         """
         )
 
         for r in result:
-            print(f"{r['name']:<30} | {r['score1']:.4f}          | {r['score2']:.4f}")
+            print(
+                f"{r['name']:<35} | {r['score1']:^15.4f} | {r['score2']:^20.4f} | {r['total_score']:^12.4f} |"
+            )
+        print("-" * 93)
 
     driver.close()
 
