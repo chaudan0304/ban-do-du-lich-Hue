@@ -1,18 +1,22 @@
 import pandas as pd
 from db import run_query, close_driver
 from werkzeug.security import generate_password_hash, check_password_hash
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def main():
-    print("⏳ Đang đọc file Excel...")
+    logging.info("⏳ Đang đọc file Excel...")
     try:
         # 1. Xóa dữ liệu cũ (Reset Database)
-        print("🧹 Đang dọn dẹp dữ liệu cũ...")
+        logging.info("🧹 Đang dọn dẹp dữ liệu cũ...")
         run_query("MATCH (n) DETACH DELETE n")
 
         # 2. Nạp Locations
         df_loc = pd.read_excel("data.xlsx", sheet_name="Locations")
-        print(f"📥 Đang nạp {len(df_loc)} địa điểm...")
+        logging.info(f"📥 Đang nạp {len(df_loc)} địa điểm...")
 
         for i, row in df_loc.iterrows():
             q_loc = """
@@ -42,7 +46,7 @@ def main():
 
         # 3. Nạp Users (Mã hóa mật khẩu)
         df_user = pd.read_excel("data.xlsx", sheet_name="Users")
-        print(f"👤 Đang nạp {len(df_user)} User (đang mã hóa mật khẩu)...")
+        logging.info(f"👤 Đang nạp {len(df_user)} User (đang mã hóa mật khẩu)...")
 
         row_count_users = 0
         for i, row in df_user.iterrows():
@@ -76,7 +80,7 @@ def main():
             row_count_users += 1
 
         # 4. Tự động tạo tài khoản Admin (Để bạn đăng nhập)
-        print("🔑 Đang tạo tài khoản Admin (Mã hóa)...")
+        logging.info("🔑 Đang tạo tài khoản Admin (Mã hóa)...")
 
         admin_pass = "admin"
         admin_hass = generate_password_hash(admin_pass)
@@ -93,16 +97,16 @@ def main():
         # Tính toán số liệu
         total_users = df_user["user_name"].nunique()
 
-        print("-" * 30)
-        print("✅ NẠP DỮ LIỆU THÀNH CÔNG!")
-        print(f"- Tổng địa điểm: {len(df_loc)}")
-        print(f"- Tổng User thực tế: {total_users}")
-        print(f"- Tổng số lượt thích : {row_count_users}")
-        print("- Tài khoản Admin: admin / {admin_pass}")
-        print("-" * 30)
+        logging.info("-" * 30)
+        logging.info("✅ NẠP DỮ LIỆU THÀNH CÔNG!")
+        logging.info(f"- Tổng địa điểm: {len(df_loc)}")
+        logging.info(f"- Tổng User thực tế: {total_users}")
+        logging.info(f"- Tổng số lượt thích : {row_count_users}")
+        logging.info("- Tài khoản Admin: admin / {admin_pass}")
+        logging.info("-" * 30)
 
     except Exception as e:
-        print(f"❌ Lỗi: {e}")
+        logging.error(f"❌ Lỗi: {e}")
     finally:
         close_driver()
 

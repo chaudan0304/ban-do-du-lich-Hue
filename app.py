@@ -8,20 +8,46 @@ from flask_login import (
     logout_user,
     current_user,
 )
-from db import run_query, close_driver, register_user, verify_user
-from db import get_all_users, delete_user_by_name
-from db import toggle_like_location
-import setup_algo
+from dotenv import load_dotenv
+import os
 import atexit
+import setup_algo
 
+from db import (
+    run_query,
+    close_driver,
+    register_user,
+    verify_user,
+    get_all_users,
+    delete_user_by_name,
+    toggle_like_location,
+)
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# ======================================================
+# LOAD ENV & APP CONFIG
+# ======================================================
+# Đọc file .env ở thư mục gốc
+load_dotenv()
+
+secret = os.getenv("FLASK_SECRET_KEY")
+if not secret:
+    raise RuntimeError("FLASK_SECRET_KEY chưa được cấu hình!")
+
+# Khởi tạo ứng dụng Flask
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
-app.secret_key = "khoa_luan_bi_mat_123"  # Key để mã hóa session cookie
+app.secret_key = secret
 
-# --- CẤU HÌNH FLASK-LOGIN ---
+# ======================================================
+# FLASK LOGIN CONFIG
+# ======================================================
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "index"  # Chuyển hướng đến trang chính nếu chưa đăng nhập
+login_manager.login_view = "index"
 
 # Đóng driver Neo4j khi ứng dụng kết thúc
 atexit.register(close_driver)
@@ -30,7 +56,7 @@ atexit.register(close_driver)
 class User(UserMixin):
     def __init__(self, id, role=None):
         self.id = id
-        self.role = "role"
+        self.role = role
 
 
 # Hàm tải user từ session
@@ -43,12 +69,21 @@ def load_user(user_id):
 @app.route("/api/register", methods=["POST"])
 def api_register():
     data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
 
+    # Kiểm tra thông tin đăng ký
     if not username or not password:
-        return jsonify({"error": "Thiếu thông tin"}), 400
+        return jsonify({"error": "Vui lòng nhập đầy đủ tài khoản và mật khẩu"}), 400
 
+    # Kiểm tra độ dài tài khoản, mật khẩu
+    if len(username) < 3:
+        return jsonify({"error": "Tên tài khoản phải có ít nhất 3 ký tự"}), 400
+
+    if len(password) < 3:
+        return jsonify({"error": "Mật khẩu phải có ít nhất 3 ký tự"}), 400
+
+    # Đăng ký tài khoản
     success, message = register_user(username, password)
     if success:
         return jsonify({"success": True, "message": message}), 201
@@ -139,11 +174,12 @@ def api_toggle_like():
 # ==========================================================
 # 5. API ADMIN: QUẢN TRỊ HỆ THỐNG & CRUD ĐỊA ĐIỂM
 # ==========================================================
-
-
-# --- API LẤY THỐNG KÊ (Đã fix lỗi cú pháp CALL) ---
+# --- API LẤY THỐNG KÊ ---
 @app.route("/api/admin/stats", methods=["GET"])
 def get_admin_stats():
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền"}), 403
+
     query = """
     CALL () { MATCH (u:User) RETURN count(u) as user_count }
     CALL () { MATCH (l:Location) RETURN count(l) as location_count }
@@ -161,9 +197,10 @@ def get_admin_stats():
 # --- API CHẠY LẠI THUẬT TOÁN (TRIGGER AI) ---
 @app.route("/api/admin/run-algo", methods=["POST"])
 def run_algo_trigger():
-    try:
-        import setup_algo
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền"}), 403
 
+    try:
         setup_algo.run_hybrid_algo()
         return jsonify({"status": "success", "message": "Đã cập nhật điểm PageRank!"})
     except Exception as e:
@@ -173,6 +210,9 @@ def run_algo_trigger():
 # --- API THÊM ĐỊA ĐIỂM MỚI (CREATE) ---
 @app.route("/api/admin/location/add", methods=["POST"])
 def add_location():
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền"}), 403
+
     data = request.json
     try:
         query = """
@@ -206,6 +246,9 @@ def add_location():
 # --- API SỬA ĐỊA ĐIỂM (UPDATE) ---
 @app.route("/api/admin/location/update", methods=["PUT"])
 def update_location():
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền"}), 403
+
     data = request.json
     try:
         query = """
@@ -243,6 +286,9 @@ def update_location():
 # --- API XÓA ĐỊA ĐIỂM (DELETE) ---
 @app.route("/api/admin/location/delete", methods=["DELETE"])
 def delete_location():
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền"}), 403
+
     try:
         query = "MATCH (l:Location {name: $name}) DETACH DELETE l"
         run_query(query, {"name": request.json.get("name")})
@@ -366,5 +412,5 @@ def recommend(user_name):
 
 
 if __name__ == "__main__":
-    print("🚀 Server đang chạy tại: http://127.0.0.1:5000")
+    logging.info("🚀 Server đang chạy tại: http://127.0.0.1:5000")
     app.run(port=5000, debug=True)

@@ -347,7 +347,7 @@ function analyzeUser(isLoggedInUser = false) {
         .map(
           (place) =>
             `<div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
-                   <img src="${place.image}" onerror="this.src='/static/images/no-image.png'"> ${place.name}
+                   <img src="${place.image}" loading = "lazy" onerror="this.src='/static/images/no-image.png'"> ${place.name}
                  </div>`,
         )
         .join("");
@@ -381,7 +381,7 @@ function getRecommendations(user) {
       const card = document.createElement("div");
       card.className = "ai-card";
       card.innerHTML = `
-                <div class="card-thumb"><img src="${loc.image}" onerror="this.src='/static/images/no-image.png'"></div>
+                <div class="card-thumb"><img src="${loc.image}" loading = "lazy" onerror="this.src='/static/images/no-image.png'"></div>
                 <div class="card-content">
                     <div class="card-title">${loc.name}</div>
                     <div class="card-desc">${loc.description || "..."}</div>
@@ -435,7 +435,7 @@ function renderLocations(data) {
     const div = document.createElement("div");
     div.className = "mini-item";
     div.innerHTML = `
-      <img src="${loc.image}" class="mini-img" onerror="this.src='/static/images/no-image.png'">
+      <img src="${loc.image}" loading = "lazy"class="mini-img" onerror="this.src='/static/images/no-image.png'">
       <div style="flex:1; overflow:hidden;">
         <div class="mini-name">${loc.name}</div>
         <div style="font-size:11px; color:#f59e0b;">⭐ ${loc.rating ? loc.rating.toFixed(1) : "5.0"}</div>
@@ -498,7 +498,7 @@ function showDetail(loc) {
     : `<button class="btn-action btn-like" onclick="openAuthModal()"><i class="fas fa-lock"></i> Đăng nhập để thích</button>`;
 
   content.innerHTML = `
-        <img src="${loc.image}" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
+        <img src="${loc.image}" loading = "lazy" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
         <div class="detail-body">
             <h1 class="detail-title">${loc.name}</h1>
             <div class="detail-meta"><span>⭐ ${loc.rating || 5}/5</span> • <span>${loc.category}</span></div>

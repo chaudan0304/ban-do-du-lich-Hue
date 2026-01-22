@@ -2,6 +2,11 @@ import os
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from werkzeug.security import generate_password_hash, check_password_hash
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 # Đọc file .env ở thư mục gốc
 load_dotenv()
@@ -28,9 +33,9 @@ def get_driver():
         try:
             driver = GraphDatabase.driver(URI, auth=AUTH)
             driver.verify_connectivity()
-            print("✅ (db.py) Đã kết nối Neo4j thành công!")
+            logger.info("✅ (db.py) Đã kết nối Neo4j thành công!")
         except Exception as e:
-            print(f"❌ (db.py) Lỗi kết nối: {e}")
+            logger.error(f"❌ (db.py) Lỗi kết nối: {e}")
             driver = None
     return driver
 
