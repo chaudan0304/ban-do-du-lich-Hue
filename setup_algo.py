@@ -15,8 +15,12 @@ def run_hybrid_algo():
     with driver.session() as session:
         print("⏳ Đang xử lý dữ liệu Hybrid...")
 
-        # --- PHẦN 1: TẠO MỐI QUAN HỆ 'RELATED_TO' (Location <-> Location) ---
-        print("1️⃣  Đang tạo mối liên hệ giữa các địa điểm (Co-occurrence)...")
+        # --- Dọn dẹp liên kết RELATED_TO cũ...
+        print(" 🧹  Đang dọn dẹp liên kết cũ...")
+        session.run("MATCH ()-[r:RELATED_TO]->() DELETE r")
+
+        # --- PHẦN 1a: TẠO MỐI QUAN HỆ 'RELATED_TO' (Location <-> Location) ---
+        print("1️⃣a  Đang tạo mối liên hệ giữa các địa điểm (Co-occurrence)...")
         # Logic: Nếu cùng 1 user thích cả 2 địa điểm, thì 2 địa điểm đó liên quan nhau
         session.run(
             """
@@ -24,6 +28,20 @@ def run_hybrid_algo():
             MATCH (u)-[:LIKED]->(l2:Location)
             WHERE elementId(l1) < elementId(l2)
             MERGE (l1)-[:RELATED_TO]-(l2)
+        """
+        )
+
+        # PHẦN 1b: TẠO LIÊN KẾT THEO NỘI DUNG CÙNG DANH MỤC
+        print("1️⃣b Tạo liên kết theo nội dung cùng danh mục (Content-based)...")
+        # Logic: Nếu 2 địa điểm cùng trỏ về 1 Category -> Tạo quan hệ RELATED_TO giữa chúng
+        session.run(
+            """
+            MATCH (l1:Location)-[:HAS_CATEGORY]->(cat:Category)<-[:HAS_CATEGORY]-(l2:Location)
+            WHERE elementId(l1) < elementId(l2)
+            MERGE (l1)-[r:RELATED_TO]-(l2)
+            
+            ON CREATE SET r.weight = 0.5
+            ON MATCH SET r.weight = 0.5
         """
         )
 
@@ -88,9 +106,9 @@ def run_hybrid_algo():
         # --- PHẦN 4: HIỂN THỊ KẾT QUẢ SO SÁNH ---
         print("\n✅ SO SÁNH KẾT QUẢ:")
         print(
-            f"{'Tên địa điểm':<35} | {'Phổ biến (User)':^15} | {'Kết nối (Mạng lưới)':^20} | {'Tổng điểm':^12} |"
+            f"{'Tên địa điểm':<36} | {'Phổ biến (User)':^15} | {'Kết nối (Mạng lưới)':^20} | {'Tổng điểm':^12} |"
         )
-        print("-" * 93)
+        print("-" * 94)
 
         result = session.run(
             """
@@ -106,9 +124,9 @@ def run_hybrid_algo():
 
         for r in result:
             print(
-                f"{r['name']:<35} | {r['score1']:^15.4f} | {r['score2']:^20.4f} | {r['total_score']:^12.4f} |"
+                f"{r['name']:<36} | {r['score1']:^15.4f} | {r['score2']:^20.4f} | {r['total_score']:^12.4f} |"
             )
-        print("-" * 93)
+        print("-" * 94)
 
     driver.close()
 

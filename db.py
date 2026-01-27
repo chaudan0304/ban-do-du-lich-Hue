@@ -63,7 +63,7 @@ def run_query(query, params=None):
             return records
     except Exception as e:
         error_str = str(e).lower()
-        print(f"❌ LỖI NEO4J: {e}")
+        logger.error(f"❌ LỖI NEO4J: {e}")
 
         # Phát hiện lỗi constraint (tên trùng)
         if "constraint" in error_str or "already exists" in error_str:
@@ -168,7 +168,8 @@ def toggle_like_location(username, location_name):
     else:
         # Chưa thích -> Tạo (Like)
         create_query = """
-        MATCH (u:User {name: $u_name}), (l:Location {name: $l_name})
+        MATCH (u:User {name: $u_name})
+        MATCH (l:Location {name: $l_name})
         MERGE (u)-[:LIKED]->(l)
         """
         run_query(create_query, {"u_name": username, "l_name": location_name})

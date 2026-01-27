@@ -349,66 +349,78 @@ def get_user_history(user_name):
 # --- 4. API: GỢI Ý THÔNG MINH (CORE AI) ---
 @app.route("/api/recommend/<user_name>", methods=["GET"])
 def recommend(user_name):
-    # Chiến thuật: Tìm người tương đồng (Collaborative Filtering) + PageRank
+    # --- CHIẾN THUẬT: HYBRID RECOMMENDATION ---
+    # Kết hợp 3 yếu tố:
+    # 1. Collaborative Filtering: "Người giống bạn cũng thích chỗ này"
+    # 2. Content-based Filtering: "Chỗ này giống chỗ bạn đã like (cùng danh mục/kết nối)"
+    # 3. PageRank: "Chỗ này đang rất hot"
+
     cypher_query = """
-    MATCH (me:User {name: $name})-[:LIKED]->(my_place:Location)
-    MATCH (other:User)-[:LIKED]->(my_place)
-    WHERE other.name <> $name
+    MATCH (me:User {name: $name})
     
-    MATCH (other)-[:LIKED]->(suggestion:Location)
-    WHERE NOT (me)-[:LIKED]->(suggestion)
+    // Bước 1: Collaborative Filtering
+    OPTIONAL MATCH (me)-[:LIKED]->(:Location)<-[:LIKED]-(other:User)-[:LIKED]->(l_collab:Location)
+    WHERE NOT (me)-[:LIKED]->(l_collab)
+    WITH me, l_collab, count(DISTINCT other) AS score_collab
+    WITH me, collect({loc: l_collab, score: score_collab, type: 'collab'}) AS collab_list
+
+    // Bước 2: Content-based Filtering
+    OPTIONAL MATCH (me)-[:LIKED]->(:Location)-[r:RELATED_TO]-(l_content:Location)
+    WHERE NOT (me)-[:LIKED]->(l_content)
+    WITH me, collab_list, l_content, sum(coalesce(r.weight, 1)) AS score_content
     
-    OPTIONAL MATCH (suggestion)-[:HAS_CATEGORY]->(cat:Category)
+    // Bước 3: Gom nhóm riêng biệt trước khi cộng mảng
+    WITH me, collab_list, collect({loc: l_content, score: score_content, type: 'content'}) AS content_list
+    WITH me, collab_list + content_list AS all_candidates
+
+    // Bước 4: Xử lý Unwind và tính điểm tổng hợp
+    UNWIND all_candidates AS c
+    WITH c.loc AS l, c.score AS s, c.type AS t
+    WHERE l IS NOT NULL
     
-    RETURN suggestion.name AS name, 
-           suggestion.desc AS description, 
-           suggestion.rating AS rating,
-           suggestion.lat AS lat,      
-           suggestion.lng AS lng,
-           
-           coalesce(suggestion.pagerankScore, 0.15) AS pr_pop,
-           coalesce(suggestion.pagerankConnect, 0.15) AS pr_conn,
-           
-           suggestion.image AS image, 
+    WITH l,
+         sum(CASE WHEN t = 'collab' THEN s ELSE 0 END) AS final_s_collab,
+         sum(CASE WHEN t = 'content' THEN s ELSE 0 END) AS final_s_content
+
+    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+
+    RETURN l.name AS name, 
+           l.desc AS description, 
+           l.rating AS rating,
+           l.lat AS lat,      
+           l.lng AS lng,
+           l.image AS image, 
            cat.name AS category,
-           count(other) AS common_users
+           coalesce(l.pagerankScore, 0.15) AS pr,
+           (final_s_collab * 3.0) + (final_s_content * 1.0) + (coalesce(l.pagerankScore, 0) * 10.0) AS final_score,
+           final_s_collab AS common_users
            
-    ORDER BY common_users DESC, (pr_pop + pr_conn) DESC 
-    LIMIT 6
+    ORDER BY final_score DESC
+    LIMIT 12
     """
+    try:
+        # Sử dụng hàm run_query từ db.py để thực thi
+        results = run_query(cypher_query, {"name": user_name})
 
-    results = run_query(cypher_query, {"name": user_name})
+        # Fallback cho người dùng mới (Cold Start) dựa trên PageRank
+        if not results:
+            fallback_query = """
+            MATCH (l:Location) 
+            OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+            RETURN l.name AS name, l.desc AS description, l.rating AS rating, 
+                   l.lat AS lat, l.lng AS lng, l.image as image, cat.name as category,
+                   coalesce(l.pagerankScore, 0.15) AS pr,
+                   l.pagerankScore AS final_score,
+                   0 as common_users
+            ORDER BY l.pagerankScore DESC
+            LIMIT 12
+            """
+            results = run_query(fallback_query)
 
-    # Fallback: Nếu user mới (Cold Start), gợi ý theo PageRank thuần túy
-    if not results:
-        fallback_query = """
-        MATCH (l:Location) 
-        OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
-        
-        RETURN l.name AS name, l.desc AS description, l.rating AS rating, 
-               l.lat AS lat, l.lng AS lng, 
-               
-               coalesce(l.pagerankScore, 0.15) AS pr_pop,
-               coalesce(l.pagerankConnect, 0.15) AS pr_conn,
-               
-               l.image as image,
-               cat.name as category,
-               0 as common_users
-        
-        ORDER BY (pr_pop + pr_conn) DESC
-        LIMIT 6
-        """
-        results = run_query(fallback_query)
-
-    # Đảm bảo results không phải là None trước khi xử lý
-    if results:
-        for item in results:
-            # Cộng gộp điểm để hiển thị ra ngoài (nếu cần)
-            item["pr"] = item.get("pr_pop", 0) + item.get("pr_conn", 0)
-    else:
-        results = []  # Trả về danh sách rỗng nếu lỗi để không sập app
-
-    return jsonify(results)
+        return jsonify(results or [])
+    except Exception as e:
+        print(f"❌ Lỗi Recommend: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":

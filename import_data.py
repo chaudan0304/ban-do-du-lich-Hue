@@ -23,7 +23,7 @@ def main():
             MERGE (c:City {name: $city})
             MERGE (cat:Category {name: $cat})
             MERGE (l:Location {id: $id})
-            SET l.name = $name, l.desc = $desc, l.rating = $rating, 
+            SET l.name = $name, l.desc = $desc, 
                 l.lat = $lat, l.lng = $lng, 
                 l.image = $image   
             MERGE (l)-[:LOCATED_IN]->(c)
@@ -37,7 +37,6 @@ def main():
                     "desc": row["description"],
                     "city": row["city"],
                     "cat": row["category"],
-                    "rating": row["rating"],
                     "lat": row["lat"],
                     "lng": row["lng"],
                     "image": row["image"],
