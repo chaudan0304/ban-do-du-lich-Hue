@@ -11,6 +11,7 @@ var userRole = "user";
 var userLikedSet = new Set();
 var currentOpenLoc = null;
 var isPickingMode = null;
+var currentCategory = "All";
 
 // Hàm gọi API chung
 async function apiFetch(url, options = {}) {
@@ -431,6 +432,9 @@ function renderLocations(data) {
 
   const latLngs = [];
   data.forEach((loc) => {
+    //Tính điểm PageRank hiển thị
+    let displayScore = (loc.score * 100).toFixed(1);
+
     // List item
     const div = document.createElement("div");
     div.className = "mini-item";
@@ -438,7 +442,11 @@ function renderLocations(data) {
       <img src="${loc.image}" loading = "lazy"class="mini-img" onerror="this.src='/static/images/no-image.png'">
       <div style="flex:1; overflow:hidden;">
         <div class="mini-name">${loc.name}</div>
-        <div style="font-size:11px; color:#f59e0b;">⭐ ${loc.rating ? loc.rating.toFixed(1) : "5.0"}</div>
+
+        <div style="font-size:12px; color:#059669; font-weight:700; margin-top:2px">
+          <i class="fas fa-chart-bar"></i> Điểm nổi tiếng: ${displayScore}
+        </div>
+
       </div>
     `;
     div.onclick = () => showDetail(loc);
@@ -473,7 +481,15 @@ function renderLocations(data) {
 }
 
 function showDetail(loc) {
+  if (currentCategory !== loc.category) {
+    console.log("Tự động chuyển danh mục sang:", loc.category);
+    filterData(loc.category);
+  }
+
   currentOpenLoc = loc;
+
+  let rawScore = loc.score !== undefined ? loc.score : loc.pr !== undefined ? loc.pr : 0;
+  let displayScore = (rawScore * 100).toFixed(1);
 
   let mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.name + " Thừa Thiên Huế")}`;
 
@@ -501,8 +517,14 @@ function showDetail(loc) {
         <img src="${loc.image}" loading = "lazy" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
         <div class="detail-body">
             <h1 class="detail-title">${loc.name}</h1>
-            <div class="detail-meta"><span>⭐ ${loc.rating || 5}/5</span> • <span>${loc.category}</span></div>
+
+            <div class="detail-meta">
+              <span style="color:#ffffff; background:#059669; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:12px;">⭐ Điểm nổi tiếng: ${displayScore}</span>
+              <span style="margin-left:8px; color:#6b7280">• ${loc.category}</span></div>
+            </div>
+
             <p class="detail-desc">${loc.description || "..."}</p>
+
             <div class="detail-actions">
                 ${likeBtn}
                 <a href="${mapLink}" target="_blank" class="btn-action btn-maps"><i class="fas fa-directions"></i> Chỉ đường</a>
@@ -572,8 +594,23 @@ function closeDetail() {
 }
 
 function filterData(cat, btn) {
-  document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+  // Cập nhật biến toàn cục
+  currentCategory = cat;
+
+  // 1. Xử lý giao diện nút
+  const allChips = document.querySelectorAll(".chip");
+  allChips.forEach((c) => c.classList.remove("active"));
+
   if (btn) btn.classList.add("active");
+  else {
+    allChips.forEach((c) => {
+      if (c.innerText.includes(cat) || (cat === "All" && c.innerText === "Tất cả")) {
+        c.classList.add("active");
+      }
+    });
+  }
+
+  // 2. Tải lại dữ liệu
   loadLocations(cat);
 }
 

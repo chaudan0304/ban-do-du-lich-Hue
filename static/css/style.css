@@ -1270,10 +1270,11 @@ body {
   height: 85vh;
   display: flex;
   flex-direction: column;
+  /* Chiều cao cố định với cuộn bên trong */
   overflow-y: auto;
   border-radius: 24px;
-  /* Bo góc lớn sang trọng */
   overflow: hidden;
+  /* Bo góc lớn sang trọng */
   box-shadow: 0 20px 70px rgba(0, 0, 0, 0.4);
   background: #ffffff;
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1336,7 +1337,8 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto; /* ✅ cho cuộn dọc */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Form Groups */

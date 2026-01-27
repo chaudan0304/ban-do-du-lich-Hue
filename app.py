@@ -233,9 +233,9 @@ def add_location():
                 "category": data.get("category"),
                 "desc": data.get("description", ""),
                 "image": data.get("image", ""),
-                "rating": float(data.get("rating", 5.0)),
-                "lat": float(data.get("lat")),
-                "lng": float(data.get("lng")),
+                "rating": safe_float(data.get("rating"), 5.0),
+                "lat": safe_float(data.get("lat")),
+                "lng": safe_float(data.get("lng")),
             },
         )
         return jsonify({"success": True})
@@ -270,12 +270,12 @@ def update_location():
             {
                 "old_name": data.get("old_name"),
                 "name": data.get("name"),
-                "lat": data.get("lat", 0),
-                "lng": data.get("lng", 0),
+                "lat": safe_float(data.get("lat", 0)),
+                "lng": safe_float(data.get("lng", 0)),
                 "category": data.get("category"),
                 "desc": data.get("description"),
                 "image": data.get("image"),
-                "rating": float(data.get("rating", 0)),
+                "rating": safe_float(data.get("rating", 0)),
             },
         )
         return jsonify({"success": True})
@@ -312,17 +312,24 @@ def get_locations():
     MATCH (l:Location)
     MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
     """
+
+    params = {}  # Tạo dictionary chứa tham số
     if category_filter and category_filter != "All":
-        query += f" WHERE cat.name = '{category_filter}' "
+        query += " WHERE cat.name = $cat_name "
+        params["cat_name"] = category_filter
 
     query += """
-    RETURN l.name AS name, l.desc AS description, 
-           l.rating AS rating, l.lat AS lat, l.lng AS lng,
-           l.image AS image, cat.name AS category
+    RETURN l.name AS name,
+           l.desc AS description,
+           l.lat AS lat, l.lng AS lng,
+           l.image AS image, 
+           cat.name AS category,
+           coalesce(l.pagerankNorm, 0) AS score
+    ORDER BY score DESC           
     """
 
     try:
-        data = run_query(query)
+        data = run_query(query, params)
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -365,9 +372,18 @@ def recommend(user_name):
     WITH me, collect({loc: l_collab, score: score_collab, type: 'collab'}) AS collab_list
 
     // Bước 2: Content-based Filtering
-    OPTIONAL MATCH (me)-[:LIKED]->(:Location)-[r:RELATED_TO]-(l_content:Location)
+    // Tìm địa điểm user đã thích
+    OPTIONAL MATCH (me)-[:LIKED]->(liked_loc:Location)
+    
+    // Tìm địa điểm khác cùng category với những địa điểm đã thích
+    OPTIONAL MATCH (liked_loc)-[:HAS_CATEGORY]->(cat:Category)<-[:HAS_CATEGORY]-(l_content:Location)
     WHERE NOT (me)-[:LIKED]->(l_content)
-    WITH me, collab_list, l_content, sum(coalesce(r.weight, 1)) AS score_content
+    
+    // Kiểm tra xem có liên kết RELATED_TO cũ không để cộng điểm ưu tiên
+    OPTIONAL MATCH (liked_loc)-[r:RELATED_TO]-(l_content)
+    
+    // Tính điểm: 1 điểm cơ bản cho cùng danh mục + trọng số thuật toán (nếu có)
+    WITH me, collab_list, l_content, sum(1 + coalesce(r.weight, 0)) AS score_content
     
     // Bước 3: Gom nhóm riêng biệt trước khi cộng mảng
     WITH me, collab_list, collect({loc: l_content, score: score_content, type: 'content'}) AS content_list
@@ -391,8 +407,13 @@ def recommend(user_name):
            l.lng AS lng,
            l.image AS image, 
            cat.name AS category,
-           coalesce(l.pagerankScore, 0.15) AS pr,
-           (final_s_collab * 3.0) + (final_s_content * 1.0) + (coalesce(l.pagerankScore, 0) * 10.0) AS final_score,
+           coalesce(l.pagerankNorm, 0.15) AS score,
+           
+           // CÔNG THỨC TÍNH ĐIỂM CUỐI CÙNG
+           // Collab quan trọng nhất (x3)
+           // Content (Realtime + Batch) quan trọng nhì (x1)
+           // PageRank (Độ nổi tiếng) hỗ trợ thêm (x10 vì điểm PR thường rất nhỏ < 0.x)
+           (final_s_collab * 3.0) + (final_s_content * 1.0) + (coalesce(l.pagerankNorm, 0) * 10.0) AS final_score,
            final_s_collab AS common_users
            
     ORDER BY final_score DESC
@@ -423,6 +444,15 @@ def recommend(user_name):
         return jsonify({"error": str(e)}), 500
 
 
+# 5. Hàm phụ trợ chuyển đổi an toàn sang float
+def safe_float(value, default=0.0):
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default
+
+
+# ==========================================================
 if __name__ == "__main__":
     logging.info("🚀 Server đang chạy tại: http://127.0.0.1:5000")
     app.run(port=5000, debug=True)
