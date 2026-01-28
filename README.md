@@ -121,5 +121,5 @@
 
 ## 👨‍💻 Tác giả
 
-**Châu Dân** - Sinh viên thực hiện Khóa luận.
+**Châu Đàn** - Sinh viên thực hiện Khóa luận.
 *   © 2026 Hue Travel AI Project.
