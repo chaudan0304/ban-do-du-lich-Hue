@@ -21,6 +21,9 @@ from db import (
     get_all_users,
     delete_user_by_name,
     toggle_like_location,
+    add_review,
+    get_location_reviews,
+    delete_review,
 )
 import logging
 
@@ -169,6 +172,47 @@ def api_toggle_like():
     is_liked, msg = toggle_like_location(current_user.id, location_name)
 
     return jsonify({"liked": is_liked, "message": msg}), 200
+
+
+# --- API REVIEW ---
+@app.route("/api/review", methods=["POST"])
+@login_required
+def api_add_review():
+    data = request.json
+    loc_name = data.get("location_name")
+    rating = data.get("rating")
+    comment = data.get("comment", "")
+
+    if not loc_name or not rating:
+        return jsonify({"error": "Thiếu thông tin rating hoặc địa điểm"}), 400
+
+    success, result = add_review(current_user.id, loc_name, rating, comment)
+    if success:
+        return jsonify({"success": True, "message": "Đánh giá thành công!", "stats": result}), 200
+    else:
+        return jsonify({"success": False, "error": result}), 500
+
+
+@app.route("/api/reviews/<location_name>", methods=["GET"])
+def api_get_reviews(location_name):
+    reviews = get_location_reviews(location_name)
+    return jsonify(reviews if reviews else [])
+
+
+@app.route("/api/review", methods=["DELETE"])
+@login_required
+def api_delete_review():
+    data = request.json
+    loc_name = data.get("location_name")
+    
+    if not loc_name:
+        return jsonify({"error": "Thiếu tên địa điểm"}), 400
+
+    success, result = delete_review(current_user.id, loc_name)
+    if success:
+        return jsonify({"success": True, "message": "Đã xóa đánh giá!", "stats": result}), 200
+    else:
+        return jsonify({"success": False, "error": result}), 500
 
 
 # ==========================================================

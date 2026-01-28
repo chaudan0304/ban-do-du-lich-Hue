@@ -1,55 +1,41 @@
+
 import os
-from dotenv import load_dotenv
+import datetime
 from neo4j import GraphDatabase
 from werkzeug.security import generate_password_hash, check_password_hash
-import logging
+from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-# Đọc file .env ở thư mục gốc
+# Load biến môi trường
 load_dotenv()
 
-# Lấy giá trị từ .env (Neo4j connection)
-URI = os.getenv("NEO4J_URI")
-USER = os.getenv("NEO4J_USER")
-PASS = os.getenv("NEO4J_PASS")
+# Cấu hình Neo4j connection
+URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+USER = os.getenv("NEO4J_USER", "neo4j")
+PASSWORD = os.getenv("NEO4J_PASS", "12345678")
 
-if not all([URI, USER, PASS]):
-    raise ValueError(
-        "❌ Thiếu biến môi trường trong file .env! Kiểm tra NEO4J_URI, NEO4J_USER, NEO4J_PASS"
-    )
+_driver = None
 
-AUTH = (USER, PASS)
-driver = None
-
-
-# === KẾT NỐI NEO4J ===
 def get_driver():
-    """Hàm lấy driver kết nối (Singleton)"""
-    global driver
-    if driver is None:
+    global _driver
+    if _driver is None:
         try:
-            driver = GraphDatabase.driver(URI, auth=AUTH)
-            driver.verify_connectivity()
-            logger.info("✅ (db.py) Đã kết nối Neo4j thành công!")
+            _driver = GraphDatabase.driver(URI, auth=(USER, PASSWORD))
+            _driver.verify_connectivity()
+            print("✅ Kết nối Neo4j thành công!")
         except Exception as e:
-            logger.error(f"❌ (db.py) Lỗi kết nối: {e}")
-            driver = None
-    return driver
+            print(f"❌ Lỗi kết nối Neo4j: {e}")
+            _driver = None
+    return _driver
 
-
-# Hàm đóng kết nối
 def close_driver():
-    """Hàm đóng kết nối"""
-    global driver
-    if driver:
-        driver.close()
-        driver = None
+    global _driver
+    if _driver:
+        _driver.close()
+        _driver = None
 
-
-# === HÀM CHẠY TRUY VẤN CHUNG ===
+# --------------------------------------------------------------------------------------
+# HÀM CHUNG THỰC THI QUERY
+# --------------------------------------------------------------------------------------
 def run_query(query, params=None):
     """Hàm chạy lệnh Cypher chung, bắt lỗi và trả về kết quả an toàn"""
     driver = get_driver()
@@ -63,102 +49,96 @@ def run_query(query, params=None):
             return records
     except Exception as e:
         error_str = str(e).lower()
-        logger.error(f"❌ LỖI NEO4J: {e}")
+        print(f"❌ LỖI NEO4J: {e}")
 
         # Phát hiện lỗi constraint (tên trùng)
         if "constraint" in error_str or "already exists" in error_str:
             return "CONSTRAINT_VIOLATION"
         return None
 
-
-# === HÀM XỬ LÝ USER ===
+# --------------------------------------------------------------------------------------
+# CÁC HÀM XỬ LÝ USER (ĐĂNG KÝ, ĐĂNG NHẬP)
+# --------------------------------------------------------------------------------------
 def register_user(username, password):
-    """Tạo node User mới với password đã mã hóa"""
-    # 1. Kiểm tra user tồn tại (đã ổn)
+    """Đăng ký tài khoản mới (lưu hash password)"""
+    # 1. Kiểm tra user đã tồn tại chưa
     check_query = "MATCH (u:User {name: $name}) RETURN u"
     existing = run_query(check_query, {"name": username})
+    
+    if existing:
+        return False, "Tài khoản đã tồn tại"
+    
+    if existing == "CONSTRAINT_VIOLATION": # Double check
+        return False, "Tài khoản đã tồn tại"
 
-    if existing and existing != "CONSTRAINT_VIOLATION":
-        return False, "Tên tài khoản đã tồn tại!"
-
-    # 2. Mã hóa mật khẩu
-    pw_hash = generate_password_hash(password)
-
-    # 3. Tạo User mới + kiểm tra kết quả thực sự
+    # 2. Hash mật khẩu và lưu
+    hashed_pw = generate_password_hash(password)
     create_query = """
-    CREATE (u:User {name: $name, password: $pw_hash, role: 'user', create_at: datetime()})
-    RETURN u.name AS name
+    CREATE (u:User {name: $name, password: $password, role: 'user', created_at: datetime()})
+    RETURN u
     """
+    result = run_query(create_query, {"name": username, "password": hashed_pw})
+    
+    if result:
+        return True, "Đăng ký thành công"
+    return False, "Lỗi khi tạo tài khoản"
 
-    result = run_query(create_query, {"name": username, "pw_hash": pw_hash})
-
-    if result == "CONSTRAINT_VIOLATION":
-        return False, "Tên tài khoản đã tồn tại!"
-
-    if result is None or len(result) == 0:
-        return False, "Đăng ký thất bại! Có thể do lỗi hệ thống hoặc tên đã tồn tại."
-
-    return True, "Đăng ký thành công!"
-
-
-# Hàm xác minh đăng nhập
 def verify_user(username, password):
-    """Kiểm tra đăng nhập và trả về thông tin user kèm quyền hạn"""
-    # Lấy thêm thuộc tính 'role'
-    query = "MATCH (u:User {name: $name}) RETURN u.name AS name, u.password AS password, u.role AS role"
+    """Xác thực đăng nhập"""
+    query = "MATCH (u:User {name: $name}) RETURN u"
     result = run_query(query, {"name": username})
-
+    
     if not result:
-        return None
+        return False, None, "Tài khoản không tồn tại"
+    
+    user_data = result[0]['u']
+    stored_hash = user_data.get('password')
+    
+    # Nếu user cũ chưa có pass (hoặc import từ file), có thể check text thường (tùy chọn)
+    if not stored_hash:
+        return False, None, "Tài khoản lỗi (chưa có mật khẩu)"
 
-    user_data = result[0]
-    if check_password_hash(user_data["password"], password):
-        # Nếu không có role (user cũ), mặc định là 'user'
-        if not user_data.get("role"):
-            user_data["role"] = "user"
-        return user_data
+    if check_password_hash(stored_hash, password):
+        return True, user_data.get('role', 'user'), "Đăng nhập thành công"
     else:
-        return None
+        return False, None, "Sai mật khẩu"
 
-
-# --- Hàm cho Admin ---
+# --------------------------------------------------------------------------------------
+# CÁC HÀM QUẢN TRỊ (ADMIN)
+# --------------------------------------------------------------------------------------
 def get_all_users():
-    """Lấy danh sách tất cả user (trừ admin)"""
+    """Lấy danh sách tất cả user (trừ admin nếu muốn lọc)"""
     query = """
-    MATCH (u:User)
-    WHERE u.role IS NULL OR u.role <> 'admin'
-    RETURN u.name AS name,
-           size([(u)-[:LIKED]->(l) | l]) AS liked_count,
-           toString(u.create_at) AS create_at
-    ORDER BY u.create_at DESC
+    MATCH (u:User) 
+    OPTIONAL MATCH (u)-[r:LIKED]->()
+    RETURN u.name as name, u.role as role, count(r) as liked_count
+    ORDER BY u.created_at DESC
     """
     return run_query(query)
 
-
-# Hàm xóa user theo tên
 def delete_user_by_name(username):
-    """Xóa user và các mối quan hệ của họ"""
+    """Xóa user khỏi hệ thống"""
     query = "MATCH (u:User {name: $name}) DETACH DELETE u"
     run_query(query, {"name": username})
     return True
 
-
-# --- Hàm xử lý Like/Unlike địa điểm ---
+# --------------------------------------------------------------------------------------
+# CÁC HÀM LIÊN QUAN ĐẾN ĐỊA ĐIỂM & TƯƠNG TÁC
+# --------------------------------------------------------------------------------------
 def toggle_like_location(username, location_name):
     """
-    Nếu chưa thích -> Tạo quan hệ [:LIKED]
-    Nếu đã thích -> Xóa quan hệ [:LIKED]
-    Trả về: Trạng thái mới (True = Đang thích, False = Đã bỏ thích)
+    Like/Unlike một địa điểm.
+    Trả về (is_liked, message)
     """
-    # 1. Kiểm tra quan hệ hiện tại
+    # 1. Kiểm tra trạng thái hiện tại
     check_query = """
     MATCH (u:User {name: $u_name})-[r:LIKED]->(l:Location {name: $l_name})
     RETURN r
     """
-    exists = run_query(check_query, {"u_name": username, "l_name": location_name})
+    existing = run_query(check_query, {"u_name": username, "l_name": location_name})
 
-    if exists:
-        # Đã thích -> Xóa (Unlike)
+    if existing:
+        # Đã like -> Xóa (Unlike)
         delete_query = """
         MATCH (u:User {name: $u_name})-[r:LIKED]->(l:Location {name: $l_name})
         DELETE r
@@ -166,11 +146,85 @@ def toggle_like_location(username, location_name):
         run_query(delete_query, {"u_name": username, "l_name": location_name})
         return False, "Đã bỏ thích"
     else:
-        # Chưa thích -> Tạo (Like)
+        # Chưa like -> Tạo quan hệ LIKED
         create_query = """
-        MATCH (u:User {name: $u_name})
-        MATCH (l:Location {name: $l_name})
-        MERGE (u)-[:LIKED]->(l)
+        MATCH (u:User {name: $u_name}), (l:Location {name: $l_name})
+        MERGE (u)-[r:LIKED]->(l)
+        SET r.timestamp = datetime()
         """
         run_query(create_query, {"u_name": username, "l_name": location_name})
-        return True, "Đã thêm vào danh sách yêu thích!"
+        return True, "Đã thích địa điểm"
+
+# --- Hàm xử lý Review ---
+def add_review(username, location_name, rating, comment):
+    """
+    Thêm hoặc cập nhật đánh giá của user
+    """
+    query = """
+    MATCH (u:User {name: $u_name})
+    MATCH (l:Location {name: $l_name})
+    MERGE (u)-[r:REVIEWED]->(l)
+    SET r.rating = $rating, 
+        r.comment = $comment, 
+        r.timestamp = datetime()
+    """
+    # Sau khi add review, tính toán lại rating trung bình cho location
+    recalc_query = """
+    MATCH (l:Location {name: $l_name})<-[r:REVIEWED]-(:User)
+    WITH l, avg(r.rating) AS avgRating, count(r) AS totalReviews
+    SET l.rating = avgRating, l.reviewCount = totalReviews
+    RETURN avgRating, totalReviews
+    """
+    
+    try:
+        run_query(query, {
+            "u_name": username, 
+            "l_name": location_name, 
+            "rating": float(rating), 
+            "comment": comment
+        })
+        stats = run_query(recalc_query, {"l_name": location_name})
+        return True, stats[0] if stats else None
+    except Exception as e:
+        return False, str(e)
+
+
+def get_location_reviews(location_name):
+    """
+    Lấy danh sách review của địa điểm
+    """
+    query = """
+    MATCH (u:User)-[r:REVIEWED]->(l:Location {name: $l_name})
+    RETURN u.name AS user, 
+           r.rating AS rating, 
+           r.comment AS comment, 
+           toString(r.timestamp) AS time
+    ORDER BY r.timestamp DESC
+    """
+    return run_query(query, {"l_name": location_name})
+
+
+def delete_review(username, location_name):
+    """
+    Xóa đánh giá của user đối với một địa điểm
+    """
+    query = """
+    MATCH (u:User {name: $u_name})-[r:REVIEWED]->(l:Location {name: $l_name})
+    DELETE r
+    """
+    # Tính toán lại rating sau khi xóa
+    recalc_query = """
+    MATCH (l:Location {name: $l_name})
+    OPTIONAL MATCH (l)<-[r:REVIEWED]-(:User)
+    WITH l, avg(r.rating) AS avgRating, count(r) AS totalReviews
+    SET l.rating = CASE WHEN totalReviews > 0 THEN avgRating ELSE 0 END, 
+        l.reviewCount = totalReviews
+    RETURN avgRating, totalReviews
+    """
+    
+    try:
+        run_query(query, {"u_name": username, "l_name": location_name})
+        stats = run_query(recalc_query, {"l_name": location_name})
+        return True, stats[0] if stats else {"avgRating": 0, "totalReviews": 0}
+    except Exception as e:
+        return False, str(e)

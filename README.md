@@ -19,12 +19,20 @@
     *   **Content-Based:** Gợi ý các địa điểm tương tự cùng danh mục.
 *   **Similar Locations:** Tự động đề xuất các địa điểm liên quan khi xem chi tiết một địa điểm.
 
-### 🗺️ 2. Bản đồ Tương tác (Interactive Map)
-*   Tích hợp **Leaflet.js** cho trải nghiệm bản đồ mượt mà.
-*   **Map Clustering:** Gom nhóm các địa điểm khi zoom out.
-*   **Dynamic Markers:** Hiển thị trực quan vị trí và thông tin tóm tắt.
+### 🗺️ 2. Bản đồ & Trực quan hóa (Visualization)
+*   **Interactive Map:** Tích hợp **Leaflet.js** cho trải nghiệm bản đồ mượt mà.
+*   **Heatmap (Bản đồ nhiệt):** Hiển thị trực quan các khu vực tập trung nhiều địa điểm nổi bật/được yêu thích.
+*   **Dynamic Markers:** Icon thay đổi theo loại địa điểm (Di tích 🏛️, Ẩm thực 🍜...) và màu sắc thay đổi theo độ hot (Đỏ: Hot, Xanh: Cá nhân hóa).
+*   **Map Clustering:** Gom nhóm các địa điểm khi zoom out để tránh rối mắt.
 
-### 🛠️ 3. Quản trị & Dashboard
+### ⭐ 3. Tương tác Người dùng (Social Features)
+*   **Reviews & Ratings:**
+    *   Đánh giá sao (1-5 ⭐) và viết bình luận cho địa điểm.
+    *   **CRUD Review:** Người dùng có thể Thêm, Sửa, Xóa bình luận của chính mình.
+    *   Hiển thị điểm đánh giá trung bình thời gian thực.
+*   **User Profiles:** Theo dõi lịch sử du lịch và các địa điểm yêu thích (Wishlist).
+
+### 🛠️ 4. Quản trị & Dashboard
 *   **Admin Dashboard:** Thống kê tổng quan (Users, Locations, Likes).
 *   **CRUD Locations:** Thêm, sửa, xóa địa điểm trực tiếp với giao diện trực quan.
 *   **Map Picker:** Click chọn tọa độ trực tiếp trên bản đồ khi thêm/sửa địa điểm.
@@ -39,7 +47,7 @@
 | **Backend** | Python (Flask), Pandas |
 | **Database** | **Neo4j** (Graph Database), Neo4j GDS Library |
 | **Frontend** | HTML5, CSS3 (Modern UI), JavaScript (Vanilla) |
-| **Maps** | Leaflet.js, OpenStreetMap |
+| **Maps** | Leaflet.js, OpenStreetMap, Leaflet-Heat |
 | **AI/Algorithm** | PageRank, Community Detection (trên Neo4j) |
 
 ---
@@ -96,13 +104,13 @@
 ```
 📂 ban-do-du-lich-Hue
 ├── 📂 static/           # Tài nguyên tĩnh (CSS, JS, Images)
-│   ├── 📂 css/          # Style.css (Giao diện chính)
+│   ├── 📂 css/          # Style.css (Giao diện chính), Map.css
 │   ├── 📂 js/           # Main.js (Logic Frontend & Map)
 │   └── 📂 images/       # Ảnh địa điểm
 ├── 📂 templates/        # HTML Templates (Jinja2)
 │   └── index.html       # Trang chủ SPA (Single Page App)
 ├── app.py               # Backend Flask Server & API
-├── db.py                # Module kết nối Neo4j
+├── db.py                # Module kết nối Neo4j, xử lý User/Review
 ├── import_data.py       # Script nạp dữ liệu (ETL)
 ├── setup_algo.py        # Script chạy thuật toán GDS
 ├── data.xlsx            # Dữ liệu nguồn (Địa điểm, User mẫu)

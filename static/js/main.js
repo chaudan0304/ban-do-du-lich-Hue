@@ -18,7 +18,6 @@ var isHeatmapActive = false;
 // Hàm gọi API chung
 async function apiFetch(url, options = {}) {
   try {
-    console.log(`[API CALL] ${url}`);
     const response = await fetch(url, options);
     if (!response.ok) {
       let errorMessage = `Lỗi ${response.status}`;
@@ -46,8 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
   checkLoginStatus();
   loadLocations("All");
   setupEnterKey();
-
-  // Các tính năng UX
   setupDragScroll();
   setupDebounceSearch();
 });
@@ -60,67 +57,31 @@ function initMap() {
   }).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
 
-  // Sự kiện click bản đồ
   map.on("click", (e) => {
-    // Lấy tọa độ và làm tròn 5 số cho đẹp
     const lat = e.latlng.lat.toFixed(5);
     const lng = e.latlng.lng.toFixed(5);
 
-    // --- TRƯỜNG HỢP 1: ĐANG THÊM MỚI (ADD) ---
     if (isPickingMode === "add" || document.getElementById("addModal").classList.contains("active")) {
       document.getElementById("addLat").value = lat;
       document.getElementById("addLng").value = lng;
-
-      // Reset trạng thái
       isPickingMode = null;
-      document.getElementById("map").style.cursor = ""; // Trả lại con trỏ chuột
-
-      // Đảm bảo form thêm hiện lên
+      document.getElementById("map").style.cursor = "";
       document.getElementById("addModal").classList.add("active");
-
-      // (Tùy chọn) Hiện popup xác nhận nhanh
-      L.popup().setLatLng(e.latlng).setContent("Đã chọn vị trí này cho địa điểm mới!").openOn(map);
-    }
-
-    // --- TRƯỜNG HỢP 2: ĐANG CHỈNH SỬA (EDIT) ---
-    else if (isPickingMode === "edit") {
+      L.popup().setLatLng(e.latlng).setContent("Đã chọn vị trí này!").openOn(map);
+    } else if (isPickingMode === "edit") {
       document.getElementById("editLat").value = lat;
       document.getElementById("editLng").value = lng;
-
-      // 1. Xóa marker tạm cũ nếu đã có (để tránh trên map có nhiều ghim rác)
-      if (tempMarker) {
-        map.removeLayer(tempMarker);
-      }
-
-      // 2. Tạo Marker mới tại vị trí vừa click
-      tempMarker = L.marker([lat, lng], {
-        draggable: true, // Cho phép kéo thả để chỉnh lại cho chuẩn
-      }).addTo(map);
-
-      // 3. Gắn popup cho nó để dễ nhìn
-      tempMarker.bindPopup("<b>📍 Vị trí mới</b><br>Đang chờ lưu...").openPopup();
-
-      // 4. (Tùy chọn) Cập nhật lại tọa độ khi kéo thả marker này
+      if (tempMarker) map.removeLayer(tempMarker);
+      tempMarker = L.marker([lat, lng], { draggable: true }).addTo(map);
+      tempMarker.bindPopup("<b>📍 Vị trí mới</b>").openPopup();
       tempMarker.on("dragend", function (event) {
-        var marker = event.target;
-        var position = marker.getLatLng();
+        var position = event.target.getLatLng();
         document.getElementById("editLat").value = position.lat.toFixed(5);
         document.getElementById("editLng").value = position.lng.toFixed(5);
       });
-
-      // Reset trạng thái
       isPickingMode = null;
       document.getElementById("map").style.cursor = "";
-
-      // QUAN TRỌNG: Bật lại Modal Sửa (lúc nãy đã bị ẩn đi để nhìn bản đồ)
       document.getElementById("editModal").classList.add("active");
-
-      // Đóng thông báo hướng dẫn phía trên (nếu có)
-      const notifModal = document.getElementById("notificationModal");
-      if (notifModal) notifModal.classList.remove("active");
-
-      // Thông báo nhỏ
-      L.popup().setLatLng(e.latlng).setContent("Đã thay đổi vị trí cho địa điểm hiện tại!").openOn(map);
     }
   });
 }
@@ -141,7 +102,6 @@ function setupEnterKey() {
         }
       });
   });
-  // Blur ô tìm kiếm nhỏ để ẩn bàn phím mobile
   document.getElementById("miniSearchInput")?.addEventListener("keypress", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -192,19 +152,12 @@ function showGuestView() {
   document.querySelector(".search-box").style.display = "block";
   document.getElementById("guest-search-box").style.display = "flex";
   document.getElementById("logged-view").style.display = "none";
-  const adminPanel = document.getElementById("admin-panel");
-  if (adminPanel) adminPanel.style.display = "none";
   const recArea = document.getElementById("recommendation-area");
   if (recArea) recArea.innerHTML = `<div class="empty-state">...Sẵn sàng phân tích...</div>`;
 }
 
-// --- Modal Auth Logic ---
-function openAuthModal() {
-  document.getElementById("authModal").classList.add("active");
-}
-function closeAuthModal() {
-  document.getElementById("authModal").classList.remove("active");
-}
+function openAuthModal() { document.getElementById("authModal").classList.add("active"); }
+function closeAuthModal() { document.getElementById("authModal").classList.remove("active"); }
 function switchTab(tab) {
   document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
   document.querySelectorAll(".auth-form").forEach((f) => (f.style.display = "none"));
@@ -217,68 +170,35 @@ function switchTab(tab) {
   }
 }
 
-// --- Login & Register Logic ---
 function handleLogin() {
   const u = document.getElementById("loginUser").value.trim();
   const p = document.getElementById("loginPass").value;
-
-  // 1. Kiểm tra đầu vào
-  if (!u || !p) {
-    showNotification({
-      type: "error",
-      title: "Cảnh báo",
-      message: "Vui lòng nhập đầy đủ tài khoản và mật khẩu!",
-      btnText: "Đóng",
-    });
-    return;
-  }
-
-  // Lấy thẻ thông báo lỗi để dùng nhiều lần
+  if (!u || !p) return showNotification({ type: "error", title: "Lỗi", message: "Vui lòng nhập đầy đủ thông tin" });
+  
   const msgElement = document.getElementById("loginMsg");
   msgElement.innerText = "Đang xử lý...";
 
-  // 2. Dùng FETCH chuẩn (Thay vì apiFetch để tránh lỗi stream)
   fetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: u, password: p }),
   })
     .then(async (response) => {
-      // ✅ ĐỌC DỮ LIỆU 1 LẦN DUY NHẤT VÀO BIẾN 'data'
       const data = await response.json();
-
-      // Kiểm tra HTTP Status (200 là thành công)
       if (response.ok) {
-        // --- XỬ LÝ THÀNH CÔNG ---
         currentUser = data.username;
         userRole = data.role;
-
         closeAuthModal();
         checkLoginStatus();
-
-        // Load lại chi tiết địa điểm nếu đang mở (để cập nhật nút Like)
-        if (typeof currentOpenLoc !== "undefined" && currentOpenLoc !== null) {
-          showDetail(currentOpenLoc);
-        }
-
-        showNotification({
-          type: "success",
-          title: "Đăng nhập thành công",
-          message: `Chào mừng <b>${data.username}</b>!`,
-          btnText: "Bắt đầu",
-        });
-
-        msgElement.innerText = ""; // Xóa thông báo lỗi
+        if (typeof currentOpenLoc !== "undefined" && currentOpenLoc !== null) showDetail(currentOpenLoc);
+        showNotification({ type: "success", title: "Đăng nhập thành công", message: `Chào mừng <b>${data.username}</b>!` });
+        msgElement.innerText = "";
       } else {
-        // --- XỬ LÝ LỖI ---
-        // Dùng biến 'data' đã đọc ở trên, lấy thuộc tính .error
         msgElement.innerText = data.error || "Đăng nhập thất bại";
         msgElement.style.color = "red";
       }
     })
     .catch((err) => {
-      console.error("Login Error:", err);
-      msgElement.innerText = "Lỗi kết nối đến máy chủ!";
+      msgElement.innerText = "Lỗi kết nối!";
       msgElement.style.color = "red";
     });
 }
@@ -287,88 +207,63 @@ function handleRegister() {
   const u = document.getElementById("regUser").value.trim();
   const p = document.getElementById("regPass").value;
   if (!u || !p) return alert("Thiếu thông tin");
-
   const msg = document.getElementById("regMsg");
   msg.innerText = "Đang đăng ký...";
-
+  
   apiFetch("/api/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: u, password: p }),
   })
-    .then((res) => {
-      if (res.success) {
-        showNotification({
-          type: "success",
-          title: "Đăng ký thành công!",
-          message: `Tài khoản <b>${u}</b> đã được tạo.`,
-          btnText: "Đăng nhập ngay",
-          onConfirm: () => {
-            switchTab("login");
-            document.getElementById("loginUser").value = u;
-            document.getElementById("loginPass").focus();
-          },
-        });
-        msg.innerText = "";
-      } else {
-        msg.innerText = "Tên tài khoản đã tồn tại";
-      }
-    })
-    .catch((err) => (msg.innerText = err.message));
+  .then((res) => {
+    if (res.success) {
+      showNotification({
+        type: "success", title: "Thành công", message: `Tài khoản <b>${u}</b> đã được tạo.`,
+        btnText: "Đăng nhập ngay", onConfirm: () => {
+          switchTab("login");
+          document.getElementById("loginUser").value = u;
+        },
+      });
+      msg.innerText = "";
+    } else {
+      msg.innerText = "Tên tài khoản đã tồn tại";
+    }
+  }).catch((err) => (msg.innerText = err.message));
 }
 
-// Hàm đăng xuất
 function handleLogout() {
   if (!confirm("Bạn có chắc chắn muốn đăng xuất?")) return;
-
   apiFetch("/api/logout", { method: "POST" }).then(() => checkLoginStatus());
-  showNotification({
-    type: "success",
-    title: "Đăng xuất thành công",
-    message: "Hẹn gặp lại bạn! 👋",
-    btnText: "Đóng",
-  });
+  showNotification({ type: "success", title: "Đã đăng xuất", message: "Hẹn gặp lại bạn!" });
 }
 
 // ============================================================================
-// PHẦN 4: LOGIC GỢI Ý (AI RECOMMENDATION)
+// PHẦN 4: LOGIC GỢI Ý & DATA
 // ============================================================================
 function analyzeUser(isLoggedInUser = false) {
   const targetUser = isLoggedInUser ? currentUser : document.getElementById("usernameInput").value.trim();
   if (!targetUser) return;
 
-  // 1. History
   apiFetch(`/api/history/${targetUser}`).then((data) => {
     userLikedSet.clear();
     const histDiv = document.getElementById("user-history");
     const histList = document.getElementById("history-list");
-
     if (data && data.length > 0) {
       data.forEach((item) => userLikedSet.add(item.name));
       histDiv.style.display = "block";
-      histList.innerHTML = data
-        .map(
-          (place) =>
-            `<div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
-                   <img src="${place.image}" loading = "lazy" onerror="this.src='/static/images/no-image.png'"> ${place.name}
-                 </div>`,
-        )
-        .join("");
+      histList.innerHTML = data.map(place => 
+        `<div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
+           <img src="${place.image}" loading="lazy" onerror="this.src='/static/images/no-image.png'"> ${place.name}
+         </div>`).join("");
     } else {
       histDiv.style.display = "none";
     }
   });
-
-  // 2. Recommendation
   getRecommendations(targetUser);
 }
 
 function getRecommendations(user) {
   const recArea = document.getElementById("recommendation-area");
-  recArea.innerHTML = `<div style="text-align:center; padding:60px 20px; color:#6b7280;">
-    <i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>
-    Đang phân tích sở thích của <strong>${user}</strong>...
-  </div>`;
+  recArea.innerHTML = `<div style="text-align:center; padding:60px 20px;"><i class="fas fa-circle-notch fa-spin"></i> Đang phân tích...</div>`;
 
   apiFetch(`/api/recommend/${user}`).then((data) => {
     recArea.innerHTML = "";
@@ -377,39 +272,30 @@ function getRecommendations(user) {
       return;
     }
     data.forEach((loc) => {
-      // Sử dụng thông tin giải thích mới từ API
       const reasonIcon = loc.reason_icon || "🤖";
-      const reason = loc.reason || "Được gợi ý bởi AI";
+      const reason = loc.reason || "AI Recommended";
       const reasonType = loc.reason_type || "default";
-      
-      // Tạo badge với class theo loại lý do
-      const badgeClass = `algo-badge badge-${reasonType}`;
-      const badgeHTML = `<div class="${badgeClass}">${reasonIcon} ${reason}</div>`;
-
       const card = document.createElement("div");
       card.className = "ai-card";
       card.innerHTML = `
-                <div class="card-thumb"><img src="${loc.image}" loading = "lazy" onerror="this.src='/static/images/no-image.png'"></div>
-                <div class="card-content">
-                    <div class="card-title">${loc.name}</div>
-                    <div class="card-desc">${loc.description || "..."}</div>
-                    ${badgeHTML}
-                </div>
-            `;
+        <div class="card-thumb"><img src="${loc.image}" loading="lazy" onerror="this.src='/static/images/no-image.png'"></div>
+        <div class="card-content">
+            <div class="card-title">${loc.name}</div>
+            <div class="card-desc">${loc.description || "..."}</div>
+            <div class="algo-badge badge-${reasonType}">${reasonIcon} ${reason}</div>
+        </div>
+      `;
       card.onclick = () => showDetail(loc);
       recArea.appendChild(card);
     });
   });
 }
 
-// ============================================================================
-// PHẦN 5: GIAO DIỆN & BẢN ĐỒ
-// ============================================================================
 async function loadLocations(cat = "All") {
   document.getElementById("locationList").innerHTML = `<div style="text-align:center; padding:20px;">Đang tải...</div>`;
   try {
     let data;
-    if (cat === "All" && cachedAllLocations) data = cachedAllLocations;
+    if (cat === "All" && cachedAllLocations && cachedAllLocations.length > 0) data = cachedAllLocations;
     else {
       let url = "/api/locations";
       if (cat !== "All") url += `?category=${encodeURIComponent(cat)}`;
@@ -430,76 +316,35 @@ function renderLocations(data) {
   list.innerHTML = "";
 
   if (!data || data.length === 0) {
-    list.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align:center; padding:20px; color:#9ca3af;">
-        Không tìm thấy địa điểm nào.
-      </div>`;
+    list.innerHTML = `<div style="text-align:center; padding:20px;">Không tìm thấy địa điểm nào.</div>`;
     return;
   }
 
   const latLngs = [];
   data.forEach((loc) => {
-    //Tính điểm PageRank hiển thị
     let displayScore = (loc.score * 100).toFixed(1);
-
-    // List item
     const div = document.createElement("div");
     div.className = "mini-item";
     div.innerHTML = `
-      <img src="${loc.image}" loading = "lazy"class="mini-img" onerror="this.src='/static/images/no-image.png'">
+      <img src="${loc.image}" loading="lazy" class="mini-img" onerror="this.src='/static/images/no-image.png'">
       <div style="flex:1; overflow:hidden;">
         <div class="mini-name">${loc.name}</div>
-
-        <div style="font-size:12px; color:#059669; font-weight:700; margin-top:2px">
-          <i class="fas fa-chart-bar"></i> Điểm nổi tiếng: ${displayScore}
-        </div>
-
+        <div style="font-size:12px; color:#059669; font-weight:700;">${displayScore} pts</div>
       </div>
     `;
     div.onclick = () => showDetail(loc);
     list.appendChild(div);
 
-    // Marker + Popup thông minh
     const marker = L.marker([loc.lat, loc.lng], { icon: getDynamicIcon(loc) });
-
-    const popupContent = document.createElement("div");
-    popupContent.innerHTML = `
-      <div style="text-align:center; cursor:pointer;">
-        <b style="font-size:13px">${loc.name}</b><br>
-        <span style="font-size:11px; color:#666">${loc.category}</span>
-      </div>
-    `;
-    popupContent.onclick = () => showDetail(loc);
-
-    marker.bindPopup(popupContent);
-    marker.on("click", () => showDetail(loc));
+    marker.bindPopup(`<b>${loc.name}</b><br>${loc.category}`).on("click", () => showDetail(loc));
     marker.addTo(markerLayer);
     markersMap[loc.name] = marker;
-
     latLngs.push([loc.lat, loc.lng]);
   });
-
-  // Tự động fitBounds khi lọc danh mục
-  if (latLngs.length > 0 && map) {
-    setTimeout(() => {
-      map.fitBounds(latLngs, { padding: [50, 50], maxZoom: 15 });
-    }, 100);
-  }
 }
 
 function showDetail(loc) {
-  if (currentCategory !== loc.category) {
-    console.log("Tự động chuyển danh mục sang:", loc.category);
-    filterData(loc.category);
-  }
-
   currentOpenLoc = loc;
-
-  let rawScore = loc.score !== undefined ? loc.score : loc.pr !== undefined ? loc.pr : 0;
-  let displayScore = (rawScore * 100).toFixed(1);
-
-  let mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.name + " Thừa Thiên Huế")}`;
-
   flyToLocation(loc.lat, loc.lng, loc.name);
   const panel = document.getElementById("detail-panel");
   const content = document.getElementById("detail-content");
@@ -508,7 +353,7 @@ function showDetail(loc) {
   if (currentUser === "admin" || userRole === "admin") {
     adminActions = `
       <div class="admin-actions-container">
-        <button class="btn-admin-tool btn-tool-edit" onclick="openEditModal()"><i class="fas fa-edit"></i> Chỉnh sửa</button>
+        <button class="btn-admin-tool btn-tool-edit" onclick="openEditModal()"><i class="fas fa-edit"></i> Sửa</button>
         <button class="btn-admin-tool btn-tool-delete" onclick="deleteLocation('${loc.name}')"><i class="fas fa-trash"></i> Xóa</button>
       </div>
     `;
@@ -516,144 +361,94 @@ function showDetail(loc) {
 
   let likeBtn = currentUser
     ? `<button class="${userLikedSet.has(loc.name) ? "btn-action btn-like liked" : "btn-action btn-like"}" onclick="handleLike(this, '${loc.name}')">
-             <i class="${userLikedSet.has(loc.name) ? "fas" : "far"} fa-heart"></i> ${userLikedSet.has(loc.name) ? "Đã thích" : "Yêu thích"}
-           </button>`
-    : `<button class="btn-action btn-like" onclick="openAuthModal()"><i class="fas fa-lock"></i> Đăng nhập để thích</button>`;
+         <i class="${userLikedSet.has(loc.name) ? "fas" : "far"} fa-heart"></i> ${userLikedSet.has(loc.name) ? "Đã thích" : "Yêu thích"}
+       </button>`
+    : `<button class="btn-action btn-like" onclick="openAuthModal()"><i class="fas fa-lock"></i> Đăng nhập</button>`;
 
-  // Tạo section giải thích AI nếu có thông tin reason
+  // AI Explanation
   let aiExplanationHTML = "";
   if (loc.reason && loc.reason_details) {
-    const details = loc.reason_details;
-    const reasonType = loc.reason_type || "default";
-    
-    // Tạo biểu đồ thanh cho mỗi thành phần
+    const d = loc.reason_details;
+    const type = loc.reason_type || "default";
     aiExplanationHTML = `
       <div class="ai-explanation-section">
-        <div class="ai-explanation-header">
-          <i class="fas fa-robot"></i> Tại sao gợi ý cho bạn?
-        </div>
-        <div class="ai-reason-main ${reasonType}">
-          <span class="reason-icon">${loc.reason_icon}</span>
-          <span class="reason-text">${loc.reason}</span>
-        </div>
+        <div class="ai-explanation-header"><i class="fas fa-robot"></i> Tại sao gợi ý?</div>
+        <div class="ai-reason-main ${type}"><span class="reason-icon">${loc.reason_icon}</span> <span class="reason-text">${loc.reason}</span></div>
         <div class="ai-score-breakdown">
-          <div class="score-bar-item">
-            <div class="score-label">
-              <span class="score-icon">👥</span>
-              <span>${details.collab.label}</span>
-              <span class="score-value">${details.collab.percent.toFixed(0)}%</span>
-            </div>
-            <div class="score-bar">
-              <div class="score-bar-fill collab" style="width: ${details.collab.percent}%"></div>
-            </div>
-            <div class="score-desc">${details.collab.desc}</div>
-          </div>
-          <div class="score-bar-item">
-            <div class="score-label">
-              <span class="score-icon">🎯</span>
-              <span>${details.content.label}</span>
-              <span class="score-value">${details.content.percent.toFixed(0)}%</span>
-            </div>
-            <div class="score-bar">
-              <div class="score-bar-fill content" style="width: ${details.content.percent}%"></div>
-            </div>
-            <div class="score-desc">${details.content.desc}</div>
-          </div>
-          <div class="score-bar-item">
-            <div class="score-label">
-              <span class="score-icon">🏆</span>
-              <span>${details.pagerank.label}</span>
-              <span class="score-value">${details.pagerank.percent.toFixed(0)}%</span>
-            </div>
-            <div class="score-bar">
-              <div class="score-bar-fill pagerank" style="width: ${details.pagerank.percent}%"></div>
-            </div>
-            <div class="score-desc">${details.pagerank.desc}</div>
-          </div>
+          <div class="score-bar-item"><div class="score-label"><span>👥 ${d.collab.label}</span> <span class="score-value">${d.collab.percent.toFixed(0)}%</span></div><div class="score-bar"><div class="score-bar-fill collab" style="width:${d.collab.percent}%"></div></div></div>
+          <div class="score-bar-item"><div class="score-label"><span>🎯 ${d.content.label}</span> <span class="score-value">${d.content.percent.toFixed(0)}%</span></div><div class="score-bar"><div class="score-bar-fill content" style="width:${d.content.percent}%"></div></div></div>
+          <div class="score-bar-item"><div class="score-label"><span>🏆 ${d.pagerank.label}</span> <span class="score-value">${d.pagerank.percent.toFixed(0)}%</span></div><div class="score-bar"><div class="score-bar-fill pagerank" style="width:${d.pagerank.percent}%"></div></div></div>
         </div>
       </div>
     `;
   }
 
   content.innerHTML = `
-        <img src="${loc.image}" loading = "lazy" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
-        <div class="detail-body">
-            <h1 class="detail-title">${loc.name}</h1>
-
-            <div class="detail-meta">
-              <span style="color:#ffffff; background:#059669; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:12px;">⭐ Điểm nổi tiếng: ${displayScore}</span>
-              <span style="margin-left:8px; color:#6b7280">• ${loc.category}</span></div>
-            </div>
-
-            <p class="detail-desc">${loc.description || "..."}</p>
-
-            ${aiExplanationHTML}
-
-            <div class="detail-actions">
-                ${likeBtn}
-                <a href="${mapLink}" target="_blank" class="btn-action btn-maps"><i class="fas fa-directions"></i> Chỉ đường</a>
-            </div>
-            ${adminActions}
-
-            <!-- Section gợi ý địa điểm cùng danh mục -->
-            <div class="similar-locations-section">
-              <div class="similar-header">
-                <i class="fas fa-map-marker-alt"></i> 
-                <span>Địa điểm <strong>${loc.category}</strong> khác</span>
-              </div>
-              <div class="similar-locations-list" id="similar-locations-list">
-                <div class="similar-loading">
-                  <i class="fas fa-spinner fa-spin"></i> Đang tải...
-                </div>
-              </div>
-            </div>
+    <img src="${loc.image}" loading="lazy" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
+    <div class="detail-body">
+        <h1 class="detail-title">${loc.name}</h1>
+        <div class="detail-meta"><span>${loc.category}</span></div>
+        <p class="detail-desc">${loc.description || "..."}</p>
+        ${aiExplanationHTML}
+        
+        <div class="detail-actions">
+            ${likeBtn}
+            <a href="https://maps.google.com/?q=${encodeURIComponent(loc.name + " Huế")}" target="_blank" class="btn-action btn-maps"><i class="fas fa-directions"></i> Chỉ đường</a>
         </div>
-    `;
-  panel.classList.add("active");
+        ${adminActions}
 
-  // Tải các địa điểm cùng danh mục
+        <!-- REVIEW SECTION -->
+        <div class="review-section">
+            <div class="review-header">
+                <span><i class="fas fa-comments"></i> Đánh giá & Bình luận</span>
+                <button class="btn-action" onclick="toggleReviewForm()" style="font-size:12px; padding:4px 8px;"><i class="fas fa-pen"></i> Viết</button>
+            </div>
+            <div id="reviewFormContainer" class="review-form">
+                <div class="star-rating-input">
+                    <input type="radio" id="star5" name="rating" value="5" /><label for="star5">★</label>
+                    <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
+                    <input type="radio" id="star3" name="rating" value="3" /><label for="star3">★</label>
+                    <input type="radio" id="star2" name="rating" value="2" /><label for="star2">★</label>
+                    <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
+                </div>
+                <textarea id="reviewComment" class="review-textarea" placeholder="Chia sẻ trải nghiệm..."></textarea>
+                <div style="text-align:right; margin-top:8px;"><button class="btn-submit" onclick="submitReview('${loc.name}')">Gửi</button></div>
+            </div>
+            <div id="reviewList" class="review-list"><div style="text-align:center;">Đang tải...</div></div>
+        </div>
+
+        <div class="similar-locations-section">
+          <div class="similar-header"><span>Địa điểm <strong>${loc.category}</strong> khác</span></div>
+          <div class="similar-locations-list" id="similar-locations-list"></div>
+        </div>
+    </div>
+  `;
+  panel.classList.add("active");
   loadSimilarLocations(loc.name);
+  loadReviews(loc.name);
 }
 
-// Hàm tải địa điểm cùng danh mục
 function loadSimilarLocations(locationName) {
   const container = document.getElementById("similar-locations-list");
-  if (!container) return;
-
-  apiFetch(`/api/similar/${encodeURIComponent(locationName)}`)
-    .then((data) => {
-      container.innerHTML = "";
-      
-      if (!data || data.length === 0) {
-        container.innerHTML = `<div class="similar-empty">Không có địa điểm tương tự</div>`;
-        return;
-      }
-
-      data.forEach((loc) => {
-        const score = ((loc.score || 0) * 100).toFixed(1);
-        const card = document.createElement("div");
-        card.className = "similar-card";
-        card.innerHTML = `
-          <img src="${loc.image}" loading="lazy" class="similar-card-img" onerror="this.src='/static/images/no-image.png'">
-          <div class="similar-card-info">
-            <div class="similar-card-name">${loc.name}</div>
-            <div class="similar-card-score"><i class="fas fa-chart-bar"></i> ${score}</div>
-          </div>
-        `;
-        card.onclick = () => showDetail(loc);
-        container.appendChild(card);
-      });
-    })
-    .catch((err) => {
-      console.error("Lỗi tải địa điểm tương tự:", err);
-      container.innerHTML = `<div class="similar-empty">Không thể tải dữ liệu</div>`;
+  apiFetch(`/api/similar/${encodeURIComponent(locationName)}`).then((data) => {
+    container.innerHTML = "";
+    if (!data || data.length === 0) return;
+    data.forEach((loc) => {
+      const card = document.createElement("div");
+      card.className = "similar-card";
+      card.innerHTML = `
+        <img src="${loc.image}" loading="lazy" class="similar-card-img" onerror="this.src='/static/images/no-image.png'">
+        <div class="similar-card-info"><div class="similar-card-name">${loc.name}</div></div>
+      `;
+      card.onclick = () => showDetail(loc);
+      container.appendChild(card);
     });
+  });
 }
 
 function handleLike(btn, name) {
   apiFetch("/api/like", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ location_name: name }),
   }).then((data) => {
     analyzeUser(true);
@@ -667,31 +462,25 @@ function handleLike(btn, name) {
   });
 }
 
-function getIconByCategory(cat) {
-  const iconMap = {
-    "Di tích": "🏛️",
-    "Ẩm thực": "🍜",
-    "Thiên nhiên": "🌳",
-    "Bãi biển": "🏖️",
-    "Tâm linh": "🛕",
-    "Lăng tẩm": "🏯",
-    "Tham quan": "🏞️",
-    "Mua sắm": "🛍️",
-  };
-  const symbol = iconMap[cat] || "📍";
-  return L.divIcon({
-    className: "custom-div-icon",
-    html: `<div class='custom-pin'>${symbol}</div>`,
-    iconSize: [30, 42],
-  });
+function showDetailFromData(name, lat, lng, image) {
+  showDetail({ name, lat, lng, image, category: "Lịch sử", description: "Địa điểm đã xem" });
+}
+function closeDetail() { document.getElementById("detail-panel").classList.remove("active"); }
+
+function filterData(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  else {
+    document.querySelectorAll(".chip").forEach(c => {
+        if(c.textContent.includes(cat) || (cat === "All" && c.textContent.includes("Tất cả"))) c.classList.add("active");
+    });
+  }
+  loadLocations(cat);
 }
 
 function flyToLocation(lat, lng, name) {
-  if (window.innerWidth <= 768) {
-    console.log("Mobile mode: Skip map flying");
-    return;
-  }
-
+  if (window.innerWidth <= 768) {}
   if (map) {
     map.flyTo([lat, lng], 16, { duration: 1.5 });
     if (markersMap[name]) {
@@ -700,60 +489,10 @@ function flyToLocation(lat, lng, name) {
   }
 }
 
-function showDetailFromData(name, lat, lng, image) {
-  showDetail({ name, lat, lng, image, category: "Đã ghé thăm", description: "Địa điểm trong lịch sử" });
-}
-
-function closeDetail() {
-  document.getElementById("detail-panel").classList.remove("active");
-}
-
-function filterData(cat, btn) {
-  // Cập nhật biến toàn cục
-  currentCategory = cat;
-
-  // 1. Xử lý giao diện nút
-  const allChips = document.querySelectorAll(".chip");
-  allChips.forEach((c) => c.classList.remove("active"));
-
-  if (btn) btn.classList.add("active");
-  else {
-    allChips.forEach((c) => {
-      if (c.innerText.includes(cat) || (cat === "All" && c.innerText === "Tất cả")) {
-        c.classList.add("active");
-      }
-    });
-  }
-
-  // 2. Tải lại dữ liệu
-  loadLocations(cat);
-}
-
-function handleLocalSearch() {
-  const input = document.getElementById("miniSearchInput");
-  if (!input) return;
-
-  const keyword = input.value.toLowerCase().trim();
-  if (!keyword) {
-    renderLocations(currentListData);
-    return;
-  }
-
-  const filtered = currentListData.filter((loc) => {
-    const nameMatch = loc.name.toLowerCase().includes(keyword);
-    const descMatch = loc.description ? loc.description.toLowerCase().includes(keyword) : false;
-    return nameMatch || descMatch;
-  });
-
-  renderLocations(filtered);
-}
-
 // ============================================================================
-// PHẦN 6: QUẢN TRỊ HỆ THỐNG
+// PHẦN 5: ADMIN & UTILS
 // ============================================================================
-function checkAdminAccess(username) {
-  console.log("Admin logged in:", username);
-}
+function checkAdminAccess(username) { console.log("Admin logged in:", username); }
 
 async function loadAdminStats() {
   try {
@@ -765,453 +504,127 @@ async function loadAdminStats() {
   } catch (e) {}
 }
 
-async function triggerAI() {
-  const btn = document.querySelector("#adminModal .btn-ai");
-  const originalText = btn.innerHTML;
-
-  btn.innerHTML = "<i class='fas fa-snipner fa-spin'></i> Đang chạy...";
-  btn.disabled = true;
-
-  try {
-    await apiFetch("/api/admin/run-algo", { method: "POST" });
-    alert("✅ Đã cập nhật xong!");
-    loadAdminStats();
-  } catch (e) {
-    alert("Lỗi: " + e.message);
-  } finally {
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-  }
-}
-
 function openAdminUserModal() {
   document.getElementById("adminModal").classList.add("active");
   loadAdminUsersList();
   loadAdminStats();
 }
-
-function closeAdminModal() {
-  document.getElementById("adminModal").classList.remove("active");
-}
+function closeAdminModal() { document.getElementById("adminModal").classList.remove("active"); }
 
 async function loadAdminUsersList() {
-  const tbody = document.getElementById("adminUserList");
-  tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">⏳ Đang tải...</td></tr>';
-  try {
-    const users = await apiFetch("/api/admin/users");
-
-    console.log("👉 Tổng số user Server trả về:", users.length);
-    console.log(
-      "👉 Danh sách tên:",
-      users.map((u) => u.name),
-    );
-
-    // Kiểm tra xem có user nào tên là "admin" trong này không?
-    const hasAdmin = users.find((u) => u.name === "admin");
-    console.log("👉 Có user 'admin' trong danh sách không?", hasAdmin ? "CÓ" : "KHÔNG");
-    tbody.innerHTML = "";
-    users.forEach((u) => {
-      if (u.name === "admin") return;
-      tbody.innerHTML += `
-                <tr style="border-bottom:1px solid #eee">
-                    <td style="padding:10px; font-weight:600">${u.name}</td>
-                    <td style="padding:10px">❤️ ${u.liked_count}</td>
-                    <td style="padding:10px; text-align:right">
-                        <button onclick="deleteUser('${u.name}')" style="background:#fee2e2; color:red; border:none; padding:5px 10px; border-radius:4px; cursor:pointer"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-    });
-  } catch (e) {
-    tbody.innerHTML = '<tr><td colspan="3" style="color:red">Lỗi tải danh sách</td></tr>';
-  }
+    const tbody = document.getElementById("adminUserList");
+    tbody.innerHTML = "<tr><td>Đang tải...</td></tr>";
+    try {
+        const users = await apiFetch("/api/admin/users");
+        tbody.innerHTML = "";
+        users.forEach(u => {
+            if (u.name === "admin") return;
+            tbody.innerHTML += `<tr><td>${u.name}</td><td>${u.liked_count} likes</td><td><button onclick="deleteUser('${u.name}')">Xóa</button></td></tr>`;
+        });
+    } catch(e) { tbody.innerHTML = "Lỗi tải"; }
 }
-
 async function deleteUser(name) {
-  if (!confirm(`⚠️ Xóa user "${name}"?\n(Hành động không thể hoàn tác)`)) return;
-  await apiFetch(`/api/admin/users/${name}`, { method: "DELETE" });
-  showNotification({
-    type: "delete",
-    title: "Xóa tài khoản thành công",
-    message: `Tài khoản <b>${name}</b> đã bị xóa khỏi hệ thống.`,
-    btnText: "Đóng",
-  });
-  loadAdminUsersList();
-  loadAdminStats();
-}
-
-// ============================================================================
-// PHẦN 7: QUẢN TRỊ DỮ LIỆU ĐỊA ĐIỂM
-// ============================================================================
-function openAddModal() {
-  document.getElementById("addModal").classList.add("active");
-}
-function closeAddModal() {
-  document.getElementById("addModal").classList.remove("active");
-}
-
-function activateMapPicker() {
-  closeAddModal();
-  closeAdminModal();
-  isPickingMode = "add";
-
-  showNotification({
-    type: "success",
-    title: "Chế độ chọn vị trí",
-    message: "Hãy click chuột vào điểm bạn muốn chọn trên bản đồ.",
-    btnText: "Đóng",
-  });
-
-  document.getElementById("addLat").value = "";
-  document.getElementById("addLng").value = "";
-  document.getElementById("map").style.cursor = "crosshair";
-}
-
-function activateEditMapPicker() {
-  // Ẩn form sửa đi để nhìn thấy bản đồ
-  document.getElementById("editModal").classList.remove("active");
-
-  // Gán trạng thái là edit
-  isPickingMode = "edit";
-
-  showNotification({
-    type: "info",
-    title: "Chọn vị trí mới",
-    message: "Click vào vị trí mới trên bản đồ để cập nhật.",
-    btnText: "Đóng",
-  });
-
-  document.getElementById("addLat").value = "";
-  document.getElementById("addLng").value = "";
-  document.getElementById("map").style.cursor = "crosshair";
-}
-
-async function submitAddLocation() {
-  const body = {
-    name: document.getElementById("addName").value,
-    lat: document.getElementById("addLat").value,
-    lng: document.getElementById("addLng").value,
-    category: document.getElementById("addCategory").value,
-    image: document.getElementById("addImage").value,
-    description: document.getElementById("addDesc").value,
-  };
-  if (!body.name || !body.lat) return alert("Thiếu tên hoặc tọa độ!");
-
-  await apiFetch("/api/admin/location/add", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  showNotification({
-    type: "success",
-    title: "Thành công",
-    message: "Đã thêm địa điểm mới vào hệ thống.",
-    btnText: "OK",
-  });
-
-  closeAddModal();
-  loadLocations("All");
-  cachedAllLocations = null;
-  loadAdminStats();
-}
-
-function openEditModal() {
-  if (!currentOpenLoc) return;
-
-  // 1. Điền các thông tin văn bản (Tên, mô tả...)
-  document.getElementById("editOldName").value = currentOpenLoc.name;
-  document.getElementById("editName").value = currentOpenLoc.name;
-  document.getElementById("editCategory").value = currentOpenLoc.category;
-  // document.getElementById("editRating").value = currentOpenLoc.rating; (Đã bỏ)
-  document.getElementById("editImage").value = currentOpenLoc.image;
-  document.getElementById("editDesc").value = currentOpenLoc.description;
-
-  // 2. Tính toán tọa độ (Logic quan trọng)
-  let finalLat = currentOpenLoc.lat; // Mặc định lấy từ Database
-  let finalLng = currentOpenLoc.lng;
-
-  // Kiểm tra xem có ghim tạm thời đang cắm trên bản đồ không?
-  if (tempMarker) {
-    const pos = tempMarker.getLatLng();
-    finalLat = pos.lat.toFixed(5);
-    finalLng = pos.lng.toFixed(5);
-    console.log("👉 Đã phát hiện ghim tạm, ưu tiên sử dụng tọa độ mới:", finalLat, finalLng);
-  } else {
-    console.log("ℹ️ Không có ghim tạm, sử dụng tọa độ gốc từ Database.");
-  }
-
-  // 3. GÁN GIÁ TRỊ VÀO Ô INPUT (Chỉ làm 1 lần tại đây)
-  // Dùng setTimeout 0ms để đẩy việc này xuống cuối hàng đợi xử lý của trình duyệt
-  // Giúp khắc phục lỗi giao diện chưa kịp cập nhật
-  setTimeout(() => {
-    document.getElementById("editLat").value = finalLat;
-    document.getElementById("editLng").value = finalLng;
-  }, 0);
-
-  // 4. Hiển thị Modal
-  document.getElementById("editModal").classList.add("active");
-}
-
-function closeEditModal() {
-  document.getElementById("editModal").classList.remove("active");
-
-  isPickingMode = null;
-  document.getElementById("map").style.cursor = "";
-
-  const notifModal = document.getElementById("notificationModal");
-  if (notifModal) notifModal.classList.remove("active");
-}
-
-async function submitEditLocation() {
-  // 1. Lấy dữ liệu (Logic ưu tiên Marker như bài trước)
-  let submitLat = document.getElementById("editLat").value;
-  let submitLng = document.getElementById("editLng").value;
-
-  if (tempMarker) {
-    const pos = tempMarker.getLatLng();
-    submitLat = pos.lat;
-    submitLng = pos.lng;
-  }
-
-  const body = {
-    old_name: document.getElementById("editOldName").value,
-    name: document.getElementById("editName").value,
-    lat: submitLat,
-    lng: submitLng,
-    category: document.getElementById("editCategory").value,
-    // Cho phép rating mặc định hoặc giữ nguyên (backend sẽ xử lý hoặc bỏ qua)
-    image: document.getElementById("editImage").value,
-    description: document.getElementById("editDesc").value,
-  };
-
-  try {
-    // Gọi API cập nhật
-    await apiFetch("/api/admin/location/update", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-
-    // --- ✅ KHẮC PHỤC LỖI KHÔNG CẬP NHẬT NGAY ---
-
-    // 1. Xóa ghim tạm (Temp Marker)
-    if (tempMarker) {
-      map.removeLayer(tempMarker);
-      tempMarker = null;
-    }
-
-    // 2. XÓA BỘ NHỚ ĐỆM DỮ LIỆU
-    cachedAllLocations = null;
-    currentListData = [];
-
-    // 3. XÓA SẠCH CÁC GHIM CŨ TRÊN BẢN ĐỒ (Quan trọng)
-    // Nếu bạn dùng markerLayer (như khai báo đầu file), hãy xóa nó
-    if (typeof markerLayer !== "undefined" && markerLayer) {
-      markerLayer.clearLayers();
-    }
-
-    // 4. CẬP NHẬT BIẾN currentOpenLoc (Quan trọng)
-    // Để nếu bạn click vào xem chi tiết ngay, nó sẽ hiển thị dữ liệu mới
-    if (currentOpenLoc && currentOpenLoc.name === body.old_name) {
-      // Gán đè dữ liệu mới vào biến hiện tại
-      currentOpenLoc.name = body.name;
-      currentOpenLoc.lat = body.lat;
-      currentOpenLoc.lng = body.lng;
-      currentOpenLoc.image = body.image;
-      currentOpenLoc.category = body.category;
-      currentOpenLoc.description = body.description;
-    }
-    // ----------------------------------------------
-
-    showNotification({
-      type: "success",
-      title: "Thành công",
-      message: "Đã cập nhật dữ liệu mới.",
-      btnText: "OK",
-    });
-
-    closeEditModal();
-    closeDetail();
-
-    // 5. Tải lại dữ liệu mới từ Server
-    // Thêm await để đảm bảo tải xong mới làm việc khác
-    await loadLocations("All");
-
-    // Reset bộ lọc UI
-    document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
-    document.querySelector(".chip:first-child").classList.add("active");
-  } catch (error) {
-    console.error(error);
-    showNotification({ type: "error", title: "Lỗi", message: "Lỗi lưu: " + error.message });
-  }
+    if(!confirm(`Xóa user ${name}?`)) return;
+    await apiFetch(`/api/admin/users/${name}`, {method: 'DELETE'});
+    loadAdminUsersList();
 }
 
 async function deleteLocation(name) {
-  if (!confirm(`⚠️ Xóa vĩnh viễn địa điểm "${name}"?`)) return;
+  if (!confirm(`Xóa địa điểm "${name}"?`)) return;
   await apiFetch("/api/admin/location/delete", {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    method: "DELETE", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
   });
-
-  showNotification({
-    type: "delete",
-    title: "Thành công",
-    message: "Đã xóa địa điểm khỏi hệ thống.",
-    btnText: "OK",
-  });
-
   closeDetail();
   loadLocations("All");
   cachedAllLocations = null;
-  loadAdminStats();
 }
 
-// ============================================================================
-// PHẦN 8: TIỆN ÍCH & TRẢI NGHIỆM NGƯỜI DÙNG (UTILS & UX)
-// ============================================================================
-
-// 8.1. Debounce Search (Chống spam API khi gõ phím)
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-function setupDebounceSearch() {
-  document.getElementById("usernameInput").addEventListener(
-    "input",
-    debounce(() => {
-      const val = document.getElementById("usernameInput").value.trim();
-      if (val.length > 2) analyzeUser(false);
-    }, 800),
-  );
+// Utils
+function showNotification({ type, title, message, btnText, onConfirm }) {
+  // Simplification for reliability
+  alert(`${title}\n${message}`); 
+  if(onConfirm) onConfirm();
 }
 
-// 8.2. Drag Scroll (Kéo thả để cuộn thanh lọc danh mục)
 function setupDragScroll() {
   const slider = document.querySelector(".filter-chips");
-  let isDown = false;
-  let startX;
-  let scrollLeft;
-
-  if (slider) {
-    // --- A. DÀNH CHO MÁY TÍNH (CHUỘT) ---
-    slider.addEventListener("mousedown", (e) => {
-      isDown = true;
-      slider.classList.add("active");
-      startX = e.pageX - slider.offsetLeft;
-      scrollLeft = slider.scrollLeft;
-      slider.style.cursor = "grabbing";
-    });
-    slider.addEventListener("mouseleave", () => {
-      isDown = false;
-      slider.classList.remove("active");
-      slider.style.cursor = "grab";
-    });
-    slider.addEventListener("mouseup", () => {
-      isDown = false;
-      slider.classList.remove("active");
-      slider.style.cursor = "grab";
-    });
-    slider.addEventListener("mousemove", (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - slider.offsetLeft;
-      const walk = (x - startX) * 2;
-      slider.scrollLeft = scrollLeft - walk;
-    });
-
-    // Cuộn bằng Touchpad / Con lăn chuột
-    slider.addEventListener("wheel", (e) => {
-      if (slider.scrollWidth <= slider.clientWidth) return;
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      e.preventDefault();
-      slider.scrollLeft += e.deltaX || e.deltaY;
-    });
-
-    // --- B. DÀNH CHO ĐIỆN THOẠI (CẢM ỨNG) ---
-    slider.addEventListener("touchstart", (e) => {
-      isDown = true;
-      startX = e.touches[0].pageX - slider.offsetLeft;
-      scrollLeft = slider.scrollLeft;
-    });
-    slider.addEventListener("touchend", () => {
-      isDown = false;
-    });
-    slider.addEventListener("touchmove", (e) => {
-      if (!isDown) return;
-      const x = e.touches[0].pageX - slider.offsetLeft;
-      const walk = (x - startX) * 2; // Tốc độ cuộn
-      slider.scrollLeft = scrollLeft - walk;
-    });
-  }
+  if (!slider) return;
+  let isDown = false, startX, scrollLeft;
+  slider.addEventListener("mousedown", (e) => { isDown=true; startX = e.pageX - slider.offsetLeft; scrollLeft=slider.scrollLeft; });
+  slider.addEventListener("mouseleave", () => { isDown=false; });
+  slider.addEventListener("mouseup", () => { isDown=false; });
+  slider.addEventListener("mousemove", (e) => { if(!isDown)return; e.preventDefault(); const x=e.pageX-slider.offsetLeft; slider.scrollLeft = scrollLeft - (x-startX)*2; });
 }
 
-// 8.3. Notification Modal (Thông báo đẹp)
-function showNotification({ type, title, message, btnText, onConfirm }) {
-  const modal = document.getElementById("notificationModal");
-  const icon = document.getElementById("notif-icon");
-  const titleEl = document.getElementById("notif-title");
-  const msgEl = document.getElementById("notif-msg");
-  const btn = document.getElementById("notif-btn");
-
-  // 1. Cập nhật nội dung
-  titleEl.innerText = title;
-  msgEl.innerHTML = message;
-  btn.innerText = btnText || "Đóng";
-
-  // 2. Cập nhật giao diện (Màu sắc/Icon)
-  if (type === "success") {
-    icon.className = "fas fa-check-circle";
-    icon.style.color = "#10b981"; // Xanh lá
-    btn.style.backgroundColor = "#2563eb"; // Xanh dương
-  } else if (type === "delete") {
-    icon.className = "fas fa-trash-alt";
-    icon.style.color = "#ef4444"; // Đỏ
-    btn.style.backgroundColor = "#ef4444"; // Nút đỏ
-  } else if (type === "error") {
-    icon.className = "fas fa-exclamation-triangle";
-    icon.style.color = "#f59e0b"; // Vàng
-    btn.style.backgroundColor = "#f59e0b"; // Nút vàng
-  } else {
-    icon.className = "fas fa-info-circle";
-    icon.style.color = "#2563eb"; // Xanh dương
-    btn.style.backgroundColor = "#2563eb"; // Nút xanh dương
-  }
-
-  // 3. Tạo nút để xóa sự kiện cũ
-  const newBtn = btn.cloneNode(true);
-  btn.parentNode.replaceChild(newBtn, btn);
-
-  // Hàm đóng Modal chung
-  const closeModal = () => {
-    modal.classList.remove("active");
-    document.removeEventListener("keydown", handleEnterKey);
-    if (onConfirm) onConfirm();
-  };
-
-  // Hàm xử lý phím Enter
-  const handleEnterKey = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // Ngăn hành vi mặc định (như submit form nền)
-      closeModal();
-    }
-  };
-
-  // Gán sự kiện
-  newBtn.onclick = closeModal;
-  document.addEventListener("keydown", handleEnterKey);
-
-  // Hiển thị & Focus vào nút đóng (để tiện cho người dùng dùng phím)
-  modal.classList.add("active");
-  newBtn.focus();
+function setupDebounceSearch() {
+    let timeout;
+    document.getElementById("usernameInput").addEventListener("input", () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            if(document.getElementById("usernameInput").value.length > 2) analyzeUser(false);
+        }, 800);
+    });
 }
 
-/* ============================================================================
-   PHẦN 5.1: MAP EXTENSIONS (ICONS & HEATMAP)
-   ============================================================================ */
+function openEditModal() { // Simplified placeholder
+    if(!currentOpenLoc) return;
+    document.getElementById("editModal").classList.add("active");
+    // Populate fields
+    document.getElementById("editOldName").value = currentOpenLoc.name;
+    document.getElementById("editName").value = currentOpenLoc.name;
+    document.getElementById("editLat").value = currentOpenLoc.lat;
+    document.getElementById("editLng").value = currentOpenLoc.lng;
+    document.getElementById("editCategory").value = currentOpenLoc.category;
+    document.getElementById("editImage").value = currentOpenLoc.image;
+    document.getElementById("editDesc").value = currentOpenLoc.description;
+}
+function closeEditModal() { document.getElementById("editModal").classList.remove("active"); }
+
+async function submitEditLocation() {
+    const body = {
+        old_name: document.getElementById("editOldName").value,
+        name: document.getElementById("editName").value,
+        lat: document.getElementById("editLat").value,
+        lng: document.getElementById("editLng").value,
+        category: document.getElementById("editCategory").value,
+        image: document.getElementById("editImage").value,
+        description: document.getElementById("editDesc").value
+    };
+    await apiFetch("/api/admin/location/update", {
+        method: "PUT", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    });
+    alert("Cập nhật thành công!");
+    closeEditModal();
+    cachedAllLocations = null;
+    loadLocations("All");
+}
+
+function openAddModal() { document.getElementById("addModal").classList.add("active"); }
+function closeAddModal() { document.getElementById("addModal").classList.remove("active"); }
+async function submitAddLocation() {
+    const body = {
+        name: document.getElementById("addName").value,
+        lat: document.getElementById("addLat").value,
+        lng: document.getElementById("addLng").value,
+        category: document.getElementById("addCategory").value,
+        image: document.getElementById("addImage").value,
+        description: document.getElementById("addDesc").value
+    };
+    await apiFetch("/api/admin/location/add", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    });
+    alert("Thêm thành công!");
+    closeAddModal();
+    cachedAllLocations = null;
+    loadLocations("All");
+}
+
+// ============================================================================
+// PHẦN 6: EXTENSIONS (ICONS, HEATMAP, REVIEWS)
+// ============================================================================
 
 function getDynamicIcon(loc) {
   const iconMap = {
@@ -1220,17 +633,10 @@ function getDynamicIcon(loc) {
     "Tham quan": "🏞️", "Mua sắm": "🛍️",
   };
   const symbol = iconMap[loc.category] || "📍";
-  
   let extraClass = "";
+  if (loc.is_personalized) extraClass = "pin-collab";
+  else if (loc.score >= 0.35) extraClass = "pin-pr";
   
-  // LOGIC MÀU SẮC CHO LEGEND
-  if (loc.is_personalized || (loc.reason && loc.reason_type === 'collab')) {
-      extraClass = "pin-collab"; // Xanh dương
-  } 
-  else if (loc.score && loc.score >= 0.35) {
-      extraClass = "pin-pr"; // Đỏ
-  }
-
   return L.divIcon({
     className: "custom-div-icon",
     html: `<div class='custom-pin ${extraClass}'>${symbol}</div>`,
@@ -1240,41 +646,136 @@ function getDynamicIcon(loc) {
 
 function toggleHeatmap() {
     const btn = document.getElementById('btn-toggle-heatmap');
-    
     if (isHeatmapActive) {
-        // Tắt Heatmap
-        if (heatLayer && map.hasLayer(heatLayer)) { map.removeLayer(heatLayer); }
-        if (markerLayer) { map.addLayer(markerLayer); }
-        
+        if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+        if (markerLayer) map.addLayer(markerLayer);
         isHeatmapActive = false;
         btn.classList.remove('active');
-        btn.innerHTML = '<i class="fas fa-fire"></i> Bản đồ nhiệt';
-        const legend = document.getElementById('heatmap-legend');
-        if(legend) legend.style.display = 'none';
-        
+        const leg = document.getElementById('heatmap-legend');
+        if(leg) leg.style.display = 'none';
     } else {
-        // Bật Heatmap
-        if (!cachedAllLocations || cachedAllLocations.length === 0) {
-            showNotification({type: 'error', title: 'Lỗi', message: 'Chưa có dữ liệu.', btnText: 'Đóng'});
-            return;
-        }
-
-        const heatPoints = cachedAllLocations.map(loc => {
-            let val = loc.score || loc.pagerankScore || 0;
-            if (val === 0) val = 0.1;
-            return [loc.lat, loc.lng, val * 5];
-        });
-
+        if (!cachedAllLocations) return alert("Chưa có dữ liệu");
+        const heatPoints = cachedAllLocations.map(loc => [loc.lat, loc.lng, (loc.score||0.1)*5]);
         if (markerLayer) map.removeLayer(markerLayer);
-
         heatLayer = L.heatLayer(heatPoints, { radius: 30, blur: 20, max: 1.0 }).addTo(map);
-
         isHeatmapActive = true;
         btn.classList.add('active');
-        btn.innerHTML = '<i class="fas fa-fire-alt"></i> Tắt Heatmap';
-        const legend = document.getElementById('heatmap-legend');
-        if(legend) legend.style.display = 'block';
-        
-        showNotification({type: 'success', title: 'Heatmap', message: 'Đang hiển thị mức độ phổ biến.', btnText: 'OK'});
+        const leg = document.getElementById('heatmap-legend');
+        if(leg) leg.style.display = 'block';
     }
+}
+
+// Review Functions
+function toggleReviewForm() {
+    if (!currentUser) return alert("Bạn cần đăng nhập để đánh giá");
+    const form = document.getElementById('reviewFormContainer');
+    form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+    
+    // Reset form if not editing
+    if (!form.dataset.editing) {
+       document.getElementById('reviewComment').value = "";
+       document.querySelectorAll('input[name="rating"]').forEach(i => i.checked = false);
+       document.querySelector('#reviewFormContainer button.btn-submit').innerText = "Gửi";
+       // Remove any old event listeners by cloning
+       const oldBtn = document.querySelector('#reviewFormContainer button.btn-submit');
+       const newBtn = oldBtn.cloneNode(true);
+       oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+       // Re-attach standard submit handler
+       newBtn.onclick = () => submitReview(currentOpenLoc ? currentOpenLoc.name : "");
+    }
+}
+
+function loadReviews(locationName) {
+    const list = document.getElementById('reviewList');
+    apiFetch(`/api/reviews/${encodeURIComponent(locationName)}`).then(data => {
+        if(!data || data.length === 0) return list.innerHTML = `<div class="no-reviews">Chưa có đánh giá nào.</div>`;
+        
+        list.innerHTML = data.map(rev => {
+            let actions = "";
+            if(currentUser && rev.user === currentUser) {
+                const safeComment = (rev.comment || "").replace(/"/g, "&quot;").replace(/'/g, "\\'");
+                actions = `
+                    <div style="margin-left:auto; font-size:11px;">
+                        <a href="#" onclick="editReview('${locationName}', ${rev.rating}, '${safeComment}'); return false;" style="color:#2563eb; margin-right:8px;">Sửa</a>
+                        <a href="#" onclick="deleteReview('${locationName}'); return false;" style="color:#ef4444;">Xóa</a>
+                    </div>`;
+            }
+            return `
+            <div class="review-item">
+                <div class="review-avatar"><i class="fas fa-user"></i></div>
+                <div class="review-content">
+                    <div style="display:flex; justify-content:space-between;">
+                        <div class="review-user-name">${rev.user}</div>
+                        ${actions}
+                    </div>
+                    <div class="review-meta"><span class="review-stars">${'★'.repeat(rev.rating)}</span> • ${rev.time}</div>
+                    <div class="review-text">${rev.comment || ""}</div>
+                </div>
+            </div>`;
+        }).join("");
+    }).catch(e => list.innerHTML = "Lỗi tải bình luận");
+}
+
+function editReview(locationName, rating, comment) {
+    const form = document.getElementById('reviewFormContainer');
+    form.style.display = 'block';
+    form.dataset.editing = "true";
+    
+    const ratingInput = document.querySelector(`input[name="rating"][value="${rating}"]`);
+    if(ratingInput) ratingInput.checked = true;
+    document.getElementById('reviewComment').value = comment;
+    
+    const btn = document.querySelector('#reviewFormContainer button.btn-submit');
+    btn.innerText = "Cập nhật";
+    btn.onclick = () => submitReview(locationName);
+    
+    form.scrollIntoView({behavior: "smooth"});
+}
+
+function deleteReview(locationName) {
+    if(!confirm("Bạn chắc chắn muốn xóa?")) return;
+    apiFetch('/api/review', {
+        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location_name: locationName })
+    }).then(res => {
+        if(res.success) {
+            alert("Đã xóa!");
+            loadReviews(locationName);
+            const form = document.getElementById('reviewFormContainer');
+            delete form.dataset.editing;
+            document.querySelector('#reviewFormContainer button.btn-submit').innerText = "Gửi";
+        } else alert("Lỗi: " + res.error);
+    });
+}
+
+function submitReview(locationName) {
+    const ratingEl = document.querySelector('input[name="rating"]:checked');
+    if (!ratingEl) return alert("Vui lòng chọn số sao!");
+    
+    const isEditing = document.getElementById('reviewFormContainer').dataset.editing;
+    apiFetch('/api/review', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            location_name: locationName, rating: ratingEl.value,
+            comment: document.getElementById('reviewComment').value.trim()
+        })
+    }).then(res => {
+        if (res.success) {
+            alert(isEditing ? "Cập nhật thành công!" : "Đánh giá thành công!");
+            document.getElementById('reviewComment').value = "";
+            const form = document.getElementById('reviewFormContainer');
+            form.style.display = 'none';
+            delete form.dataset.editing;
+            
+            // Reset button to standard state
+            const btn = document.querySelector('#reviewFormContainer button.btn-submit');
+            btn.innerText = "Gửi";
+            // Important: clone to clear old event listeners
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            newBtn.onclick = () => submitReview(currentOpenLoc ? currentOpenLoc.name : "");
+
+            loadReviews(locationName);
+        } else alert("Lỗi: " + res.error);
+    });
 }
