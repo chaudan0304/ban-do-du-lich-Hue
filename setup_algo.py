@@ -13,8 +13,13 @@ Mục tiêu:
 
 from neo4j import GraphDatabase, NotificationSeverity
 import os
+import sys
 from dotenv import load_dotenv
 from datetime import datetime
+
+# Fix encoding cho Windows console (hỗ trợ emoji)
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
 
 load_dotenv()
 
@@ -101,11 +106,10 @@ def run_hybrid_algo():
         print("2️⃣ Tính PageRank phổ biến (dựa trên :LIKED)...")
         try:
             session.run(
-                "CALL gds.graph.drop($name) YIELD graphName", {"name": GRAPH_USER}
+                "CALL gds.graph.drop($name, false) YIELD graphName", {"name": GRAPH_USER}
             )
         except Exception as e:
-            if "not found" not in str(e).lower():
-                print(f"⚠️ Lỗi drop graph user: {e}")
+            pass  # Bỏ qua lỗi nếu graph không tồn tại
 
         try:
             session.run(
@@ -147,11 +151,10 @@ def run_hybrid_algo():
         print("3️⃣ Tính PageRank kết nối (dựa trên :RELATED_TO)...")
         try:
             session.run(
-                "CALL gds.graph.drop($name) YIELD graphName", {"name": GRAPH_LOC}
+                "CALL gds.graph.drop($name, false) YIELD graphName", {"name": GRAPH_LOC}
             )
         except Exception as e:
-            if "not found" not in str(e).lower():
-                print(f"⚠️ Lỗi drop graph loc: {e}")
+            pass  # Bỏ qua lỗi nếu graph không tồn tại
 
         try:
             session.run(

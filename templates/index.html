@@ -1,419 +1,392 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Huế Travel AI - Khám phá thông minh</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Huế Travel AI - Khám phá thông minh</title>
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-  </head>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <body>
-    <!-- Loading toàn cục (hiển thị khi gọi API dài) -->
-    <div id="global-loading" class="global-loading" style="display: none">
-      <div class="spinner-large"></div>
-      <p>Đang xử lý... Vui lòng đợi</p>
-    </div>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
 
-    <div class="app-layout">
-      <aside class="sidebar">
-        <div class="sidebar-header">
-          <div class="brand">
-            <i class="fas fa-map-marked-alt logo-icon"></i>
-            <div>
-              <h1>Huế Travel AI</h1>
-              <p>Hệ gợi ý du lịch</p>
-            </div>
+<body>
+  <!-- Loading toàn cục (hiển thị khi gọi API dài) -->
+  <div id="global-loading" class="global-loading" style="display: none">
+    <div class="spinner-large"></div>
+    <p>Đang xử lý... Vui lòng đợi</p>
+  </div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <i class="fas fa-map-marked-alt logo-icon"></i>
+          <div>
+            <h1>Huế Travel AI</h1>
+            <p>Hệ gợi ý du lịch</p>
           </div>
+        </div>
 
-          <div class="header-auth">
-            <button id="header-login-btn" class="btn-header-login" onclick="openAuthModal()">
-              <i class="fas fa-user-circle"></i> Đăng nhập
+        <div class="header-auth">
+          <button id="header-login-btn" class="btn-header-login" onclick="openAuthModal()">
+            <i class="fas fa-user-circle"></i> Đăng nhập
+          </button>
+
+          <div id="header-user-info" class="header-user" style="display: none">
+            <div class="user-avatar-small"><i class="fas fa-user"></i></div>
+            <span id="header-username">User</span>
+
+            <button id="btn-admin-panel" class="btn-logout-mini" onclick="openAdminUserModal()"
+              title="Quản lý Người dùng" style="display: none; margin-right: 5px; color: #fbbf24">
+              <i class="fas fa-users-cog"></i>
             </button>
 
-            <div id="header-user-info" class="header-user" style="display: none">
-              <div class="user-avatar-small"><i class="fas fa-user"></i></div>
-              <span id="header-username">User</span>
-
-              <button
-                id="btn-admin-panel"
-                class="btn-logout-mini"
-                onclick="openAdminUserModal()"
-                title="Quản lý Người dùng"
-                style="display: none; margin-right: 5px; color: #fbbf24"
-              >
-                <i class="fas fa-users-cog"></i>
-              </button>
-
-              <button class="btn-logout-mini" onclick="handleLogout()" title="Đăng xuất">
-                <i class="fas fa-sign-out-alt"></i>
-              </button>
-            </div>
+            <button class="btn-logout-mini" onclick="handleLogout()" title="Đăng xuất">
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
           </div>
-        </div>
-
-        <div class="search-box" id="main-search-box">
-          <div class="input-group" id="guest-search-box">
-            <input type="text" id="usernameInput" placeholder="Nhập tên User để phân tích..." />
-            <button class="btn-submit" onclick="analyzeUser(false)"><i class="fas fa-search"></i></button>
-          </div>
-        </div>
-
-        <div id="logged-view" style="display: none; margin: 10px 24px">
-          <div id="user-history" class="history-section" style="display: none">
-            <div class="history-title"><i class="fas fa-history"></i> Địa điểm đã thích:</div>
-            <div class="history-chips" id="history-list"></div>
-          </div>
-        </div>
-
-        <div class="results-container">
-          <div class="section-head">
-            <h2>Gợi ý dành cho bạn</h2>
-            <span class="badge-counter">AI Recommended</span>
-          </div>
-
-          <div id="recommendation-area" class="cards-list">
-            <div class="empty-state">
-              <img src="https://cdn-icons-png.flaticon.com/512/1086/1086933.png" alt="AI" />
-              <h3>Sẵn sàng phân tích</h3>
-              <p>Hệ thống sử dụng <b>PageRank</b> & <b>Collaborative Filtering</b>.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="data-explorer">
-          <div class="section-head">
-            <h2>Khám phá địa điểm</h2>
-            <div class="mini-search-box">
-              <input type="text" id="miniSearchInput" placeholder="Tìm nhanh..." onkeyup="handleLocalSearch()" />
-              <i class="fas fa-search"></i>
-            </div>
-          </div>
-
-          <div class="filter-chips">
-            <button class="chip active" onclick="filterData('All', this)">Tất cả</button>
-            <button class="chip" onclick="filterData('Di tích', this)">🏛️ Di tích</button>
-            <button class="chip" onclick="filterData('Lăng tẩm', this)">🏯 Lăng tẩm</button>
-            <button class="chip" onclick="filterData('Tâm linh', this)">🛕 Tâm linh</button>
-            <button class="chip" onclick="filterData('Ẩm thực', this)">🍜 Ẩm thực</button>
-            <button class="chip" onclick="filterData('Bãi biển', this)">🏖️ Bãi biển</button>
-            <button class="chip" onclick="filterData('Tham quan', this)">🏞️ Tham quan</button>
-            <button class="chip" onclick="filterData('Thiên nhiên', this)">🌳 Thiên nhiên</button>
-            <button class="chip" onclick="filterData('Mua sắm', this)">🛍️ Mua sắm</button>
-          </div>
-
-          <div class="mini-list" id="locationList"></div>
-        </div>
-
-        <div id="detail-panel" class="detail-panel">
-          <button class="btn-back" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Quay lại danh sách</button>
-          <div id="detail-content"></div>
-        </div>
-      </aside>
-
-      <main class="map-container">
-        <div id="map"></div>
-        <div class="map-legend">
-          <div
-            class="legend-item"
-            title="PageRank: đo độ phổ biến toàn cục của địa điểm trên đồ thị (càng nhiều người ghé càng cao)"
-          >
-            <span class="dot dot-pr"></span> Top PageRank (Nổi tiếng toàn Huế)
-          </div>
-          <div
-            class="legend-item"
-            title="Collaborative Filtering: gợi ý dựa trên sự tương đồng sở thích giữa các người dùng"
-          >
-            <span class="dot dot-collab"></span> Gợi ý cá nhân hóa (AI)
-          </div>
-        </div>
-      </main>
-    </div>
-
-    <!-- Modal Auth -->
-    <div id="authModal" class="modal">
-      <div class="modal-content">
-        <button class="close-modal" onclick="closeAuthModal()">&times;</button>
-        <div class="auth-tabs">
-          <button class="tab-btn active" onclick="switchTab('login')">Đăng nhập</button>
-          <button class="tab-btn" onclick="switchTab('register')">Đăng ký</button>
-        </div>
-
-        <div id="loginForm" class="auth-form">
-          <div class="form-group">
-            <i class="fas fa-user"></i><input type="text" id="loginUser" placeholder="Tên đăng nhập" />
-          </div>
-          <div class="form-group">
-            <i class="fas fa-lock"></i><input type="password" id="loginPass" placeholder="Mật khẩu" />
-          </div>
-          <button class="btn-full" onclick="handleLogin()">Đăng nhập</button>
-          <p id="loginMsg" style="color: red; font-size: 12px; margin-top: 10px; text-align: center"></p>
-        </div>
-
-        <div id="registerForm" class="auth-form" style="display: none">
-          <div class="form-group">
-            <i class="fas fa-user"></i><input type="text" id="regUser" placeholder="Chọn tên đăng nhập" />
-          </div>
-          <div class="form-group">
-            <i class="fas fa-lock"></i><input type="password" id="regPass" placeholder="Mật khẩu" />
-          </div>
-          <button class="btn-full btn-outline" onclick="handleRegister()">Tạo tài khoản</button>
-          <p id="regMsg" style="color: red; font-size: 12px; margin-top: 10px; text-align: center"></p>
         </div>
       </div>
-    </div>
 
-    <!-- Modal Admin User -->
-    <div id="adminModal" class="modal">
-      <div class="modal-content-fancy">
-        <div class="modal-header-gradient">
-          <h3 class="modal-title-fancy"><i class="fas fa-user-shield"></i> Quản trị hệ thống</h3>
-          <div class="close-btn-white" onclick="closeAdminModal()">
-            <i class="fas fa-times"></i>
+      <div class="search-box" id="main-search-box">
+        <div class="input-group" id="guest-search-box">
+          <input type="text" id="usernameInput" placeholder="Nhập tên User để phân tích..." />
+          <button class="btn-submit" onclick="analyzeUser(false)"><i class="fas fa-search"></i></button>
+        </div>
+      </div>
+
+      <div id="logged-view" style="display: none; margin: 10px 24px">
+        <div id="user-history" class="history-section" style="display: none">
+          <div class="history-title"><i class="fas fa-history"></i> Địa điểm đã thích:</div>
+          <div class="history-chips" id="history-list"></div>
+        </div>
+      </div>
+
+      <div class="results-container">
+        <div class="section-head">
+          <h2>Gợi ý dành cho bạn</h2>
+          <span class="badge-counter">AI Recommended</span>
+        </div>
+
+        <div id="recommendation-area" class="cards-list">
+          <div class="empty-state">
+            <img src="https://cdn-icons-png.flaticon.com/512/1086/1086933.png" alt="AI" />
+            <h3>Sẵn sàng phân tích</h3>
+            <p>Hệ thống sử dụng <b>PageRank</b> & <b>Collaborative Filtering</b>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-explorer">
+        <div class="section-head">
+          <h2>Khám phá địa điểm</h2>
+          <div class="mini-search-box">
+            <input type="text" id="miniSearchInput" placeholder="Tìm nhanh..." onkeyup="handleLocalSearch()" />
+            <i class="fas fa-search"></i>
           </div>
         </div>
 
-        <div class="modal-body-fancy">
-          <div class="dashboard-stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon i-users"><i class="fas fa-users"></i></div>
-              <div class="stat-data">
-                <span>Users</span>
-                <b id="stat-user">0</b>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon i-locs"><i class="fas fa-map-marker-alt"></i></div>
-              <div class="stat-data">
-                <span>Địa điểm</span>
-                <b id="stat-loc">0</b>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon i-likes"><i class="fas fa-heart"></i></div>
-              <div class="stat-data">
-                <span>Lượt thích</span>
-                <b id="stat-like">0</b>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon i-links"><i class="fas fa-project-diagram"></i></div>
-              <div class="stat-data">
-                <span>Liên kết</span>
-                <b id="stat-link">0</b>
-              </div>
+        <div class="filter-chips">
+          <button class="chip active" onclick="filterData('All', this)">Tất cả</button>
+          <button class="chip" onclick="filterData('Di tích', this)">🏛️ Di tích</button>
+          <button class="chip" onclick="filterData('Lăng tẩm', this)">🏯 Lăng tẩm</button>
+          <button class="chip" onclick="filterData('Tâm linh', this)">🛕 Tâm linh</button>
+          <button class="chip" onclick="filterData('Ẩm thực', this)">🍜 Ẩm thực</button>
+          <button class="chip" onclick="filterData('Bãi biển', this)">🏖️ Bãi biển</button>
+          <button class="chip" onclick="filterData('Tham quan', this)">🏞️ Tham quan</button>
+          <button class="chip" onclick="filterData('Thiên nhiên', this)">🌳 Thiên nhiên</button>
+          <button class="chip" onclick="filterData('Mua sắm', this)">🛍️ Mua sắm</button>
+        </div>
+
+        <div class="mini-list" id="locationList"></div>
+      </div>
+
+      <div id="detail-panel" class="detail-panel">
+        <button class="btn-back" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Quay lại danh sách</button>
+        <div id="detail-content"></div>
+      </div>
+    </aside>
+
+    <main class="map-container">
+      <div id="map"></div>
+      <div class="map-legend">
+        <div class="legend-item"
+          title="PageRank: đo độ phổ biến toàn cục của địa điểm trên đồ thị (càng nhiều người ghé càng cao)">
+          <span class="dot dot-pr"></span> Top PageRank (Nổi tiếng toàn Huế)
+        </div>
+        <div class="legend-item"
+          title="Collaborative Filtering: gợi ý dựa trên sự tương đồng sở thích giữa các người dùng">
+          <span class="dot dot-collab"></span> Gợi ý cá nhân hóa (AI)
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Auth -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeAuthModal()">&times;</button>
+      <div class="auth-tabs">
+        <button class="tab-btn active" onclick="switchTab('login')">Đăng nhập</button>
+        <button class="tab-btn" onclick="switchTab('register')">Đăng ký</button>
+      </div>
+
+      <div id="loginForm" class="auth-form">
+        <div class="form-group">
+          <i class="fas fa-user"></i><input type="text" id="loginUser" placeholder="Tên đăng nhập" />
+        </div>
+        <div class="form-group">
+          <i class="fas fa-lock"></i><input type="password" id="loginPass" placeholder="Mật khẩu" />
+        </div>
+        <button class="btn-full" onclick="handleLogin()">Đăng nhập</button>
+        <p id="loginMsg" style="color: red; font-size: 12px; margin-top: 10px; text-align: center"></p>
+      </div>
+
+      <div id="registerForm" class="auth-form" style="display: none">
+        <div class="form-group">
+          <i class="fas fa-user"></i><input type="text" id="regUser" placeholder="Chọn tên đăng nhập" />
+        </div>
+        <div class="form-group">
+          <i class="fas fa-lock"></i><input type="password" id="regPass" placeholder="Mật khẩu" />
+        </div>
+        <button class="btn-full btn-outline" onclick="handleRegister()">Tạo tài khoản</button>
+        <p id="regMsg" style="color: red; font-size: 12px; margin-top: 10px; text-align: center"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Admin User -->
+  <div id="adminModal" class="modal">
+    <div class="modal-content-fancy">
+      <div class="modal-header-gradient">
+        <h3 class="modal-title-fancy"><i class="fas fa-user-shield"></i> Quản trị hệ thống</h3>
+        <div class="close-btn-white" onclick="closeAdminModal()">
+          <i class="fas fa-times"></i>
+        </div>
+      </div>
+
+      <div class="modal-body-fancy">
+        <div class="dashboard-stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon i-users"><i class="fas fa-users"></i></div>
+            <div class="stat-data">
+              <span>Users</span>
+              <b id="stat-user">0</b>
             </div>
           </div>
-
-          <div class="dashboard-actions">
-            <button onclick="triggerAI()" class="btn-dash btn-ai">
-              <i class="fas fa-brain"></i> Chạy thuật toán AI
-            </button>
-            <button onclick="openAddModal()" class="btn-dash btn-add">
-              <i class="fas fa-plus-circle"></i> Thêm địa điểm
-            </button>
+          <div class="stat-card">
+            <div class="stat-icon i-locs"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="stat-data">
+              <span>Địa điểm</span>
+              <b id="stat-loc">0</b>
+            </div>
           </div>
-          <p id="algo-status" class="admin-status-text" style="color: #333; margin-bottom: 20px"></p>
+          <div class="stat-card">
+            <div class="stat-icon i-likes"><i class="fas fa-heart"></i></div>
+            <div class="stat-data">
+              <span>Lượt thích</span>
+              <b id="stat-like">0</b>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon i-links"><i class="fas fa-project-diagram"></i></div>
+            <div class="stat-data">
+              <span>Liên kết</span>
+              <b id="stat-link">0</b>
+            </div>
+          </div>
+        </div>
 
-          <h4
-            style="
+        <div class="dashboard-actions">
+          <button onclick="triggerAI()" class="btn-dash btn-ai">
+            <i class="fas fa-brain"></i> Chạy thuật toán AI
+          </button>
+          <button onclick="openAddModal()" class="btn-dash btn-add">
+            <i class="fas fa-plus-circle"></i> Thêm địa điểm
+          </button>
+        </div>
+        <p id="algo-status" class="admin-status-text" style="color: #333; margin-bottom: 20px"></p>
+
+        <h4 style="
               margin: 0 0 15px;
               padding-bottom: 8px;
               border-bottom: 2px solid #e2e8f0;
               font-size: 15px;
               color: #475569;
-            "
-          >
-            <i class="fas fa-list"></i> Danh sách người dùng
-          </h4>
+            ">
+          <i class="fas fa-list"></i> Danh sách người dùng
+        </h4>
 
-          <div class="user-list-scroll">
-            <table style="width: 100%; border-collapse: collapse">
-              <tbody id="adminUserList"></tbody>
-            </table>
-          </div>
+        <div class="user-list-scroll">
+          <table style="width: 100%; border-collapse: collapse">
+            <tbody id="adminUserList"></tbody>
+          </table>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Modal Notification -->
-    <div id="notificationModal" class="modal">
-      <div class="modal-content modal-content-notification">
-        <div class="success-icon" style="margin-bottom: 20px">
-          <i id="notif-icon" class="fas fa-check-circle" style="font-size: 60px"></i>
-        </div>
-        <h3 id="notif-title" style="margin-bottom: 10px; color: #111">Thông báo</h3>
-        <p id="notif-msg" style="color: #666; margin-bottom: 25px; font-size: 14px; line-height: 1.5">Nội dung...</p>
-        <button id="notif-btn" class="btn-full">Đóng</button>
+  <!-- Modal Notification -->
+  <div id="notificationModal" class="modal">
+    <div class="modal-content modal-content-notification">
+      <div class="success-icon" style="margin-bottom: 20px">
+        <i id="notif-icon" class="fas fa-check-circle" style="font-size: 60px"></i>
       </div>
+      <h3 id="notif-title" style="margin-bottom: 10px; color: #111">Thông báo</h3>
+      <p id="notif-msg" style="color: #666; margin-bottom: 25px; font-size: 14px; line-height: 1.5">Nội dung...</p>
+      <button id="notif-btn" class="btn-full">Đóng</button>
     </div>
+  </div>
 
-    <!-- Modal Edit Location -->
-    <div class="modal" id="editModal">
-      <div class="modal-content-fancy">
-        <div class="modal-header-gradient">
-          <h3 class="modal-title-fancy">✏️ Chỉnh sửa thông tin</h3>
-          <div class="close-btn-white" onclick="closeEditModal()">
-            <i class="fas fa-times"></i>
+  <!-- Modal Edit Location -->
+  <div class="modal" id="editModal">
+    <div class="modal-content-fancy">
+      <div class="modal-header-gradient">
+        <h3 class="modal-title-fancy">✏️ Chỉnh sửa thông tin</h3>
+        <div class="close-btn-white" onclick="closeEditModal()">
+          <i class="fas fa-times"></i>
+        </div>
+      </div>
+
+      <div class="modal-body-fancy">
+        <input type="hidden" id="editOldName" />
+
+        <div class="form-group">
+          <label class="label-fancy"><i class="fas fa-signature"></i> Tên địa điểm <span
+              class="required-mark">*</span></label>
+          <input type="text" id="editName" class="input-fancy" placeholder="Nhập tên địa điểm..." />
+        </div>
+
+        <div class="form-row">
+          <div class="col">
+            <div class="form-group">
+              <label class="label-fancy"><i class="fas fa-globe"></i> Vĩ độ (Lat)</label>
+              <input type="number" id="editLat" class="input-fancy" step="any" placeholder="..." />
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label class="label-fancy"><i class="fas fa-globe"></i> Kinh độ (Lng)</label>
+              <input type="number" id="editLng" class="input-fancy" step="any" placeholder="..." />
+            </div>
           </div>
         </div>
 
-        <div class="modal-body-fancy">
-          <input type="hidden" id="editOldName" />
-
-          <div class="form-group">
-            <label class="label-fancy"
-              ><i class="fas fa-signature"></i> Tên địa điểm <span class="required-mark">*</span></label
-            >
-            <input type="text" id="editName" class="input-fancy" placeholder="Nhập tên địa điểm..." />
-          </div>
-
-          <div class="form-row">
-            <div class="col">
-              <div class="form-group">
-                <label class="label-fancy"><i class="fas fa-globe"></i> Vĩ độ (Lat)</label>
-                <input type="number" id="editLat" class="input-fancy" step="any" placeholder="..." />
-              </div>
-            </div>
-            <div class="col">
-              <div class="form-group">
-                <label class="label-fancy"><i class="fas fa-globe"></i> Kinh độ (Lng)</label>
-                <input type="number" id="editLng" class="input-fancy" step="any" placeholder="..." />
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-top: -10px; margin-bottom: 15px">
-            <button
-              type="button"
-              class="btn-action"
-              style="width: 100%; padding: 8px"
-              onclick="activateEditMapPicker()"
-            >
-              <i class="fas fa-map-marker-alt"></i> Chọn lại vị trí trên bản đồ
-            </button>
-          </div>
-
-          <div class="form-row">
-            <div class="col">
-              <div class="form-group">
-                <label class="label-fancy"><i class="fas fa-tags"></i> Danh mục</label>
-                <select id="editCategory" class="input-fancy select-fancy">
-                  <option value="Di tích">Di tích</option>
-                  <option value="Tâm linh">Tâm linh</option>
-                  <option value="Ẩm thực">Ẩm thực</option>
-                  <option value="Thiên nhiên">Thiên nhiên</option>
-                  <option value="Tham quan">Tham quan</option>
-                  <option value="Bãi biển">Bãi biển</option>
-                  <option value="Lăng tẩm">Lăng tẩm</option>
-                  <option value="Mua sắm">Mua sắm</option>
-                </select>
-              </div>
-            </div>
-            <div class="col">
-              <div class="form-group">
-                <label class="label-fancy"><i class="fas fa-star"></i> Đánh giá (0-5)</label>
-                <input type="number" id="editRating" class="input-fancy" step="0.1" min="0" max="5" />
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="label-fancy"><i class="fas fa-image"></i> Link hình ảnh</label>
-            <input type="text" id="editImage" class="input-fancy" placeholder="https://..." />
-          </div>
-
-          <div class="form-group">
-            <label class="label-fancy"><i class="fas fa-align-left"></i> Mô tả chi tiết</label>
-            <textarea id="editDesc" class="input-fancy textarea-fancy" rows="4"></textarea>
-          </div>
-
-          <button onclick="submitEditLocation()" class="btn-save-gradient">
-            <i class="fas fa-save"></i> Lưu thay đổi
+        <div class="form-group" style="margin-top: -10px; margin-bottom: 15px">
+          <button type="button" class="btn-action" style="width: 100%; padding: 8px" onclick="activateEditMapPicker()">
+            <i class="fas fa-map-marker-alt"></i> Chọn lại vị trí trên bản đồ
           </button>
         </div>
+
+        <div class="form-group">
+          <label class="label-fancy"><i class="fas fa-tags"></i> Danh mục</label>
+          <select id="editCategory" class="input-fancy select-fancy">
+            <option value="Di tích">Di tích</option>
+            <option value="Tâm linh">Tâm linh</option>
+            <option value="Ẩm thực">Ẩm thực</option>
+            <option value="Thiên nhiên">Thiên nhiên</option>
+            <option value="Tham quan">Tham quan</option>
+            <option value="Bãi biển">Bãi biển</option>
+            <option value="Lăng tẩm">Lăng tẩm</option>
+            <option value="Mua sắm">Mua sắm</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="label-fancy"><i class="fas fa-image"></i> Link hình ảnh</label>
+          <input type="text" id="editImage" class="input-fancy" placeholder="https://..." />
+        </div>
+
+        <div class="form-group">
+          <label class="label-fancy"><i class="fas fa-align-left"></i> Mô tả chi tiết</label>
+          <textarea id="editDesc" class="input-fancy textarea-fancy" rows="4"></textarea>
+        </div>
+
+        <button onclick="submitEditLocation()" class="btn-save-gradient">
+          <i class="fas fa-save"></i> Lưu thay đổi
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- Modal Add Location -->
-    <div class="modal" id="addModal">
-      <div class="modal-content-fancy">
-        <div class="modal-header-gradient">
-          <h3 class="modal-title-fancy">➕ Thêm địa điểm mới</h3>
-          <div class="close-btn-white" onclick="closeAddModal()">
-            <i class="fas fa-times"></i>
+  <!-- Modal Add Location -->
+  <div class="modal" id="addModal">
+    <div class="modal-content-fancy">
+      <div class="modal-header-gradient">
+        <h3 class="modal-title-fancy">➕ Thêm địa điểm mới</h3>
+        <div class="close-btn-white" onclick="closeAddModal()">
+          <i class="fas fa-times"></i>
+        </div>
+      </div>
+
+      <div class="modal-body-fancy">
+        <div class="form-group">
+          <label class="label-fancy"><i class="fas fa-map-pin"></i> Tên địa điểm <span
+              class="required-mark">*</span></label>
+          <input type="text" id="addName" class="input-fancy" placeholder="Ví dụ: Cầu Gỗ Lim..." />
+        </div>
+
+        <div class="form-row">
+          <div class="col">
+            <div class="form-group">
+              <label class="label-fancy"><i class="fas fa-globe"></i> Vĩ độ (Lat)</label>
+              <input type="number" id="addLat" class="input-fancy" placeholder="..." />
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label class="label-fancy"><i class="fas fa-globe"></i> Kinh độ (Lng)</label>
+              <input type="number" id="addLng" class="input-fancy" placeholder="..." />
+            </div>
           </div>
         </div>
 
-        <div class="modal-body-fancy">
-          <div class="form-group">
-            <label class="label-fancy"
-              ><i class="fas fa-map-pin"></i> Tên địa điểm <span class="required-mark">*</span></label
-            >
-            <input type="text" id="addName" class="input-fancy" placeholder="Ví dụ: Cầu Gỗ Lim..." />
-          </div>
+        <button onclick="activateMapPicker()" class="btn-map-picker">
+          <i class="fas fa-map-marked-alt"></i> Click chọn vị trí trên bản đồ
+        </button>
 
-          <div class="form-row">
-            <div class="col">
-              <div class="form-group">
-                <label class="label-fancy"><i class="fas fa-globe"></i> Vĩ độ (Lat)</label>
-                <input type="number" id="addLat" class="input-fancy" placeholder="..." />
-              </div>
-            </div>
-            <div class="col">
-              <div class="form-group">
-                <label class="label-fancy"><i class="fas fa-globe"></i> Kinh độ (Lng)</label>
-                <input type="number" id="addLng" class="input-fancy" placeholder="..." />
-              </div>
-            </div>
-          </div>
-
-          <button onclick="activateMapPicker()" class="btn-map-picker">
-            <i class="fas fa-map-marked-alt"></i> Click chọn vị trí trên bản đồ
-          </button>
-
-          <div class="form-group">
-            <label class="label-fancy"
-              ><i class="fas fa-layer-group"></i> Danh mục <span class="required-mark">*</span></label
-            >
-            <select id="addCategory" class="input-fancy select-fancy">
-              <option value="">-- Chọn danh mục --</option>
-              <option value="Di tích">Di tích</option>
-              <option value="Tâm linh">Tâm linh</option>
-              <option value="Ẩm thực">Ẩm thực</option>
-              <option value="Thiên nhiên">Thiên nhiên</option>
-              <option value="Tham quan">Tham quan</option>
-              <option value="Bãi biển">Bãi biển</option>
-              <option value="Lăng tẩm">Lăng tẩm</option>
-              <option value="Mua sắm">Mua sắm</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label class="label-fancy"><i class="fas fa-image"></i> Link hình ảnh</label>
-            <input type="text" id="addImage" class="input-fancy" placeholder="https://..." />
-          </div>
-
-          <div class="form-group">
-            <label class="label-fancy"><i class="fas fa-pen"></i> Mô tả ngắn</label>
-            <textarea id="addDesc" class="input-fancy textarea-fancy" rows="3"></textarea>
-          </div>
-
-          <button onclick="submitAddLocation()" class="btn-save-gradient">
-            <i class="fas fa-rocket"></i> Tạo địa điểm mới
-          </button>
+        <div class="form-group">
+          <label class="label-fancy"><i class="fas fa-layer-group"></i> Danh mục <span
+              class="required-mark">*</span></label>
+          <select id="addCategory" class="input-fancy select-fancy">
+            <option value="">-- Chọn danh mục --</option>
+            <option value="Di tích">Di tích</option>
+            <option value="Tâm linh">Tâm linh</option>
+            <option value="Ẩm thực">Ẩm thực</option>
+            <option value="Thiên nhiên">Thiên nhiên</option>
+            <option value="Tham quan">Tham quan</option>
+            <option value="Bãi biển">Bãi biển</option>
+            <option value="Lăng tẩm">Lăng tẩm</option>
+            <option value="Mua sắm">Mua sắm</option>
+          </select>
         </div>
+
+        <div class="form-group">
+          <label class="label-fancy"><i class="fas fa-image"></i> Link hình ảnh</label>
+          <input type="text" id="addImage" class="input-fancy" placeholder="https://..." />
+        </div>
+
+        <div class="form-group">
+          <label class="label-fancy"><i class="fas fa-pen"></i> Mô tả ngắn</label>
+          <textarea id="addDesc" class="input-fancy textarea-fancy" rows="3"></textarea>
+        </div>
+
+        <button onclick="submitAddLocation()" class="btn-save-gradient">
+          <i class="fas fa-rocket"></i> Tạo địa điểm mới
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- Leaflet CSS-->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-  </body>
+  <!-- Leaflet CSS-->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
 </html>

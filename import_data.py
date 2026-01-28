@@ -15,7 +15,8 @@ def main():
         run_query("MATCH (n) DETACH DELETE n")
 
         # 2. Nạp Locations
-        df_loc = pd.read_excel("data.xlsx", sheet_name="Locations")
+        # Đọc sheet đầu tiên (bất kể tên gì)
+        df_loc = pd.read_excel("data.xlsx", sheet_name=0)
         logging.info(f"📥 Đang nạp {len(df_loc)} địa điểm...")
 
         for i, row in df_loc.iterrows():
@@ -43,40 +44,40 @@ def main():
                 },
             )
 
-        # 3. Nạp Users (Mã hóa mật khẩu)
-        df_user = pd.read_excel("data.xlsx", sheet_name="Users")
-        logging.info(f"👤 Đang nạp {len(df_user)} User (đang mã hóa mật khẩu)...")
+        # 3. Nạp Users (Tạo giả lập vì sheet Users đã mất)
+        logging.info("👤 Đang tạo dữ liệu người dùng mẫu...")
+        
+        # Danh sách người dùng mẫu và sở thích giả định
+        sample_users = [
+            ("user1", "Tung", ["Đại Nội", "Lăng Tự Đức", "Chùa Thiên Mụ"]), 
+            ("user2", "Lan", ["Chợ Đông Ba", "Cầu Trường Tiền", "Chè Hẻm"]),
+            ("user3", "Minh", ["Vườn Quốc gia Bạch Mã", "Bãi biển Lăng Cô", "Đầm Lập An"]),
+            ("user4", "Hoa", ["Nhà Lưu Niệm Nguyễn Tất Thành", "Bảo tàng Hồ Chí Minh", "Trường Quốc Học"])
+        ]
 
         row_count_users = 0
-        for i, row in df_user.iterrows():
-            # Mã hóa mật khẩu
-            raw_pass = str(row["pass_word"])
-            hash_pass = generate_password_hash(raw_pass)
+        default_pass = generate_password_hash("123")
 
-            q_user = """
+        for u_id, u_name, likes in sample_users:
+            # Tạo user
+            q_create_user = """
             MERGE (u:User {name: $name})
-            
-            ON CREATE SET 
-                u.password = $pass, 
-                u.role = 'user',
-                u.created_at = datetime()
-            ON MATCH SET 
-                u.password = $pass
-
-            WITH u
-            MATCH (l:Location {id: $lid})
-            MERGE (u)-[:LIKED]->(l)
+            SET u.password = $pass, u.role = 'user', u.created_at = datetime()
             """
-
-            run_query(
-                q_user,
-                {
-                    "name": row["user_name"],
-                    "pass": hash_pass,
-                    "lid": row["liked_id"],
-                },
-            )
-            row_count_users += 1
+            run_query(q_create_user, {"name": u_name, "pass": default_pass})
+            
+            # Tạo like
+            for loc_name in likes:
+                q_like = """
+                MATCH (u:User {name: $name})
+                MATCH (l:Location) WHERE l.name CONTAINS $loc_name
+                MERGE (u)-[:LIKED]->(l)
+                """
+                run_query(q_like, {"name": u_name, "loc_name": loc_name})
+                row_count_users += 1
+                
+        # Update tổng user
+        total_users = len(sample_users)
 
         # 4. Tự động tạo tài khoản Admin (Để bạn đăng nhập)
         logging.info("🔑 Đang tạo tài khoản Admin (Mã hóa)...")
@@ -93,8 +94,7 @@ def main():
             {"pass": admin_hass},
         )
 
-        # Tính toán số liệu
-        total_users = df_user["user_name"].nunique()
+        # Tính toán số liệu (đã tính ở trên)
 
         logging.info("-" * 30)
         logging.info("✅ NẠP DỮ LIỆU THÀNH CÔNG!")

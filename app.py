@@ -219,7 +219,7 @@ def add_location():
         MERGE (c:City {name: "Huế"})
         MERGE (cat:Category {name: $category})
         CREATE (l:Location {
-            id: randomUUID(), name: $name, desc: $desc, rating: $rating,
+            id: randomUUID(), name: $name, desc: $desc,
             image: $image, lat: $lat, lng: $lng,
             pagerankScore: 0.15, pagerankConnect: 0.15
         })
@@ -233,7 +233,6 @@ def add_location():
                 "category": data.get("category"),
                 "desc": data.get("description", ""),
                 "image": data.get("image", ""),
-                "rating": safe_float(data.get("rating"), 5.0),
                 "lat": safe_float(data.get("lat")),
                 "lng": safe_float(data.get("lng")),
             },
@@ -257,7 +256,6 @@ def update_location():
             l.desc = $desc,
             l.lat = $lat, 
             l.lng = $lng,
-            l.rating = $rating, 
             l.image = $image
         WITH l
         OPTIONAL MATCH (l)-[r:HAS_CATEGORY]->(:Category) DELETE r
@@ -275,7 +273,6 @@ def update_location():
                 "category": data.get("category"),
                 "desc": data.get("description"),
                 "image": data.get("image"),
-                "rating": safe_float(data.get("rating", 0)),
             },
         )
         return jsonify({"success": True})
@@ -414,7 +411,12 @@ def recommend(user_name):
            // Content (Realtime + Batch) quan trọng nhì (x1)
            // PageRank (Độ nổi tiếng) hỗ trợ thêm (x10 vì điểm PR thường rất nhỏ < 0.x)
            (final_s_collab * 3.0) + (final_s_content * 1.0) + (coalesce(l.pagerankNorm, 0) * 10.0) AS final_score,
-           final_s_collab AS common_users
+           final_s_collab AS common_users,
+           
+           // THÔNG TIN GIẢI THÍCH GỢI Ý
+           final_s_collab * 3.0 AS score_collab,
+           final_s_content * 1.0 AS score_content,
+           coalesce(l.pagerankNorm, 0) * 10.0 AS score_pagerank
            
     ORDER BY final_score DESC
     LIMIT 12
@@ -427,20 +429,133 @@ def recommend(user_name):
         if not results:
             fallback_query = """
             MATCH (l:Location) 
+            OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(:Category)
             OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
             RETURN l.name AS name, l.desc AS description, l.rating AS rating, 
                    l.lat AS lat, l.lng AS lng, l.image as image, cat.name as category,
-                   coalesce(l.pagerankScore, 0.15) AS pr,
-                   l.pagerankScore AS final_score,
-                   0 as common_users
-            ORDER BY l.pagerankScore DESC
+                   coalesce(l.pagerankNorm, 0) AS score,
+                   coalesce(l.pagerankNorm, 0) AS final_score,
+                   0 as common_users,
+                   0 as score_collab,
+                   0 as score_content,
+                   coalesce(l.pagerankNorm, 0) * 10.0 AS score_pagerank
+            ORDER BY l.pagerankNorm DESC
             LIMIT 12
             """
             results = run_query(fallback_query)
 
-        return jsonify(results or [])
+        # Xử lý thêm thông tin giải thích cho mỗi kết quả
+        processed_results = []
+        for loc in (results or []):
+            # Lấy điểm số từ 3 thành phần
+            s_collab = loc.get("score_collab", 0) or 0
+            s_content = loc.get("score_content", 0) or 0
+            s_pagerank = loc.get("score_pagerank", 0) or 0
+            common_users = loc.get("common_users", 0) or 0
+            
+            # Tính tổng và tỷ lệ phần trăm
+            total = s_collab + s_content + s_pagerank
+            if total > 0:
+                pct_collab = (s_collab / total) * 100
+                pct_content = (s_content / total) * 100
+                pct_pagerank = (s_pagerank / total) * 100
+            else:
+                pct_collab = pct_content = pct_pagerank = 0
+            
+            # Xác định lý do chính
+            reason = ""
+            reason_icon = "🤖"
+            reason_type = "default"
+            
+            if s_collab > 0 and s_collab >= s_content and s_collab >= s_pagerank:
+                # Collaborative Filtering là chính
+                reason = f"{int(common_users)} người có sở thích giống bạn đã thích địa điểm này"
+                reason_icon = "👥"
+                reason_type = "collab"
+            elif s_content > 0 and s_content >= s_collab and s_content >= s_pagerank:
+                # Content-based là chính
+                reason = f"Địa điểm này tương tự với những nơi bạn đã yêu thích"
+                reason_icon = "🎯"
+                reason_type = "content"
+            elif s_pagerank > 0:
+                # PageRank là chính
+                pr_score = (loc.get("score", 0) or 0) * 100
+                reason = f"Địa điểm nổi tiếng với điểm phổ biến {pr_score:.1f}/100"
+                reason_icon = "🏆"
+                reason_type = "pagerank"
+            else:
+                reason = "Được gợi ý bởi hệ thống AI"
+                reason_icon = "🤖"
+                reason_type = "default"
+            
+            # Tạo chi tiết phân tích (cho tooltip hoặc panel chi tiết)
+            reason_details = {
+                "collab": {
+                    "score": round(s_collab, 2),
+                    "percent": round(pct_collab, 1),
+                    "label": "Collaborative Filtering",
+                    "desc": f"{int(common_users)} người dùng tương đồng"
+                },
+                "content": {
+                    "score": round(s_content, 2),
+                    "percent": round(pct_content, 1),
+                    "label": "Content-based",
+                    "desc": "Tương tự địa điểm đã thích"
+                },
+                "pagerank": {
+                    "score": round(s_pagerank, 2),
+                    "percent": round(pct_pagerank, 1),
+                    "label": "PageRank",
+                    "desc": "Độ nổi tiếng toàn hệ thống"
+                }
+            }
+            
+            # Thêm các trường mới vào kết quả
+            loc["reason"] = reason
+            loc["reason_icon"] = reason_icon
+            loc["reason_type"] = reason_type
+            loc["reason_details"] = reason_details
+            
+            processed_results.append(loc)
+
+        return jsonify(processed_results)
     except Exception as e:
         print(f"❌ Lỗi Recommend: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# --- API: LẤY ĐỊA ĐIỂM CÙNG DANH MỤC ---
+@app.route("/api/similar/<location_name>", methods=["GET"])
+def get_similar_locations(location_name):
+    """
+    Lấy các địa điểm cùng danh mục với địa điểm được chọn.
+    Trả về tối đa 6 địa điểm, sắp xếp theo điểm PageRank.
+    """
+    query = """
+    // Tìm địa điểm hiện tại và danh mục của nó
+    MATCH (current:Location {name: $name})-[:HAS_CATEGORY]->(cat:Category)
+    
+    // Tìm các địa điểm khác cùng danh mục
+    MATCH (similar:Location)-[:HAS_CATEGORY]->(cat)
+    WHERE similar.name <> $name
+    
+    // Trả về thông tin các địa điểm tương tự
+    RETURN similar.name AS name,
+           similar.desc AS description,
+           similar.lat AS lat,
+           similar.lng AS lng,
+           similar.image AS image,
+           similar.rating AS rating,
+           cat.name AS category,
+           coalesce(similar.pagerankNorm, 0) AS score
+    ORDER BY score DESC
+    LIMIT 6
+    """
+    try:
+        results = run_query(query, {"name": location_name})
+        return jsonify(results if results else [])
+    except Exception as e:
+        print(f"❌ Lỗi get_similar_locations: {e}")
         return jsonify({"error": str(e)}), 500
 
 

@@ -375,9 +375,14 @@ function getRecommendations(user) {
       return;
     }
     data.forEach((loc) => {
-      let badgeHTML = !loc.common_users
-        ? `<div class="algo-badge badge-pr">🏆 PageRank: ${loc.pr?.toFixed(2)}</div>`
-        : `<div class="algo-badge badge-collab">👥 ${loc.common_users} người cùng sở thích</div>`;
+      // Sử dụng thông tin giải thích mới từ API
+      const reasonIcon = loc.reason_icon || "🤖";
+      const reason = loc.reason || "Được gợi ý bởi AI";
+      const reasonType = loc.reason_type || "default";
+      
+      // Tạo badge với class theo loại lý do
+      const badgeClass = `algo-badge badge-${reasonType}`;
+      const badgeHTML = `<div class="${badgeClass}">${reasonIcon} ${reason}</div>`;
 
       const card = document.createElement("div");
       card.className = "ai-card";
@@ -513,6 +518,61 @@ function showDetail(loc) {
            </button>`
     : `<button class="btn-action btn-like" onclick="openAuthModal()"><i class="fas fa-lock"></i> Đăng nhập để thích</button>`;
 
+  // Tạo section giải thích AI nếu có thông tin reason
+  let aiExplanationHTML = "";
+  if (loc.reason && loc.reason_details) {
+    const details = loc.reason_details;
+    const reasonType = loc.reason_type || "default";
+    
+    // Tạo biểu đồ thanh cho mỗi thành phần
+    aiExplanationHTML = `
+      <div class="ai-explanation-section">
+        <div class="ai-explanation-header">
+          <i class="fas fa-robot"></i> Tại sao gợi ý cho bạn?
+        </div>
+        <div class="ai-reason-main ${reasonType}">
+          <span class="reason-icon">${loc.reason_icon}</span>
+          <span class="reason-text">${loc.reason}</span>
+        </div>
+        <div class="ai-score-breakdown">
+          <div class="score-bar-item">
+            <div class="score-label">
+              <span class="score-icon">👥</span>
+              <span>${details.collab.label}</span>
+              <span class="score-value">${details.collab.percent.toFixed(0)}%</span>
+            </div>
+            <div class="score-bar">
+              <div class="score-bar-fill collab" style="width: ${details.collab.percent}%"></div>
+            </div>
+            <div class="score-desc">${details.collab.desc}</div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-label">
+              <span class="score-icon">🎯</span>
+              <span>${details.content.label}</span>
+              <span class="score-value">${details.content.percent.toFixed(0)}%</span>
+            </div>
+            <div class="score-bar">
+              <div class="score-bar-fill content" style="width: ${details.content.percent}%"></div>
+            </div>
+            <div class="score-desc">${details.content.desc}</div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-label">
+              <span class="score-icon">🏆</span>
+              <span>${details.pagerank.label}</span>
+              <span class="score-value">${details.pagerank.percent.toFixed(0)}%</span>
+            </div>
+            <div class="score-bar">
+              <div class="score-bar-fill pagerank" style="width: ${details.pagerank.percent}%"></div>
+            </div>
+            <div class="score-desc">${details.pagerank.desc}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   content.innerHTML = `
         <img src="${loc.image}" loading = "lazy" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
         <div class="detail-body">
@@ -525,14 +585,67 @@ function showDetail(loc) {
 
             <p class="detail-desc">${loc.description || "..."}</p>
 
+            ${aiExplanationHTML}
+
             <div class="detail-actions">
                 ${likeBtn}
                 <a href="${mapLink}" target="_blank" class="btn-action btn-maps"><i class="fas fa-directions"></i> Chỉ đường</a>
             </div>
             ${adminActions}
+
+            <!-- Section gợi ý địa điểm cùng danh mục -->
+            <div class="similar-locations-section">
+              <div class="similar-header">
+                <i class="fas fa-map-marker-alt"></i> 
+                <span>Địa điểm <strong>${loc.category}</strong> khác</span>
+              </div>
+              <div class="similar-locations-list" id="similar-locations-list">
+                <div class="similar-loading">
+                  <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                </div>
+              </div>
+            </div>
         </div>
     `;
   panel.classList.add("active");
+
+  // Tải các địa điểm cùng danh mục
+  loadSimilarLocations(loc.name);
+}
+
+// Hàm tải địa điểm cùng danh mục
+function loadSimilarLocations(locationName) {
+  const container = document.getElementById("similar-locations-list");
+  if (!container) return;
+
+  apiFetch(`/api/similar/${encodeURIComponent(locationName)}`)
+    .then((data) => {
+      container.innerHTML = "";
+      
+      if (!data || data.length === 0) {
+        container.innerHTML = `<div class="similar-empty">Không có địa điểm tương tự</div>`;
+        return;
+      }
+
+      data.forEach((loc) => {
+        const score = ((loc.score || 0) * 100).toFixed(1);
+        const card = document.createElement("div");
+        card.className = "similar-card";
+        card.innerHTML = `
+          <img src="${loc.image}" loading="lazy" class="similar-card-img" onerror="this.src='/static/images/no-image.png'">
+          <div class="similar-card-info">
+            <div class="similar-card-name">${loc.name}</div>
+            <div class="similar-card-score"><i class="fas fa-chart-bar"></i> ${score}</div>
+          </div>
+        `;
+        card.onclick = () => showDetail(loc);
+        container.appendChild(card);
+      });
+    })
+    .catch((err) => {
+      console.error("Lỗi tải địa điểm tương tự:", err);
+      container.innerHTML = `<div class="similar-empty">Không thể tải dữ liệu</div>`;
+    });
 }
 
 function handleLike(btn, name) {
@@ -807,7 +920,7 @@ function openEditModal() {
   document.getElementById("editOldName").value = currentOpenLoc.name;
   document.getElementById("editName").value = currentOpenLoc.name;
   document.getElementById("editCategory").value = currentOpenLoc.category;
-  document.getElementById("editRating").value = currentOpenLoc.rating;
+  // document.getElementById("editRating").value = currentOpenLoc.rating; (Đã bỏ)
   document.getElementById("editImage").value = currentOpenLoc.image;
   document.getElementById("editDesc").value = currentOpenLoc.description;
 
@@ -864,7 +977,7 @@ async function submitEditLocation() {
     lat: submitLat,
     lng: submitLng,
     category: document.getElementById("editCategory").value,
-    rating: document.getElementById("editRating").value,
+    // Cho phép rating mặc định hoặc giữ nguyên (backend sẽ xử lý hoặc bỏ qua)
     image: document.getElementById("editImage").value,
     description: document.getElementById("editDesc").value,
   };
