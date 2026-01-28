@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}" />
 </head>
 
 <body>
@@ -115,6 +116,23 @@
 
     <main class="map-container">
       <div id="map"></div>
+
+      <!-- Map Controls -->
+      <div class="map-controls-overlay">
+        <button id="btn-toggle-heatmap" class="btn-map-control" onclick="toggleHeatmap()">
+          <i class="fas fa-fire"></i> Bản đồ nhiệt
+        </button>
+
+        <!-- Heatmap Legend (Hidden by default) -->
+        <div id="heatmap-legend" class="heatmap-legend" style="display: none;">
+          <div class="gradient-bar"></div>
+          <div class="legend-labels">
+            <span>Ít</span>
+            <span>Vừa</span>
+            <span>Hot</span>
+          </div>
+        </div>
+      </div>
       <div class="map-legend">
         <div class="legend-item"
           title="PageRank: đo độ phổ biến toàn cục của địa điểm trên đồ thị (càng nhiều người ghé càng cao)">
@@ -386,6 +404,7 @@
 
   <!-- Leaflet CSS-->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 

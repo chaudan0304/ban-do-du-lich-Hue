@@ -115,6 +115,174 @@ body {
   /* Màu giữ chỗ khi bản đồ chưa tải xong */
 }
 
+
+/* ==========================================================================
+   BẢN ĐỒ & VISUALIZATION (MAP, MARKERS, HEATMAP)
+   ========================================================================== */
+
+/* 1. Map Control Overlay (Nút Heatmap) - Góc dưới phải */
+.map-controls-overlay {
+  position: absolute;
+  bottom: 30px;
+  right: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.btn-map-control {
+  background: white;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.btn-map-control:hover {
+  background: #f9fafb;
+}
+
+.btn-map-control.active {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Heatmap Legend - Thanh màu */
+.heatmap-legend {
+  background: white;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-top: 5px;
+  font-size: 11px;
+  color: #555;
+  width: 140px;
+}
+
+.gradient-bar {
+  height: 10px;
+  width: 100%;
+  background: linear-gradient(to right, blue, cyan, lime, yellow, red);
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+/* 2. Map Legend (Góc dưới trái) */
+.map-legend {
+  position: absolute;
+  bottom: 25px;
+  left: 10px;
+  z-index: 1000;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 200px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4b5563;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-pr {
+  background-color: #ef4444;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #ef4444;
+}
+
+.dot-collab {
+  background-color: #3b82f6;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* 3. Modern Markers (Giọt nước) */
+.custom-pin {
+  width: 34px;
+  height: 34px;
+  background-color: white;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.2);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #3b82f6;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  background-image: none !important;
+  padding: 0 !important;
+}
+
+.custom-pin div,
+.custom-pin i,
+.custom-pin span {
+  transform: rotate(45deg) !important;
+  font-size: 16px !important;
+  margin: 0 !important;
+  position: static !important;
+  line-height: normal !important;
+}
+
+.custom-pin:hover {
+  transform: rotate(-45deg) scale(1.2) translateY(-8px);
+  z-index: 9999;
+  cursor: pointer;
+  box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Biến thể màu sắc Marker */
+.custom-pin.pin-pr {
+  background: linear-gradient(135deg, #ef4444, #991b1b) !important;
+  border-color: white !important;
+  box-shadow: -3px 3px 10px rgba(185, 28, 28, 0.5) !important;
+}
+
+.custom-pin.pin-collab {
+  background: linear-gradient(135deg, #3b82f6, #1e40af) !important;
+  border-color: white !important;
+  box-shadow: -3px 3px 10px rgba(30, 64, 175, 0.5) !important;
+}
+
+/* Xóa hiệu ứng filter cũ */
+.custom-pin.pin-pr,
+.custom-pin.pin-collab {
+  filter: none !important;
+}
+
+
+
 #map {
   width: 100%;
   height: 100%;
@@ -320,7 +488,7 @@ body {
   padding: 20px 24px;
   background: #f9fafb;
   overflow-y: auto;
-  min-height: 180px;
+  min-height: 100px;
 }
 
 .section-head {
@@ -549,7 +717,8 @@ body {
   flex: 1.2;
   display: flex;
   flex-direction: column;
-  min-height: 200px;
+  flex-direction: column;
+  min-height: 100px;
   padding: 20px 24px;
   background: var(--bg-white);
   border-top: 1px solid var(--border-light);
@@ -943,20 +1112,7 @@ body {
 /* --------------------------------------------------------------------------
    5. BẢN ĐỒ & CÁC LỚP PHỦ (MAP & OVERLAYS)
    -------------------------------------------------------------------------- */
-.map-legend {
-  position: absolute;
-  bottom: 30px;
-  right: 20px;
-  z-index: 1000;
 
-  padding: 10px 15px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-
-  font-size: 12px;
-  font-weight: 600;
-}
 
 .legend-item {
   display: flex;
@@ -984,28 +1140,11 @@ body {
 }
 
 /* Ghim bản đồ tùy chỉnh (Map Pins) */
-.custom-pin {
-  position: relative;
-  width: 34px;
-  height: 46px;
-  background-image: url('https://cdn-icons-png.flaticon.com/512/684/684908.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  transition: transform 0.2s;
-}
 
-.custom-pin:hover {
-  transform: translateY(-5px) scale(1.1);
-}
 
-.custom-pin i {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 16px;
-}
+
+
+
 
 /* Màu ghim theo bộ lọc */
 .pin-ditich {
@@ -1924,4 +2063,79 @@ body {
   .similar-card-score {
     font-size: 9px;
   }
+}
+
+/* Map Legend Custom */
+
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4b5563;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-pr {
+  background-color: #ef4444;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #ef4444;
+}
+
+.dot-collab {
+  background-color: #3b82f6;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+
+/* Dynamic Pin Colors for Legend */
+.custom-pin.pin-pr {
+  background-color: #ef4444;
+  /* ? - Top PageRank */
+  border: 2px solid #fff;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  z-index: 1001;
+  /* N?i ln trn */
+}
+
+.custom-pin.pin-collab {
+  background-color: #3b82f6;
+  /* Xanh - AI Suggestion */
+  border: 2px solid #fff;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+  z-index: 1002;
+}
+
+/* Hi?u ?ng pulse nh? cho cc pin quan tr?ng */
+@keyframes pulse-pin {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.custom-pin.pin-pr,
+.custom-pin.pin-collab {
+  animation: none;
+  /* T?t animation xoay cu n?u c */
+  transition: transform 0.2s;
+}
+
+.custom-pin.pin-pr:hover,
+.custom-pin.pin-collab:hover {
+  transform: translateY(-5px) scale(1.2);
 }

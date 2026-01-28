@@ -12,6 +12,8 @@ var userLikedSet = new Set();
 var currentOpenLoc = null;
 var isPickingMode = null;
 var currentCategory = "All";
+var heatLayer = null;
+var isHeatmapActive = false;
 
 // Hàm gọi API chung
 async function apiFetch(url, options = {}) {
@@ -412,7 +414,7 @@ async function loadLocations(cat = "All") {
       let url = "/api/locations";
       if (cat !== "All") url += `?category=${encodeURIComponent(cat)}`;
       data = await apiFetch(url);
-      if (cat === "All") cachedAllLocations = data;
+      if (cat === "All" && data && data.length > 0) cachedAllLocations = data;
     }
     currentListData = data || [];
     renderLocations(currentListData);
@@ -458,7 +460,7 @@ function renderLocations(data) {
     list.appendChild(div);
 
     // Marker + Popup thông minh
-    const marker = L.marker([loc.lat, loc.lng], { icon: getIconByCategory(loc.category) });
+    const marker = L.marker([loc.lat, loc.lng], { icon: getDynamicIcon(loc) });
 
     const popupContent = document.createElement("div");
     popupContent.innerHTML = `
@@ -1205,4 +1207,74 @@ function showNotification({ type, title, message, btnText, onConfirm }) {
   // Hiển thị & Focus vào nút đóng (để tiện cho người dùng dùng phím)
   modal.classList.add("active");
   newBtn.focus();
+}
+
+/* ============================================================================
+   PHẦN 5.1: MAP EXTENSIONS (ICONS & HEATMAP)
+   ============================================================================ */
+
+function getDynamicIcon(loc) {
+  const iconMap = {
+    "Di tích": "🏛️", "Ẩm thực": "🍜", "Thiên nhiên": "🌳",
+    "Bãi biển": "🏖️", "Tâm linh": "🛕", "Lăng tẩm": "🏯",
+    "Tham quan": "🏞️", "Mua sắm": "🛍️",
+  };
+  const symbol = iconMap[loc.category] || "📍";
+  
+  let extraClass = "";
+  
+  // LOGIC MÀU SẮC CHO LEGEND
+  if (loc.is_personalized || (loc.reason && loc.reason_type === 'collab')) {
+      extraClass = "pin-collab"; // Xanh dương
+  } 
+  else if (loc.score && loc.score >= 0.35) {
+      extraClass = "pin-pr"; // Đỏ
+  }
+
+  return L.divIcon({
+    className: "custom-div-icon",
+    html: `<div class='custom-pin ${extraClass}'>${symbol}</div>`,
+    iconSize: [30, 30] 
+  });
+}
+
+function toggleHeatmap() {
+    const btn = document.getElementById('btn-toggle-heatmap');
+    
+    if (isHeatmapActive) {
+        // Tắt Heatmap
+        if (heatLayer && map.hasLayer(heatLayer)) { map.removeLayer(heatLayer); }
+        if (markerLayer) { map.addLayer(markerLayer); }
+        
+        isHeatmapActive = false;
+        btn.classList.remove('active');
+        btn.innerHTML = '<i class="fas fa-fire"></i> Bản đồ nhiệt';
+        const legend = document.getElementById('heatmap-legend');
+        if(legend) legend.style.display = 'none';
+        
+    } else {
+        // Bật Heatmap
+        if (!cachedAllLocations || cachedAllLocations.length === 0) {
+            showNotification({type: 'error', title: 'Lỗi', message: 'Chưa có dữ liệu.', btnText: 'Đóng'});
+            return;
+        }
+
+        const heatPoints = cachedAllLocations.map(loc => {
+            let val = loc.score || loc.pagerankScore || 0;
+            if (val === 0) val = 0.1;
+            return [loc.lat, loc.lng, val * 5];
+        });
+
+        if (markerLayer) map.removeLayer(markerLayer);
+
+        heatLayer = L.heatLayer(heatPoints, { radius: 30, blur: 20, max: 1.0 }).addTo(map);
+
+        isHeatmapActive = true;
+        btn.classList.add('active');
+        btn.innerHTML = '<i class="fas fa-fire-alt"></i> Tắt Heatmap';
+        const legend = document.getElementById('heatmap-legend');
+        if(legend) legend.style.display = 'block';
+        
+        showNotification({type: 'success', title: 'Heatmap', message: 'Đang hiển thị mức độ phổ biến.', btnText: 'OK'});
+    }
 }

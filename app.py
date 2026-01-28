@@ -307,7 +307,7 @@ def get_locations():
 
     query = """
     MATCH (l:Location)
-    MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
     """
 
     params = {}  # Tạo dictionary chứa tham số
@@ -467,18 +467,18 @@ def recommend(user_name):
             reason_icon = "🤖"
             reason_type = "default"
             
-            if s_collab > 0 and s_collab >= s_content and s_collab >= s_pagerank:
-                # Collaborative Filtering là chính
+            if s_collab > 0.5: # Có trọng số collab đáng kể
+                # Collaborative Filtering là chính: Social Proof mạnh mẽ nhất
                 reason = f"{int(common_users)} người có sở thích giống bạn đã thích địa điểm này"
                 reason_icon = "👥"
                 reason_type = "collab"
-            elif s_content > 0 and s_content >= s_collab and s_content >= s_pagerank:
-                # Content-based là chính
-                reason = f"Địa điểm này tương tự với những nơi bạn đã yêu thích"
+            elif s_content > 0.1: 
+                # Content-based là chính: Ưu tiên hiển thị tính cá nhân hóa dù điểm PR cao hơn
+                reason = f"Gợi ý vì bạn thích các địa điểm {loc.get('category', '')}"
                 reason_icon = "🎯"
                 reason_type = "content"
             elif s_pagerank > 0:
-                # PageRank là chính
+                # PageRank là chính (Fallback)
                 pr_score = (loc.get("score", 0) or 0) * 100
                 reason = f"Địa điểm nổi tiếng với điểm phổ biến {pr_score:.1f}/100"
                 reason_icon = "🏆"
