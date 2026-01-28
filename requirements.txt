@@ -1,0 +1,7 @@
+Flask
+Flask-Login
+neo4j
+pandas
+python-dotenv
+openpyxl
+werkzeug
