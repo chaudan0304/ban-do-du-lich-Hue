@@ -1,62 +1,54 @@
-// BIẾN TOÀN CỤC
+// ============================================================================
+// PHẦN 1: BIẾN TOÀN CỤC & HÀM CỐT LÕI (CORE)
+// ============================================================================
 let cachedAllLocations = null;
-var map;
-var markerLayer;
+var map, markerLayer;
 var markersMap = {};
+var tempMarker = null;
 var currentUser = null;
+var currentListData = [];
 var userRole = "user";
 var userLikedSet = new Set();
 var currentOpenLoc = null;
+var isPickingMode = null;
+var currentCategory = "All";
+var heatLayer = null;
+var isHeatmapActive = false;
 
-// ================================================================
-// 0. HÀM GỌI API CHUNG VỚI LOG VÀ XỬ LÝ LỖI
-// ================================================================
+// Hàm gọi API chung
 async function apiFetch(url, options = {}) {
   try {
-    console.log(`[API CALL] ${url}`);
     const response = await fetch(url, options);
-
-    // Nếu có lỗi từ Server (400, 401, 403, 500...)
     if (!response.ok) {
       let errorMessage = `Lỗi ${response.status}`;
-
-      // 1. Cố gắng đọc nội dung lỗi dưới dạng JSON (để lấy message từ Python)
       try {
         const errorData = await response.json();
-        // Backend trả về: {"error": "Tên tài khoản đã tồn tại!"}
-        if (errorData && errorData.error) {
-          errorMessage = errorData.error;
-        }
+        if (errorData?.error) errorMessage = errorData.error;
       } catch (e) {
-        // Nếu không phải JSON, đọc dưới dạng text thường
         const text = await response.text();
         if (text) errorMessage = text;
       }
-
-      // Ném lỗi ra ngoài với nội dung sạch sẽ (đã decode unicode)
       throw new Error(errorMessage);
     }
-
-    // Nếu thành công
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (err) {
     console.error(`[API FAIL] ${url}:`, err);
-
     throw err;
   }
 }
 
-// ================================================================
-// 1. KHỞI TẠO BẢN ĐỒ
-// ================================================================
-// Khởi tạo khi DOM sẵn sàng
+// ============================================================================
+// PHẦN 2: KHỞI TẠO ỨNG DỤNG
+// ============================================================================
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
   checkLoginStatus();
   loadLocations("All");
+  setupEnterKey();
+  setupDragScroll();
+  setupDebounceSearch();
 });
-// Khởi tạo bản đồ Leaflet
+
 function initMap() {
   map = L.map("map", { zoomControl: false }).setView([16.4637, 107.5909], 14);
   L.control.zoom({ position: "topright" }).addTo(map);
@@ -64,123 +56,111 @@ function initMap() {
     attribution: "© OpenStreetMap contributors",
   }).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
+
+  map.on("click", (e) => {
+    const lat = e.latlng.lat.toFixed(5);
+    const lng = e.latlng.lng.toFixed(5);
+
+    if (isPickingMode === "add" || document.getElementById("addModal").classList.contains("active")) {
+      document.getElementById("addLat").value = lat;
+      document.getElementById("addLng").value = lng;
+      isPickingMode = null;
+      document.getElementById("map").style.cursor = "";
+      document.getElementById("addModal").classList.add("active");
+      L.popup().setLatLng(e.latlng).setContent("Đã chọn vị trí này!").openOn(map);
+    } else if (isPickingMode === "edit") {
+      document.getElementById("editLat").value = lat;
+      document.getElementById("editLng").value = lng;
+      if (tempMarker) map.removeLayer(tempMarker);
+      tempMarker = L.marker([lat, lng], { draggable: true }).addTo(map);
+      tempMarker.bindPopup("<b>📍 Vị trí mới</b>").openPopup();
+      tempMarker.on("dragend", function (event) {
+        var position = event.target.getLatLng();
+        document.getElementById("editLat").value = position.lat.toFixed(5);
+        document.getElementById("editLng").value = position.lng.toFixed(5);
+      });
+      isPickingMode = null;
+      document.getElementById("map").style.cursor = "";
+      document.getElementById("editModal").classList.add("active");
+    }
+  });
 }
 
-// ================================================================
-// 2. AUTHENTICATION
-// ================================================================
-// Kiểm tra trạng thái đăng nhập
+function setupEnterKey() {
+  const bindings = [
+    { id: "loginPass", action: handleLogin },
+    { id: "regPass", action: handleRegister },
+    { id: "usernameInput", action: () => analyzeUser(false) },
+  ];
+  bindings.forEach((item) => {
+    const el = document.getElementById(item.id);
+    if (el)
+      el.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          item.action();
+        }
+      });
+  });
+  document.getElementById("miniSearchInput")?.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      this.blur();
+    }
+  });
+}
+
+// ============================================================================
+// PHẦN 3: XÁC THỰC NGƯỜI DÙNG
+// ============================================================================
 function checkLoginStatus() {
   apiFetch("/api/current_user")
     .then((data) => {
       if (data && data.is_logged_in) {
         currentUser = data.username;
-        console.log("Đã đăng nhập với user:", currentUser);
-
+        userRole = data.role || "user";
         showLoggedView(data.username);
         analyzeUser(true);
-        // Nếu panel chi tiết đang mở, cập nhật lại nội dung
-        const detailPanel = document.getElementById("detail-panel");
-        if (detailPanel && detailPanel.classList.contains("active") && currentOpenLoc) {
-          // Gọi lại showDetail để nó cập nhật giao diện theo user mới
-          showDetail(currentOpenLoc);
-        }
       } else {
         currentUser = null;
+        userRole = "user";
         showGuestView();
       }
     })
-    .catch((err) => console.error("Lỗi kiểm tra Auth:", err));
+    .catch(() => showGuestView());
 }
 
-// Hiển thị giao diện khi đã đăng nhập
 function showLoggedView(username) {
-  // 1. Cập nhật header
-  const btnLogin = document.getElementById("header-login-btn");
-  if (btnLogin) btnLogin.style.display = "none";
-
+  document.getElementById("header-login-btn").style.display = "none";
   const userInfo = document.getElementById("header-user-info");
   if (userInfo) {
     userInfo.style.display = "flex";
-    const nameSpan = document.getElementById("header-username");
-    if (nameSpan) nameSpan.innerText = username;
-
-    // Nút Admin
-    const adminBtn = document.getElementById("btn-admin-panel");
-    if (adminBtn) {
-      if (username === "admin" || (typeof userRole !== "undefined" && userRole === "admin")) {
-        adminBtn.style.display = "block";
-      } else {
-        adminBtn.style.display = "none";
-      }
+    document.getElementById("header-username").innerText = username;
+    const btnAdminHeader = document.getElementById("btn-admin-panel");
+    if (btnAdminHeader) {
+      btnAdminHeader.style.display = username === "admin" || userRole === "admin" ? "inline-block" : "none";
     }
   }
-
-  // 2. Ẩn toàn bộ khung tìm kiếm cho khách
-  const searchBox = document.querySelector(".search-box");
-  if (searchBox) searchBox.style.display = "none";
-
-  // 3. Hiện khung lịch sử người dùng
-  const loggedView = document.getElementById("logged-view");
-  if (loggedView) loggedView.style.display = "block";
+  document.querySelector(".search-box").style.display = "none";
+  document.getElementById("logged-view").style.display = "block";
+  checkAdminAccess(username);
 }
 
-// Hiển thị giao diện khi chưa đăng nhập
 function showGuestView() {
-  // 1. Cập nhật header
-  const btnLogin = document.getElementById("header-login-btn");
-  if (btnLogin) btnLogin.style.display = "flex";
-
-  const userInfo = document.getElementById("header-user-info");
-  if (userInfo) userInfo.style.display = "none";
-
-  //2. Hiện khung tìm kiếm chính
-  const searchBox = document.querySelector(".search-box");
-  if (searchBox) searchBox.style.display = "block";
-
-  const guestSearchBox = document.getElementById("guest-search-box");
-  if (guestSearchBox) guestSearchBox.style.display = "flex";
-
-  // 3. Ẩn khung lịch sử người dùng
-  const loggedView = document.getElementById("logged-view");
-  if (loggedView) loggedView.style.display = "none";
-
-  // Reset kết quả
+  document.getElementById("header-login-btn").style.display = "flex";
+  document.getElementById("header-user-info").style.display = "none";
+  document.querySelector(".search-box").style.display = "block";
+  document.getElementById("guest-search-box").style.display = "flex";
+  document.getElementById("logged-view").style.display = "none";
   const recArea = document.getElementById("recommendation-area");
-  if (recArea) {
-    recArea.innerHTML = `
-        <div class="empty-state">
-            <img src="https://cdn-icons-png.flaticon.com/512/1086/1086933.png" alt="AI">
-            <h3>Sẵn sàng phân tích</h3>
-            <p>Hệ thống sử dụng <b>PageRank</b> & <b>Collaborative Filtering</b>.</p>
-        </div>`;
-  }
-  const histDiv = document.getElementById("user-history");
-  if (histDiv) histDiv.style.display = "none";
+  if (recArea) recArea.innerHTML = `<div class="empty-state">...Sẵn sàng phân tích...</div>`;
 }
 
-// -----MODAL AUTH-----
-// Mở modal
-function openAuthModal() {
-  document.getElementById("authModal").classList.add("active");
-  // Xóa thông báo lỗi cũ
-  document.getElementById("loginMsg").innerText = "";
-  document.getElementById("regMsg").innerText = "";
-  // Xóa dữ liệu cũ
-  document.getElementById("loginUser").value = "";
-  document.getElementById("loginPass").value = "";
-  document.getElementById("regUser").value = "";
-  document.getElementById("regPass").value = "";
-}
-// Đóng modal
-function closeAuthModal() {
-  document.getElementById("authModal").classList.remove("active");
-}
-// Chuyển tab trong modal
+function openAuthModal() { document.getElementById("authModal").classList.add("active"); }
+function closeAuthModal() { document.getElementById("authModal").classList.remove("active"); }
 function switchTab(tab) {
   document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
   document.querySelectorAll(".auth-form").forEach((f) => (f.style.display = "none"));
-
   if (tab === "login") {
     document.querySelector(".tab-btn:nth-child(1)").classList.add("active");
     document.getElementById("loginForm").style.display = "block";
@@ -189,656 +169,613 @@ function switchTab(tab) {
     document.getElementById("registerForm").style.display = "block";
   }
 }
-// Xử lý đăng nhập
+
 function handleLogin() {
   const u = document.getElementById("loginUser").value.trim();
   const p = document.getElementById("loginPass").value;
-  const msg = document.getElementById("loginMsg");
+  if (!u || !p) return showNotification({ type: "error", title: "Lỗi", message: "Vui lòng nhập đầy đủ thông tin" });
+  
+  const msgElement = document.getElementById("loginMsg");
+  msgElement.innerText = "Đang xử lý...";
 
-  if (!u || !p) {
-    msg.innerText = "Vui lòng nhập đủ thông tin";
-    return;
-  }
-  msg.innerText = "Đang xử lý...";
-
-  apiFetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+  fetch("/api/login", {
+    method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: u, password: p }),
   })
-    .then((res) => {
-      if (res && res.message) {
-        // Lưu role
-        userRole = res.role || "user";
+    .then(async (response) => {
+      const data = await response.json();
+      if (response.ok) {
+        currentUser = data.username;
+        userRole = data.role;
         closeAuthModal();
         checkLoginStatus();
+        if (typeof currentOpenLoc !== "undefined" && currentOpenLoc !== null) showDetail(currentOpenLoc);
+        showNotification({ type: "success", title: "Đăng nhập thành công", message: `Chào mừng <b>${data.username}</b>!` });
+        msgElement.innerText = "";
       } else {
-        msg.innerText = res?.error || "Lỗi đăng nhập";
+        msgElement.innerText = data.error || "Đăng nhập thất bại";
+        msgElement.style.color = "red";
       }
     })
     .catch((err) => {
-      msg.innerText = err.message;
-      msg.style.color = "red";
-      console.error("Login error logic:", err);
+      msgElement.innerText = "Lỗi kết nối!";
+      msgElement.style.color = "red";
     });
 }
 
-// Xử lý đăng ký
 function handleRegister() {
-  // Lấy dữ liệu
   const u = document.getElementById("regUser").value.trim();
   const p = document.getElementById("regPass").value;
+  if (!u || !p) return alert("Thiếu thông tin");
   const msg = document.getElementById("regMsg");
-
-  // Kiểm tra dữ liệu
-  if (!u || !p) {
-    msg.innerText = "Vui lòng nhập đủ thông tin";
-    msg.style.color = "red";
-    return;
-  }
-
-  // Gửi yêu cầu đăng ký
   msg.innerText = "Đang đăng ký...";
-  msg.style.color = "#6b7280";
-
-  // Gọi API
+  
   apiFetch("/api/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username: u, password: p }),
   })
-    .then((res) => {
-      if (!res) {
-        msg.innerText = "Lỗi đăng ký";
-        msg.style.color = "red";
-        return;
-      }
-
-      if (res.success === true) {
-        showNotification({
-          type: "success",
-          title: "Đăng ký thành công!",
-          message: `Tài khoản <b>${u}</b> đã được tạo. Bạn có thể đăng nhập ngay bây giờ.`,
-          btnText: "Đăng nhập ngay",
-          onConfirm: () => {
-            switchTab("login");
-            document.getElementById("loginUser").value = u;
-            document.getElementById("loginPass").value = "";
-            document.getElementById("loginPass").focus();
-          },
-        });
-        msg.innerText = "";
-      } else {
-        msg.innerText = "Đăng ký thất bại (Tên tài khoản có thể đã tồn tại)";
-        msg.style.color = "red";
-      }
-    })
-    .catch((err) => {
-      msg.innerText = err.message;
-      msg.style.color = "red";
-      console.error("Register error logic:", err);
-    });
+  .then((res) => {
+    if (res.success) {
+      showNotification({
+        type: "success", title: "Thành công", message: `Tài khoản <b>${u}</b> đã được tạo.`,
+        btnText: "Đăng nhập ngay", onConfirm: () => {
+          switchTab("login");
+          document.getElementById("loginUser").value = u;
+        },
+      });
+      msg.innerText = "";
+    } else {
+      msg.innerText = "Tên tài khoản đã tồn tại";
+    }
+  }).catch((err) => (msg.innerText = err.message));
 }
-// Xử lý đăng xuất
+
 function handleLogout() {
-  apiFetch("/api/logout", { method: "POST" }).then(() => {
-    checkLoginStatus();
-  });
+  if (!confirm("Bạn có chắc chắn muốn đăng xuất?")) return;
+  apiFetch("/api/logout", { method: "POST" }).then(() => checkLoginStatus());
+  showNotification({ type: "success", title: "Đã đăng xuất", message: "Hẹn gặp lại bạn!" });
 }
 
-// ================================================================
-// 3. RECOMMENDATION & HISTORY
-// ================================================================
-// Hàm debounce để giảm tần suất gọi hàm khi gõ input
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-// Lắng nghe sự kiện gõ phím trong ô tìm kiếm User
-document.getElementById("usernameInput").addEventListener(
-  "input",
-  debounce(() => {
-    const val = document.getElementById("usernameInput").value.trim();
-    if (val.length > 2) analyzeUser(false);
-  }, 800)
-);
-// Phân tích User (đã đăng nhập hoặc nhập tên)
-// Phân tích User (đã đăng nhập hoặc nhập tên)
+// ============================================================================
+// PHẦN 4: LOGIC GỢI Ý & DATA
+// ============================================================================
 function analyzeUser(isLoggedInUser = false) {
   const targetUser = isLoggedInUser ? currentUser : document.getElementById("usernameInput").value.trim();
-  if (!targetUser) return alert("Vui lòng nhập tên User!");
+  if (!targetUser) return;
 
-  // History
-  apiFetch(`/api/history/${targetUser}`)
-    .then((data) => {
-      userLikedSet.clear();
-
-      const histDiv = document.getElementById("user-history");
-      const histList = document.getElementById("history-list");
-
-      // [QUAN TRỌNG] Đã sửa lỗi logic cũ ở đây:
-      // Không cần gọi search-box hay mainBox nữa vì layout đã tách biệt.
-
-      if (data && data.length > 0) {
-        data.forEach((item) => userLikedSet.add(item.name));
-
-        // Hiện nội dung lịch sử
-        if (histDiv) histDiv.style.display = "block";
-
-        // Vẽ danh sách
-        if (histList) {
-          histList.innerHTML = data
-            .map(
-              (place) => `
-              <div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
-                <img src="${place.image}" onerror="this.src='/static/images/no-image.png'">
-                ${place.name}
-              </div>`
-            )
-            .join("");
-        }
-      } else {
-        // Không có dữ liệu thì ẩn div con đi
-        if (histDiv) histDiv.style.display = "none";
-      }
-    })
-    .catch((err) => console.error("History error:", err));
-
+  apiFetch(`/api/history/${targetUser}`).then((data) => {
+    userLikedSet.clear();
+    const histDiv = document.getElementById("user-history");
+    const histList = document.getElementById("history-list");
+    if (data && data.length > 0) {
+      data.forEach((item) => userLikedSet.add(item.name));
+      histDiv.style.display = "block";
+      histList.innerHTML = data.map(place => 
+        `<div class="hist-chip" onclick="showDetailFromData('${place.name}', ${place.lat}, ${place.lng}, '${place.image}')">
+           <img src="${place.image}" loading="lazy" onerror="this.src='/static/images/no-image.png'"> ${place.name}
+         </div>`).join("");
+    } else {
+      histDiv.style.display = "none";
+    }
+  });
   getRecommendations(targetUser);
 }
-// Lấy gợi ý cho User
+
 function getRecommendations(user) {
   const recArea = document.getElementById("recommendation-area");
-  recArea.innerHTML = `
-    <div style="text-align:center; padding:60px 20px; color:#6b7280;">
-      <i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>
-      Đang phân tích sở thích của <strong>${user}</strong>...
-    </div>`;
+  recArea.innerHTML = `<div style="text-align:center; padding:60px 20px;"><i class="fas fa-circle-notch fa-spin"></i> Đang phân tích...</div>`;
 
-  apiFetch(`/api/recommend/${user}`)
-    .then((data) => {
-      console.log("Recommendation data:", data);
-      recArea.innerHTML = "";
-      if (!data || data.length === 0) {
-        recArea.innerHTML = `
-          <div class="empty-state">
-            <p>Chưa có gợi ý nào cho ${user}. Hãy thích thêm địa điểm!</p>
-          </div>`;
-        return;
-      }
-
-      data.forEach((loc) => {
-        let badgeHTML = "";
-        if (!loc.common_users || loc.common_users === 0) {
-          let score = loc.pr ? loc.pr.toFixed(2) : "N/A";
-          badgeHTML = `<div class="algo-badge badge-pr"><i class="fas fa-chart-line"></i> PageRank: ${score}</div>`;
-        } else {
-          badgeHTML = `<div class="algo-badge badge-collab"><i class="fas fa-users"></i> ${loc.common_users} người cùng sở thích</div>`;
-        }
-
-        const card = document.createElement("div");
-        card.className = "ai-card";
-        card.innerHTML = `
-          <div class="card-thumb">${createPlaceImage(loc.image)}</div>
-          <div class="card-content">
+  apiFetch(`/api/recommend/${user}`).then((data) => {
+    recArea.innerHTML = "";
+    if (!data || data.length === 0) {
+      recArea.innerHTML = `<div class="empty-state"><p>Chưa có gợi ý nào cho ${user}</p></div>`;
+      return;
+    }
+    data.forEach((loc) => {
+      const reasonIcon = loc.reason_icon || "🤖";
+      const reason = loc.reason || "AI Recommended";
+      const reasonType = loc.reason_type || "default";
+      const card = document.createElement("div");
+      card.className = "ai-card";
+      card.innerHTML = `
+        <div class="card-thumb"><img src="${loc.image}" loading="lazy" onerror="this.src='/static/images/no-image.png'"></div>
+        <div class="card-content">
             <div class="card-title">${loc.name}</div>
-            <div class="card-desc">${loc.description || "Đang cập nhật..."}</div>
-            ${badgeHTML}
-          </div>
-        `;
-        card.onclick = () => showDetail(loc);
-        recArea.appendChild(card);
-      });
-    })
-    .catch((err) => {
-      console.error("Recommend error:", err);
-      recArea.innerHTML = `<div style="text-align:center; color:red; padding:20px;">Lỗi tải gợi ý: ${err.message}</div>`;
+            <div class="card-desc">${loc.description || "..."}</div>
+            <div class="algo-badge badge-${reasonType}">${reasonIcon} ${reason}</div>
+        </div>
+      `;
+      card.onclick = () => showDetail(loc);
+      recArea.appendChild(card);
     });
-}
-
-// ================================================================
-// 4. HELPER & DETAIL
-// ================================================================
-// Tạo thẻ img với xử lý lỗi ảnh
-function createPlaceImage(src) {
-  return `<img src="${src}" onerror="this.src='/static/images/no-image.png'">`;
-}
-// Lấy icon theo category
-function getIconByCategory(category) {
-  const iconMap = {
-    "Di tích": { class: "pin-ditich", symbol: "🏛️" },
-    "Tâm linh": { class: "pin-tamlinh", symbol: "🛕" },
-    "Lăng tẩm": { class: "pin-langtam", symbol: "🏯" },
-    "Bãi biển": { class: "pin-bien", symbol: "🏖️" },
-    "Tham quan": { class: "pin-thamquan", symbol: "🏞️" },
-    "Ẩm thực": { class: "pin-amthuc", symbol: "🍜" },
-    "Thiên nhiên": { class: "pin-thiennhien", symbol: "🌳" },
-  };
-  const config = iconMap[category] || { class: "pin-khac", symbol: "📍" };
-  return L.divIcon({
-    className: "custom-div-icon",
-    html: `<div class='custom-pin ${config.class}'><i>${config.symbol}</i></div>`,
-    iconSize: [34, 46],
-    iconAnchor: [17, 46],
-    popupAnchor: [0, -42],
   });
 }
 
-// Di chuyển bản đồ đến vị trí và mở popup
-function flyToLocation(lat, lng, name) {
-  // 1. Nếu đang ở Mobile (màn hình nhỏ hơn 768px),
-  if (window.innerWidth <= 768) {
-    console.log("Mobile mode: Skip map flying");
-    return;
-  }
-
-  // 2. Kiểm tra an toàn xem map có tồn tại không
-  if (!map) return;
-
-  // 3. Thực hiện bay trên Desktop
-  try {
-    map.flyTo([lat, lng], 16, { duration: 1 });
-    if (markersMap[name]) {
-      map.once("moveend", () => markersMap[name].openPopup());
-    }
-  } catch (err) {
-    console.warn("Lỗi khi di chuyển bản đồ:", err);
-  }
-}
-
-// Hiển thị chi tiết địa điểm
-function showDetail(loc) {
-  console.log("Đang mở chi tiết địa điểm:", loc.name); // Log kiểm tra
-  currentOpenLoc = loc; // [QUAN TRỌNG] Lưu lại để dùng sau khi login
-
-  flyToLocation(loc.lat, loc.lng, loc.name);
-  const panel = document.getElementById("detail-panel");
-  const content = document.getElementById("detail-content");
-
-  const googleLink = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
-
-  // Thẻ badge thuật toán
-  let badgeInfo = "";
-  if (loc.common_users !== undefined) {
-    badgeInfo =
-      loc.common_users === 0
-        ? `<span class="algo-badge badge-pr">🏆 Địa điểm nổi bật (PageRank Top)</span>`
-        : `<span class="algo-badge badge-collab">👥 ${loc.common_users} người cùng sở thích</span>`;
-  }
-
-  // Nút thích địa điểm
-  let likeButton = currentUser
-    ? `<button class="${userLikedSet.has(loc.name) ? "btn-action btn-like liked" : "btn-action btn-like"}"
-               onclick="handleLike(this, '${loc.name}')">
-        <i class="${userLikedSet.has(loc.name) ? "fas" : "far"} fa-heart"></i> 
-        ${userLikedSet.has(loc.name) ? "Đã thích" : "Yêu thích"}
-      </button>`
-    : `<button class="btn-action btn-like" onclick="openAuthModal()">
-        <i class="fas fa-lock"></i> Đăng nhập để thích
-      </button>`;
-
-  content.innerHTML = `
-    <img src="${loc.image}" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
-    <div class="detail-body">
-      <div style="margin-bottom:10px;">${badgeInfo}</div>
-      <h1 class="detail-title">${loc.name}</h1>
-      <div class="detail-meta">
-        <span>⭐ ${loc.rating || 5}/5</span> • <span>${loc.category || "Địa điểm"}</span>
-      </div>
-      <p class="detail-desc">${loc.description || "Chưa có mô tả."}</p>
-      <div class="detail-actions">
-        ${likeButton}
-        <a href="${googleLink}" target="_blank" class="btn-action btn-maps">
-          <i class="fas fa-directions"></i> Chỉ đường
-        </a>
-      </div>
-    </div>
-  `;
-  panel.classList.add("active");
-}
-// Xử lý thích địa điểm
-function handleLike(btnElement, locName) {
-  const icon = btnElement.querySelector("i");
-  icon.className = "fas fa-spinner fa-spin";
-
-  apiFetch("/api/like", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ location_name: locName }),
-  })
-    .then((data) => {
-      if (data && data.liked) {
-        btnElement.classList.add("liked");
-        btnElement.innerHTML = `<i class="fas fa-heart"></i> Đã thích`;
-      } else {
-        btnElement.classList.remove("liked");
-        btnElement.innerHTML = `<i class="far fa-heart"></i> Yêu thích`;
-      }
-      analyzeUser(true);
-    })
-    .catch((err) => {
-      console.error("Like error:", err);
-      alert("Lỗi khi thích địa điểm!");
-      icon.className = userLikedSet.has(locName) ? "fas fa-heart" : "far fa-heart";
-    });
-}
-// Hiển thị chi tiết từ dữ liệu thô (không có marker)
-function showDetailFromData(name, lat, lng, image) {
-  const fakeLoc = {
-    name,
-    lat,
-    lng,
-    image,
-    description: "Bạn đã thích địa điểm này.",
-    category: "Đã ghé thăm",
-    rating: 5,
-  };
-  showDetail(fakeLoc);
-}
-// Đóng panel chi tiết
-function closeDetail() {
-  document.getElementById("detail-panel").classList.remove("active");
-}
-
-// ================================================================
-// 5. DATA EXPLORER (BỘ LỌC & TÌM KIẾM)
-// ================================================================
-
-// Biến lưu trữ dữ liệu hiện tại của danh sách (để tìm kiếm client-side)
-let currentListData = [];
-
-// --- HÀM 1: LỌC THEO CATEGORY (Gắn vào các nút bấm) ---
-function filterData(cat, btn) {
-  // 1. Cập nhật giao diện nút bấm (Active state)
-  document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
-  if (btn) btn.classList.add("active");
-
-  // 2. Xóa nội dung ô tìm kiếm (để tránh gây nhầm lẫn khi chuyển danh mục)
-  const searchInput = document.getElementById("miniSearchInput");
-  if (searchInput) searchInput.value = "";
-
-  // 3. Tải dữ liệu theo danh mục mới
-  loadLocations(cat);
-}
-
-// --- HÀM 2: TẢI DỮ LIỆU TỪ API ---
-async function loadLocations(category = "All") {
-  // Reset UI loading
-  const list = document.getElementById("locationList");
-  list.innerHTML = `
-    <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #6b7280;">
-      <i class="fas fa-circle-notch fa-spin fa-2x"></i>
-      <p style="margin-top: 12px;">Đang tải...</p>
-    </div>`;
-
+async function loadLocations(cat = "All") {
+  document.getElementById("locationList").innerHTML = `<div style="text-align:center; padding:20px;">Đang tải...</div>`;
   try {
     let data;
-    // Kiểm tra cache nếu chọn All (để đỡ gọi API nhiều lần)
-    if (category === "All" && cachedAllLocations) {
-      data = cachedAllLocations;
-    } else {
+    if (cat === "All" && cachedAllLocations && cachedAllLocations.length > 0) data = cachedAllLocations;
+    else {
       let url = "/api/locations";
-      if (category !== "All") url += `?category=${encodeURIComponent(category)}`;
-
+      if (cat !== "All") url += `?category=${encodeURIComponent(cat)}`;
       data = await apiFetch(url);
-      if (category === "All") cachedAllLocations = data; // Lưu cache
+      if (cat === "All" && data && data.length > 0) cachedAllLocations = data;
     }
-
-    // [QUAN TRỌNG] Lưu data vào biến toàn cục để dùng cho Search
     currentListData = data || [];
-
-    // Gọi hàm hiển thị
     renderLocations(currentListData);
   } catch (err) {
-    console.error("Load locations error:", err);
-    list.innerHTML = `<div style="text-align:center; color:red; grid-column: 1 / -1;">Lỗi tải dữ liệu</div>`;
+    document.getElementById("locationList").innerHTML = "Lỗi tải dữ liệu";
   }
 }
 
-// --- HÀM 3: HIỂN THỊ DANH SÁCH & MARKER ---
 function renderLocations(data) {
   const list = document.getElementById("locationList");
-
-  // Xóa marker cũ & list cũ
   if (markerLayer) markerLayer.clearLayers();
   markersMap = {};
   list.innerHTML = "";
 
   if (!data || data.length === 0) {
-    list.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align:center; padding:20px; color:#9ca3af;">
-          Không tìm thấy địa điểm nào.
-        </div>`;
+    list.innerHTML = `<div style="text-align:center; padding:20px;">Không tìm thấy địa điểm nào.</div>`;
     return;
   }
 
   const latLngs = [];
-
   data.forEach((loc) => {
-    // A. Tạo thẻ bên trái (List Item)
+    let displayScore = (loc.score * 100).toFixed(1);
     const div = document.createElement("div");
     div.className = "mini-item";
     div.innerHTML = `
-      <img src="${loc.image}" class="mini-img" onerror="this.src='/static/images/no-image.png'">
+      <img src="${loc.image}" loading="lazy" class="mini-img" onerror="this.src='/static/images/no-image.png'">
       <div style="flex:1; overflow:hidden;">
         <div class="mini-name">${loc.name}</div>
-        <div style="font-size:11px; color:#f59e0b;">⭐ ${loc.rating ? loc.rating.toFixed(1) : "5.0"}</div>
+        <div style="font-size:12px; color:#059669; font-weight:700;">${displayScore} pts</div>
       </div>
     `;
     div.onclick = () => showDetail(loc);
     list.appendChild(div);
 
-    // B. Tạo Marker trên bản đồ
-    const marker = L.marker([loc.lat, loc.lng], { icon: getIconByCategory(loc.category) });
-
-    // Popup rút gọn khi bấm vào marker
-    const popupContent = document.createElement("div");
-    popupContent.innerHTML = `
-        <div style="text-align:center; cursor:pointer;">
-            <b style="font-size:13px">${loc.name}</b><br>
-            <span style="font-size:11px; color:#666">${loc.category}</span>
-        </div>
-    `;
-    popupContent.onclick = () => showDetail(loc);
-
-    marker.bindPopup(popupContent);
-    marker.on("click", () => showDetail(loc));
-
+    const marker = L.marker([loc.lat, loc.lng], { icon: getDynamicIcon(loc) });
+    marker.bindPopup(`<b>${loc.name}</b><br>${loc.category}`).on("click", () => showDetail(loc));
     marker.addTo(markerLayer);
     markersMap[loc.name] = marker;
     latLngs.push([loc.lat, loc.lng]);
   });
-
-  // Fit bản đồ để nhìn thấy các điểm vừa load (nếu có điểm)
-  if (latLngs.length > 0 && map) {
-    // Dùng setTimeout để tránh lỗi khi map chưa render xong
-    setTimeout(() => {
-      map.fitBounds(latLngs, { padding: [50, 50], maxZoom: 15 });
-    }, 100);
-  }
 }
 
-// --- HÀM 4: XỬ LÝ TÌM KIẾM KHI GÕ PHÍM (Search Box) ---
-function handleLocalSearch() {
-  const input = document.getElementById("miniSearchInput");
-  if (!input) return;
+function showDetail(loc) {
+  currentOpenLoc = loc;
+  flyToLocation(loc.lat, loc.lng, loc.name);
+  const panel = document.getElementById("detail-panel");
+  const content = document.getElementById("detail-content");
 
-  const keyword = input.value.toLowerCase().trim();
-
-  if (!keyword) {
-    // Nếu xóa hết chữ -> Hiển thị lại toàn bộ danh sách hiện tại
-    renderLocations(currentListData);
-    return;
+  let adminActions = "";
+  if (currentUser === "admin" || userRole === "admin") {
+    adminActions = `
+      <div class="admin-actions-container">
+        <button class="btn-admin-tool btn-tool-edit" onclick="openEditModal()"><i class="fas fa-edit"></i> Sửa</button>
+        <button class="btn-admin-tool btn-tool-delete" onclick="deleteLocation('${loc.name}')"><i class="fas fa-trash"></i> Xóa</button>
+      </div>
+    `;
   }
 
-  // Lọc dữ liệu trong RAM
-  const filteredData = currentListData.filter((loc) => {
-    const nameMatch = loc.name.toLowerCase().includes(keyword);
-    // Nếu có description thì tìm cả trong description
-    const descMatch = loc.description ? loc.description.toLowerCase().includes(keyword) : false;
-    return nameMatch || descMatch;
-  });
+  let likeBtn = currentUser
+    ? `<button class="${userLikedSet.has(loc.name) ? "btn-action btn-like liked" : "btn-action btn-like"}" onclick="handleLike(this, '${loc.name}')">
+         <i class="${userLikedSet.has(loc.name) ? "fas" : "far"} fa-heart"></i> ${userLikedSet.has(loc.name) ? "Đã thích" : "Yêu thích"}
+       </button>`
+    : `<button class="btn-action btn-like" onclick="openAuthModal()"><i class="fas fa-lock"></i> Đăng nhập</button>`;
 
-  renderLocations(filteredData);
+  // AI Explanation
+  let aiExplanationHTML = "";
+  if (loc.reason && loc.reason_details) {
+    const d = loc.reason_details;
+    const type = loc.reason_type || "default";
+    aiExplanationHTML = `
+      <div class="ai-explanation-section">
+        <div class="ai-explanation-header"><i class="fas fa-robot"></i> Tại sao gợi ý?</div>
+        <div class="ai-reason-main ${type}"><span class="reason-icon">${loc.reason_icon}</span> <span class="reason-text">${loc.reason}</span></div>
+        <div class="ai-score-breakdown">
+          <div class="score-bar-item"><div class="score-label"><span>👥 ${d.collab.label}</span> <span class="score-value">${d.collab.percent.toFixed(0)}%</span></div><div class="score-bar"><div class="score-bar-fill collab" style="width:${d.collab.percent}%"></div></div></div>
+          <div class="score-bar-item"><div class="score-label"><span>🎯 ${d.content.label}</span> <span class="score-value">${d.content.percent.toFixed(0)}%</span></div><div class="score-bar"><div class="score-bar-fill content" style="width:${d.content.percent}%"></div></div></div>
+          <div class="score-bar-item"><div class="score-label"><span>🏆 ${d.pagerank.label}</span> <span class="score-value">${d.pagerank.percent.toFixed(0)}%</span></div><div class="score-bar"><div class="score-bar-fill pagerank" style="width:${d.pagerank.percent}%"></div></div></div>
+        </div>
+      </div>
+    `;
+  }
+
+  content.innerHTML = `
+    <img src="${loc.image}" loading="lazy" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
+    <div class="detail-body">
+        <h1 class="detail-title">${loc.name}</h1>
+        <div class="detail-meta"><span>${loc.category}</span></div>
+        <p class="detail-desc">${loc.description || "..."}</p>
+        ${aiExplanationHTML}
+        
+        <div class="detail-actions">
+            ${likeBtn}
+            <a href="https://maps.google.com/?q=${encodeURIComponent(loc.name + " Huế")}" target="_blank" class="btn-action btn-maps"><i class="fas fa-directions"></i> Chỉ đường</a>
+        </div>
+        ${adminActions}
+
+        <!-- REVIEW SECTION -->
+        <div class="review-section">
+            <div class="review-header">
+                <span><i class="fas fa-comments"></i> Đánh giá & Bình luận</span>
+                <button class="btn-action" onclick="toggleReviewForm()" style="font-size:12px; padding:4px 8px;"><i class="fas fa-pen"></i> Viết</button>
+            </div>
+            <div id="reviewFormContainer" class="review-form">
+                <div class="star-rating-input">
+                    <input type="radio" id="star5" name="rating" value="5" /><label for="star5">★</label>
+                    <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
+                    <input type="radio" id="star3" name="rating" value="3" /><label for="star3">★</label>
+                    <input type="radio" id="star2" name="rating" value="2" /><label for="star2">★</label>
+                    <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
+                </div>
+                <textarea id="reviewComment" class="review-textarea" placeholder="Chia sẻ trải nghiệm..."></textarea>
+                <div style="text-align:right; margin-top:8px;"><button class="btn-submit" onclick="submitReview('${loc.name}')">Gửi</button></div>
+            </div>
+            <div id="reviewList" class="review-list"><div style="text-align:center;">Đang tải...</div></div>
+        </div>
+
+        <div class="similar-locations-section">
+          <div class="similar-header"><span>Địa điểm <strong>${loc.category}</strong> khác</span></div>
+          <div class="similar-locations-list" id="similar-locations-list"></div>
+        </div>
+    </div>
+  `;
+  panel.classList.add("active");
+  loadSimilarLocations(loc.name);
+  loadReviews(loc.name);
 }
 
-// ================================================================
-// 6. ADMIN PANEL
-// ================================================================
-function openAdminModal() {
-  document.getElementById("adminModal").classList.add("active");
-  loadAdminUsers();
-}
-// Đóng modal
-function closeAdminModal() {
-  document.getElementById("adminModal").classList.remove("active");
-}
-// Tải danh sách user
-function loadAdminUsers() {
-  const tbody = document.getElementById("adminUserList");
-  tbody.innerHTML = '<tr><td style="padding:15px; text-align:center;">Đang tải...</td></tr>';
-
-  apiFetch("/api/admin/users").then((data) => {
-    tbody.innerHTML = "";
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td style="padding:15px; text-align:center;">Chưa có user nào.</td></tr>';
-      return;
-    }
-
-    data.forEach((u) => {
-      const tr = document.createElement("tr");
-      tr.style.borderBottom = "1px solid #eee";
-      tr.innerHTML = `
-                <td style="padding: 10px; font-weight: 600;">${u.name}</td>
-                <td style="padding: 10px; color: #666; font-size: 12px;">❤️ ${u.liked_count} thích</td>
-                <td style="padding: 10px; text-align: right;">
-                    <button onclick="deleteUser('${u.name}')" style="background: #fee2e2; color: #dc2626; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-                        <i class="fas fa-trash"></i> Xóa
-                    </button>
-                </td>
-            `;
-      tbody.appendChild(tr);
+function loadSimilarLocations(locationName) {
+  const container = document.getElementById("similar-locations-list");
+  apiFetch(`/api/similar/${encodeURIComponent(locationName)}`).then((data) => {
+    container.innerHTML = "";
+    if (!data || data.length === 0) return;
+    data.forEach((loc) => {
+      const card = document.createElement("div");
+      card.className = "similar-card";
+      card.innerHTML = `
+        <img src="${loc.image}" loading="lazy" class="similar-card-img" onerror="this.src='/static/images/no-image.png'">
+        <div class="similar-card-info"><div class="similar-card-name">${loc.name}</div></div>
+      `;
+      card.onclick = () => showDetail(loc);
+      container.appendChild(card);
     });
   });
 }
-// Xóa user
-function deleteUser(username) {
-  if (!confirm(`Bạn có chắc muốn xóa tài khoản "${username}" không? Hành động này không thể hoàn tác.`)) return;
 
-  apiFetch(`/api/admin/users/${username}`, { method: "DELETE" }).then((res) => {
-    if (res) {
-      showNotification({
-        type: "delete",
-        title: "Xóa tài khoản thành công",
-        message: `Tài khoản <b>${username}</b> đã được xóa.`,
-        btnText: "Đóng",
-      });
-      loadAdminUsers(); // Load lại danh sách
+function handleLike(btn, name) {
+  apiFetch("/api/like", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ location_name: name }),
+  }).then((data) => {
+    analyzeUser(true);
+    if (data.liked) {
+      btn.classList.add("liked");
+      btn.innerHTML = `<i class="fas fa-heart"></i> Đã thích`;
+    } else {
+      btn.classList.remove("liked");
+      btn.innerHTML = `<i class="far fa-heart"></i> Yêu thích`;
     }
   });
 }
 
-// --- HÀM HIỂN THỊ THÔNG BÁO ĐA NĂNG ---
-function showNotification({ type, title, message, btnText, onConfirm }) {
-  const modal = document.getElementById("notificationModal");
-  const icon = document.getElementById("notif-icon");
-  const titleEl = document.getElementById("notif-title");
-  const msgEl = document.getElementById("notif-msg");
-  const btn = document.getElementById("notif-btn");
+function showDetailFromData(name, lat, lng, image) {
+  showDetail({ name, lat, lng, image, category: "Lịch sử", description: "Địa điểm đã xem" });
+}
+function closeDetail() { document.getElementById("detail-panel").classList.remove("active"); }
 
-  // 1. Cài đặt nội dung
-  titleEl.innerText = title;
-  msgEl.innerHTML = message; // Dùng innerHTML để hỗ trợ xuống dòng <br> hoặc bôi đậm <b>
-  btn.innerText = btnText || "Đóng";
-
-  // 2. Cài đặt giao diện theo Loại (type)
-  if (type === "success") {
-    // Màu Xanh (Đăng ký thành công)
-    icon.className = "fas fa-check-circle";
-    icon.style.color = "#10b981"; // Xanh lá
-    btn.style.backgroundColor = "#2563eb"; // Xanh dương
-  } else if (type === "delete") {
-    // Màu Đỏ (Xóa thành công)
-    icon.className = "fas fa-trash-alt";
-    icon.style.color = "#ef4444"; // Đỏ
-    btn.style.backgroundColor = "#ef4444"; // Nút màu đỏ
+function filterData(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  else {
+    document.querySelectorAll(".chip").forEach(c => {
+        if(c.textContent.includes(cat) || (cat === "All" && c.textContent.includes("Tất cả"))) c.classList.add("active");
+    });
   }
-
-  // 3. Xử lý sự kiện nút bấm
-  // Trước khi gán sự kiện mới, ta clone nút để xóa sạch các sự kiện cũ (tránh bị lặp)
-  const newBtn = btn.cloneNode(true);
-  btn.parentNode.replaceChild(newBtn, btn);
-
-  newBtn.onclick = () => {
-    modal.classList.remove("active"); // Luôn đóng modal trước
-    if (onConfirm) onConfirm(); // Chạy hàm callback nếu có
-  };
-
-  // 4. Hiện Modal
-  modal.classList.add("active");
+  loadLocations(cat);
 }
 
-// ================================================================
-// 7. TÍNH NĂNG KÉO THẢ & CUỘN NGANG (dành cho mobile + desktop + touchpad)
-// ================================================================
-const slider = document.querySelector(".filter-chips");
-let isDown = false;
-let startX;
-let scrollLeft;
+function flyToLocation(lat, lng, name) {
+  if (window.innerWidth <= 768) {}
+  if (map) {
+    map.flyTo([lat, lng], 16, { duration: 1.5 });
+    if (markersMap[name]) {
+      map.once("moveend", () => markersMap[name].openPopup());
+    }
+  }
+}
 
-if (slider) {
-  // Cuộn ngang với touchpad / bánh xe chuột
-  slider.addEventListener("wheel", (e) => {
-    if (slider.scrollWidth <= slider.clientWidth) return;
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+// ============================================================================
+// PHẦN 5: ADMIN & UTILS
+// ============================================================================
+function checkAdminAccess(username) { console.log("Admin logged in:", username); }
 
-    e.preventDefault();
-    const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
-    slider.scrollLeft += delta * 1.5; // Điều chỉnh tốc độ
-  });
+async function loadAdminStats() {
+  try {
+    const d = await apiFetch("/api/admin/stats");
+    document.getElementById("stat-user").innerText = d.user_count;
+    document.getElementById("stat-loc").innerText = d.location_count;
+    document.getElementById("stat-like").innerText = d.like_count;
+    document.getElementById("stat-link").innerText = d.link_count;
+  } catch (e) {}
+}
 
-  // Kéo thả với chuột
-  slider.addEventListener("mousedown", (e) => {
-    isDown = true;
-    slider.classList.add("active");
-    startX = e.pageX - slider.offsetLeft;
-    scrollLeft = slider.scrollLeft;
-    slider.style.cursor = "grabbing";
-  });
-  slider.addEventListener("mouseleave", () => {
-    isDown = false;
-    slider.classList.remove("active");
-    slider.style.cursor = "grab";
-  });
-  slider.addEventListener("mouseup", () => {
-    isDown = false;
-    slider.classList.remove("active");
-    slider.style.cursor = "grab";
-  });
-  slider.addEventListener("mousemove", (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - slider.offsetLeft;
-    const walk = (x - startX) * 2; // Tốc độ cuộn
-    slider.scrollLeft = scrollLeft - walk;
-  });
+function openAdminUserModal() {
+  document.getElementById("adminModal").classList.add("active");
+  loadAdminUsersList();
+  loadAdminStats();
+}
+function closeAdminModal() { document.getElementById("adminModal").classList.remove("active"); }
 
-  // Kéo thả với cảm ứng (touch)
-  slider.addEventListener("touchstart", (e) => {
-    isDown = true;
-    startX = e.touches[0].pageX - slider.offsetLeft;
-    scrollLeft = slider.scrollLeft;
+async function loadAdminUsersList() {
+    const tbody = document.getElementById("adminUserList");
+    tbody.innerHTML = "<tr><td>Đang tải...</td></tr>";
+    try {
+        const users = await apiFetch("/api/admin/users");
+        tbody.innerHTML = "";
+        users.forEach(u => {
+            if (u.name === "admin") return;
+            tbody.innerHTML += `<tr><td>${u.name}</td><td>${u.liked_count} likes</td><td><button onclick="deleteUser('${u.name}')">Xóa</button></td></tr>`;
+        });
+    } catch(e) { tbody.innerHTML = "Lỗi tải"; }
+}
+async function deleteUser(name) {
+    if(!confirm(`Xóa user ${name}?`)) return;
+    await apiFetch(`/api/admin/users/${name}`, {method: 'DELETE'});
+    loadAdminUsersList();
+}
+
+async function deleteLocation(name) {
+  if (!confirm(`Xóa địa điểm "${name}"?`)) return;
+  await apiFetch("/api/admin/location/delete", {
+    method: "DELETE", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
   });
-  slider.addEventListener("touchend", () => {
-    isDown = false;
+  closeDetail();
+  loadLocations("All");
+  cachedAllLocations = null;
+}
+
+// Utils
+function showNotification({ type, title, message, btnText, onConfirm }) {
+  // Simplification for reliability
+  alert(`${title}\n${message}`); 
+  if(onConfirm) onConfirm();
+}
+
+function setupDragScroll() {
+  const slider = document.querySelector(".filter-chips");
+  if (!slider) return;
+  let isDown = false, startX, scrollLeft;
+  slider.addEventListener("mousedown", (e) => { isDown=true; startX = e.pageX - slider.offsetLeft; scrollLeft=slider.scrollLeft; });
+  slider.addEventListener("mouseleave", () => { isDown=false; });
+  slider.addEventListener("mouseup", () => { isDown=false; });
+  slider.addEventListener("mousemove", (e) => { if(!isDown)return; e.preventDefault(); const x=e.pageX-slider.offsetLeft; slider.scrollLeft = scrollLeft - (x-startX)*2; });
+}
+
+function setupDebounceSearch() {
+    let timeout;
+    document.getElementById("usernameInput").addEventListener("input", () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            if(document.getElementById("usernameInput").value.length > 2) analyzeUser(false);
+        }, 800);
+    });
+}
+
+function openEditModal() { // Simplified placeholder
+    if(!currentOpenLoc) return;
+    document.getElementById("editModal").classList.add("active");
+    // Populate fields
+    document.getElementById("editOldName").value = currentOpenLoc.name;
+    document.getElementById("editName").value = currentOpenLoc.name;
+    document.getElementById("editLat").value = currentOpenLoc.lat;
+    document.getElementById("editLng").value = currentOpenLoc.lng;
+    document.getElementById("editCategory").value = currentOpenLoc.category;
+    document.getElementById("editImage").value = currentOpenLoc.image;
+    document.getElementById("editDesc").value = currentOpenLoc.description;
+}
+function closeEditModal() { document.getElementById("editModal").classList.remove("active"); }
+
+async function submitEditLocation() {
+    const body = {
+        old_name: document.getElementById("editOldName").value,
+        name: document.getElementById("editName").value,
+        lat: document.getElementById("editLat").value,
+        lng: document.getElementById("editLng").value,
+        category: document.getElementById("editCategory").value,
+        image: document.getElementById("editImage").value,
+        description: document.getElementById("editDesc").value
+    };
+    await apiFetch("/api/admin/location/update", {
+        method: "PUT", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    });
+    alert("Cập nhật thành công!");
+    closeEditModal();
+    cachedAllLocations = null;
+    loadLocations("All");
+}
+
+function openAddModal() { document.getElementById("addModal").classList.add("active"); }
+function closeAddModal() { document.getElementById("addModal").classList.remove("active"); }
+async function submitAddLocation() {
+    const body = {
+        name: document.getElementById("addName").value,
+        lat: document.getElementById("addLat").value,
+        lng: document.getElementById("addLng").value,
+        category: document.getElementById("addCategory").value,
+        image: document.getElementById("addImage").value,
+        description: document.getElementById("addDesc").value
+    };
+    await apiFetch("/api/admin/location/add", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    });
+    alert("Thêm thành công!");
+    closeAddModal();
+    cachedAllLocations = null;
+    loadLocations("All");
+}
+
+// ============================================================================
+// PHẦN 6: EXTENSIONS (ICONS, HEATMAP, REVIEWS)
+// ============================================================================
+
+function getDynamicIcon(loc) {
+  const iconMap = {
+    "Di tích": "🏛️", "Ẩm thực": "🍜", "Thiên nhiên": "🌳",
+    "Bãi biển": "🏖️", "Tâm linh": "🛕", "Lăng tẩm": "🏯",
+    "Tham quan": "🏞️", "Mua sắm": "🛍️",
+  };
+  const symbol = iconMap[loc.category] || "📍";
+  let extraClass = "";
+  if (loc.is_personalized) extraClass = "pin-collab";
+  else if (loc.score >= 0.35) extraClass = "pin-pr";
+  
+  return L.divIcon({
+    className: "custom-div-icon",
+    html: `<div class='custom-pin ${extraClass}'>${symbol}</div>`,
+    iconSize: [30, 30] 
   });
-  slider.addEventListener("touchmove", (e) => {
-    if (!isDown) return;
-    const x = e.touches[0].pageX - slider.offsetLeft;
-    const walk = (x - startX) * 2; // Tốc độ cuộn
-    slider.scrollLeft = scrollLeft - walk;
-  });
+}
+
+function toggleHeatmap() {
+    const btn = document.getElementById('btn-toggle-heatmap');
+    if (isHeatmapActive) {
+        if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+        if (markerLayer) map.addLayer(markerLayer);
+        isHeatmapActive = false;
+        btn.classList.remove('active');
+        const leg = document.getElementById('heatmap-legend');
+        if(leg) leg.style.display = 'none';
+    } else {
+        if (!cachedAllLocations) return alert("Chưa có dữ liệu");
+        const heatPoints = cachedAllLocations.map(loc => [loc.lat, loc.lng, (loc.score||0.1)*5]);
+        if (markerLayer) map.removeLayer(markerLayer);
+        heatLayer = L.heatLayer(heatPoints, { radius: 30, blur: 20, max: 1.0 }).addTo(map);
+        isHeatmapActive = true;
+        btn.classList.add('active');
+        const leg = document.getElementById('heatmap-legend');
+        if(leg) leg.style.display = 'block';
+    }
+}
+
+// Review Functions
+function toggleReviewForm() {
+    if (!currentUser) return alert("Bạn cần đăng nhập để đánh giá");
+    const form = document.getElementById('reviewFormContainer');
+    form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+    
+    // Reset form if not editing
+    if (!form.dataset.editing) {
+       document.getElementById('reviewComment').value = "";
+       document.querySelectorAll('input[name="rating"]').forEach(i => i.checked = false);
+       document.querySelector('#reviewFormContainer button.btn-submit').innerText = "Gửi";
+       // Remove any old event listeners by cloning
+       const oldBtn = document.querySelector('#reviewFormContainer button.btn-submit');
+       const newBtn = oldBtn.cloneNode(true);
+       oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+       // Re-attach standard submit handler
+       newBtn.onclick = () => submitReview(currentOpenLoc ? currentOpenLoc.name : "");
+    }
+}
+
+function loadReviews(locationName) {
+    const list = document.getElementById('reviewList');
+    apiFetch(`/api/reviews/${encodeURIComponent(locationName)}`).then(data => {
+        if(!data || data.length === 0) return list.innerHTML = `<div class="no-reviews">Chưa có đánh giá nào.</div>`;
+        
+        list.innerHTML = data.map(rev => {
+            let actions = "";
+            if(currentUser && rev.user === currentUser) {
+                const safeComment = (rev.comment || "").replace(/"/g, "&quot;").replace(/'/g, "\\'");
+                actions = `
+                    <div style="margin-left:auto; font-size:11px;">
+                        <a href="#" onclick="editReview('${locationName}', ${rev.rating}, '${safeComment}'); return false;" style="color:#2563eb; margin-right:8px;">Sửa</a>
+                        <a href="#" onclick="deleteReview('${locationName}'); return false;" style="color:#ef4444;">Xóa</a>
+                    </div>`;
+            }
+            return `
+            <div class="review-item">
+                <div class="review-avatar"><i class="fas fa-user"></i></div>
+                <div class="review-content">
+                    <div style="display:flex; justify-content:space-between;">
+                        <div class="review-user-name">${rev.user}</div>
+                        ${actions}
+                    </div>
+                    <div class="review-meta"><span class="review-stars">${'★'.repeat(rev.rating)}</span> • ${rev.time}</div>
+                    <div class="review-text">${rev.comment || ""}</div>
+                </div>
+            </div>`;
+        }).join("");
+    }).catch(e => list.innerHTML = "Lỗi tải bình luận");
+}
+
+function editReview(locationName, rating, comment) {
+    const form = document.getElementById('reviewFormContainer');
+    form.style.display = 'block';
+    form.dataset.editing = "true";
+    
+    const ratingInput = document.querySelector(`input[name="rating"][value="${rating}"]`);
+    if(ratingInput) ratingInput.checked = true;
+    document.getElementById('reviewComment').value = comment;
+    
+    const btn = document.querySelector('#reviewFormContainer button.btn-submit');
+    btn.innerText = "Cập nhật";
+    btn.onclick = () => submitReview(locationName);
+    
+    form.scrollIntoView({behavior: "smooth"});
+}
+
+function deleteReview(locationName) {
+    if(!confirm("Bạn chắc chắn muốn xóa?")) return;
+    apiFetch('/api/review', {
+        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location_name: locationName })
+    }).then(res => {
+        if(res.success) {
+            alert("Đã xóa!");
+            loadReviews(locationName);
+            const form = document.getElementById('reviewFormContainer');
+            delete form.dataset.editing;
+            document.querySelector('#reviewFormContainer button.btn-submit').innerText = "Gửi";
+        } else alert("Lỗi: " + res.error);
+    });
+}
+
+function submitReview(locationName) {
+    const ratingEl = document.querySelector('input[name="rating"]:checked');
+    if (!ratingEl) return alert("Vui lòng chọn số sao!");
+    
+    const isEditing = document.getElementById('reviewFormContainer').dataset.editing;
+    apiFetch('/api/review', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            location_name: locationName, rating: ratingEl.value,
+            comment: document.getElementById('reviewComment').value.trim()
+        })
+    }).then(res => {
+        if (res.success) {
+            alert(isEditing ? "Cập nhật thành công!" : "Đánh giá thành công!");
+            document.getElementById('reviewComment').value = "";
+            const form = document.getElementById('reviewFormContainer');
+            form.style.display = 'none';
+            delete form.dataset.editing;
+            
+            // Reset button to standard state
+            const btn = document.querySelector('#reviewFormContainer button.btn-submit');
+            btn.innerText = "Gửi";
+            // Important: clone to clear old event listeners
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            newBtn.onclick = () => submitReview(currentOpenLoc ? currentOpenLoc.name : "");
+
+            loadReviews(locationName);
+        } else alert("Lỗi: " + res.error);
+    });
 }
