@@ -1,24 +1,24 @@
-# 🏯 Huế Travel AI - Phiên bản pb1 (Nhánh Legacy)
+# 🏯 Huế Travel AI - Phiên bản pb2 (Nhánh Legacy)
 
-> **Trạng thái:** Nhánh lưu trữ (Legacy Branch) - Phiên bản thử nghiệm nền tảng.
+> **Trạng thái:** Nhánh lưu trữ (Legacy Branch) - Phiên bản ổn định trước khi đại tu giao diện.
 
 ---
 
 ## 🕰️ Thông tin phiên bản
 
-- **Ngày tạo:** 21/12/2025
-- **Ngày dừng:** 08/01/2026
-- **Mục tiêu:** Xây dựng khung xương cho hệ thống và thử nghiệm các thuật toán AI trên đồ thị tri thức.
+- **Ngày tạo:** 21/12/2025 (Kế thừa nền tảng từ pb1)
+- **Ngày dừng:** 28/01/2026
+- **Mục tiêu:** Hoàn thiện các tính năng cốt lõi, tích hợp bản đồ nhiệt và chuẩn hóa hệ thống đánh giá.
 
 ---
 
 ## 🚀 Chức năng chính đã triển khai
 
-- **Cơ sở dữ liệu đồ thị:** Khởi tạo cấu trúc các Node (Location, User) và Relationships (LIKED) trên Neo4j.
-- **Thuật toán PageRank:** Triển khai tính toán độ phổ biến của các địa điểm dựa trên lượng tương tác người dùng.
-- **Thuật toán Similarity:** Thử nghiệm Jaccard Similarity để tìm kiếm các địa điểm tương đồng.
-- **Collaborative Filtering:** Bước đầu xây dựng logic gợi ý dựa trên hành vi của các người dùng có sở thích giống nhau.
-- **Giao diện sơ khai:** Hiển thị danh sách địa điểm và bản đồ cơ bản.
+- **Bản đồ nhiệt (Heatmap):** Hỗ trợ trực quan hóa các khu vực "hot" dựa trên PageRank và lượt Like thực tế.
+- **Gợi ý tương tự (Similar Locations):** Tự động đề xuất các địa điểm liên quan khi người dùng xem chi tiết.
+- **Hệ thống Đánh giá (Review System):** Cho phép người dùng đánh giá sao và viết bình luận cho mỗi địa điểm.
+- **Quản trị mở rộng:** Nâng cấp Admin Dashboard với khả năng CRUD (Thêm, Sửa, Xóa) địa điểm linh hoạt.
+- **Chuẩn hóa dữ liệu:** Sửa các lỗi về tọa độ, hình ảnh và tối ưu hóa câu lệnh truy vấn Neo4j.
 
 ---
 
