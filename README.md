@@ -1,7 +1,7 @@
 # 🏯 Huế Travel AI - Hệ thống Gợi ý Du lịch Thông minh
 
 > **Đề tài Khóa luận Tốt nghiệp**
-> 
+>
 > Một nền tảng du lịch thông minh sử dụng **Graph Database (Neo4j)** và **Hybrid Recommendation System** (Hệ khuyến nghị lai) để giúp du khách khám phá vẻ đẹp cố đô Huế.
 
 ---
@@ -13,67 +13,75 @@
 ## 🚀 Tính năng nổi bật
 
 ### 🧠 1. Hệ thống Gợi ý Thông minh (AI Core)
-*   **Hybrid Recommendation:** Kết hợp đa chiều dữ liệu để gợi ý:
-    *   **PageRank Popularity:** Đánh giá độ nổi tiếng dựa trên lượng tương tác người dùng.
-    *   **Graph Connectivity:** Đánh giá tầm quan trọng trong mạng lưới kết nối địa điểm.
-    *   **Content-Based:** Gợi ý các địa điểm tương tự cùng danh mục.
-*   **Similar Locations:** Tự động đề xuất các địa điểm liên quan khi xem chi tiết một địa điểm.
+
+- **Hybrid Recommendation:** Kết hợp đa chiều dữ liệu để gợi ý:
+  - **PageRank Popularity:** Đánh giá độ nổi tiếng dựa trên lượng tương tác người dùng.
+  - **Graph Connectivity:** Đánh giá tầm quan trọng trong mạng lưới kết nối địa điểm.
+  - **Content-Based:** Gợi ý các địa điểm tương tự cùng danh mục.
+- **Similar Locations:** Tự động đề xuất các địa điểm liên quan khi xem chi tiết một địa điểm.
 
 ### 🗺️ 2. Bản đồ & Trực quan hóa (Visualization)
-*   **Interactive Map:** Tích hợp **Leaflet.js** cho trải nghiệm bản đồ mượt mà.
-*   **Heatmap (Bản đồ nhiệt):** Hiển thị trực quan các khu vực tập trung nhiều địa điểm nổi bật/được yêu thích.
-*   **Dynamic Markers:** Icon thay đổi theo loại địa điểm (Di tích 🏛️, Ẩm thực 🍜...) và màu sắc thay đổi theo độ hot (Đỏ: Hot, Xanh: Cá nhân hóa).
-*   **Map Clustering:** Gom nhóm các địa điểm khi zoom out để tránh rối mắt.
+
+- **Interactive Map:** Tích hợp **Leaflet.js** cho trải nghiệm bản đồ mượt mà.
+- **Heatmap (Bản đồ nhiệt):** Hiển thị trực quan các khu vực tập trung nhiều địa điểm nổi bật/được yêu thích.
+- **Dynamic Markers:** Icon thay đổi theo loại địa điểm (Di tích 🏛️, Ẩm thực 🍜...) và màu sắc thay đổi theo độ hot (Đỏ: Hot, Xanh: Cá nhân hóa).
+- **Map Clustering:** Gom nhóm các địa điểm khi zoom out để tránh rối mắt.
 
 ### ⭐ 3. Tương tác Người dùng (Social Features)
-*   **Reviews & Ratings:**
-    *   Đánh giá sao (1-5 ⭐) và viết bình luận cho địa điểm.
-    *   **CRUD Review:** Người dùng có thể Thêm, Sửa, Xóa bình luận của chính mình.
-    *   Hiển thị điểm đánh giá trung bình thời gian thực.
-*   **User Profiles:** Theo dõi lịch sử du lịch và các địa điểm yêu thích (Wishlist).
+
+- **Reviews & Ratings:**
+  - Đánh giá sao (1-5 ⭐) và viết bình luận cho địa điểm.
+  - **CRUD Review:** Người dùng có thể Thêm, Sửa, Xóa bình luận của chính mình.
+  - Hiển thị điểm đánh giá trung bình thời gian thực.
+- **User Profiles:** Theo dõi lịch sử du lịch và các địa điểm yêu thích (Wishlist).
 
 ### 🛠️ 4. Quản trị & Dashboard
-*   **Admin Dashboard:** Thống kê tổng quan (Users, Locations, Likes).
-*   **CRUD Locations:** Thêm, sửa, xóa địa điểm trực tiếp với giao diện trực quan.
-*   **Map Picker:** Click chọn tọa độ trực tiếp trên bản đồ khi thêm/sửa địa điểm.
-*   **Data Consistency:** Hệ thống tự động chuẩn hóa dữ liệu và tính toán lại điểm số AI sau mỗi lần cập nhật.
+
+- **Admin Dashboard:** Thống kê tổng quan (Users, Locations, Likes).
+- **CRUD Locations:** Thêm, sửa, xóa địa điểm trực tiếp với giao diện trực quan.
+- **Map Picker:** Click chọn tọa độ trực tiếp trên bản đồ khi thêm/sửa địa điểm.
+- **Data Consistency:** Hệ thống tự động chuẩn hóa dữ liệu và tính toán lại điểm số AI sau mỗi lần cập nhật.
 
 ---
 
 ## 🛠️ Công nghệ sử dụng
 
-| Thành phần | Công nghệ |
-| :--- | :--- |
-| **Backend** | Python (Flask), Pandas |
-| **Database** | **Neo4j** (Graph Database), Neo4j GDS Library |
-| **Frontend** | HTML5, CSS3 (Modern UI), JavaScript (Vanilla) |
-| **Maps** | Leaflet.js, OpenStreetMap, Leaflet-Heat |
-| **AI/Algorithm** | PageRank, Community Detection (trên Neo4j) |
+| Thành phần       | Công nghệ                                     |
+| :--------------- | :-------------------------------------------- |
+| **Backend**      | Python (Flask), Pandas                        |
+| **Database**     | **Neo4j** (Graph Database), Neo4j GDS Library |
+| **Frontend**     | HTML5, CSS3 (Modern UI), JavaScript (Vanilla) |
+| **Maps**         | Leaflet.js, OpenStreetMap, Leaflet-Heat       |
+| **AI/Algorithm** | PageRank, Community Detection (trên Neo4j)    |
 
 ---
 
 ## ⚙️ Cài đặt và Chạy dự án
 
 ### Yêu cầu tiên quyết
-*   Python 3.9+
-*   Neo4j Desktop (hoặc Neo4j AuraDB)
-*   Cài đặt thư viện **Graph Data Science (GDS)** plugin trong Neo4j.
+
+- Python 3.9+
+- Neo4j Desktop (hoặc Neo4j AuraDB)
+- Cài đặt thư viện **Graph Data Science (GDS)** plugin trong Neo4j.
 
 ### Các bước cài đặt
 
 1.  **Clone repository**
+
     ```bash
     git clone https://github.com/chaudan0304/ban-do-du-lich-Hue.git
     cd ban-do-du-lich-Hue
     ```
 
 2.  **Cài đặt dependencies**
+
     ```bash
     pip install -r requirements.txt
     ```
 
 3.  **Cấu hình môi trường (.env)**
     Tạo file `.env` tại thư mục gốc với nội dung:
+
     ```env
     NEO4J_URI=bolt://localhost:7687
     NEO4J_USER=neo4j
@@ -83,10 +91,11 @@
 
 4.  **Khởi tạo dữ liệu**
     Chạy các script sau để nạp dữ liệu và tính toán AI ban đầu:
+
     ```bash
     # 1. Nạp dữ liệu từ Excel vào Neo4j
     python import_data.py
-    
+
     # 2. Chạy thuật toán tính điểm PageRank & Similarity
     python setup_algo.py
     ```
@@ -122,12 +131,44 @@
 ## 🔐 Tài khoản Demo
 
 Để trải nghiệm tính năng Admin (Quản lý dữ liệu, Chạy AI):
-*   **User:** `admin`
-*   **Password:** `admin` (hoặc mật khẩu bạn đã thiết lập trong `import_data.py`)
+
+- **User:** `admin`
+- **Password:** `admin` (hoặc mật khẩu bạn đã thiết lập trong `import_data.py`)
 
 ---
 
 ## 👨‍💻 Tác giả
 
 **Châu Đàn** - Sinh viên thực hiện Khóa luận.
-*   © 2026 Hue Travel AI Project.
+
+- © 2026 Hue Travel AI Project.
+
+---
+
+## 📜 Nhật ký Cập nhật (Update Log)
+
+### 🚀 Phiên bản cập nhật - 30/01/2026
+
+#### 🎨 Giao diện & Trải nghiệm người dùng (UI/UX)
+
+- **Hệ thống Thông báo mới:** Thay thế toàn bộ `alert()` và `confirm()` mặc định bằng hệ thống thông báo `showNotification` tùy chỉnh, hỗ trợ các loại: Thành công, Lỗi, Chờ xác nhận (Confirm) với giao diện hiện đại.
+- **Sidebar Linh hoạt:**
+  - Nâng cấp thanh Sidebar có khả năng thay đổi kích thước (Resizable).
+  - Thiết lập độ rộng tối thiểu (min-width) là **420px** để tối ưu không gian hiển thị thông tin.
+- **Khám phá Địa điểm:** Cập nhật hiển thị tên đầy đủ của địa điểm (không còn bị cắt bớt dấu ...) giúp người dùng dễ dàng theo dõi.
+- **Tinh chỉnh Form Admin:**
+  - Thêm hệ thống icon đa sắc màu (Red, Blue, Purple, Green, Amber) cho form Thêm/Sửa địa điểm.
+  - Căn chỉnh lại vị trí icon trong ô nhập liệu (Input) chuẩn mực và cân đối hơn.
+  - Xóa bỏ các đường phân cách (dashed) không cần thiết để tối giản giao diện.
+
+#### 👤 Quản lý Người dùng
+
+- **Hồ sơ chi tiết:**
+  - Hiển thị đầy đủ **Họ tên, Email** và **Ngày tham gia** trong modal chi tiết.
+  - Bổ sung mục **"Địa điểm đã thích"** với danh sách ảnh (gallery) nằm ngang, cho phép xem trực tiếp các địa điểm user quan tâm.
+- **Cải thiện Navigation:** Thay đổi nút xem chi tiết user thành liên kết văn bản "Xem thông tin chi tiết" tinh tế hơn.
+
+#### 🔧 Backend & Data
+
+- Nâng cấp API `/api/admin/user_profile/<username>` để trả về thêm danh sách các địa điểm đã yêu thích kèm thông tin tọa độ.
+- Tối ưu hóa logic xử lý sự kiện trong JS để đảm bảo tính ổn định khi mở các modal lồng nhau.
