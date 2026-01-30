@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   checkLoginStatus();
   loadLocations("All");
   setupEnterKey();
+  setupSidebarResizer(); // Kích hoạt tính năng kéo dãn Sidebar
 
   // Các tính năng UX
   setupDragScroll();
@@ -176,10 +177,40 @@ function showLoggedView(username) {
   if (userInfo) {
     userInfo.style.display = "flex";
     document.getElementById("header-username").innerText = username;
-    const btnAdminHeader = document.getElementById("btn-admin-panel");
-    if (btnAdminHeader) {
-      btnAdminHeader.style.display = username === "admin" || userRole === "admin" ? "inline-block" : "none";
+    
+    // Nút Profile
+    const btnProfile = `
+      <button onclick="openUserProfile()" title="Hồ sơ cá nhân" style="display:inline-block; margin-right:5px; border:none; background: #e0f2fe; color: #0284c7; width:26px; height:26px; border-radius:50%; cursor:pointer;">
+        <i class="fas fa-user-edit"></i>
+      </button>
+    `;
+    
+    // Nút Admin
+    let btnAdminHTML = "";
+    if (username === "admin" || userRole === "admin") {
+      btnAdminHTML = `
+        <button id="btn-admin-panel" class="btn-logout-mini" onclick="openAdminUserModal()" title="Quản lý Người dùng" style="display: inline-block; margin-right: 5px; color: #3b82f6;">
+           <i class="fas fa-users-cog"></i>
+        </button>
+      `;
     }
+
+    // Nút Logout
+    const btnLogout = `
+      <button class="btn-logout-mini" onclick="handleLogout()" title="Đăng xuất">
+         <i class="fas fa-sign-out-alt"></i>
+      </button>
+    `;
+
+    // Cập nhật lại HTML của header-user-info
+    // Giữ lại avatar
+    userInfo.innerHTML = `
+      <div class="user-avatar-small"></div>
+      <span id="header-username">${username}</span>
+      ${btnProfile}
+      ${btnAdminHTML}
+      ${btnLogout}
+    `;
   }
   document.querySelector(".search-box").style.display = "none";
   document.getElementById("logged-view").style.display = "block";
@@ -286,7 +317,10 @@ function handleLogin() {
 function handleRegister() {
   const u = document.getElementById("regUser").value.trim();
   const p = document.getElementById("regPass").value;
-  if (!u || !p) return alert("Thiếu thông tin");
+  if (!u || !p) {
+      showNotification({ type: "warning", message: "Vui lòng nhập đầy đủ thông tin" });
+      return;
+  }
 
   const msg = document.getElementById("regMsg");
   msg.innerText = "Đang đăng ký...";
@@ -319,14 +353,22 @@ function handleRegister() {
 
 // Hàm đăng xuất
 function handleLogout() {
-  if (!confirm("Bạn có chắc chắn muốn đăng xuất?")) return;
-
-  apiFetch("/api/logout", { method: "POST" }).then(() => checkLoginStatus());
   showNotification({
-    type: "success",
-    title: "Đăng xuất thành công",
-    message: "Hẹn gặp lại bạn! 👋",
-    btnText: "Đóng",
+    type: "question",
+    title: "Đăng xuất",
+    message: "Bạn có chắc chắn muốn đăng xuất?",
+    btnText: "Đồng ý",
+    showCancel: true,
+    onConfirm: () => {
+        apiFetch("/api/logout", { method: "POST" }).then(() => {
+            checkLoginStatus();
+            showNotification({
+                type: "success",
+                title: "Đã đăng xuất",
+                message: "Hẹn gặp lại bạn! 👋"
+            });
+        });
+    }
   });
 }
 
@@ -539,7 +581,7 @@ function showDetail(loc) {
           <div class="score-bar-item">
             <div class="score-label">
               <span class="score-icon">👥</span>
-              <span>${details.collab.label}</span>
+              <!-- Hidden Label -->
               <span class="score-value">${details.collab.percent.toFixed(0)}%</span>
             </div>
             <div class="score-bar">
@@ -550,7 +592,7 @@ function showDetail(loc) {
           <div class="score-bar-item">
             <div class="score-label">
               <span class="score-icon">🎯</span>
-              <span>${details.content.label}</span>
+              <!-- Hidden Label -->
               <span class="score-value">${details.content.percent.toFixed(0)}%</span>
             </div>
             <div class="score-bar">
@@ -561,7 +603,7 @@ function showDetail(loc) {
           <div class="score-bar-item">
             <div class="score-label">
               <span class="score-icon">🏆</span>
-              <span>${details.pagerank.label}</span>
+              <!-- Hidden Label -->
               <span class="score-value">${details.pagerank.percent.toFixed(0)}%</span>
             </div>
             <div class="score-bar">
@@ -575,13 +617,13 @@ function showDetail(loc) {
   }
 
   content.innerHTML = `
-        <img src="${loc.image}" loading = "lazy" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
+        <img src="${loc.image}" loading="lazy" class="detail-hero" onerror="this.src='/static/images/no-image.png'">
         <div class="detail-body">
             <h1 class="detail-title">${loc.name}</h1>
 
             <div class="detail-meta">
-              <span style="color:#ffffff; background:#059669; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:12px;">⭐ Điểm nổi tiếng: ${displayScore}</span>
-              <span style="margin-left:8px; color:#6b7280">• ${loc.category}</span></div>
+              <span class="meta-tag" style="background:#059669; color:white;">⭐ ${displayScore}</span>
+              <span class="meta-tag"><i class="fas fa-tag"></i> ${loc.category}</span>
             </div>
 
             <p class="detail-desc">${loc.description || "..."}</p>
@@ -598,10 +640,10 @@ function showDetail(loc) {
             <div class="review-section">
                 <div class="review-header">
                     <span><i class="fas fa-comments"></i> Đánh giá & Bình luận</span>
-                    <button class="btn-action" onclick="toggleReviewForm()" style="font-size:12px; padding:4px 8px;"><i class="fas fa-pen"></i> Viết</button>
+                    <button class="btn-write-review" onclick="toggleReviewForm()"><i class="fas fa-pen"></i> Viết đánh giá</button>
                 </div>
-                <div id="reviewFormContainer" class="review-form">
-                    <div class="star-rating-input">
+                <div id="reviewFormContainer" class="review-form" style="display:none;">
+                    <div class="rating-input">
                         <input type="radio" id="star5" name="rating" value="5" /><label for="star5">★</label>
                         <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
                         <input type="radio" id="star3" name="rating" value="3" /><label for="star3">★</label>
@@ -609,19 +651,18 @@ function showDetail(loc) {
                         <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
                     </div>
                     <textarea id="reviewComment" class="review-textarea" placeholder="Chia sẻ trải nghiệm..."></textarea>
-                    <div style="text-align:right; margin-top:8px;"><button class="btn-submit" onclick="submitReview('${loc.name}')">Gửi</button></div>
+                    <div style="text-align:right;"><button class="btn-submit" onclick="submitReview('${loc.name}')">Gửi</button></div>
                 </div>
-                <div id="reviewList" class="review-list"><div style="text-align:center;">Đang tải...</div></div>
+                <div id="reviewList" class="review-list"><div style="text-align:center; padding:10px; color:#9ca3af;">Đang tải...</div></div>
             </div>
 
             <!-- Section gợi ý địa điểm cùng danh mục -->
             <div class="similar-locations-section">
-              <div class="similar-header">
-                <i class="fas fa-map-marker-alt"></i> 
-                <span>Địa điểm <strong>${loc.category}</strong> khác</span>
+              <div class="section-head" style="margin-top:24px; margin-bottom:12px;">
+                <h2><i class="fas fa-map-marker-alt"></i> Khám phá thêm</h2>
               </div>
               <div class="similar-locations-list" id="similar-locations-list">
-                <div class="similar-loading">
+                <div class="similar-loading" style="text-align:center; font-size:12px; color:#9ca3af;">
                   <i class="fas fa-spinner fa-spin"></i> Đang tải...
                 </div>
               </div>
@@ -834,16 +875,148 @@ async function loadAdminUsersList() {
       if (u.name === "admin") return;
       tbody.innerHTML += `
                 <tr style="border-bottom:1px solid #eee">
-                    <td style="padding:10px; font-weight:600">${u.name}</td>
-                    <td style="padding:10px">❤️ ${u.liked_count}</td>
+                    <td style="padding:10px;">
+                        <div style="font-weight:600; color:var(--text-main);">${u.name}</div>
+                        <div style="font-size:11px; color:var(--text-light); cursor:pointer;" onclick="viewUserDetails('${u.name}')">
+                            <span style="color:var(--primary); text-decoration: underline;">Xem thông tin chi tiết</span>
+                        </div>
+                    </td>
+                    <td style="padding:10px">
+                        <div style="display:flex; flex-direction:column; gap:4px; font-size:12px;">
+                            <span style="color:#e11d48"><i class="fas fa-heart"></i> ${u.liked_count || 0} thích</span>
+                            <span style="color:#2563eb"><i class="fas fa-comment"></i> ${u.comment_count || 0} đánh giá</span>
+                        </div>
+                    </td>
                     <td style="padding:10px; text-align:right">
-                        <button onclick="deleteUser('${u.name}')" style="background:#fee2e2; color:red; border:none; padding:5px 10px; border-radius:4px; cursor:pointer"><i class="fas fa-trash"></i></button>
+                        <div style="display:flex; justify-content:flex-end; gap:6px;">
+                            <button onclick="deleteUser('${u.name}')" title="Xóa tài khoản" style="background:#fee2e2; color:red; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; transition:all 0.2s;"><i class="fas fa-trash"></i></button>
+                        </div>
                     </td>
                 </tr>`;
     });
   } catch (e) {
     tbody.innerHTML = '<tr><td colspan="3" style="color:red">Lỗi tải danh sách</td></tr>';
   }
+}
+
+async function viewUserDetails(username) {
+  const modal = document.getElementById("userCommentsModal");
+  const list = document.getElementById("userCommentsList");
+  const title = document.getElementById("commentUserTitle");
+  
+  const modalHeader = modal.querySelector(".modal-title-fancy");
+  if(modalHeader) modalHeader.innerText = "📋 Hồ sơ người dùng";
+
+  title.innerText = `@${username}`;
+  list.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b;"><div class="spinner-large" style="width:24px; height:24px; border-width:2px; margin:0 auto 10px;"></div>Đang tải thông tin...</div>`;
+  modal.classList.add("active");
+
+  try {
+    const profile = await apiFetch(`/api/admin/user_profile/${username}`);
+    
+    if (!profile) {
+       list.innerHTML = `<div style="color:red; text-align:center;">Không tìm thấy thông tin user.</div>`;
+       return;
+    }
+
+    const createdDate = profile.created_at ? new Date(profile.created_at).toLocaleDateString('vi-VN') : 'Không rõ';
+    const comments = profile.reviews || [];
+
+    let html = `
+      <!-- Profile Header -->
+      <div style="background: linear-gradient(to right, #f8fafc, #f1f5f9); padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; border: 1px solid #e2e8f0;">
+          <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            <i class="fas fa-user"></i>
+          </div>
+          <div>
+            <div style="font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">${profile.fullname || profile.name}</div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px;">@${profile.name}</div>
+            
+            ${profile.email ? `<div style="font-size: 12px; color: var(--text-light); margin-bottom: 6px;"><i class="fas fa-envelope"></i> ${profile.email}</div>` : ''}
+
+            <div style="font-size: 11px; color: var(--text-light); display: flex; gap: 12px; align-items:center;">
+                <span><i class="far fa-calendar-alt"></i> ${createdDate}</span>
+                <span style="color:${profile.role==='admin'?'var(--danger)':'var(--info)'}; font-weight:600; text-transform:uppercase; font-size:10px; border:1px solid currentColor; padding:0 4px; border-radius:4px;">${profile.role || 'user'}</span>
+            </div>
+          </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+          <div style="background: #fff1f2; padding: 12px; border-radius: 8px; border: 1px solid #fecdd3; text-align: center;">
+              <div style="font-size: 20px; font-weight: 800; color: #e11d48;">${profile.liked_count}</div>
+              <div style="font-size: 11px; color: #9f1239; font-weight: 600;">ĐỊA ĐIỂM ĐÃ THÍCH</div>
+          </div>
+          <div style="background: #eff6ff; padding: 12px; border-radius: 8px; border: 1px solid #bfdbfe; text-align: center;">
+              <div style="font-size: 20px; font-weight: 800; color: #2563eb;">${profile.comment_count}</div>
+              <div style="font-size: 11px; color: #1e40af; font-weight: 600;">BÌNH LUẬN</div>
+          </div>
+      </div>
+
+      <!-- Liked Locations List -->
+      <div style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase;">
+        <i class="fas fa-heart"></i> Danh sách yêu thích
+      </div>
+      <div style="margin-bottom: 20px;">
+         ${
+            (!profile.liked_locations || profile.liked_locations.length === 0) 
+            ? `<div style="text-align:center; padding:15px; color:#94a3b8; font-size:12px; bg: #f8fafc; border:1px dashed #e2e8f0; border-radius:8px;">Chưa thích địa điểm nào</div>`
+            : `<div style="display:flex; overflow-x:auto; gap:10px; padding-bottom:5px; scrollbar-width:thin;">` + 
+              profile.liked_locations.map(l => `
+               <div onclick="showDetailFromData('${l.name}', ${l.lat}, ${l.lng}, '${l.image}')" 
+                    title="${l.name}"
+                    style="min-width:100px; width:100px; cursor:pointer; background:white; border-radius:8px; overflow:hidden; border:1px solid #e2e8f0; transition:transform 0.2s;">
+                  <div style="height:70px; width:100%; background:#f1f5f9;">
+                      <img src="${l.image || ''}" loading="lazy" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='/static/images/no-image.png'">
+                  </div>
+                  <div style="padding:6px;">
+                      <div style="font-size:11px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text-main);">${l.name}</div>
+                      <div style="font-size:9px; color:var(--text-light); white-space:nowrap;">${l.category||''}</div>
+                  </div>
+               </div>
+              `).join('') + `</div>`
+         }
+      </div>
+
+      <div style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase;">
+        <i class="fas fa-history"></i> Lịch sử hoạt động (${comments.length})
+      </div>
+    `;
+
+    if (comments.length === 0) {
+      html += `<div style="text-align:center; padding:30px; color:#94a3b8; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;"><i class="fas fa-comment-slash" style="font-size:24px; margin-bottom:8px;"></i><br>User chưa có hoạt động bình luận nào.</div>`;
+    } else {
+      html += `<div style="display: flex; flex-direction: column; gap: 10px;">`;
+      comments.forEach(c => {
+        const stars = '★'.repeat(c.rating) + '☆'.repeat(5 - c.rating);
+        html += `
+          <div class="review-item" style="padding: 12px; background: white; border: 1px solid #f1f5f9; border-radius: 8px;">
+              <div class="review-avatar" style="width: 32px; height: 32px; font-size: 14px; background: #f1f5f9; color: var(--text-secondary);">${c.rating}</div>
+              <div class="review-content">
+                  <div class="review-head" style="margin-bottom: 4px;">
+                      <div class="review-user-name" style="color:var(--primary); font-size:13px;">${c.location}</div>
+                      <div class="review-date" style="font-size:10px;">${c.time || ""}</div>
+                  </div>
+                  <div class="review-rating" style="margin-bottom: 4px;">
+                      <span class="review-stars" style="font-size:10px; color:#f59e0b;">${stars}</span>
+                  </div>
+                  <div class="review-text" style="font-size:12px;">${c.comment}</div>
+              </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    list.innerHTML = html;
+
+  } catch (err) {
+    list.innerHTML = `<div style="color:red; text-align:center;">Lỗi tải hồ sơ: ${err.message}</div>`;
+  }
+}
+
+function closeUserCommentsModal() {
+  document.getElementById("userCommentsModal").classList.remove("active");
 }
 
 async function deleteUser(name) {
@@ -1169,64 +1342,83 @@ function setupDragScroll() {
   }
 }
 
-// 8.3. Notification Modal (Thông báo đẹp)
-function showNotification({ type, title, message, btnText, onConfirm }) {
+// 8.3. Notification Modal (Thông báo đẹp & Confirm)
+function showNotification({ type, title, message, btnText, onConfirm, showCancel, cancelText, onCancel }) {
   const modal = document.getElementById("notificationModal");
+  const content = document.getElementById("notif-content");
   const icon = document.getElementById("notif-icon");
   const titleEl = document.getElementById("notif-title");
   const msgEl = document.getElementById("notif-msg");
+  
   const btn = document.getElementById("notif-btn");
+  const btnCancel = document.getElementById("notif-cancel-btn");
 
-  // 1. Cập nhật nội dung
-  titleEl.innerText = title;
+  // 1. Reset lớp màu cũ
+  content.className = "modal-content-notification"; 
+  
+  // 2. Thêm lớp màu mới & Icon
+  let iconClass = "fas fa-info";
+  if (type === "success") {
+    content.classList.add("type-success");
+    iconClass = "fas fa-check";
+  } else if (type === "error") {
+    content.classList.add("type-error");
+    iconClass = "fas fa-times";
+  } else if (type === "warning") {
+    content.classList.add("type-warning");
+    iconClass = "fas fa-exclamation";
+  } else if (type === "delete" || type === "question") {
+    content.classList.add("type-info"); // Hoặc type riêng
+    iconClass = "fas fa-question";
+  } else {
+    content.classList.add("type-info");
+    iconClass = "fas fa-info";
+  }
+  
+  icon.className = iconClass;
+
+  // 3. Cập nhật nội dung
+  titleEl.innerText = title || "Thông báo";
   msgEl.innerHTML = message;
   btn.innerText = btnText || "Đóng";
 
-  // 2. Cập nhật giao diện (Màu sắc/Icon)
-  if (type === "success") {
-    icon.className = "fas fa-check-circle";
-    icon.style.color = "#10b981"; // Xanh lá
-    btn.style.backgroundColor = "#2563eb"; // Xanh dương
-  } else if (type === "delete") {
-    icon.className = "fas fa-trash-alt";
-    icon.style.color = "#ef4444"; // Đỏ
-    btn.style.backgroundColor = "#ef4444"; // Nút đỏ
-  } else if (type === "error") {
-    icon.className = "fas fa-exclamation-triangle";
-    icon.style.color = "#f59e0b"; // Vàng
-    btn.style.backgroundColor = "#f59e0b"; // Nút vàng
+  // 4. Xử lý nút Cancel (Confirm Mode)
+  if (showCancel) {
+      btnCancel.style.display = "block";
+      btnCancel.innerText = cancelText || "Hủy";
+      
+      // Clone để xóa event cũ
+      const newBtnCancel = btnCancel.cloneNode(true);
+      btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+      
+      newBtnCancel.onclick = () => {
+          modal.classList.remove("active");
+          if (onCancel) onCancel();
+      };
   } else {
-    icon.className = "fas fa-info-circle";
-    icon.style.color = "#2563eb"; // Xanh dương
-    btn.style.backgroundColor = "#2563eb"; // Nút xanh dương
+      btnCancel.style.display = "none";
   }
 
-  // 3. Tạo nút để xóa sự kiện cũ
+  // 5. Reset event nút chính
   const newBtn = btn.cloneNode(true);
   btn.parentNode.replaceChild(newBtn, btn);
 
-  // Hàm đóng Modal chung
   const closeModal = () => {
     modal.classList.remove("active");
-    document.removeEventListener("keydown", handleEnterKey);
     if (onConfirm) onConfirm();
   };
 
-  // Hàm xử lý phím Enter
-  const handleEnterKey = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // Ngăn hành vi mặc định (như submit form nền)
-      closeModal();
-    }
-  };
-
-  // Gán sự kiện
   newBtn.onclick = closeModal;
-  document.addEventListener("keydown", handleEnterKey);
-
-  // Hiển thị & Focus vào nút đóng (để tiện cho người dùng dùng phím)
+  
+  // Hiển thị
   modal.classList.add("active");
-  newBtn.focus();
+  // Focus vào nút Hủy nếu là confirm để tránh bấm nhầm, ngược lại focus nút đóng
+  if (showCancel) {
+      // Tìm nút cancel mới (do đã render lại)
+      document.getElementById("notif-cancel-btn").focus(); 
+  } else {
+      newBtn.focus();
+  }
 }
 
 /* ============================================================================
@@ -1324,7 +1516,20 @@ function loadReviews(locationName) {
     apiFetch(`/api/reviews/${encodeURIComponent(locationName)}`).then(data => {
         if(!data || data.length === 0) return list.innerHTML = `<div class="no-reviews">Chưa có đánh giá nào.</div>`;
         
-        list.innerHTML = data.map(rev => {
+        // Tính thống kê
+        const positiveCount = data.filter(r => r.rating >= 4).length;
+        const totalCount = data.length;
+        
+        // Thêm dòng thống kê vào đầu danh sách
+        let html = `<div class="review-stats">
+            <i class="fas fa-smile-beam"></i>
+            <div class="review-stats-text">
+                <b>Tuyệt vời! ${positiveCount}/${totalCount} khách hài lòng</b>
+                <span>Dựa trên đánh giá tích cực (4-5 sao)</span>
+            </div>
+        </div>`;
+
+        html += data.map(rev => {
             let actions = "";
             if(currentUser && rev.user === currentUser) {
                 const safeComment = (rev.comment || "").replace(/"/g, "&quot;").replace(/'/g, "\\'");
@@ -1336,17 +1541,25 @@ function loadReviews(locationName) {
             }
             return `
             <div class="review-item">
-                <div class="review-avatar"><i class="fas fa-user"></i></div>
+                <div class="review-avatar"><i class="fas fa-user-circle"></i></div>
                 <div class="review-content">
-                    <div style="display:flex; justify-content:space-between;">
+                    <div class="review-head">
                         <div class="review-user-name">${rev.user}</div>
+                        <div class="review-date">${rev.time || "Vừa xong"}</div>
+                    </div>
+                    
+                    <div class="review-rating">
+                        <span class="review-stars">${'★'.repeat(rev.rating)}</span>
                         ${actions}
                     </div>
-                    <div class="review-meta"><span class="review-stars">${'★'.repeat(rev.rating)}</span> • ${rev.time}</div>
+                    
                     <div class="review-text">${rev.comment || ""}</div>
                 </div>
             </div>`;
         }).join("");
+        
+        list.innerHTML = html;
+
     }).catch(e => list.innerHTML = "Lỗi tải bình luận");
 }
 
@@ -1363,22 +1576,107 @@ function editReview(locationName, rating, comment) {
     btn.innerText = "Cập nhật";
     btn.onclick = () => submitReview(locationName);
     
+    
     form.scrollIntoView({behavior: "smooth"});
 }
 
+// ============================================================================
+// PHẦN 8: QUẢN LÝ HỒ SƠ CÁ NHÂN (PROFILE)
+// ============================================================================
+async function openUserProfile() {
+    const modal = document.getElementById("profileModal");
+    modal.classList.add("active");
+    
+    // Tải thông tin
+    try {
+        const data = await apiFetch("/api/profile");
+        if(data) {
+            document.getElementById("profileUsername").innerText = "@" + data.username;
+            document.getElementById("profileFullname").value = data.fullname || "";
+            document.getElementById("profileEmail").value = data.email || "";
+            document.getElementById("profileRole").innerText = data.role === "admin" ? "Quản trị viên" : "Thành viên";
+            document.getElementById("profileJoinDate").innerText = data.created_at ? new Date(data.created_at).toLocaleDateString('vi-VN') : "N/A";
+        }
+    } catch(e) {
+        showNotification({ type: "error", message: "Không thể tải thông tin hồ sơ" });
+    }
+}
+
+function closeUserProfile() {
+    document.getElementById("profileModal").classList.remove("active");
+}
+
+async function saveUserProfile() {
+    const fullname = document.getElementById("profileFullname").value;
+    const email = document.getElementById("profileEmail").value;
+    const password = document.getElementById("profilePassword").value;
+    
+    if(!fullname) {
+        showNotification({ type: "warning", title: "Thiếu thông tin", message: "Vui lòng nhập họ tên hiển thị" });
+        return;
+    }
+
+    const btn = document.querySelector("#profileModal .btn-save-gradient");
+    const oldText = btn.innerText;
+    btn.innerText = "Đang lưu...";
+    btn.disabled = true;
+
+    try {
+        const res = await apiFetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fullname, email, password })
+        });
+        
+        showNotification({ 
+            type: "success", 
+            title: "Thành công", 
+            message: "Đã cập nhật hồ sơ!" 
+        });
+        
+        closeUserProfile();
+        // Cập nhật lại UI nếu cần (VD: tên hiển thị trên header)
+        checkLoginStatus(); 
+        
+    } catch(e) {
+        showNotification({ type: "error", title: "Lỗi", message: e.message || "Lỗi cập nhật" });
+    } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+    }
+}
+
 function deleteReview(locationName) {
-    if(!confirm("Bạn chắc chắn muốn xóa?")) return;
-    apiFetch('/api/review', {
-        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ location_name: locationName })
-    }).then(res => {
-        if(res.success) {
-            alert("Đã xóa!");
-            loadReviews(locationName);
-            const form = document.getElementById('reviewFormContainer');
-            delete form.dataset.editing;
-            document.querySelector('#reviewFormContainer button.btn-submit').innerText = "Gửi";
-        } else alert("Lỗi: " + res.error);
+    showNotification({
+        type: "delete",
+        title: "Xác nhận xóa",
+        message: "Bạn có chắc chắn muốn xóa đánh giá này không?",
+        btnText: "Xóa ngay",
+        showCancel: true,
+        onConfirm: () => {
+            apiFetch('/api/review', {
+                method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ location_name: locationName })
+            }).then(res => {
+                if(res.success) {
+                    showNotification({ type: "success", title: "Thành công", message: "Đã xóa đánh giá của bạn!" });
+                    loadReviews(locationName); // Reload reviews list
+                    
+                    // Reset form state
+                    const form = document.getElementById('reviewFormContainer');
+                    delete form.dataset.editing;
+                    document.querySelector('#reviewFormContainer button.btn-submit').innerText = "Gửi";
+                    
+                    // Reset input
+                     document.getElementById('reviewComment').value = "";
+                     const checked = document.querySelector('input[name="rating"]:checked');
+                     if(checked) checked.checked = false;
+                     
+                } else {
+                     showNotification({ type: "error", title: "Lỗi", message: res.error });
+                }
+            });
+        }
     });
 }
 
@@ -1435,3 +1733,57 @@ function submitReview(locationName) {
         } else alert('Lỗi: ' + res.error);
     });
 }
+
+// ===========================================
+// SIDEBAR RESIZER LOGIC
+// ===========================================
+function setupSidebarResizer() {
+    const sidebar = document.querySelector('.sidebar');
+    const resizer = document.getElementById('sidebarResizer');
+    
+    if (!sidebar || !resizer) return;
+
+    let isResizing = false;
+
+    // Khi người dùng bấm chuột vào thanh resizer
+    resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        sidebar.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        e.preventDefault(); // Ngăn chọn text
+    });
+
+    // Khi di chuyển chuột (trên toàn document để không bị tuột)
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        
+        // Tính toán width mới
+        let newWidth = e.clientX;
+        
+        // Giới hạn Min/Max
+        if (newWidth < 390) newWidth = 390;
+        if (newWidth > 750) newWidth = 750;
+        
+        // Cập nhật CSS Variable
+        document.documentElement.style.setProperty('--sidebar-width', newWidth + 'px');
+        
+        // Cập nhật style trực tiếp
+        sidebar.style.width = newWidth + 'px';
+    });
+
+    // Khi thả chuột ra
+    document.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            sidebar.classList.remove('resizing');
+            document.body.style.cursor = '';
+            
+            // Cập nhật lại bản đồ Leaflet
+            setTimeout(() => {
+                if (window.map) map.invalidateSize();
+            }, 50);
+        }
+    });
+}
+
+

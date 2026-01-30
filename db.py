@@ -143,6 +143,44 @@ def register_user(username, password):
     return False, "Lỗi khi tạo tài khoản"
 
 
+def get_user_info(username):
+    """Lấy thông tin chi tiết người dùng"""
+    query = """
+    MATCH (u:User {name: $name})
+    RETURN u.name as username, 
+           u.fullname as fullname, 
+           u.email as email, 
+           u.role as role, 
+           toString(u.created_at) as created_at
+    """
+    result = run_query(query, {"name": username})
+    return result[0] if result else None
+
+
+def update_user_info(username, fullname, email, new_password=None):
+    """Cập nhật thông tin người dùng"""
+    params = {"name": username, "fullname": fullname, "email": email}
+
+    query = """
+    MATCH (u:User {name: $name})
+    SET u.fullname = $fullname,
+        u.email = $email
+    """
+
+    if new_password:
+        hashed_pw = generate_password_hash(new_password)
+        query += ", u.password = $password"
+        params["password"] = hashed_pw
+
+    query += " RETURN u"
+
+    try:
+        run_query(query, params)
+        return True, "Cập nhật thành công"
+    except Exception as e:
+        return False, str(e)
+
+
 def verify_user(username, password):
     """Xác thực đăng nhập"""
     query = "MATCH (u:User {name: $name}) RETURN u"
@@ -172,8 +210,9 @@ def get_all_users():
     query = """
     MATCH (u:User) 
     OPTIONAL MATCH (u)-[r:LIKED]->()
-    WITH u.name as name, u.role as role, u.created_at as created_at, count(r) as liked_count
-    RETURN name, role, liked_count
+    OPTIONAL MATCH (u)-[rev:REVIEWED]->()
+    WITH u.name as name, u.role as role, u.created_at as created_at, count(DISTINCT r) as liked_count, count(DISTINCT rev) as comment_count
+    RETURN name, role, liked_count, comment_count
     ORDER BY coalesce(created_at, datetime()) DESC
     """
     return run_query(query)

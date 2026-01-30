@@ -25,6 +25,8 @@ from db import (
     get_location_reviews,
     delete_review,
     sync_locations_to_excel,
+    get_user_info,
+    update_user_info,
 )
 import logging
 
@@ -151,6 +153,33 @@ def get_current_user():
         return jsonify({"is_logged_in": False})
 
 
+# --- API: Lấy/Cập nhật thông tin cá nhân ---
+@app.route("/api/profile", methods=["GET", "POST"])
+@login_required
+def api_profile_handler():
+    # GET: Lấy thông tin
+    if request.method == "GET":
+        info = get_user_info(current_user.id)
+        if info:
+            return jsonify(info)
+        return jsonify({"error": "Không tìm thấy thông tin"}), 404
+
+    # POST: Cập nhật
+    if request.method == "POST":
+        data = request.json
+        fullname = data.get("fullname", "").strip()
+        email = data.get("email", "").strip()
+        password = data.get("password", "").strip()
+
+        success, msg = update_user_info(
+            current_user.id, fullname, email, password if password else None
+        )
+        if success:
+            return jsonify({"success": True, "message": msg})
+        else:
+            return jsonify({"success": False, "error": msg}), 400
+
+
 # --- 5. API ADMIN: QUẢN LÝ NGƯỜI DÙNG ---
 @app.route("/api/admin/users", methods=["GET"])
 @login_required
@@ -177,6 +206,63 @@ def api_delete_user(username):
 
     delete_user_by_name(username)
     return jsonify({"message": f"Đã xóa user {username}"}), 200
+
+
+@app.route("/api/admin/user_comments/<username>", methods=["GET"])
+@login_required
+def api_get_user_comments(username):
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền truy cập"}), 403
+
+    query = """
+    MATCH (u:User {name: $name})-[r:REVIEWED]->(l:Location)
+    RETURN l.name AS location, r.rating AS rating, r.comment AS comment, toString(r.timestamp) AS time
+    ORDER BY r.timestamp DESC
+    """
+    results = run_query(query, {"name": username})
+    return jsonify(results if results else [])
+
+
+@app.route("/api/admin/user_profile/<username>", methods=["GET"])
+@login_required
+def api_get_user_profile(username):
+    if current_user.id != "admin":
+        return jsonify({"error": "Không có quyền truy cập"}), 403
+
+    # 1. Get User Info & Stats
+    user_query = """
+    MATCH (u:User {name: $name})
+    OPTIONAL MATCH (u)-[r:LIKED]->()
+    OPTIONAL MATCH (u)-[rev:REVIEWED]->()
+    RETURN u.name as name, u.fullname as fullname, u.email as email, u.role as role, toString(u.created_at) as created_at,
+           count(DISTINCT r) as liked_count, count(DISTINCT rev) as comment_count
+    """
+    user_data = run_query(user_query, {"name": username})
+
+    if not user_data:
+        return jsonify({"error": "User not found"}), 404
+
+    profile = user_data[0]
+
+    # 2. Get Reviews List
+    reviews_query = """
+    MATCH (u:User {name: $name})-[r:REVIEWED]->(l:Location)
+    RETURN l.name AS location, r.rating AS rating, r.comment AS comment, toString(r.timestamp) AS time
+    ORDER BY r.timestamp DESC
+    """
+    reviews = run_query(reviews_query, {"name": username})
+    profile["reviews"] = reviews if reviews else []
+
+    # 3. Get Liked Locations
+    liked_query = """
+    MATCH (u:User {name: $name})-[r:LIKED]->(l:Location)
+    RETURN l.name AS name, l.image AS image, l.category AS category, l.lat AS lat, l.lng AS lng
+    ORDER BY r.timestamp DESC
+    """
+    liked_locs = run_query(liked_query, {"name": username})
+    profile["liked_locations"] = liked_locs if liked_locs else []
+
+    return jsonify(profile)
 
 
 @app.route("/api/like", methods=["POST"])
