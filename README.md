@@ -10,37 +10,61 @@
 
 **Huế Travel AI** giải quyết bài toán "Đi đâu, chơi gì?" tại Huế bằng cách phân tích dữ liệu địa điểm và hành vi người dùng. Hệ thống kết hợp sức mạnh của **PageRank (đánh giá độ phổ biến)** và **Collaborative Filtering (lọc cộng tác)** trên đồ thị tri thức để đưa ra những gợi ý cá nhân hóa chính xác nhất.
 
-## 🚀 Tính năng nổi bật
+## 🚀 Danh sách chức năng (Full Features)
 
-### 🧠 1. Hệ thống Gợi ý Thông minh (AI Core)
+Dự án hiện tại đã hoàn thiện các nhóm chức năng chính phục vụ cả người dùng cuối và quản trị viên:
 
-- **Hybrid Recommendation:** Kết hợp đa chiều dữ liệu để gợi ý:
-  - **PageRank Popularity:** Đánh giá độ nổi tiếng dựa trên lượng tương tác người dùng.
-  - **Graph Connectivity:** Đánh giá tầm quan trọng trong mạng lưới kết nối địa điểm.
-  - **Content-Based:** Gợi ý các địa điểm tương tự cùng danh mục.
-- **Similar Locations:** Tự động đề xuất các địa điểm liên quan khi xem chi tiết một địa điểm.
+### 👤 1. Chức năng dành cho Người dùng
 
-### 🗺️ 2. Bản đồ & Trực quan hóa (Visualization)
+- **Đăng ký/Đăng nhập:** Hệ thống xác thực người dùng, bảo mật mật khẩu.
+- **Quản lý Hồ sơ (Profile):**
+  - Xem thông tin cá nhân (Họ tên, Email, Ngày tham gia).
+  - Cập nhật thông tin cá nhân và mật khẩu.
+  - **Bộ sưu tập yêu thích:** Xem lại danh sách các địa điểm đã "thả tim" với giao diện gallery ảnh sinh động.
+- **Tương tác Địa điểm:**
+  - **Yêu thích (Like):** Lưu lại các địa điểm quan tâm.
+  - **Đánh giá (Review):** Gửi bình luận và xếp hạng sao (1-5⭐).
+  - **Quản lý Đánh giá:** Người dùng có thể chỉnh sửa hoặc xóa đánh giá cũ của mình.
+- **Tìm kiếm & Lọc:**
+  - Tìm kiếm địa điểm theo tên với gợi ý thời gian thực.
+  - Lọc nhanh địa điểm theo danh mục (Di tích, Ẩm thực, Tâm linh, v.v.).
 
-- **Interactive Map:** Tích hợp **Leaflet.js** cho trải nghiệm bản đồ mượt mà.
-- **Heatmap (Bản đồ nhiệt):** Hiển thị trực quan các khu vực tập trung nhiều địa điểm nổi bật/được yêu thích.
-- **Dynamic Markers:** Icon thay đổi theo loại địa điểm (Di tích 🏛️, Ẩm thực 🍜...) và màu sắc thay đổi theo độ hot (Đỏ: Hot, Xanh: Cá nhân hóa).
-- **Map Clustering:** Gom nhóm các địa điểm khi zoom out để tránh rối mắt.
+### 🧠 2. Hệ thống Gợi ý Thông minh (AI Core)
 
-### ⭐ 3. Tương tác Người dùng (Social Features)
+- **Hybrid Recommendation:** Tự động tính toán và hiển thị các gợi ý "Dành riêng cho bạn" dựa trên:
+  - **Personalization:** Dựa trên hành vi Like/Review của chính người dùng.
+  - **Collaborative Filtering:** Gợi ý dựa trên sở thích của những người dùng có hành vi tương đồng.
+  - **PageRank Score:** Độ ưu tiên hiển thị dựa trên độ phổ biến toàn hệ thống.
+- **Khám phá thêm (Similar Locations):** Khi xem một địa điểm, hệ thống tự động đề xuất 5-10 địa điểm tương tự trong cùng khu vực hoặc danh mục.
+- **Giải thích Gợi ý:** Hiển thị lý do tại sao AI lại gợi ý địa điểm này cho bạn (ví dụ: "Vì bạn đã thích ...", hoặc "Được cộng đồng đánh giá cao").
 
-- **Reviews & Ratings:**
-  - Đánh giá sao (1-5 ⭐) và viết bình luận cho địa điểm.
-  - **CRUD Review:** Người dùng có thể Thêm, Sửa, Xóa bình luận của chính mình.
-  - Hiển thị điểm đánh giá trung bình thời gian thực.
-- **User Profiles:** Theo dõi lịch sử du lịch và các địa điểm yêu thích (Wishlist).
+### 🗺️ 3. Bản đồ & Trực quan hóa tương tác
 
-### 🛠️ 4. Quản trị & Dashboard
+- **Bản đồ 4K:** Trải nghiệm mượt mà với hàng trăm địa điểm.
+- **Bản đồ nhiệt (Heatmap):** Chế độ xem mật độ "hot" của các địa điểm du lịch.
+- **Marker Thông minh:**
+  - Phân biệt loại địa điểm qua biểu tượng (Icon) khác nhau.
+  - Phân biệt trạng thái gợi ý qua màu sắc (Đỏ: Top phổ biến, Xanh: Gợi ý riêng biệt).
+- **Marker Cluster:** Tự động gom nhóm marker khi zoom out để tối ưu hiệu suất và thẩm mỹ.
 
-- **Admin Dashboard:** Thống kê tổng quan (Users, Locations, Likes).
-- **CRUD Locations:** Thêm, sửa, xóa địa điểm trực tiếp với giao diện trực quan.
-- **Map Picker:** Click chọn tọa độ trực tiếp trên bản đồ khi thêm/sửa địa điểm.
-- **Data Consistency:** Hệ thống tự động chuẩn hóa dữ liệu và tính toán lại điểm số AI sau mỗi lần cập nhật.
+### 🛠️ 4. Chức năng dành cho Quản trị viên (Admin)
+
+- **Dashboard Thống kê:** Theo dõi tổng số người dùng, địa điểm, tổng lượt tương tác.
+- **Quản lý Địa điểm (CRUD):**
+  - Thêm địa điểm mới kèm công cụ **Map Picker** (lấy tọa độ bằng cách click trực tiếp lên bản đồ).
+  - Chỉnh sửa thông tin, hình ảnh, tọa độ.
+  - Xóa địa điểm khỏi hệ thống.
+- **Quản lý Người dùng:**
+  - Xem danh sách toàn bộ thành viên.
+  - Xem chi tiết hoạt động của từng user (hồ sơ, các nơi đã thích, các đánh giá đã gửi).
+  - Xóa tài khoản người dùng vi phạm.
+- **Quản trị AI:** Nút kích hoạt chạy lại thuật toán Neo4j GDS để cập nhật điểm số AI ngay lập tức khi có dữ liệu mới.
+
+### 🎨 5. Tiện ích UI/UX Cao cấp
+
+- **Sidebar Resizable:** Thanh bên có thể co giãn linh hoạt, tối ưu cho mọi kích thước màn hình.
+- **Custom Notifications:** Hệ thống thông báo tùy chỉnh (Success, Error, Confirm) thay thế cho alert/confirm mặc định, mang lại cảm giác ứng dụng chuyên nghiệp.
+- **Premium Design:** Sử dụng hiệu ứng Glassmorphism, Gradient, và các micro-animations tinh tế.
 
 ---
 
