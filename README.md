@@ -171,28 +171,37 @@ Dự án hiện tại đã hoàn thiện các nhóm chức năng chính phục v
 
 ## 📜 Nhật ký Cập nhật (Update Log)
 
-### 🚀 Phiên bản cập nhật - 30/01/2026
+### 🚀 Phiên bản hiện tại - 30/01/2026 (Nhánh: `feature/complete-ui-and-docs`)
 
 #### 🎨 Giao diện & Trải nghiệm người dùng (UI/UX)
 
-- **Hệ thống Thông báo mới:** Thay thế toàn bộ `alert()` và `confirm()` mặc định bằng hệ thống thông báo `showNotification` tùy chỉnh, hỗ trợ các loại: Thành công, Lỗi, Chờ xác nhận (Confirm) với giao diện hiện đại.
-- **Sidebar Linh hoạt:**
-  - Nâng cấp thanh Sidebar có khả năng thay đổi kích thước (Resizable).
-  - Thiết lập độ rộng tối thiểu (min-width) là **420px** để tối ưu không gian hiển thị thông tin.
-- **Khám phá Địa điểm:** Cập nhật hiển thị tên đầy đủ của địa điểm (không còn bị cắt bớt dấu ...) giúp người dùng dễ dàng theo dõi.
-- **Tinh chỉnh Form Admin:**
-  - Thêm hệ thống icon đa sắc màu (Red, Blue, Purple, Green, Amber) cho form Thêm/Sửa địa điểm.
-  - Căn chỉnh lại vị trí icon trong ô nhập liệu (Input) chuẩn mực và cân đối hơn.
-  - Xóa bỏ các đường phân cách (dashed) không cần thiết để tối giản giao diện.
+- **Hệ thống Thông báo mới:** Thay thế toàn bộ `alert()` và `confirm()` bằng `showNotification` tùy chỉnh, hỗ trợ Success, Error, Confirm với UI hiện đại.
+- **Sidebar Linh hoạt:** Nâng cấp thanh Sidebar Resizable với `min-width: 420px`.
+- **Tinh chỉnh Form Admin:** Thêm icon đa sắc màu và căn chỉnh vị trí icon trong Input cân đối hơn.
+- **Tối ưu hiển thị:** Hiển thị tên địa điểm đầy đủ trong phần Khám phá, giảm bớt khoảng trắng dư thừa.
 
-#### 👤 Quản lý Người dùng
+#### 👤 Quản lý Người dùng & Backend
 
-- **Hồ sơ chi tiết:**
-  - Hiển thị đầy đủ **Họ tên, Email** và **Ngày tham gia** trong modal chi tiết.
-  - Bổ sung mục **"Địa điểm đã thích"** với danh sách ảnh (gallery) nằm ngang, cho phép xem trực tiếp các địa điểm user quan tâm.
-- **Cải thiện Navigation:** Thay đổi nút xem chi tiết user thành liên kết văn bản "Xem thông tin chi tiết" tinh tế hơn.
+- **Hồ sơ chi tiết:** Hiển thị Họ tên, Email và gallery "Địa điểm đã thích" dạng scroll ngang.
+- **API Enhancement:** Nâng cấp API trả về đầy đủ thông tin tọa độ và danh sách yêu thích của người dùng.
 
-#### 🔧 Backend & Data
+---
 
-- Nâng cấp API `/api/admin/user_profile/<username>` để trả về thêm danh sách các địa điểm đã yêu thích kèm thông tin tọa độ.
-- Tối ưu hóa logic xử lý sự kiện trong JS để đảm bảo tính ổn định khi mở các modal lồng nhau.
+### 🕰️ Lịch sử phát triển các phiên bản (Legacy Branches)
+
+#### 🔸 Nhánh `pb1` (Tiền thân là nhánh `test`)
+
+- **Thời gian:** 21/12/2025 -> 08/01/2026
+- **Chức năng chính:**
+  - Thiết lập cấu trúc đồ thị Neo4j.
+  - Triển khai thuật toán **PageRank** & **Collaborative Filtering** cơ bản.
+- **Trạng thái:** Bản thử nghiệm nền tảng về AI.
+
+#### 🔹 Nhánh `pb2` (Tiền thân là nhánh `pb1_reset`)
+
+- **Thời gian:** 21/12/2025 -> 28/01/2026
+- **Chức năng chính:**
+  - Tích hợp **Bản đồ nhiệt (Heatmap)**.
+  - Bổ sung tính năng **Similar Locations**.
+  - Sửa lỗi tọa độ, rating và chuẩn hóa dữ liệu.
+- **Trạng thái:** Bản ổn định cuối cùng trước khi đại tu giao diện.
