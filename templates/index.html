@@ -99,7 +99,7 @@
           </div>
         </div>
 
-        <div id="logged-view" style="display: none; margin: 10px 24px">
+        <div id="logged-view" style="display: none; margin: 0 24px">
           <div id="user-history" class="history-section" style="display: none">
             <div class="history-title">
               <i class="fas fa-history"></i> Địa điểm đã thích:
@@ -228,13 +228,17 @@
     <!-- Modal Auth -->
     <div id="authModal" class="modal">
       <div class="modal-content">
-        <button class="close-modal" onclick="closeAuthModal()">&times;</button>
-        <div class="auth-tabs">
-          <button class="tab-btn active" onclick="switchTab('login')">
-            Đăng nhập
-          </button>
-          <button class="tab-btn" onclick="switchTab('register')">
-            Đăng ký
+        <div class="auth-header-wrapper">
+          <div class="auth-tabs">
+            <button class="tab-btn active" onclick="switchTab('login')">
+              Đăng nhập
+            </button>
+            <button class="tab-btn" onclick="switchTab('register')">
+              Đăng ký
+            </button>
+          </div>
+          <button class="close-btn-inline" onclick="closeAuthModal()">
+            <i class="fas fa-times"></i>
           </button>
         </div>
 
