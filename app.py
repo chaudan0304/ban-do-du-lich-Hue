@@ -115,18 +115,19 @@ def api_login():
     username = data.get("username")
     password = data.get("password")
 
-    # verify_user trả về tuple: (success, role, message)
-    success, role, message = verify_user(username, password)
+    # verify_user trả về tuple: (success, role, fullname, message)
+    success, role, fullname, message = verify_user(username, password)
 
     if success:
         user = User(id=username, role=role)
         login_user(user)
-        # Trả về role cho frontend biết
+        # Trả về role và fullname cho frontend
         return (
             jsonify(
                 {
                     "message": "Đăng nhập thành công!",
                     "username": username,
+                    "fullname": fullname or username,  # Fallback to username if empty
                     "role": role,
                 }
             ),
@@ -148,7 +149,16 @@ def api_logout():
 @app.route("/api/current_user", methods=["GET"])
 def get_current_user():
     if current_user.is_authenticated:
-        return jsonify({"is_logged_in": True, "username": current_user.id})
+        # Lấy thêm thông tin chi tiết (fullname)
+        info = get_user_info(current_user.id)
+        fullname = info.get("fullname", "") if info else ""
+        return jsonify(
+            {
+                "is_logged_in": True,
+                "username": current_user.id,
+                "fullname": fullname or current_user.id,  # Fallback
+            }
+        )
     else:
         return jsonify({"is_logged_in": False})
 
@@ -280,6 +290,81 @@ def api_toggle_like():
     return jsonify({"liked": is_liked, "message": msg}), 200
 
 
+# --- HÀM PHÂN TÍCH CẢM XÚC ĐƠN GIẢN (VIETNAMESE) ---
+def analyze_sentiment(text):
+    text = text.lower()
+
+    # Từ điển tích cực (Positive)
+    pos_words = [
+        "thích",
+        "ngon",
+        "đẹp",
+        "tuyệt",
+        "tốt",
+        "hay",
+        "vui",
+        "xịn",
+        "ok",
+        "ổn",
+        "xuất sắc",
+        "thân thiện",
+        "sạch",
+        "rẻ",
+        "đỉnh",
+        "hài lòng",
+        "love",
+        "good",
+        "nice",
+        "hấp dẫn",
+        "thú vị",
+        "ấn tượng",
+        "lung linh",
+        "mê",
+        "yêu",
+    ]
+
+    # Từ điển tiêu cực (Negative)
+    neg_words = [
+        "dở",
+        "tệ",
+        "xấu",
+        "chán",
+        "đắt",
+        "bẩn",
+        "ồn",
+        "kém",
+        "buồn",
+        "lâu",
+        "thất vọng",
+        "ghét",
+        "bad",
+        "tởm",
+        "hôi",
+        "đau",
+        "phí",
+        "nhạt",
+        "cũ",
+    ]
+
+    score = 0
+
+    # Tính điểm
+    for w in pos_words:
+        if w in text:
+            score += 1
+
+    for w in neg_words:
+        if w in text:
+            score -= 1
+
+    # Xếp loại
+    if score > 0:
+        return "Positive"
+    if score < 0:
+        return "Negative"
+    return "Neutral"
+
+
 # --- API REVIEW ---
 @app.route("/api/review", methods=["POST"])
 @login_required
@@ -292,11 +377,21 @@ def api_add_review():
     if not loc_name or not rating:
         return jsonify({"error": "Thiếu thông tin rating hoặc địa điểm"}), 400
 
-    success, result = add_review(current_user.id, loc_name, rating, comment)
+    # Phân tích cảm xúc
+    sentiment = analyze_sentiment(comment)
+
+    # Lưu đánh giá kèm cảm xúc
+    success, result = add_review(current_user.id, loc_name, rating, comment, sentiment)
+
     if success:
         return (
             jsonify(
-                {"success": True, "message": "Đánh giá thành công!", "stats": result}
+                {
+                    "success": True,
+                    "message": "Đánh giá thành công!",
+                    "stats": result,
+                    "sentiment": sentiment,  # Trả về để frontend hiển thị ngay
+                }
             ),
             200,
         )

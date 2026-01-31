@@ -414,7 +414,13 @@ body {
 .detail-actions { display: flex; gap: 10px; margin-top: 24px; }
 .btn-action { flex: 1; padding: 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: white; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; gap: 6px; transition: var(--trans-fast); box-shadow: var(--shadow-sm); }
 .btn-action:hover { background: var(--bg-body); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.btn-like.liked { color: var(--danger); border-color: #fecaca; background: #fef2f2; }
+.btn-like.liked { 
+  color: #dc2626; /* Darker red */
+  border-color: #fca5a5; 
+  background: #fef2f2; 
+  font-weight: 700;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); /* Inner shadow for pressed effect */
+}
 .btn-maps { background: #eff6ff; color: #2563eb; border-color: #dbeafe; text-decoration: none; }
 .btn-maps:hover { background: #2563eb; color: white; border-color: #2563eb; }
 
@@ -959,8 +965,314 @@ body {
 .input-fancy {
   background-position: 12px 50% !important; /* Force vertical center */
 }
-
 /* Ensure inputs in cols don't break layout */
 .col .form-group {
   margin-bottom: 0;
+}
+
+/* SIMILAR LOCATIONS / SUGGESTIONS */
+.similar-card {
+  cursor: pointer;
+  transition: var(--trans-fast);
+  display: flex;
+  flex-direction: column;
+}
+.similar-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.similar-card-img {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  background: var(--bg-body);
+}
+
+.similar-card-info { padding: 8px; }
+.similar-card-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.similar-card-score { font-size: 11px; color: var(--success); font-weight: 600; }
+.similar-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px; }
+
+
+/* --------------------------------------------------------------------------
+   NEW NOTIFICATION MODAL
+   -------------------------------------------------------------------------- */
+.modal-content-notification {
+  background: white;
+  width: 90%;
+  max-width: 360px;
+  border-radius: 20px;
+  padding: 30px 24px 24px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transform: scale(0.9);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal.active .modal-content-notification {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.notif-icon-box {
+  width: 70px;
+  height: 70px;
+  margin: -50px auto 20px; /* Pull up */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  background: var(--primary);
+  border: 4px solid white;
+}
+
+.modal-content-notification.type-success .notif-icon-box { background: linear-gradient(135deg, #10b981, #059669); }
+.btn-notif {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  background: var(--bg-body);
+  color: var(--text-main);
+  transition: all 0.2s;
+}
+.btn-notif:hover { background: #e2e8f0; }
+
+.modal-content-notification.type-success .btn-notif { background: #d1fae5; color: #065f46; }
+.modal-content-notification.type-success .btn-notif:hover { background: #a7f3d0; }
+
+.modal-content-notification.type-error .btn-notif { background: #fee2e2; color: #991b1b; }
+.modal-content-notification.type-error .btn-notif:hover { background: #fecaca; }
+
+/* Ensure notification is always on top of other modals */
+#notificationModal {
+  z-index: 9999 !important;
+}
+
+.notif-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.btn-notif-cancel {
+  background: #f1f5f9;
+  color: #64748b;
+}
+.btn-notif-cancel:hover {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+
+/* --- Form Layout & Map Picker --- */
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px; /* Add margin bottom to separate from next element */
+}
+.col {
+  flex: 1;
+}
+
+.btn-map-picker {
+  width: 100%;
+  padding: 12px;
+  background: #f1f5f9;
+  border: 1px dashed #94a3b8;
+  color: #475569;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  margin-bottom: 20px;
+  /* margin-top will be handled by form-row margin-bottom essentially, or we add explicit margin if needed. 
+     The user said "too close to the button above", likely referring to the inputs above. 
+     The inputs are in .form-row. So .form-row needs margin-bottom. 
+  */
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.input-fancy {
+  /* Ensure text is vertically centered if it's not */
+  display: flex;
+  align-items: center; 
+  /* This doesn't work on input, but let's check line-height */
+  line-height: normal;
+  padding-left: 40px; /* Make space for icon if there is one inside */
+  background-position: 12px center; /* Center background icon */
+  background-repeat: no-repeat;
+}
+/* Wait, I don't have the definition of input-fancy here. I should probably view it first or just add the margin fix.
+   The user uploaded an image. The globe icon IS inside the input.
+   And it looks top-aligned or something.
+   
+   Let's just fix the spacing first which is the most obvious "error".
+   And for the icon alignment, I will try to set background-position to center.
+*/
+
+/* Fix icon alignment in forms with labels */
+.modal-body-fancy .form-group i {
+  top: auto !important;
+  bottom: 13px !important; /* Align to center of input (approx) */
+  transform: none !important;
+  color: var(--primary); /* Make it prettier */
+  left: 14px !important;
+}
+
+/* Specific fix for textareas */
+.modal-body-fancy .form-group textarea + i, 
+.modal-body-fancy .form-group i.fa-align-left {
+   display: none;
+}
+.modal-body-fancy .form-group i.fa-pen {
+  display: block;
+  top: 40px !important; /* Top of textarea */
+  bottom: auto !important;
+}
+
+/* Colorful Icons for Form */
+.modal-body-fancy .form-group i.fa-map-pin { color: #ef4444; } /* Red for Pin */
+.modal-body-fancy .form-group i.fa-globe { color: #0ea5e9; }   /* Blue for Coords */
+.modal-body-fancy .form-group i.fa-layer-group { color: #8b5cf6; } /* Purple for Category */
+.modal-body-fancy .form-group i.fa-image { color: #10b981; }   /* Green for Image */
+.modal-body-fancy .form-group i.fa-pen { color: #f59e0b; }     /* Amber for Desc */
+
+/* General Input Fancy alignment */
+.input-fancy {
+  background-position: 12px 50% !important; /* Force vertical center */
+}
+/* Ensure inputs in cols don't break layout */
+.col .form-group {
+  margin-bottom: 0;
+}
+
+/* SIMILAR LOCATIONS / SUGGESTIONS */
+.similar-card {
+  cursor: pointer;
+  transition: var(--trans-fast);
+  display: flex;
+  flex-direction: column;
+}
+.similar-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.similar-card-img {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  background: var(--bg-body);
+}
+
+.similar-card-info { padding: 8px; }
+.similar-card-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.similar-card-score { font-size: 11px; color: var(--success); font-weight: 600; }
+.similar-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px; }
+
+
+/* --------------------------------------------------------------------------
+   NEW NOTIFICATION MODAL
+   -------------------------------------------------------------------------- */
+.modal-content-notification {
+  background: white;
+  width: 90%;
+  max-width: 360px;
+  border-radius: 20px;
+  padding: 30px 24px 24px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transform: scale(0.9);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal.active .modal-content-notification {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.notif-icon-box {
+  width: 70px;
+  height: 70px;
+  margin: -50px auto 20px; /* Pull up */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  background: var(--primary);
+  border: 4px solid white;
+}
+
+.modal-content-notification.type-success .notif-icon-box { background: linear-gradient(135deg, #10b981, #059669); }
+.modal-content-notification.type-error .notif-icon-box { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.modal-content-notification.type-warning .notif-icon-box { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.modal-content-notification.type-info .notif-icon-box { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.modal-content-notification.type-delete .notif-icon-box { background: linear-gradient(135deg, #64748b, #475569); }
+
+/* SENTIMENT BADGES */
+.sentiment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.sentiment-positive {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.sentiment-negative {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.sentiment-neutral {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* Visited Tag Badge */
+.visited-tag {
+  background-color: #dbeafe; /* Light blue background */
+  color: #1e40af; /* Dark blue text */
+  border: 1px solid #bfdbfe;
+  font-weight: 600;
 }

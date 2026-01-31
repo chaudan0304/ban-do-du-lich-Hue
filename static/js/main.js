@@ -160,7 +160,8 @@ function checkLoginStatus() {
       if (data && data.is_logged_in) {
         currentUser = data.username;
         userRole = data.role || "user";
-        showLoggedView(data.username);
+        // Truyền thêm fullname vào hàm hiển thị
+        showLoggedView(data.username, data.fullname);
         analyzeUser(true);
       } else {
         currentUser = null;
@@ -171,20 +172,20 @@ function checkLoginStatus() {
     .catch(() => showGuestView());
 }
 
-function showLoggedView(username) {
+function showLoggedView(username, fullname) {
   document.getElementById("header-login-btn").style.display = "none";
   const userInfo = document.getElementById("header-user-info");
+  
+  // Ưu tiên hiển thị fullname nếu có
+  const displayName = fullname || username;
+
   if (userInfo) {
     userInfo.style.display = "flex";
-    document.getElementById("header-username").innerText = username;
-    
-    // Nút Profile
-    const btnProfile = `
-      <button onclick="openUserProfile()" title="Hồ sơ cá nhân" style="display:inline-block; margin-right:5px; border:none; background: #e0f2fe; color: #0284c7; width:26px; height:26px; border-radius:50%; cursor:pointer;">
-        <i class="fas fa-user-edit"></i>
-      </button>
-    `;
-    
+    // document.getElementById("header-username").innerText = displayName; // Đã có trong template bên dưới
+
+    // Nút Profile (Đã gộp vào Avatar) - Giữ code cũ để tham khảo nếu cần
+    // const btnProfile = ...
+
     // Nút Admin
     let btnAdminHTML = "";
     if (username === "admin" || userRole === "admin") {
@@ -203,11 +204,9 @@ function showLoggedView(username) {
     `;
 
     // Cập nhật lại HTML của header-user-info
-    // Giữ lại avatar
     userInfo.innerHTML = `
-      <div class="user-avatar-small"></div>
-      <span id="header-username">${username}</span>
-      ${btnProfile}
+      <i class="fas fa-user-circle" onclick="openUserProfile()" title="Hồ sơ cá nhân / Chỉnh sửa" style="font-size: 28px; color: var(--primary); cursor: pointer; transition: transform 0.2s;"></i>
+      <span id="header-username" onclick="openUserProfile()" style="cursor: pointer;" title="Hồ sơ cá nhân">${displayName}</span>
       ${btnAdminHTML}
       ${btnLogout}
     `;
@@ -285,7 +284,7 @@ function handleLogin() {
         userRole = data.role;
 
         closeAuthModal();
-        checkLoginStatus();
+        checkLoginStatus(); // Gọi cái này nó sẽ tự fetch fullname và hiển thị luôn
 
         // Load lại chi tiết địa điểm nếu đang mở (để cập nhật nút Like)
         if (typeof currentOpenLoc !== "undefined" && currentOpenLoc !== null) {
@@ -295,7 +294,7 @@ function handleLogin() {
         showNotification({
           type: "success",
           title: "Đăng nhập thành công",
-          message: `Chào mừng <b>${data.username}</b>!`,
+          message: `Chào mừng <b>${data.fullname || data.username}</b>!`,
           btnText: "Bắt đầu",
         });
 
@@ -624,6 +623,7 @@ function showDetail(loc) {
             <div class="detail-meta">
               <span class="meta-tag" style="background:#059669; color:white;">⭐ ${displayScore}</span>
               <span class="meta-tag"><i class="fas fa-tag"></i> ${loc.category}</span>
+              ${userLikedSet.has(loc.name) ? '<span class="meta-tag visited-tag"><i class="fas fa-check-circle"></i> Đã ghé thăm</span>' : ''}
             </div>
 
             <p class="detail-desc">${loc.description || "..."}</p>
@@ -762,7 +762,27 @@ function flyToLocation(lat, lng, name) {
 }
 
 function showDetailFromData(name, lat, lng, image) {
-  showDetail({ name, lat, lng, image, category: "Đã ghé thăm", description: "Địa điểm trong lịch sử" });
+    // Tìm thông tin đầy đủ trong bộ nhớ đệm
+    let realLoc = null;
+    if (cachedAllLocations) {
+        realLoc = cachedAllLocations.find(l => l.name === name);
+    }
+    if (!realLoc && currentListData) {
+        realLoc = currentListData.find(l => l.name === name);
+    }
+
+    if (realLoc) {
+        showDetail(realLoc);
+    } else {
+        // Fallback nếu chưa tải dữ liệu (ít khi xảy ra)
+        showDetail({ 
+            name, lat, lng, image, 
+            category: "Đã ghé thăm", 
+            description: "Đang tải thông tin chi tiết...", // Sửa lại nội dung placeholder
+            score: 0 
+        });
+        // Có thể gọi loadLocations("All") ngầm để cập nhật sau
+    }
 }
 
 function closeDetail() {
@@ -1539,6 +1559,17 @@ function loadReviews(locationName) {
                         <a href="#" onclick="deleteReview('${locationName}'); return false;" style="color:#ef4444;">Xóa</a>
                     </div>`;
             }
+
+            // Xử lý hiển thị cảm xúc
+            let sentimentHtml = "";
+            if (rev.sentiment === "Positive") {
+                sentimentHtml = `<span class="sentiment-badge sentiment-positive" title="AI phân tích: Tích cực"><i class="fas fa-smile"></i> Tích cực</span>`;
+            } else if (rev.sentiment === "Negative") {
+                sentimentHtml = `<span class="sentiment-badge sentiment-negative" title="AI phân tích: Tiêu cực"><i class="fas fa-frown"></i> Tiêu cực</span>`;
+            } else {
+                sentimentHtml = `<span class="sentiment-badge sentiment-neutral" title="AI phân tích: Trung tính"><i class="fas fa-meh"></i> Trung tính</span>`;
+            }
+
             return `
             <div class="review-item">
                 <div class="review-avatar"><i class="fas fa-user-circle"></i></div>
@@ -1550,6 +1581,7 @@ function loadReviews(locationName) {
                     
                     <div class="review-rating">
                         <span class="review-stars">${'★'.repeat(rev.rating)}</span>
+                        ${sentimentHtml}
                         ${actions}
                     </div>
                     

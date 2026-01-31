@@ -1,0 +1,7 @@
+/* Visited Tag Badge */
+.visited-tag {
+  background-color: #dbeafe; /* Light blue background */
+  color: #1e40af; /* Dark blue text */
+  border: 1px solid #bfdbfe;
+  font-weight: 600;
+}

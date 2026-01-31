@@ -187,19 +187,24 @@ def verify_user(username, password):
     result = run_query(query, {"name": username})
 
     if not result:
-        return False, None, "Tài khoản không tồn tại"
+        return False, None, None, "Tài khoản không tồn tại"
 
     user_data = result[0]["u"]
     stored_hash = user_data.get("password")
 
     # Nếu user cũ chưa có pass (hoặc import từ file), có thể check text thường (tùy chọn)
     if not stored_hash:
-        return False, None, "Tài khoản lỗi (chưa có mật khẩu)"
+        return False, None, None, "Tài khoản lỗi (chưa có mật khẩu)"
 
     if check_password_hash(stored_hash, password):
-        return True, user_data.get("role", "user"), "Đăng nhập thành công"
+        return (
+            True,
+            user_data.get("role", "user"),
+            user_data.get("fullname", ""),
+            "Đăng nhập thành công",
+        )
     else:
-        return False, None, "Sai mật khẩu"
+        return False, None, None, "Sai mật khẩu"
 
 
 # --------------------------------------------------------------------------------------
@@ -286,11 +291,12 @@ def toggle_like_location(username, location_name):
 
 
 # --- Hàm xử lý Review ---
-def add_review(username, location_name, rating, comment):
+def add_review(username, location_name, rating, comment, sentiment="Neutral"):
     """
     Thêm hoặc cập nhật đánh giá của user.
     Tự động LIKE địa điểm (lưu) khi đánh giá.
     Tự động cập nhật :INTERACTED để thuật toán gợi ý real-time.
+    Cập nhật thêm sentiment (cảm xúc) từ bình luận.
     """
     # Query tạo/cập nhật REVIEWED, tự động LIKED, và đồng bộ INTERACTED
     query = """
@@ -300,6 +306,7 @@ def add_review(username, location_name, rating, comment):
     MERGE (u)-[r:REVIEWED]->(l)
     SET r.rating = $rating, 
         r.comment = $comment, 
+        r.sentiment = $sentiment,
         r.timestamp = datetime()
     WITH u, l, $rating AS review_score
     // Tự động LIKE địa điểm khi đánh giá (lưu vào danh sách yêu thích)
@@ -329,6 +336,7 @@ def add_review(username, location_name, rating, comment):
                 "l_name": location_name,
                 "rating": float(rating),
                 "comment": comment,
+                "sentiment": sentiment,
             },
         )
         stats = run_query(recalc_query, {"l_name": location_name})
@@ -346,6 +354,7 @@ def get_location_reviews(location_name):
     RETURN u.name AS user, 
            r.rating AS rating, 
            r.comment AS comment, 
+           r.sentiment AS sentiment,
            toString(r.timestamp) AS time
     ORDER BY r.timestamp DESC
     """
