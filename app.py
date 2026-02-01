@@ -20,13 +20,20 @@ from db import (
     verify_user,
     get_all_users,
     delete_user_by_name,
+    reset_user_password,
     toggle_like_location,
     add_review,
     get_location_reviews,
     delete_review,
     sync_locations_to_excel,
     get_user_info,
+    generate_itinerary,
     update_user_info,
+    get_user_reviews,
+    get_user_likes,
+    save_user_itinerary,
+    get_user_itineraries,
+    delete_user_itinerary,
 )
 import logging
 
@@ -79,7 +86,10 @@ class User(UserMixin):
 # Hàm tải user từ session
 @login_manager.user_loader
 def load_user(user_id):
-    return User(user_id)
+    info = get_user_info(user_id)
+    if info:
+        return User(id=user_id, role=info.get("role", "user"))
+    return None
 
 
 # --- ROUTE API ---
@@ -115,18 +125,19 @@ def api_login():
     username = data.get("username")
     password = data.get("password")
 
-    # verify_user trả về tuple: (success, role, message)
-    success, role, message = verify_user(username, password)
+    # verify_user trả về tuple: (success, role, fullname, message)
+    success, role, fullname, message = verify_user(username, password)
 
     if success:
         user = User(id=username, role=role)
         login_user(user)
-        # Trả về role cho frontend biết
+        # Trả về role và fullname cho frontend
         return (
             jsonify(
                 {
                     "message": "Đăng nhập thành công!",
                     "username": username,
+                    "fullname": fullname or username,  # Fallback to username if empty
                     "role": role,
                 }
             ),
@@ -134,6 +145,28 @@ def api_login():
         )
     else:
         return jsonify({"error": message}), 401
+
+
+# API: Quên mật khẩu
+@app.route("/api/reset-password", methods=["POST"])
+def api_reset_password():
+    data = request.json
+    username = data.get("username", "").strip()
+    email = data.get("email", "").strip()
+    new_password = data.get("new_password", "").strip()
+
+    if not username or not email or not new_password:
+        return jsonify({"success": False, "error": "Vui lòng nhập đủ thông tin"}), 400
+
+    if len(new_password) < 6:
+        return jsonify({"success": False, "error": "Mật khẩu mới quá ngắn"}), 400
+
+    success, message = reset_user_password(username, email, new_password)
+
+    if success:
+        return jsonify({"success": True, "message": message})
+    else:
+        return jsonify({"success": False, "error": message}), 400
 
 
 # API: Đăng xuất
@@ -148,7 +181,16 @@ def api_logout():
 @app.route("/api/current_user", methods=["GET"])
 def get_current_user():
     if current_user.is_authenticated:
-        return jsonify({"is_logged_in": True, "username": current_user.id})
+        # Lấy thêm thông tin chi tiết (fullname)
+        info = get_user_info(current_user.id)
+        fullname = info.get("fullname", "") if info else ""
+        return jsonify(
+            {
+                "is_logged_in": True,
+                "username": current_user.id,
+                "fullname": fullname or current_user.id,  # Fallback
+            }
+        )
     else:
         return jsonify({"is_logged_in": False})
 
@@ -184,7 +226,7 @@ def api_profile_handler():
 @app.route("/api/admin/users", methods=["GET"])
 @login_required
 def api_get_users():
-    if current_user.id != "admin":
+    if current_user.role != "admin":
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     try:
@@ -201,7 +243,7 @@ def api_get_users():
 @app.route("/api/admin/users/<username>", methods=["DELETE"])
 @login_required
 def api_delete_user(username):
-    if current_user.id != "admin":
+    if current_user.role != "admin":
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     delete_user_by_name(username)
@@ -211,7 +253,7 @@ def api_delete_user(username):
 @app.route("/api/admin/user_comments/<username>", methods=["GET"])
 @login_required
 def api_get_user_comments(username):
-    if current_user.id != "admin":
+    if current_user.role != "admin":
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     query = """
@@ -226,7 +268,7 @@ def api_get_user_comments(username):
 @app.route("/api/admin/user_profile/<username>", methods=["GET"])
 @login_required
 def api_get_user_profile(username):
-    if current_user.id != "admin":
+    if current_user.role != "admin":
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     # 1. Get User Info & Stats
@@ -280,6 +322,81 @@ def api_toggle_like():
     return jsonify({"liked": is_liked, "message": msg}), 200
 
 
+# --- HÀM PHÂN TÍCH CẢM XÚC ĐƠN GIẢN (VIETNAMESE) ---
+def analyze_sentiment(text):
+    text = text.lower()
+
+    # Từ điển tích cực (Positive)
+    pos_words = [
+        "thích",
+        "ngon",
+        "đẹp",
+        "tuyệt",
+        "tốt",
+        "hay",
+        "vui",
+        "xịn",
+        "ok",
+        "ổn",
+        "xuất sắc",
+        "thân thiện",
+        "sạch",
+        "rẻ",
+        "đỉnh",
+        "hài lòng",
+        "love",
+        "good",
+        "nice",
+        "hấp dẫn",
+        "thú vị",
+        "ấn tượng",
+        "lung linh",
+        "mê",
+        "yêu",
+    ]
+
+    # Từ điển tiêu cực (Negative)
+    neg_words = [
+        "dở",
+        "tệ",
+        "xấu",
+        "chán",
+        "đắt",
+        "bẩn",
+        "ồn",
+        "kém",
+        "buồn",
+        "lâu",
+        "thất vọng",
+        "ghét",
+        "bad",
+        "tởm",
+        "hôi",
+        "đau",
+        "phí",
+        "nhạt",
+        "cũ",
+    ]
+
+    score = 0
+
+    # Tính điểm
+    for w in pos_words:
+        if w in text:
+            score += 1
+
+    for w in neg_words:
+        if w in text:
+            score -= 1
+
+    # Xếp loại
+    if score > 0:
+        return "Positive"
+    if score < 0:
+        return "Negative"
+    return "Neutral"
+
+
 # --- API REVIEW ---
 @app.route("/api/review", methods=["POST"])
 @login_required
@@ -292,11 +409,21 @@ def api_add_review():
     if not loc_name or not rating:
         return jsonify({"error": "Thiếu thông tin rating hoặc địa điểm"}), 400
 
-    success, result = add_review(current_user.id, loc_name, rating, comment)
+    # Phân tích cảm xúc
+    sentiment = analyze_sentiment(comment)
+
+    # Lưu đánh giá kèm cảm xúc
+    success, result = add_review(current_user.id, loc_name, rating, comment, sentiment)
+
     if success:
         return (
             jsonify(
-                {"success": True, "message": "Đánh giá thành công!", "stats": result}
+                {
+                    "success": True,
+                    "message": "Đánh giá thành công!",
+                    "stats": result,
+                    "sentiment": sentiment,  # Trả về để frontend hiển thị ngay
+                }
             ),
             200,
         )
@@ -336,7 +463,7 @@ def api_delete_review():
 @app.route("/api/admin/stats", methods=["GET"])
 @login_required
 def get_admin_stats():
-    if not current_user.is_authenticated or current_user.id != "admin":
+    if not current_user.is_authenticated or current_user.role != "admin":
         return jsonify({"error": "Không có quyền"}), 403
 
     query = """
@@ -357,7 +484,7 @@ def get_admin_stats():
 @app.route("/api/admin/run-algo", methods=["POST"])
 @login_required
 def run_algo_trigger():
-    if not current_user.is_authenticated or current_user.id != "admin":
+    if not current_user.is_authenticated or current_user.role != "admin":
         return jsonify({"error": "Không có quyền"}), 403
 
     try:
@@ -371,7 +498,7 @@ def run_algo_trigger():
 @app.route("/api/admin/location/add", methods=["POST"])
 @login_required
 def add_location():
-    if not current_user.is_authenticated or current_user.id != "admin":
+    if not current_user.is_authenticated or current_user.role != "admin":
         return jsonify({"error": "Không có quyền"}), 403
 
     data = request.json
@@ -409,7 +536,7 @@ def add_location():
 @app.route("/api/admin/location/update", methods=["PUT"])
 @login_required
 def update_location():
-    if not current_user.is_authenticated or current_user.id != "admin":
+    if not current_user.is_authenticated or current_user.role != "admin":
         return jsonify({"error": "Không có quyền"}), 403
 
     data = request.json
@@ -450,7 +577,7 @@ def update_location():
 @app.route("/api/admin/location/delete", methods=["DELETE"])
 @login_required
 def delete_location():
-    if not current_user.is_authenticated or current_user.id != "admin":
+    if not current_user.is_authenticated or current_user.role != "admin":
         return jsonify({"error": "Không có quyền"}), 403
 
     try:
@@ -473,6 +600,7 @@ def index():
 @app.route("/api/locations", methods=["GET"])
 def get_locations():
     category_filter = request.args.get("category")
+    print(f"DEBUG: Filtering locations by category: '{category_filter}'")
 
     query = """
     MATCH (l:Location)
@@ -481,9 +609,9 @@ def get_locations():
 
     params = {}  # Tạo dictionary chứa tham số
     if category_filter and category_filter != "All":
-        # Sử dụng toLower để so sánh không phân biệt hoa thường
-        query += " WHERE toLower(cat.name) = toLower($cat_name) "
-        params["cat_name"] = category_filter
+        # Sử dụng CONTAINS để tìm kiếm linh hoạt hơn (và trim khoảng trắng)
+        query += " WHERE toLower(cat.name) CONTAINS toLower($cat_name) "
+        params["cat_name"] = category_filter.strip()
 
     query += """
     RETURN l.name AS name,
@@ -720,14 +848,31 @@ def recommend(user_name):
                 reason_type = "collab"
             elif s_content > 0.1:
                 # Content-based: Similarity
-                reason = f"Gợi ý vì bạn thích các địa điểm {loc.get('category', '')}"
+                cat = loc.get("category", "").lower()
+                icon_map = {
+                    "thực": "🍜",
+                    "uống": "☕",
+                    "chùa": "🛕",
+                    "thờ": "🛕",
+                    "biển": "🏖️",
+                    "thiên nhiên": "🌳",
+                    "lăng": "🏯",
+                    "di tích": "🏛️",
+                    "chợ": "🛍️",
+                }
                 reason_icon = "🎯"
+                for k, v in icon_map.items():
+                    if k in cat:
+                        reason_icon = v
+                        break
+
+                reason = f"Gợi ý phù hợp vì bạn hay ghé {loc.get('category', '')}"
                 reason_type = "content"
             elif s_pagerank > 0:
                 # PageRank: Global popularity (Fallback)
                 pr_score = (loc.get("score", 0) or 0) * 100
-                reason = f"Địa điểm nổi tiếng với điểm phổ biến {pr_score:.1f}/100"
-                reason_icon = "🏆"
+                reason = "Địa điểm đang rất Hot trong cộng đồng du lịch Huế"
+                reason_icon = "🔥"
                 reason_type = "pagerank"
             else:
                 reason = "Được gợi ý bởi hệ thống AI"
@@ -811,12 +956,80 @@ def get_similar_locations(location_name):
         return jsonify({"error": str(e)}), 500
 
 
-# 5. Hàm phụ trợ chuyển đổi an toàn sang float
+# DO NOT REMOVE THIS FUNCTION IT IS A HELPER
 def safe_float(value, default=0.0):
     try:
         return float(value)
     except (ValueError, TypeError):
         return default
+
+
+# ==========================================================
+# 6. AI PLANNER API
+# ==========================================================
+@app.route("/api/planner/generate", methods=["POST"])
+def api_generate_itinerary():
+    data = request.json
+    username = current_user.id if current_user.is_authenticated else "Guest"
+
+    days = int(data.get("days", 1))
+    preferences = data.get("preferences", [])  # List[str]
+
+    # Giới hạn số ngày hợp lý
+    if days < 1:
+        days = 1
+    if days > 5:
+        days = 5
+
+    try:
+        plan = generate_itinerary(username, days, preferences)
+        return jsonify({"success": True, "plan": plan})
+    except Exception as e:
+        print(f"Planner Error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/user/activity")
+@login_required
+def api_user_activity():
+    username = current_user.id
+    try:
+        likes = get_user_likes(username)
+        reviews = get_user_reviews(username)
+        return jsonify({"success": True, "likes": likes, "reviews": reviews})
+    except Exception as e:
+        print(f"Error fetching user activity: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# --- API QUẢN LÝ LỘ TRÌNH (ITINERARY) ---
+@app.route("/api/itineraries", methods=["GET"])
+@login_required
+def api_get_itineraries():
+    data = get_user_itineraries(current_user.id)
+    return jsonify({"success": True, "data": data})
+
+
+@app.route("/api/itineraries", methods=["POST"])
+@login_required
+def api_save_itinerary():
+    data = request.json
+    itinerary = data.get("itinerary")
+    if not itinerary:
+        return jsonify({"error": "Dữ liệu trống"}), 400
+
+    success, msg = save_user_itinerary(current_user.id, itinerary)
+    if success:
+        return jsonify({"success": True, "message": msg})
+    else:
+        return jsonify({"success": False, "error": msg}), 500
+
+
+@app.route("/api/itineraries/<id>", methods=["DELETE"])
+@login_required
+def api_delete_itinerary(id):
+    delete_user_itinerary(current_user.id, id)
+    return jsonify({"success": True})
 
 
 # ==========================================================

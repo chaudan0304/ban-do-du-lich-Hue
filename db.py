@@ -52,7 +52,7 @@ def run_query(query, params=None):
             return records
     except Exception as e:
         error_str = str(e).lower()
-        print(f"❌ LỖI NEO4J: {e}")
+        print(f"[ERROR] NEO4J: {e}")
 
         # Phát hiện lỗi constraint (tên trùng)
         if "constraint" in error_str or "already exists" in error_str:
@@ -151,7 +151,7 @@ def get_user_info(username):
            u.fullname as fullname, 
            u.email as email, 
            u.role as role, 
-           toString(u.created_at) as created_at
+           coalesce(toString(u.created_at), toString(datetime())) as created_at
     """
     result = run_query(query, {"name": username})
     return result[0] if result else None
@@ -187,19 +187,24 @@ def verify_user(username, password):
     result = run_query(query, {"name": username})
 
     if not result:
-        return False, None, "Tài khoản không tồn tại"
+        return False, None, None, "Tài khoản không tồn tại"
 
     user_data = result[0]["u"]
     stored_hash = user_data.get("password")
 
     # Nếu user cũ chưa có pass (hoặc import từ file), có thể check text thường (tùy chọn)
     if not stored_hash:
-        return False, None, "Tài khoản lỗi (chưa có mật khẩu)"
+        return False, None, None, "Tài khoản lỗi (chưa có mật khẩu)"
 
     if check_password_hash(stored_hash, password):
-        return True, user_data.get("role", "user"), "Đăng nhập thành công"
+        return (
+            True,
+            user_data.get("role", "user"),
+            user_data.get("fullname", ""),
+            "Đăng nhập thành công",
+        )
     else:
-        return False, None, "Sai mật khẩu"
+        return False, None, None, "Sai mật khẩu"
 
 
 # --------------------------------------------------------------------------------------
@@ -223,6 +228,30 @@ def delete_user_by_name(username):
     query = "MATCH (u:User {name: $name}) DETACH DELETE u"
     run_query(query, {"name": username})
     return True
+
+
+def reset_user_password(username, email, new_password):
+    """
+    Đặt lại mật khẩu nếu username và email trùng khớp.
+    """
+    # 1. Kiểm tra khớp thông tin
+    check_query = (
+        "MATCH (u:User {name: $name}) WHERE toLower(u.email) = toLower($email) RETURN u"
+    )
+    user = run_query(check_query, {"name": username, "email": email})
+
+    if not user:
+        return False, "Thông tin tài khoản hoặc email không chính xác."
+
+    # 2. Cập nhật mật khẩu mới
+    new_hash = generate_password_hash(new_password)
+    update_query = """
+    MATCH (u:User {name: $name})
+    SET u.password = $pass
+    """
+    run_query(update_query, {"name": username, "pass": new_hash})
+
+    return True, "Đổi mật khẩu thành công! Hãy đăng nhập lại."
 
 
 # --------------------------------------------------------------------------------------
@@ -267,7 +296,8 @@ def toggle_like_location(username, location_name):
     else:
         # Chưa like -> Tạo quan hệ LIKED và cập nhật :INTERACTED
         like_query = """
-        MATCH (u:User {name: $u_name}), (l:Location {name: $l_name})
+        MATCH (u:User {name: $u_name})
+        MATCH (l:Location {name: $l_name})
         MERGE (u)-[r:LIKED]->(l)
         SET r.timestamp = datetime()
         WITH u, l
@@ -286,11 +316,12 @@ def toggle_like_location(username, location_name):
 
 
 # --- Hàm xử lý Review ---
-def add_review(username, location_name, rating, comment):
+def add_review(username, location_name, rating, comment, sentiment="Neutral"):
     """
     Thêm hoặc cập nhật đánh giá của user.
     Tự động LIKE địa điểm (lưu) khi đánh giá.
     Tự động cập nhật :INTERACTED để thuật toán gợi ý real-time.
+    Cập nhật thêm sentiment (cảm xúc) từ bình luận.
     """
     # Query tạo/cập nhật REVIEWED, tự động LIKED, và đồng bộ INTERACTED
     query = """
@@ -300,6 +331,7 @@ def add_review(username, location_name, rating, comment):
     MERGE (u)-[r:REVIEWED]->(l)
     SET r.rating = $rating, 
         r.comment = $comment, 
+        r.sentiment = $sentiment,
         r.timestamp = datetime()
     WITH u, l, $rating AS review_score
     // Tự động LIKE địa điểm khi đánh giá (lưu vào danh sách yêu thích)
@@ -329,6 +361,7 @@ def add_review(username, location_name, rating, comment):
                 "l_name": location_name,
                 "rating": float(rating),
                 "comment": comment,
+                "sentiment": sentiment,
             },
         )
         stats = run_query(recalc_query, {"l_name": location_name})
@@ -346,6 +379,7 @@ def get_location_reviews(location_name):
     RETURN u.name AS user, 
            r.rating AS rating, 
            r.comment AS comment, 
+           r.sentiment AS sentiment,
            toString(r.timestamp) AS time
     ORDER BY r.timestamp DESC
     """
@@ -393,3 +427,320 @@ def delete_review(username, location_name):
         return True, stats[0] if stats else {"avgRating": 0, "totalReviews": 0}
     except Exception as e:
         return False, str(e)
+
+
+# --------------------------------------------------------------------------------------
+# AI ITINERARY PLANNER (LẬP LỘ TRÌNH)
+# --------------------------------------------------------------------------------------
+def generate_itinerary(username, days=1, preferences=[]):
+    """
+    Tạo lộ trình du lịch thông minh dựa trên đề xuất cá nhân hóa.
+    """
+    # 1. Lấy danh sách địa điểm tốt nhất cho user này
+    # Fix: Category là Node riêng, không phải property string
+    category_match = ""
+    category_where = ""
+
+    if preferences and len(preferences) > 0:
+        # Nếu có preferences, ta cần match với category
+        # Sử dụng pattern comprehension hoặc match explicit
+        # Ở đây dùng WHERE cat.name IN [...] cho đơn giản
+
+        # Build list string: ['Ẩm thực', 'Di tích']
+        pref_list = str(
+            preferences
+        )  # ra format "['a', 'b']" của python cũng ổn cho cypher
+
+        category_match = "MATCH (l)-[:HAS_CATEGORY]->(cat:Category)"
+        category_where = f"AND cat.name IN {pref_list}"
+    else:
+        # Nếu không filter, vẫn cần lấy category info
+        category_match = "OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)"
+
+    # Tái sử dụng logic Interacted/PageRank để scoring
+    # Schema Fix:
+    # - l.pagerank -> l.pagerankNorm (hoặc pagerankScore)
+    # - l.category -> cat.name
+    # - l.description -> l.desc
+
+    query = f"""
+    MATCH (u:User {{name: $name}})
+    MATCH (l:Location)
+    {category_match}
+    WHERE NOT (u)-[:INTERACTED]->(l) AND NOT (u)-[:REVIEWED]->(l)
+    {category_where}
+    
+    OPTIONAL MATCH (l)<-[i:INTERACTED]-(other:User)
+    WITH l, cat, count(i) as popularity, coalesce(l.pagerankNorm, l.pagerankScore, 0.15) as pr
+    
+    // Tính score đơn giản
+    WITH l, cat, (pr * 0.5 + log(popularity + 1) * 0.3) as score
+    ORDER BY score DESC
+    LIMIT 50
+    
+    RETURN l.name as name, 
+           cat.name as category, 
+           l.lat as lat, 
+           l.lng as lng, 
+           l.image as image, 
+           l.desc as description,
+           score
+    """
+
+    try:
+        print(f"DEBUG: Running Planner Query for user={{username}}...")
+
+        candidates = run_query(query, {"name": username})
+        print(f"DEBUG: Candidates found: {{len(candidates) if candidates else 0}}")
+
+        if not candidates:
+            # Fallback nếu không có đề xuất nào
+            print("DEBUG: No candidates found, running fallback...")
+
+            # Fix fallback query tương tự
+            fallback_where = ""
+            if preferences and len(preferences) > 0:
+                fallback_where = f"WHERE cat.name IN {str(preferences)}"
+
+            fallback_query = f"""
+            MATCH (l:Location)
+            OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+            {fallback_where}
+            RETURN l.name as name, 
+                   cat.name as category, 
+                   l.lat as lat, 
+                   l.lng as lng, 
+                   l.image as image, 
+                   l.desc as description, 
+                   coalesce(l.rating, 0) as score
+            ORDER BY score DESC LIMIT 30
+            """
+            candidates = run_query(fallback_query, {{}})
+            print(
+                f"DEBUG: Fallback candidates: {{len(candidates) if candidates else 0}}"
+            )
+        food_keywords = [
+            "ẩm thực",
+            "bún",
+            "chè",
+            "cơm",
+            "bánh",
+            "cafe",
+            "cà phê",
+            "quán",
+            "nhà hàng",
+            "chợ",
+            "món",
+            "ăn",
+            "uống",
+        ]
+
+        pool_sightseeing = []
+        pool_food = []
+
+        for item in candidates:
+            cat = item.get("category", "")
+            if not cat:
+                cat = ""
+            cat_lower = cat.lower()
+
+            # Check keyword (Case Insensitive)
+            is_food = any(k in cat_lower for k in food_keywords)
+
+            if is_food:
+                pool_food.append(item)
+            else:
+                pool_sightseeing.append(item)
+
+        # 3. Sắp xếp lộ trình (Thuật toán Nearest Neighbor - Greedy)
+        # Helper: Tính bình phương khoảng cách (đủ để so sánh, không cần căn bậc 2)
+        def dist_sq(loc1, loc2):
+            try:
+                lat1, lng1 = float(loc1.get("lat", 0)), float(loc1.get("lng", 0))
+                lat2, lng2 = float(loc2.get("lat", 0)), float(loc2.get("lng", 0))
+                return (lat1 - lat2) ** 2 + (lng1 - lng2) ** 2
+            except:
+                return float("inf")
+
+        # Helper: Lấy địa điểm gần nhất từ pool so với vị trí hiện tại
+        def pop_nearest(current_location, pool):
+            if not pool:
+                return None
+
+            # Nếu chưa có vị trí (đầu ngày), lấy địa điểm điểm cao nhất (đầu list)
+            if not current_location:
+                return pool.pop(0)
+
+            # Tìm địa điểm gần nhất trong pool
+            nearest_idx = 0
+            min_dist = float("inf")
+
+            for i, loc in enumerate(pool):
+                d = dist_sq(current_location, loc)
+                if d < min_dist:
+                    min_dist = d
+                    nearest_idx = i
+
+            return pool.pop(nearest_idx)
+
+        print(
+            f"DEBUG: Sightseeing pool: {len(pool_sightseeing)}, Food pool: {len(pool_food)}"
+        )
+
+        itinerary = []
+
+        for day in range(1, days + 1):
+            day_plan = {"day": day, "activities": []}
+
+            # Biến lưu vị trí hiện tại để tìm điểm tiếp theo gần đó
+            current_loc = None
+
+            # SÁNG: Tham quan (Điểm Neo - Chọn nơi Hot nhất còn lại)
+            loc = pop_nearest(None, pool_sightseeing)
+            if loc:
+                day_plan["activities"].append(
+                    {"time": "Sáng", "type": "visit", "location": loc}
+                )
+                current_loc = loc
+
+            # TRƯA: Ăn uống (Tìm quán gần địa điểm sáng nhất)
+            loc = pop_nearest(current_loc, pool_food)
+            # Nếu hết quán ăn thì thôi, hoặc fallback (logic cũ)
+            if loc:
+                day_plan["activities"].append(
+                    {"time": "Trưa", "type": "food", "location": loc}
+                )
+                current_loc = loc
+
+            # CHIỀU: Tham quan (Tìm nơi gần quán ăn trưa nhất)
+            # Nếu trưa ko ăn, thì tìm gần địa điểm sáng
+            loc = pop_nearest(current_loc, pool_sightseeing)
+            if loc:
+                day_plan["activities"].append(
+                    {"time": "Chiều", "type": "visit", "location": loc}
+                )
+                current_loc = loc
+
+            # TỐI: Ăn uống / Chill (Tìm nơi gần địa điểm chiều nhất)
+            loc = pop_nearest(current_loc, pool_food)
+
+            # Nếu hết đồ ăn, thử tìm chỗ đi dạo tối (pool sightseeing)
+            if not loc:
+                loc = pop_nearest(current_loc, pool_sightseeing)
+
+            if loc:
+                # Check type để gán label đúng
+                act_type = "food"
+                cat_lower = loc.get("category", "").lower()
+                if not any(k in cat_lower for k in food_keywords):
+                    act_type = "visit"
+
+                day_plan["activities"].append(
+                    {"time": "Tối", "type": act_type, "location": loc}
+                )
+
+            itinerary.append(day_plan)
+
+        print("DEBUG: Itinerary generated successfully with Spatial Optimization")
+        return itinerary
+
+    except Exception as e:
+        print(f"[ERROR] Generating itinerary: {e}")
+        import traceback
+
+        traceback.print_exc()
+        return []
+
+
+# --------------------------------------------------------------------------------------
+# USER ACTIVITY HISTORY
+# --------------------------------------------------------------------------------------
+def get_user_reviews(username):
+    """Lấy danh sách đánh giá của người dùng"""
+    query = """
+    MATCH (u:User {name: $username})-[r:REVIEWED]->(l:Location)
+    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(c:Category)
+    RETURN l.name as location, l.lat as lat, l.lng as lng, l.image as image, c.name as category,
+           r.rating as rating, r.comment as comment, r.sentiment as sentiment, toString(r.timestamp) as timestamp
+    ORDER BY r.timestamp DESC
+    """
+    return run_query(query, {"username": username})
+
+
+def get_user_likes(username):
+    """Lấy danh sách địa điểm người dùng đã thích"""
+    query = """
+    MATCH (u:User {name: $username})-[:LIKED]->(l:Location)
+    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(c:Category)
+    RETURN l.name as location, l.lat as lat, l.lng as lng, l.image as image, c.name as category
+    ORDER BY l.name ASC
+    """
+    return run_query(query, {"username": username})
+
+
+# --------------------------------------------------------------------------------------
+# ITINERARY MANAGEMENT (LƯU LỘ TRÌNH)
+# --------------------------------------------------------------------------------------
+import json
+
+
+def save_user_itinerary(username, itinerary_data):
+    """Lưu lộ trình vào DB"""
+    data_json = json.dumps(itinerary_data, ensure_ascii=False)
+    # Lấy tiêu đề đại diện (VD: 3 ngày tham quan Huế)
+    days_count = len(itinerary_data)
+    title = f"Lịch trình {days_count} ngày tại Huế"
+
+    query = """
+    MATCH (u:User {name: $username})
+    CREATE (i:Itinerary {
+        id: randomUUID(),
+        title: $title,
+        data: $data,
+        days: $days,
+        created_at: datetime()
+    })
+    MERGE (u)-[:CREATED]->(i)
+    RETURN i.id
+    """
+    try:
+        run_query(
+            query,
+            {
+                "username": username,
+                "title": title,
+                "data": data_json,
+                "days": days_count,
+            },
+        )
+        return True, "Lưu thành công!"
+    except Exception as e:
+        print(f"Error saving itinerary: {e}")
+        return False, str(e)
+
+
+def get_user_itineraries(username):
+    """Lấy danh sách lộ trình của user"""
+    query = """
+    MATCH (u:User {name: $username})-[:CREATED]->(i:Itinerary)
+    RETURN i.id as id, i.title as title, i.days as days, i.data as data, toString(i.created_at) as created_at
+    ORDER BY i.created_at DESC
+    """
+    results = run_query(query, {"username": username})
+    # Parse JSON string back to object
+    for r in results:
+        try:
+            r["data"] = json.loads(r["data"])
+        except:
+            r["data"] = []
+    return results
+
+
+def delete_user_itinerary(username, itinerary_id):
+    """Xóa lộ trình"""
+    query = """
+    MATCH (u:User {name: $username})-[:CREATED]->(i:Itinerary {id: $id})
+    DETACH DELETE i
+    """
+    run_query(query, {"username": username, "id": itinerary_id})
+    return True

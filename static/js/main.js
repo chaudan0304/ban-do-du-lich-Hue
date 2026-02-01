@@ -14,6 +14,7 @@ var isPickingMode = null;
 var currentCategory = "All";
 var heatLayer = null;
 var isHeatmapActive = false;
+let currentItineraryData = null;
 
 // Hàm gọi API chung
 async function apiFetch(url, options = {}) {
@@ -160,7 +161,8 @@ function checkLoginStatus() {
       if (data && data.is_logged_in) {
         currentUser = data.username;
         userRole = data.role || "user";
-        showLoggedView(data.username);
+        // Truyền thêm fullname vào hàm hiển thị
+        showLoggedView(data.username, data.fullname);
         analyzeUser(true);
       } else {
         currentUser = null;
@@ -171,20 +173,20 @@ function checkLoginStatus() {
     .catch(() => showGuestView());
 }
 
-function showLoggedView(username) {
+function showLoggedView(username, fullname) {
   document.getElementById("header-login-btn").style.display = "none";
   const userInfo = document.getElementById("header-user-info");
+  
+  // Ưu tiên hiển thị fullname nếu có
+  const displayName = fullname || username;
+
   if (userInfo) {
     userInfo.style.display = "flex";
-    document.getElementById("header-username").innerText = username;
-    
-    // Nút Profile
-    const btnProfile = `
-      <button onclick="openUserProfile()" title="Hồ sơ cá nhân" style="display:inline-block; margin-right:5px; border:none; background: #e0f2fe; color: #0284c7; width:26px; height:26px; border-radius:50%; cursor:pointer;">
-        <i class="fas fa-user-edit"></i>
-      </button>
-    `;
-    
+    // document.getElementById("header-username").innerText = displayName; // Đã có trong template bên dưới
+
+    // Nút Profile (Đã gộp vào Avatar) - Giữ code cũ để tham khảo nếu cần
+    // const btnProfile = ...
+
     // Nút Admin
     let btnAdminHTML = "";
     if (username === "admin" || userRole === "admin") {
@@ -203,11 +205,9 @@ function showLoggedView(username) {
     `;
 
     // Cập nhật lại HTML của header-user-info
-    // Giữ lại avatar
     userInfo.innerHTML = `
-      <div class="user-avatar-small"></div>
-      <span id="header-username">${username}</span>
-      ${btnProfile}
+      <i class="fas fa-user-circle" onclick="openUserProfile()" title="Hồ sơ cá nhân / Chỉnh sửa" style="font-size: 28px; color: var(--primary); cursor: pointer; transition: transform 0.2s;"></i>
+      <span id="header-username" onclick="openUserProfile()" style="cursor: pointer;" title="Hồ sơ cá nhân">${displayName}</span>
       ${btnAdminHTML}
       ${btnLogout}
     `;
@@ -235,6 +235,55 @@ function openAuthModal() {
 }
 function closeAuthModal() {
   document.getElementById("authModal").classList.remove("active");
+}
+
+function openResetPasswordModal() {
+  closeAuthModal(); // Đóng modal đăng nhập trước
+  document.getElementById("resetPasswordModal").classList.add("active");
+}
+
+function closeResetPasswordModal() {
+  document.getElementById("resetPasswordModal").classList.remove("active");
+}
+
+async function handleResetPassword() {
+  const username = document.getElementById("resetUsername").value;
+  const email = document.getElementById("resetEmail").value;
+  const newPass = document.getElementById("resetNewPass").value;
+  const msgEl = document.getElementById("resetMsg");
+
+  if (!username || !email || !newPass) {
+    msgEl.innerText = "Vui lòng nhập đầy đủ thông tin.";
+    return;
+  }
+  if (newPass.length < 6) {
+    msgEl.innerText = "Mật khẩu mới phải có ít nhất 6 ký tự.";
+    return;
+  }
+
+  msgEl.innerText = "Đang xử lý...";
+  msgEl.style.color = "#4f46e5";
+
+  try {
+    const res = await apiFetch("/api/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, new_password: newPass }),
+    });
+
+    showNotification({
+      type: "success",
+      title: "Thành công",
+      message: res.message || "Đã đổi mật khẩu thành công!",
+      btnText: "Đăng nhập ngay",
+    });
+
+    closeResetPasswordModal();
+    openAuthModal();
+  } catch (err) {
+    msgEl.innerText = err.message || "Lỗi xử lý.";
+    msgEl.style.color = "red";
+  }
 }
 function switchTab(tab) {
   document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
@@ -285,7 +334,7 @@ function handleLogin() {
         userRole = data.role;
 
         closeAuthModal();
-        checkLoginStatus();
+        checkLoginStatus(); // Gọi cái này nó sẽ tự fetch fullname và hiển thị luôn
 
         // Load lại chi tiết địa điểm nếu đang mở (để cập nhật nút Like)
         if (typeof currentOpenLoc !== "undefined" && currentOpenLoc !== null) {
@@ -295,7 +344,7 @@ function handleLogin() {
         showNotification({
           type: "success",
           title: "Đăng nhập thành công",
-          message: `Chào mừng <b>${data.username}</b>!`,
+          message: `Chào mừng <b>${data.fullname || data.username}</b>!`,
           btnText: "Bắt đầu",
         });
 
@@ -447,25 +496,39 @@ function getRecommendations(user) {
 // ============================================================================
 // PHẦN 5: GIAO DIỆN & BẢN ĐỒ
 // ============================================================================
-async function loadLocations(cat = "All") {
-  document.getElementById("locationList").innerHTML = `<div style="text-align:center; padding:20px;">Đang tải...</div>`;
+async function loadLocations(cat = "All", autoFit = true) {
+  const listEl = document.getElementById("locationList");
+  listEl.innerHTML = `<div style="text-align:center; padding:20px;">Đang tải...</div>`;
+  
   try {
-    let data;
-    if (cat === "All" && cachedAllLocations) data = cachedAllLocations;
-    else {
-      let url = "/api/locations";
-      if (cat !== "All") url += `?category=${encodeURIComponent(cat)}`;
-      data = await apiFetch(url);
-      if (cat === "All" && data && data.length > 0) cachedAllLocations = data;
+    // 1. Nếu chưa có cache, gọi API lấy toàn bộ 1 lần
+    if (!cachedAllLocations) {
+       const initialData = await apiFetch("/api/locations"); // Mặc định lấy All
+       cachedAllLocations = initialData || [];
     }
-    currentListData = data || [];
-    renderLocations(currentListData);
+
+    // 2. Lọc dữ liệu từ Cache (Client-side filtering)
+    let data = cachedAllLocations;
+    if (cat !== "All") {
+        const keyword = cat.trim().toLowerCase();
+        data = cachedAllLocations.filter(loc => 
+            loc.category && loc.category.toLowerCase().includes(keyword)
+        );
+    }
+    
+    currentListData = data;
+    renderLocations(currentListData, autoFit);
+    
+    // Trả về promise resolved (dù không cần dữ liệu trả về)
+    return Promise.resolve();
+
   } catch (err) {
-    document.getElementById("locationList").innerHTML = "Lỗi tải dữ liệu";
+    console.error(err);
+    listEl.innerHTML = "Lỗi tải dữ liệu";
   }
 }
 
-function renderLocations(data) {
+function renderLocations(data, autoFit = true) {
   const list = document.getElementById("locationList");
   if (markerLayer) markerLayer.clearLayers();
   markersMap = {};
@@ -522,17 +585,29 @@ function renderLocations(data) {
   });
 
   // Tự động fitBounds khi lọc danh mục
-  if (latLngs.length > 0 && map) {
+  if (autoFit && latLngs.length > 0 && map) {
     setTimeout(() => {
       map.fitBounds(latLngs, { padding: [50, 50], maxZoom: 15 });
     }, 100);
   }
 }
 
-function showDetail(loc) {
+async function showDetail(loc) {
+  console.log(`[DEBUG] Clicked: ${loc.name}, Category: ${loc.category}, Current Filter: ${currentCategory}`);
+
+  // Tự động lọc bản đồ theo danh mục của địa điểm đang xem
   if (currentCategory !== loc.category) {
-    // console.log("Tự động chuyển danh mục sang:", loc.category);
-    // filterData(loc.category); // (Tắt tính năng nhảy danh mục để tránh khó chịu)
+    console.log(`[DEBUG] Switching filter to: ${loc.category}`);
+    // Gọi hàm lọc dữ liệu và ĐỢI nó xong (để marker được vẽ lại)
+    // autoFit = false: Không zoom toàn bộ category, để dành zoom vào địa điểm cụ thể bên dưới
+    await filterData(loc.category, null, false);
+    
+    // Cập nhật giao diện nút bấm (Chip)
+    const chips = document.querySelectorAll(".chip");
+    chips.forEach(c => {
+        if (c.innerText.includes(loc.category)) c.classList.add("active");
+        else c.classList.remove("active");
+    });
   }
 
   currentOpenLoc = loc;
@@ -624,6 +699,7 @@ function showDetail(loc) {
             <div class="detail-meta">
               <span class="meta-tag" style="background:#059669; color:white;">⭐ ${displayScore}</span>
               <span class="meta-tag"><i class="fas fa-tag"></i> ${loc.category}</span>
+              ${userLikedSet.has(loc.name) ? '<span class="meta-tag visited-tag"><i class="fas fa-check-circle"></i> Đã ghé thăm</span>' : ''}
             </div>
 
             <p class="detail-desc">${loc.description || "..."}</p>
@@ -762,14 +838,37 @@ function flyToLocation(lat, lng, name) {
 }
 
 function showDetailFromData(name, lat, lng, image) {
-  showDetail({ name, lat, lng, image, category: "Đã ghé thăm", description: "Địa điểm trong lịch sử" });
+    // Đóng modal profile nếu đang mở để hiển thị map bên dưới
+    closeUserProfile();
+
+    // Tìm thông tin đầy đủ trong bộ nhớ đệm
+    let realLoc = null;
+    if (cachedAllLocations) {
+        realLoc = cachedAllLocations.find(l => l.name === name);
+    }
+    if (!realLoc && currentListData) {
+        realLoc = currentListData.find(l => l.name === name);
+    }
+
+    if (realLoc) {
+        showDetail(realLoc);
+    } else {
+        // Fallback nếu chưa tải dữ liệu (ít khi xảy ra)
+        showDetail({ 
+            name, lat, lng, image, 
+            category: "Đã ghé thăm", 
+            description: "Đang tải thông tin chi tiết...", // Sửa lại nội dung placeholder
+            score: 0 
+        });
+        // Có thể gọi loadLocations("All") ngầm để cập nhật sau
+    }
 }
 
 function closeDetail() {
   document.getElementById("detail-panel").classList.remove("active");
 }
 
-function filterData(cat, btn) {
+function filterData(cat, btn, autoFit = true) {
   // Cập nhật biến toàn cục
   currentCategory = cat;
 
@@ -786,8 +885,8 @@ function filterData(cat, btn) {
     });
   }
 
-  // 2. Tải lại dữ liệu
-  loadLocations(cat);
+  // 2. Tải lại dữ liệu (TRẢ VỀ PROMISE)
+  return loadLocations(cat, autoFit);
 }
 
 function handleLocalSearch() {
@@ -800,7 +899,10 @@ function handleLocalSearch() {
     return;
   }
 
-  const filtered = currentListData.filter((loc) => {
+  // Ưu tiên tìm trên toàn bộ dữ liệu (cache) nếu có
+  const sourceData = cachedAllLocations || currentListData;
+
+  const filtered = sourceData.filter((loc) => {
     const nameMatch = loc.name.toLowerCase().includes(keyword);
     const descMatch = loc.description ? loc.description.toLowerCase().includes(keyword) : false;
     return nameMatch || descMatch;
@@ -1103,8 +1205,8 @@ async function submitAddLocation() {
   });
 
   closeAddModal();
-  loadLocations("All");
   cachedAllLocations = null;
+  loadLocations("All");
   loadAdminStats();
 }
 
@@ -1539,6 +1641,17 @@ function loadReviews(locationName) {
                         <a href="#" onclick="deleteReview('${locationName}'); return false;" style="color:#ef4444;">Xóa</a>
                     </div>`;
             }
+
+            // Xử lý hiển thị cảm xúc
+            let sentimentHtml = "";
+            if (rev.sentiment === "Positive") {
+                sentimentHtml = `<span class="sentiment-badge sentiment-positive" title="AI phân tích: Tích cực"><i class="fas fa-smile"></i> Tích cực</span>`;
+            } else if (rev.sentiment === "Negative") {
+                sentimentHtml = `<span class="sentiment-badge sentiment-negative" title="AI phân tích: Tiêu cực"><i class="fas fa-frown"></i> Tiêu cực</span>`;
+            } else {
+                sentimentHtml = `<span class="sentiment-badge sentiment-neutral" title="AI phân tích: Trung tính"><i class="fas fa-meh"></i> Trung tính</span>`;
+            }
+
             return `
             <div class="review-item">
                 <div class="review-avatar"><i class="fas fa-user-circle"></i></div>
@@ -1550,6 +1663,7 @@ function loadReviews(locationName) {
                     
                     <div class="review-rating">
                         <span class="review-stars">${'★'.repeat(rev.rating)}</span>
+                        ${sentimentHtml}
                         ${actions}
                     </div>
                     
@@ -1583,6 +1697,8 @@ function editReview(locationName, rating, comment) {
 // ============================================================================
 // PHẦN 8: QUẢN LÝ HỒ SƠ CÁ NHÂN (PROFILE)
 // ============================================================================
+let userActivityData = { likes: [], reviews: [] };
+
 async function openUserProfile() {
     const modal = document.getElementById("profileModal");
     modal.classList.add("active");
@@ -1597,8 +1713,148 @@ async function openUserProfile() {
             document.getElementById("profileRole").innerText = data.role === "admin" ? "Quản trị viên" : "Thành viên";
             document.getElementById("profileJoinDate").innerText = data.created_at ? new Date(data.created_at).toLocaleDateString('vi-VN') : "N/A";
         }
+
+        // Tải lịch sử hoạt động VÀ lộ trình
+        const [activity, itineraries] = await Promise.all([
+             apiFetch("/api/user/activity"),
+             apiFetch("/api/itineraries")
+        ]);
+
+        if(activity && activity.success) {
+            userActivityData.likes = activity.likes || [];
+            userActivityData.reviews = activity.reviews || [];
+        }
+        if(itineraries && itineraries.success) {
+            userActivityData.itineraries = itineraries.data || [];
+        } else {
+            userActivityData.itineraries = [];
+        }
+
+        // Mặc định hiển thị tab 'likes'
+        const activeTabBtn = document.querySelector(".activity-tabs .tab-btn.active");
+        let currentTab = 'likes';
+        if (activeTabBtn.innerText.includes("Đánh giá")) currentTab = 'reviews';
+        if (activeTabBtn.innerText.includes("Lộ trình")) currentTab = 'itineraries';
+        
+        renderActivity(currentTab);
+
     } catch(e) {
+        console.error(e);
         showNotification({ type: "error", message: "Không thể tải thông tin hồ sơ" });
+    }
+}
+
+function switchActivityTab(tab, btn) {
+    // UI toggle
+    document.querySelectorAll(".activity-tabs .tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderActivity(tab);
+}
+
+function renderActivity(tab) {
+    const container = document.getElementById("activityContent");
+    container.innerHTML = "";
+    
+    const items = userActivityData[tab] || [];
+    
+    if (items.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:#9ca3af; font-size:12px;">Chưa có hoạt động nào</div>`;
+        return;
+    }
+    
+    if (tab === 'likes') {
+        container.innerHTML = items.map(p => `
+            <div class="activity-item-compact">
+                <img src="${p.image || '/static/images/no-image.png'}" onerror="this.src='/static/images/no-image.png'">
+                <div class="activity-info">
+                    <h5>${p.name || p.location}</h5>
+                    <p>${p.category}</p>
+                </div>
+                <button class="btn-tool-delete" style="padding:4px 8px;" onclick="handleLikeInProfile(this, '${p.name || p.location}')"><i class="fas fa-trash"></i></button>
+            </div>
+        `).join("");
+    } else if (tab === 'reviews') {
+        container.innerHTML = items.map(r => `
+            <div class="activity-item-compact">
+                <div class="activity-info">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h5>${r.location}</h5>
+                        <span class="review-tag">${r.rating} ⭐</span>
+                    </div>
+                    <p style="font-style:italic;">"${r.comment || 'Không có bình luận'}"</p>
+                    <p style="font-size:10px; margin-top:4px;"><i class="fas fa-calendar-alt"></i> ${r.time || 'N/A'}</p>
+                </div>
+            </div>
+        `).join("");
+    } else if (tab === 'itineraries') {
+        container.innerHTML = items.map(it => `
+            <div class="activity-item-compact">
+                <div class="activity-info">
+                    <h5><i class="fas fa-route"></i> ${it.title}</h5>
+                    <p style="font-size:11px;">Thời lượng: ${it.days} ngày</p>
+                    <p style="font-size:10px; color:#666; margin-top:2px;">Tạo ngày: ${it.created_at || 'Vừa xong'}</p>
+                </div>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-tool-edit" onclick='viewSavedItinerary(${JSON.stringify(it.data)})'><i class="fas fa-eye"></i></button>
+                    <button class="btn-tool-delete" onclick="deleteItinerary('${it.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `).join("");
+    }
+}
+
+// Helper: Xem lại lộ trình đã lưu
+function viewSavedItinerary(planData) {
+    if (!planData) return;
+    renderItinerary(planData);
+    openPlannerResultModal();
+    // Ẩn modal profile để nhìn rõ hơn
+    document.getElementById("profileModal").classList.remove("active");
+}
+
+// Helper: Xóa lộ trình
+async function deleteItinerary(id) {
+    if (!confirm("Bạn muốn xóa lộ trình này?")) return;
+    try {
+        await apiFetch(`/api/itineraries/${id}`, { method: "DELETE" });
+        // Tải lại danh sách
+        openUserProfile(); 
+    } catch(e) {
+        alert("Lỗi xóa: " + e.message);
+    }
+}
+
+// Hàm phụ để Unlike ngay trong Profile
+async function handleLikeInProfile(btn, name) {
+    if (!confirm(`Bạn muốn bỏ thích ${name}?`)) return;
+    
+    try {
+        const res = await apiFetch("/api/like", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ location_name: name }),
+        });
+        
+        if (res) {
+            // Cập nhật local data và render lại
+            userActivityData.likes = userActivityData.likes.filter(l => l.location !== name);
+            renderActivity('likes');
+            
+            // Cập nhật global state
+            userLikedSet.delete(name);
+            analyzeUser(true); // Cập nhật sidebar
+            
+            // Nếu panel đang mở địa điểm này, cập nhật nút like
+            if (currentOpenLoc && currentOpenLoc.name === name) {
+                const globalLikeBtn = document.querySelector('.btn-like');
+                if (globalLikeBtn) {
+                    globalLikeBtn.classList.remove('liked');
+                    globalLikeBtn.innerHTML = `<i class="far fa-heart"></i> Yêu thích`;
+                }
+            }
+        }
+    } catch(e) {
+        alert("Lỗi khi thực hiện thao tác");
     }
 }
 
@@ -1787,3 +2043,161 @@ function setupSidebarResizer() {
 }
 
 
+
+// ===========================================
+// AI PLANNER LOGIC
+// ===========================================
+function openPlannerInputModal() {
+    document.getElementById("plannerInputModal").classList.add("active");
+}
+function closePlannerInputModal() {
+    document.getElementById("plannerInputModal").classList.remove("active");
+}
+
+function openPlannerResultModal() {
+    document.getElementById("plannerResultModal").classList.add("active");
+}
+function closePlannerResultModal() {
+    document.getElementById("plannerResultModal").classList.remove("active");
+}
+
+function changePlanDays(delta) {
+    const input = document.getElementById("planDays");
+    const display = document.getElementById("dayDisplay");
+    let val = parseInt(input.value) || 1;
+    
+    val += delta;
+    if (val < 1) val = 1;
+    if (val > 7) val = 7; // Max 1 tuần để AI không bị quá tải
+    
+    input.value = val;
+    display.innerText = val + " Ngày";
+}
+
+async function submitPlanner() {
+    // 1. Get input
+    const days = document.getElementById("planDays").value;
+    const prefCheckboxes = document.querySelectorAll('input[name="planPref"]:checked');
+    const preferences = Array.from(prefCheckboxes).map(cb => cb.value);
+    
+    // UI state
+    const btn = document.querySelector("#plannerInputModal .btn-save-gradient");
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang thiết kế...';
+    btn.disabled = true;
+    
+    try {
+        const res = await apiFetch("/api/planner/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                days: days,
+                preferences: preferences
+            })
+        });
+        
+        if (res.success) {
+            closePlannerInputModal();
+            currentItineraryData = res.plan; // Lưu
+            renderItinerary(res.plan);
+            openPlannerResultModal();
+        } else {
+            alert("Lỗi tạo lộ trình: " + (res.error || "Không rõ"));
+        }
+    } catch (e) {
+        alert("Lỗi kết nối AI Planner");
+        console.error(e);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+function renderItinerary(plan) {
+    const container = document.getElementById("plannerTimeline");
+    container.innerHTML = "";
+    
+    if (!plan || plan.length === 0) {
+        container.innerHTML = `<div class="empty-state">Không tìm thấy lộ trình phù hợp. Hãy thử thay đổi sở thích.</div>`;
+        return;
+    }
+    
+    // Add Summary Header
+    const summaryDiv = document.createElement("div");
+    summaryDiv.style.textAlign = "center";
+    summaryDiv.style.marginBottom = "30px";
+    summaryDiv.innerHTML = `
+        <h2 style="color:var(--primary); margin-bottom:5px;">Hành trình ${plan.length} ngày</h2>
+        <p style="color:var(--text-secondary); font-size:14px;">Khám phá Huế trọn vẹn</p>
+    `;
+    container.appendChild(summaryDiv);
+    
+    plan.forEach(dayInfo => {
+        const dayBlock = document.createElement("div");
+        dayBlock.className = "day-block";
+        
+        const dayHeader = document.createElement("div");
+        dayHeader.className = "day-header";
+        dayHeader.innerText = `Ngày ${dayInfo.day}`;
+        dayBlock.appendChild(dayHeader);
+        
+        const timeline = document.createElement("div");
+        timeline.className = "day-timeline";
+        
+        dayInfo.activities.forEach(act => {
+            const actEl = document.createElement("div");
+            actEl.className = "activity-item";
+            
+            // Icon Mapping
+            let iconClass = "fa-map-marker-alt";
+            if (act.type === "food") iconClass = "fa-utensils";
+            else if (act.type === "visit") iconClass = "fa-camera";
+            else if (act.type === "coffee") iconClass = "fa-coffee";
+            
+            const loc = act.location;
+            
+            actEl.innerHTML = `
+                <div class="activity-time">
+                    <i class="fas ${iconClass} activity-icon"></i>
+                    <span>${act.time}</span>
+                </div>
+                <div class="activity-content">
+                    <h4>${loc.name}</h4>
+                    <span class="sentiment-badge sentiment-neutral" style="font-size:10px; margin-left:0; margin-bottom:4px; display:inline-block;">${loc.category}</span>
+                    <p>${loc.description || "Chưa có mô tả"}</p>
+                </div>
+                <img src="${loc.image || '/static/images/no-image.png'}" class="act-img" loading="lazy" onerror="this.src='/static/images/no-image.png'">
+            `;
+            
+            // Interaction: Click to show detail
+            actEl.onclick = () => showDetail(loc);
+            
+            timeline.appendChild(actEl);
+        });
+        
+        dayBlock.appendChild(timeline);
+        container.appendChild(dayBlock);
+    });
+}
+
+async function saveItinerary() {
+    if (!currentUser) return openAuthModal();
+    if (!currentItineraryData) return alert("Không có lộ trình để lưu!");
+    
+    try {
+        const res = await apiFetch("/api/itineraries", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ itinerary: currentItineraryData })
+        });
+        
+        if (res.success) {
+            showNotification({type: "success", title: "Thành công", message: res.message});
+            closePlannerResultModal();
+        } else {
+             showNotification({type: "error", title: "Lỗi", message: res.error});
+        }
+    } catch (e) {
+        showNotification({type: "error", title: "Lỗi", message: e.message});
+    }
+}

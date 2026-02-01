@@ -100,6 +100,11 @@
         </div>
 
         <div id="logged-view" style="display: none; margin: 0 24px">
+          <!-- Nút kích hoạt AI Planner -->
+          <button class="btn-ai-planner" onclick="openPlannerInputModal()">
+             <i class="fas fa-magic"></i> Lập Lộ Trình Thông Minh
+          </button>
+
           <div id="user-history" class="history-section" style="display: none">
             <div class="history-title">
               <i class="fas fa-history"></i> Địa điểm đã thích:
@@ -261,6 +266,9 @@
               text-align: center;
             "
           ></p>
+          <div style="text-align: center; margin-top: 5px;">
+            <a href="#" onclick="openResetPasswordModal()" style="font-size: 13px; color: #666; text-decoration: none;">Quên mật khẩu?</a>
+          </div>
         </div>
 
         <div id="registerForm" class="auth-form" style="display: none">
@@ -443,19 +451,13 @@
             </div>
           </div>
 
-          <div
-            class="form-group"
-            style="margin-top: -10px; margin-bottom: 15px"
-          >
-            <button
+          <button
               type="button"
-              class="btn-action"
-              style="width: 100%; padding: 8px"
+              class="btn-map-picker"
               onclick="activateEditMapPicker()"
             >
-              <i class="fas fa-map-marker-alt"></i> Chọn lại vị trí trên bản đồ
-            </button>
-          </div>
+              <i class="fas fa-map-marked-alt"></i> Chọn lại vị trí trên bản đồ
+          </button>
 
           <div class="form-group">
             <label class="label-fancy"
@@ -639,7 +641,22 @@
                 <span>THAM GIA: <b id="profileJoinDate">...</b></span>
             </div>
 
-            <button class="btn-save-gradient" onclick="saveUserProfile()"><i class="fas fa-save"></i> Cập nhật hồ sơ</button>
+            <!-- Hoạt động của tôi -->
+            <div class="profile-activity-section">
+                <h4 style="font-size: 14px; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-clock-rotate-left"></i> Lịch sử hoạt động
+                </h4>
+                <div class="activity-tabs">
+                    <button class="tab-btn active" onclick="switchActivityTab('likes', this)">Đã thích</button>
+                    <button class="tab-btn" onclick="switchActivityTab('reviews', this)">Đánh giá</button>
+                    <button class="tab-btn" onclick="switchActivityTab('itineraries', this)">Lộ trình</button>
+                </div>
+                <div id="activityContent" style="max-height: 250px; overflow-y: auto; background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 10px;">
+                    <!-- Activity items will be loaded here -->
+                </div>
+            </div>
+
+            <button class="btn-save-gradient" onclick="saveUserProfile()" style="margin-top: 20px;"><i class="fas fa-save"></i> Cập nhật hồ sơ</button>
         </div>
     </div>
   </div>
@@ -656,6 +673,121 @@
         <div id="userCommentsList" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
           <!-- Comments will be loaded here -->
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: AI PLANNER INPUT -->
+  <!-- ======================================================= -->
+  <div id="plannerInputModal" class="modal">
+    <div class="modal-content-fancy" style="max-width: 450px;">
+        <button class="close-btn-white" onclick="closePlannerInputModal()"><i class="fas fa-times"></i></button>
+        <div class="modal-header-gradient" style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
+            <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                <i class="fas fa-route" style="font-size: 24px; color: white;"></i>
+            </div>
+            <h3 class="modal-title-fancy">Thiết kế lịch trình</h3>
+            <p style="font-size: 13px; opacity: 0.9; margin-top: 4px;">AI sẽ gợi ý lộ trình tối ưu cho bạn</p>
+        </div>
+        
+        <div class="modal-body-fancy">
+            <!-- 1. Chọn số ngày -->
+            <label class="form-label">📅 Bạn dự định đi bao lâu?</label>
+            <div class="counter-selector" style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 10px;">
+                <button class="btn-counter" onclick="changePlanDays(-1)" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ddd; background: white; cursor: pointer; color: var(--primary); font-size: 16px; transition: all 0.2s;"><i class="fas fa-minus"></i></button>
+                <span id="dayDisplay" class="counter-value" style="font-size: 18px; font-weight: 700; color: var(--text-main); min-width: 80px; text-align: center;">1 Ngày</span>
+                <button class="btn-counter" onclick="changePlanDays(1)" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ddd; background: white; cursor: pointer; color: var(--primary); font-size: 16px; transition: all 0.2s;"><i class="fas fa-plus"></i></button>
+                <input type="hidden" id="planDays" value="1">
+            </div>
+            
+            <!-- 2. Chọn sở thích -->
+            <label class="form-label" style="margin-top:20px;">❤️ Sở thích ưu tiên (Chọn nhiều)</label>
+            <div class="preference-grid">
+                <label class="pref-item">
+                    <input type="checkbox" name="planPref" value="Di tích">
+                    <span>🏛️ Di tích</span>
+                </label>
+                <label class="pref-item">
+                    <input type="checkbox" name="planPref" value="Ẩm thực">
+                    <span>🍜 Ẩm thực</span>
+                </label>
+                <label class="pref-item">
+                    <input type="checkbox" name="planPref" value="Thiên nhiên">
+                    <span>🌳 Thiên nhiên</span>
+                </label>
+                <label class="pref-item">
+                    <input type="checkbox" name="planPref" value="Tâm linh">
+                    <span>🛕 Tâm linh</span>
+                </label>
+                 <label class="pref-item">
+                    <input type="checkbox" name="planPref" value="Check-in">
+                    <span>📸 Check-in</span>
+                </label>
+                 <label class="pref-item">
+                    <input type="checkbox" name="planPref" value="Cafe">
+                    <span>☕ Cafe</span>
+                </label>
+            </div>
+            
+            <button class="btn-save-gradient" onclick="submitPlanner()" style="margin-top: 25px;">
+                <i class="fas fa-magic"></i> Tạo lộ trình ngay
+            </button>
+        </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: AI PLANNER RESULT -->
+  <!-- ======================================================= -->
+  <div id="plannerResultModal" class="modal">
+    <div class="modal-content-fancy" style="max-width: 800px; height: 90vh; display: flex; flex-direction: column;">
+        <button class="close-btn-white" onclick="closePlannerResultModal()"><i class="fas fa-times"></i></button>
+        
+        <div class="modal-header-gradient" style="background: linear-gradient(135deg, #10b981, #059669); flex-shrink: 0;">
+            <h3 class="modal-title-fancy"><i class="fas fa-map-marked-alt"></i> Lộ trình gợi ý</h3>
+            <p style="font-size: 13px; opacity: 0.9;">Được cá nhân hóa dành riêng cho bạn</p>
+        </div>
+        
+        <div class="modal-body-fancy" style="flex: 1; overflow-y: auto; padding: 0; background: #f8fafc;">
+            <div id="plannerTimeline" class="timeline-container">
+                <!-- Nội dung lặp lịch trình sẽ được JS render vào đây -->
+            </div>
+        </div>
+        
+        <div class="modal-footer-fancy" style="padding: 15px; border-top: 1px solid #e2e8f0; background: white; text-align: right;">
+            <button class="btn-cancel" onclick="closePlannerResultModal()">Đóng</button>
+            <button class="btn-save" onclick="saveItinerary()"><i class="fas fa-save"></i> Lưu lộ trình</button>
+        </div>
+    </div>
+  </div>
+
+  <!-- Modal Reset Password -->
+  <div id="resetPasswordModal" class="modal">
+    <div class="modal-content-fancy" style="max-width: 400px;">
+      <div class="modal-header-gradient" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+          <h3 class="modal-title-fancy">🔐 Đặt lại mật khẩu</h3>
+          <div class="close-btn-white" onclick="closeResetPasswordModal()">
+              <i class="fas fa-times"></i>
+          </div>
+      </div>
+      <div class="modal-body-fancy">
+          <div class="form-group">
+              <label class="label-fancy">Tên tài khoản</label>
+              <input type="text" id="resetUsername" class="input-fancy" placeholder="Tên đăng nhập...">
+          </div>
+          <div class="form-group">
+              <label class="label-fancy">Email đăng ký</label>
+              <input type="email" id="resetEmail" class="input-fancy" placeholder="Email đã đăng ký...">
+          </div>
+          <div class="form-group">
+              <label class="label-fancy">Mật khẩu mới</label>
+              <input type="password" id="resetNewPass" class="input-fancy" placeholder="Mật khẩu mới (min 6 ký tự)...">
+          </div>
+          <button class="btn-full" onclick="handleResetPassword()" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+              <i class="fas fa-key"></i> Đổi mật khẩu
+          </button>
+          <p id="resetMsg" style="color: red; font-size: 12px; margin-top: 10px; text-align: center;"></p>
       </div>
     </div>
   </div>
