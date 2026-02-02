@@ -160,6 +160,32 @@ async function handleUnlikeFromProfile(locName) {
     } catch(e) { console.error(e); }
 }
 
+async function handleLike(btn, name) {
+    try {
+        const res = await apiFetch("/api/like", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ location_name: name }),
+        });
+        
+        if (res.liked) {
+            btn.classList.add("liked");
+            btn.innerHTML = `<i class="fas fa-heart"></i> Đã thích`;
+            userLikedSet.add(name);
+        } else {
+            btn.classList.remove("liked");
+            btn.innerHTML = `<i class="far fa-heart"></i> Yêu thích`;
+            userLikedSet.delete(name);
+        }
+        
+        // Trigger AI analysis refresh if user is logged in
+        if(typeof analyzeUser === 'function') analyzeUser(true);
+        
+    } catch(e) {
+        console.error("Like failed:", e);
+    }
+}
+
 async function handleDeletePlanFromProfile(planId) {
     if(!confirm("Bạn có chắc chắn muốn xóa lộ trình này?")) return;
     try {
@@ -341,3 +367,5 @@ function loadSimilarLocations(locationName) {
       container.innerHTML = `<div class="similar-empty">Không thể tải dữ liệu</div>`;
     });
 }
+
+

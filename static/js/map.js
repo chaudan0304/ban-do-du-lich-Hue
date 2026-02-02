@@ -11,6 +11,8 @@ let markersMap = {};          // Map name -> Marker object
 // currentUser và userLikedSet được khai báo trong utils.js
 let currentCategory = "All";
 let currentOpenLoc = null;
+let isPickingMode = null; // Global Add/Edit mode state
+let tempMarker = null;    // Marker for picker
 
 // Heatmap
 let heatLayer = null;
@@ -46,9 +48,75 @@ function initMap() {
           (err) => console.log("Không lấy được vị trí người dùng")
       );
   }
+
+  // --- RESTORED LOGIC: MAP CLICK HANDLER (FOR ADMIN) ---
+  map.on("click", (e) => {
+    // Lấy tọa độ và làm tròn 5 số cho đẹp
+    const lat = e.latlng.lat.toFixed(5);
+    const lng = e.latlng.lng.toFixed(5);
+
+    // --- TRƯỜNG HỢP 1: ĐANG THÊM MỚI (ADD) ---
+    // Kiểm tra biến isPickingMode hoặc nếu đang mở modal Add
+    const addModal = document.getElementById("addModal");
+    if (isPickingMode === "add" || (addModal && addModal.classList.contains("active"))) {
+      const latInput = document.getElementById("addLat");
+      const lngInput = document.getElementById("addLng");
+      
+      if (latInput && lngInput) {
+          latInput.value = lat;
+          lngInput.value = lng;
+      }
+
+      // Reset trạng thái
+      isPickingMode = null;
+      document.getElementById("map").style.cursor = ""; 
+
+      // Đảm bảo form thêm hiện lên
+      if (addModal) addModal.classList.add("active");
+
+      // (Tùy chọn) Hiện popup xác nhận nhanh
+      L.popup().setLatLng(e.latlng).setContent("Đã chọn vị trí này cho địa điểm mới!").openOn(map);
+    }
+
+    // --- TRƯỜNG HỢP 2: ĐANG CHỈNH SỬA (EDIT) ---
+    else if (isPickingMode === "edit") {
+      document.getElementById("editLat").value = lat;
+      document.getElementById("editLng").value = lng;
+
+      // 1. Xóa marker tạm cũ nếu đã có (để tránh trên map có nhiều ghim rác)
+      if (tempMarker) {
+        map.removeLayer(tempMarker);
+      }
+
+      // 2. Tạo Marker mới tại vị trí vừa click
+      tempMarker = L.marker([lat, lng], {
+        draggable: true, // Cho phép kéo thả để chỉnh lại cho chuẩn
+      }).addTo(map);
+
+      // 3. Gắn popup cho nó để dễ nhìn
+      tempMarker.bindPopup("<b>📍 Vị trí mới</b><br>Đang chờ lưu...").openPopup();
+
+      // 4. Cập nhật lại tọa độ khi kéo thả marker này
+      tempMarker.on("dragend", function (event) {
+        var marker = event.target;
+        var position = marker.getLatLng();
+        document.getElementById("editLat").value = position.lat.toFixed(5);
+        document.getElementById("editLng").value = position.lng.toFixed(5);
+      });
+
+      // Reset trạng thái
+      isPickingMode = null;
+      document.getElementById("map").style.cursor = "";
+
+      // QUAN TRỌNG: Bật lại Modal Sửa
+      document.getElementById("editModal").classList.add("active");
+
+      // Thông báo nhỏ
+      L.popup().setLatLng(e.latlng).setContent("Đã thay đổi vị trí!").openOn(map);
+    }
+  });
 }
 
-// --- Dynamic Icons ---
 // --- Dynamic Icons ---
 function getDynamicIcon(loc) {
     // Logic cũ đơn giản: Icon theo danh mục

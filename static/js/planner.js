@@ -217,21 +217,29 @@ async function deleteSavedItinerary(id) {
 }
 
 // Xem lại lịch trình đã lưu
-// Lưu ý: data trả về từ API list có thể chưa có plan_data chi tiết, cần parse hoặc gọi detail
-// Ở phiên bản đơn giản, data list trả về full
 async function viewSavedItinerary(id) {
     if (typeof closeUserProfile === 'function') closeUserProfile();
     
     // Tìm trong cache của window.userActivityData (từ profile.js)
     let plan = null;
     if (window.userActivityData && window.userActivityData.plans) {
-        plan = window.userActivityData.plans.find(p => p.id === id);
+        // Lưu ý: ID có thể là string hoặc int
+        plan = window.userActivityData.plans.find(p => p.id == id);
     }
     
     if (plan && plan.data) {
-        currentItineraryData = plan.data;
-        renderItinerary(plan.data);
-        openPlannerResultModal();
+        let pData = plan.data;
+        // Parse if string (đề phòng backend trả về chuỗi JSON)
+        if(typeof pData === 'string') {
+            try { pData = JSON.parse(pData); } catch(e) { console.error("JSON parse error", e); }
+        }
+        
+        currentItineraryData = pData;
+        
+        if (typeof renderItinerary === 'function') {
+             renderItinerary(pData);
+             openPlannerResultModal();
+        }
     } else {
         showNotification({type: 'error', message: 'Không tìm thấy dữ liệu lộ trình này.'});
     }
