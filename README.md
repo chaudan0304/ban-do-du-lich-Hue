@@ -16,24 +16,47 @@
 
 **Huế Travel AI** giải quyết bài toán "Đi đâu, chơi gì?" tại Huế bằng cách phân tích dữ liệu địa điểm và hành vi người dùng. Hệ thống kết hợp sức mạnh của **PageRank (đánh giá độ phổ biến)** và **Collaborative Filtering (lọc cộng tác)** trên đồ thị tri thức để đưa ra những gợi ý cá nhân hóa chính xác nhất.
 
-## 🚀 Tính năng Nổi bật (Key Features)
+## 🚀 Chi tiết Chức năng (Feature Breakdown)
 
-### 👤 Dành cho Người dùng (Travelers)
+### 🧠 1. Hệ thống Gợi ý Lai (Hybrid Recommendation Engine)
 
-- **Hệ thống Gợi ý Lai (Hybrid AI):**
-  - _Cá nhân hóa:_ Gợi ý dựa trên lịch sử tương tác (Like/Review) của bạn.
-  - _Cộng đồng:_ Gợi ý dựa trên những người có sở thích tương đồng (Collaborative Filtering).
-  - _Xu hướng:_ Đề xuất các địa điểm đang "hot" nhất hệ thống (PageRank).
-- **Lập kế hoạch Thông minh (AI Planner):** Tạo lịch trình 1-5 ngày tự động chỉ với vài cú click, tối ưu theo sở thích cá nhân.
-- **Bản đồ Tương tác 4K:** Heatmap mật độ du lịch, Marker Cluster thông minh, xem chi tiết địa điểm trực quan.
-- **Quản lý Hồ sơ:** Lưu bộ sưu tập yêu thích, xem lại lịch trình đã tạo.
+Trái tim của ứng dụng là thuật toán AI kết hợp 3 phương pháp tiên tiến để đưa ra những gợi ý "đúng ý" người dùng nhất:
 
-### 🛠️ Dành cho Quản trị viên (Admin)
+- **Collaborative Filtering (Lọc cộng tác):** Phân tích đồ thị quan hệ `(:User)-[:INTERACTED]->(:Location)` để tìm những người dùng có "gu" du lịch giống bạn và gợi ý những địa điểm họ thích mà bạn chưa khám phá.
+- **Content-Based Filtering (Lọc theo nội dung):** Nếu bạn thường xuyên check-in tại các "Chùa chiền" hay "Di tích", hệ thống sẽ ưu tiên đề xuất các địa điểm tương tự cùng danh mục.
+- **Weighted PageRank (Độ phổ biến):** Đánh giá độ "hot" của địa điểm dựa trên tổng số lượng tương tác, chất lượng đánh giá (sao) và mức độ uy tín của người review.
 
-- **Dashboard Thống kê:** Tổng quan số liệu hệ thống (User, Location, Interactions).
-- **Quản lý Dữ liệu (CRUD):** Thêm/Sửa/Xóa địa điểm trực quan với công cụ Map Picker.
-- **AI Control:** Kích hoạt chạy lại thuật toán Neo4j GDS để cập nhật điểm số gợi ý theo thời gian thực.
-- **Quản lý Người dùng:** Theo dõi hoạt động và kiểm soát tài khoản.
+### 📅 2. Lập kế hoạch Du lịch Thông minh (AI Planner)
+
+Giải quyết nỗi lo "không biết đi đâu" chỉ trong 3 giây:
+
+- **Tùy chỉnh linh hoạt:** Chọn số ngày đi (1-5 ngày) và sở thích ưu tiên (Văn hóa, Ẩm thực, Thiên nhiên...).
+- **Tối ưu hóa:** Thuật toán tự động sắp xếp các địa điểm gần nhau vào cùng một buổi để tối ưu thời gian di chuyển.
+- **Chế độ "Dựa trên sở thích" (Use Liked):** Ưu tiên đưa các địa điểm bạn đã "Thả tim" vào lịch trình, kết hợp với các gợi ý phù hợp nhất từ AI.
+- **Lưu trữ:** Dễ dàng lưu lại và quản lý các lịch trình đã tạo trong hồ sơ cá nhân.
+
+### 🗺️ 3. Bản đồ Tương tác Nâng cao (Interactive Map)
+
+Không chỉ là bản đồ tĩnh, Hue Travel AI mang đến trải nghiệm khám phá sống động:
+
+- **Heatmap (Bản đồ nhiệt):** Trực quan hóa những khu vực tập trung đông khách du lịch nhất tại Huế.
+- **Marker Clustering:** Tự động gom nhóm các địa điểm khi thu nhỏ bản đồ, giúp giao diện không bị rối mắt.
+- **Routing (Chỉ đường):** Tích hợp điều hướng trực tiếp đến địa điểm thông qua Google Maps/Apple Maps.
+- **Smart Markers:** Phân loại địa điểm bằng bộ icon đa dạng (🍜 cho Ẩm thực, 🏯 cho Di tích, 🌳 cho Thiên nhiên).
+
+### 👤 4. Hồ sơ & Tương tác Người dùng
+
+- **Bộ sưu tập cá nhân:** Lưu lại danh sách "Bucket list" những nơi muốn đi.
+- **Đánh giá & Bình luận:** Đánh giá 5 sao và viết review chi tiết. Phần review hỗ trợ phân tích cảm xúc (Sentiment Analysis) cơ bản.
+- **Bảo mật 2 lớp:** Quy trình đổi mật khẩu an toàn yêu cầu xác thực email và username.
+
+### 🛠️ 5. Quản trị Hệ thống (Admin Dashboard)
+
+Dành cho người quản lý để vận hành hệ thống:
+
+- **Quản lý Dữ liệu (CRUD):** Thêm mới/Chỉnh sửa địa điểm trực quan với công cụ chọn tọa độ trên bản đồ (Map Picker).
+- **Real-time AI Update:** Kích hoạt tính toán lại điểm số PageRank và Gợi ý ngay lập tức khi có dữ liệu mới nạp vào.
+- **Thống kê:** Theo dõi sức khỏe hệ thống qua các chỉ số tăng trưởng User và Review.
 
 ---
 
