@@ -1,49 +1,314 @@
-  <!-- Modal: Hồ sơ cá nhân -->
+  <style>
+
+    .modal-header-teal {
+        background: #14b8a6; /* Màu Teal đặc trưng */
+        padding: 20px 25px;
+        color: white;
+        position: relative;
+    }
+
+    .modal-header-teal .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header-teal .header-title-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .modal-header-teal .header-title-box h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .modal-header-teal .header-username-sub {
+        font-size: 14px;
+        opacity: 0.95;
+        margin-top: 4px;
+        display: block;
+        font-weight: 500;
+    }
+
+    .close-btn-teal {
+        background: rgba(255, 255, 255, 0.15);
+        border: none;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        transition: 0.2s;
+    }
+
+    .close-btn-teal:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-body-teal {
+        padding: 25px;
+    }
+
+    /* Form Fields */
+    .form-group-pill {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .form-group-pill i {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6366f1; /* Một chút ánh tím như trong ảnh */
+        font-size: 18px;
+    }
+
+    .input-pill {
+        width: 100%;
+        padding: 16px 20px 16px 55px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        font-size: 15px;
+        color: #1e293b;
+        outline: none;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    #profileModal .input-pill::placeholder {
+        color: #94a3b8;
+    }
+
+    .input-pill:focus {
+        border-color: #14b8a6;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.08);
+    }
+
+    /* Info Bar (Vai trò & Tham gia) */
+    .profile-info-bar {
+        display: flex;
+        justify-content: space-between;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 15px;
+        padding: 18px 20px;
+        margin-bottom: 30px;
+        font-size: 13px;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item b {
+        color: #1e293b;
+        font-weight: 700;
+        margin-left: 2px;
+    }
+
+    /* History Section */
+    .history-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .activity-tabs-box {
+        background: #f1f5f9;
+        display: flex;
+        padding: 6px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+    }
+
+    .activity-tab-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        background: none;
+        font-size: 14px;
+        font-weight: 700;
+        color: #64748b;
+        cursor: pointer;
+        border-radius: 12px;
+        transition: 0.2s;
+    }
+
+    .activity-tab-btn.active {
+        background: white;
+        color: #6366f1;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    /* History List Container */
+    .activity-content-container {
+        max-height: 250px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+    
+    .activity-content-container::-webkit-scrollbar {
+        width: 4px;
+    }
+    .activity-content-container::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+
+    /* History Item Layout */
+    .history-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 15px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        margin-bottom: 12px;
+        transition: 0.2s;
+    }
+
+    .history-item:hover {
+        border-color: #14b8a6;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    .item-thumb {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        object-fit: cover;
+        background: #f1f5f9;
+    }
+
+    .item-info {
+        flex: 1;
+    }
+
+    .item-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 2px 0;
+    }
+
+    .item-cat {
+        font-size: 12px;
+        color: #94a3b8;
+    }
+
+    .delete-btn {
+        width: 38px;
+        height: 38px;
+        background: #fee2e2;
+        color: #ef4444;
+        border: 2px solid white;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    .delete-btn:hover {
+        background: #ef4444;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Save Button */
+    .btn-save-wrap {
+        margin-top: 10px;
+    }
+
+    .btn-save-teal {
+        width: 100%;
+        padding: 15px;
+        background: #6366f1;
+        color: white;
+        border: none;
+        border-radius: 18px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-save-teal:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+    }
+  </style>
+
   <div id="profileModal" class="modal">
-    <div class="modal-content">
-        <div class="auth-header-wrapper" style="justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-            <h3 style="margin:0; font-size: 18px; color: var(--primary);">Hồ sơ của tôi</h3>
-            <button class="close-btn-inline" onclick="closeUserProfile()"><i class="fas fa-times"></i></button>
+    <div class="modal-content-fancy">
+        <div class="modal-header-teal">
+            <div class="header-top">
+                <div class="header-title-box">
+                    <i class="fas fa-user-circle" style="font-size: 24px;"></i>
+                    <h3>Hồ sơ của tôi</h3>
+                </div>
+                <button class="close-btn-teal" onclick="closeUserProfile()"><i class="fas fa-times"></i></button>
+            </div>
+            <span class="header-username-sub" id="profileShortUsername">@chaudan</span>
         </div>
 
-        <div class="modal-body">
-             <!-- Tabs -->
-            <div class="auth-tabs" style="margin-bottom: 20px;">
-                <button class="tab-btn active" data-tab="info" onclick="switchProfileTab('info')">Thông tin</button>
-                <button class="tab-btn" data-tab="plans" onclick="switchProfileTab('plans')">Lộ trình đã lưu</button>
+        <div class="modal-body-teal">
+            <!-- Form Section -->
+            <div class="form-group-pill">
+                <i class="fas fa-user-tag"></i>
+                <input type="text" id="profileFullname" class="input-pill" placeholder="Họ và tên">
             </div>
-            
-            <!-- Tab Info -->
-            <div id="tab-info" class="profile-tab-content">
-                <div class="form-group">
-                    <i class="fas fa-user-tag"></i>
-                    <input type="text" id="profileFullname" placeholder="Tên hiển thị">
-                </div>
-                <div class="form-group">
-                     <i class="fas fa-envelope"></i>
-                    <input type="email" id="profileEmail" placeholder="Email liên hệ">
-                </div>
-                
-                <div style="background:#f9f9f9; padding:10px; border-radius:4px; margin-bottom:15px; font-size:13px; color:#555;">
-                    <p style="margin:5px 0;">Tài khoản: <b id="profileUsername">...</b></p>
-                    <p style="margin:5px 0;">Vai trò: <b id="profileRole">...</b></p>
-                </div>
-                
-                 <h4 style="font-size: 14px; margin-bottom: 10px;">Hoạt động gần đây</h4>
-                <div id="activityContent" style="height: 120px; overflow-y: auto; background: #eee; border-radius: 4px; padding: 10px; font-size: 13px; color: #666;">
-                    Chưa có hoạt động nào.
-                </div>
-
-                <button class="btn-full" onclick="submitProfileUpdate()" style="margin-top: 20px;">Cập nhật</button>
+            <div class="form-group-pill">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="profileEmail" class="input-pill" placeholder="Email liên hệ">
+            </div>
+            <div class="form-group-pill">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="profilePassword" class="input-pill" placeholder="Đổi mật khẩu mới (nếu cần)">
             </div>
 
-            <!-- Tab Saved Plans -->
-            <div id="tab-plans" class="profile-tab-content" style="display:none;">
-                 <div id="saved-itineraries-list" style="max-height: 300px; overflow-y: auto;">
-                     <div class="empty-state" style="padding: 20px; text-align: center; color: #999;">Đang tải...</div>
-                 </div>
+            <!-- Role/Date Info -->
+            <div class="profile-info-bar">
+                <div class="info-item">VAI TRÒ: <b id="profileRole">Thành viên</b></div>
+                <div class="info-item">THAM GIA: <b id="profileJoinDate">30/01/2026</b></div>
             </div>
 
+            <!-- History Section -->
+            <div class="history-title">
+                <i class="fas fa-rotate-left"></i> Lịch sử hoạt động
+            </div>
+
+            <div class="activity-tabs-box">
+                <button class="activity-tab-btn active" data-subtab="liked" onclick="switchActivityTab('liked')">Đã thích</button>
+                <button class="activity-tab-btn" data-subtab="reviews" onclick="switchActivityTab('reviews')">Đánh giá</button>
+                <button class="activity-tab-btn" data-subtab="plans" onclick="switchActivityTab('plans')">Lộ trình</button>
+            </div>
+
+            <div id="activity-content-list" class="activity-content-container">
+                <!-- Nội dung được nạp qua JS -->
+            </div>
+
+            <div class="btn-save-wrap">
+                <button class="btn-save-teal" onclick="submitProfileUpdate()">Lưu cập nhật</button>
+            </div>
         </div>
     </div>
   </div>

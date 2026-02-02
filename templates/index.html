@@ -22,7 +22,19 @@
 
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}?v=2"
+      href="{{ url_for('static', filename='css/style.css') }}?v=3"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/sidebar.css') }}?v=3"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/modals.css') }}?v=3"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/planner.css') }}?v=3"
     />
     <link
       rel="stylesheet"
@@ -182,9 +194,6 @@
         </div>
 
         <div id="detail-panel" class="detail-panel">
-          <button class="btn-back" onclick="closeDetail()">
-            <i class="fas fa-arrow-left"></i> Quay lại danh sách
-          </button>
           <div id="detail-content"></div>
         </div>
         <div class="sidebar-resizer" id="sidebarResizer"></div>

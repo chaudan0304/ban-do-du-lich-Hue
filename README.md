@@ -1,5 +1,11 @@
 # 🏯 Huế Travel AI - Hệ thống Gợi ý Du lịch Thông minh
 
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python)
+![Flask](https://img.shields.io/badge/Flask-2.0%2B-green?style=for-the-badge&logo=flask)
+![Neo4j](https://img.shields.io/badge/Neo4j-Graph_DB-blueviolet?style=for-the-badge&logo=neo4j)
+![GDS](https://img.shields.io/badge/Neo4j-Graph_Data_Science-orange?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Active_Development-brightgreen?style=for-the-badge)
+
 > **Đề tài Khóa luận Tốt nghiệp**
 >
 > Một nền tảng du lịch thông minh sử dụng **Graph Database (Neo4j)** và **Hybrid Recommendation System** (Hệ khuyến nghị lai) để giúp du khách khám phá vẻ đẹp cố đô Huế.
@@ -10,154 +16,132 @@
 
 **Huế Travel AI** giải quyết bài toán "Đi đâu, chơi gì?" tại Huế bằng cách phân tích dữ liệu địa điểm và hành vi người dùng. Hệ thống kết hợp sức mạnh của **PageRank (đánh giá độ phổ biến)** và **Collaborative Filtering (lọc cộng tác)** trên đồ thị tri thức để đưa ra những gợi ý cá nhân hóa chính xác nhất.
 
-## 🚀 Danh sách chức năng (Full Features)
+## 🚀 Tính năng Nổi bật (Key Features)
 
-Dự án hiện tại đã hoàn thiện các nhóm chức năng chính phục vụ cả người dùng cuối và quản trị viên:
+### 👤 Dành cho Người dùng (Travelers)
 
-### 👤 1. Chức năng dành cho Người dùng
+- **Hệ thống Gợi ý Lai (Hybrid AI):**
+  - _Cá nhân hóa:_ Gợi ý dựa trên lịch sử tương tác (Like/Review) của bạn.
+  - _Cộng đồng:_ Gợi ý dựa trên những người có sở thích tương đồng (Collaborative Filtering).
+  - _Xu hướng:_ Đề xuất các địa điểm đang "hot" nhất hệ thống (PageRank).
+- **Lập kế hoạch Thông minh (AI Planner):** Tạo lịch trình 1-5 ngày tự động chỉ với vài cú click, tối ưu theo sở thích cá nhân.
+- **Bản đồ Tương tác 4K:** Heatmap mật độ du lịch, Marker Cluster thông minh, xem chi tiết địa điểm trực quan.
+- **Quản lý Hồ sơ:** Lưu bộ sưu tập yêu thích, xem lại lịch trình đã tạo.
 
-- **Đăng ký/Đăng nhập:** Hệ thống xác thực người dùng, bảo mật mật khẩu.
-- **Quản lý Hồ sơ (Profile):**
-  - Xem thông tin cá nhân (Họ tên, Email, Ngày tham gia).
-  - Cập nhật thông tin cá nhân và mật khẩu.
-  - **Bộ sưu tập yêu thích:** Xem lại danh sách các địa điểm đã "thả tim" với giao diện gallery ảnh sinh động.
-- **Tương tác Địa điểm:**
-  - **Yêu thích (Like):** Lưu lại các địa điểm quan tâm.
-  - **Đánh giá (Review):** Gửi bình luận và xếp hạng sao (1-5⭐).
-  - **Quản lý Đánh giá:** Người dùng có thể chỉnh sửa hoặc xóa đánh giá cũ của mình.
-- **Tìm kiếm & Lọc:**
-  - Tìm kiếm địa điểm theo tên với gợi ý thời gian thực.
-  - Lọc nhanh địa điểm theo danh mục (Di tích, Ẩm thực, Tâm linh, v.v.).
+### 🛠️ Dành cho Quản trị viên (Admin)
 
-### 🧠 2. Hệ thống Gợi ý Thông minh (AI Core)
-
-- **Hybrid Recommendation:** Tự động tính toán và hiển thị các gợi ý "Dành riêng cho bạn" dựa trên:
-  - **Personalization:** Dựa trên hành vi Like/Review của chính người dùng.
-  - **Collaborative Filtering:** Gợi ý dựa trên sở thích của những người dùng có hành vi tương đồng.
-  - **PageRank Score:** Độ ưu tiên hiển thị dựa trên độ phổ biến toàn hệ thống.
-- **Khám phá thêm (Similar Locations):** Khi xem một địa điểm, hệ thống tự động đề xuất 5-10 địa điểm tương tự trong cùng khu vực hoặc danh mục.
-- **Giải thích Gợi ý:** Hiển thị lý do tại sao AI lại gợi ý địa điểm này cho bạn (ví dụ: "Vì bạn đã thích ...", hoặc "Được cộng đồng đánh giá cao").
-
-### 🗺️ 3. Bản đồ & Trực quan hóa tương tác
-
-- **Bản đồ 4K:** Trải nghiệm mượt mà với hàng trăm địa điểm.
-- **Bản đồ nhiệt (Heatmap):** Chế độ xem mật độ "hot" của các địa điểm du lịch.
-- **Marker Thông minh:**
-  - Phân biệt loại địa điểm qua biểu tượng (Icon) khác nhau.
-  - Phân biệt trạng thái gợi ý qua màu sắc (Đỏ: Top phổ biến, Xanh: Gợi ý riêng biệt).
-- **Marker Cluster:** Tự động gom nhóm marker khi zoom out để tối ưu hiệu suất và thẩm mỹ.
-
-### 🛠️ 4. Chức năng dành cho Quản trị viên (Admin)
-
-- **Dashboard Thống kê:** Theo dõi tổng số người dùng, địa điểm, tổng lượt tương tác.
-- **Quản lý Địa điểm (CRUD):**
-  - Thêm địa điểm mới kèm công cụ **Map Picker** (lấy tọa độ bằng cách click trực tiếp lên bản đồ).
-  - Chỉnh sửa thông tin, hình ảnh, tọa độ.
-  - Xóa địa điểm khỏi hệ thống.
-- **Quản lý Người dùng:**
-  - Xem danh sách toàn bộ thành viên.
-  - Xem chi tiết hoạt động của từng user (hồ sơ, các nơi đã thích, các đánh giá đã gửi).
-  - Xóa tài khoản người dùng vi phạm.
-- **Quản trị AI:** Nút kích hoạt chạy lại thuật toán Neo4j GDS để cập nhật điểm số AI ngay lập tức khi có dữ liệu mới.
-
-### 🎨 5. Tiện ích UI/UX Cao cấp
-
-- **Sidebar Resizable:** Thanh bên có thể co giãn linh hoạt, tối ưu cho mọi kích thước màn hình.
-- **Custom Notifications:** Hệ thống thông báo tùy chỉnh (Success, Error, Confirm) thay thế cho alert/confirm mặc định, mang lại cảm giác ứng dụng chuyên nghiệp.
-- **Premium Design:** Sử dụng hiệu ứng Glassmorphism, Gradient, và các micro-animations tinh tế.
+- **Dashboard Thống kê:** Tổng quan số liệu hệ thống (User, Location, Interactions).
+- **Quản lý Dữ liệu (CRUD):** Thêm/Sửa/Xóa địa điểm trực quan với công cụ Map Picker.
+- **AI Control:** Kích hoạt chạy lại thuật toán Neo4j GDS để cập nhật điểm số gợi ý theo thời gian thực.
+- **Quản lý Người dùng:** Theo dõi hoạt động và kiểm soát tài khoản.
 
 ---
 
-## 🛠️ Công nghệ sử dụng
+## 🛠️ Công nghệ Sử dụng (Tech Stack)
 
-| Thành phần       | Công nghệ                                     |
-| :--------------- | :-------------------------------------------- |
-| **Backend**      | Python (Flask), Pandas                        |
-| **Database**     | **Neo4j** (Graph Database), Neo4j GDS Library |
-| **Frontend**     | HTML5, CSS3 (Modern UI), JavaScript (Vanilla) |
-| **Maps**         | Leaflet.js, OpenStreetMap, Leaflet-Heat       |
-| **AI/Algorithm** | PageRank, Community Detection (trên Neo4j)    |
+| Thành phần     | Công nghệ                                                   |
+| :------------- | :---------------------------------------------------------- |
+| **Backend**    | Python (Flask), Pandas, Blueprint Architecture              |
+| **Database**   | **Neo4j** (Graph Database) + Neo4j GDS Library              |
+| **Frontend**   | HTML5, CSS3 (Modern UI/Glassmorphism), JavaScript (Vanilla) |
+| **Maps**       | Leaflet.js, OpenStreetMap, Leaflet-Heat                     |
+| **Algorithms** | PageRank, Community Detection, Cosine Similarity            |
 
 ---
 
-## ⚙️ Cài đặt và Chạy dự án
+## ⚙️ Cài đặt & Triển khai (Installation)
 
 ### Yêu cầu tiên quyết
 
 - Python 3.9+
 - Neo4j Desktop (hoặc Neo4j AuraDB)
-- Cài đặt thư viện **Graph Data Science (GDS)** plugin trong Neo4j.
+- **Quan trọng:** Cài đặt plugin **Graph Data Science (GDS)** trong Neo4j.
 
 ### Các bước cài đặt
 
-1.  **Clone repository**
+**1. Clone dự án**
 
-    ```bash
-    git clone https://github.com/chaudan0304/ban-do-du-lich-Hue.git
-    cd ban-do-du-lich-Hue
-    ```
+```bash
+git clone https://github.com/chaudan0304/ban-do-du-lich-Hue.git
+cd ban-do-du-lich-Hue
+```
 
-2.  **Cài đặt dependencies**
+**2. Cài đặt thư viện**
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+```bash
+pip install -r requirements.txt
+```
 
-3.  **Cấu hình môi trường (.env)**
-    Tạo file `.env` tại thư mục gốc với nội dung:
+**3. Cấu hình môi trường**
+Tạo file `.env` tại thư mục gốc và điền thông tin kết nối Neo4j:
 
-    ```env
-    NEO4J_URI=bolt://localhost:7687
-    NEO4J_USER=neo4j
-    NEO4J_PASS=your_password
-    FLASK_SECRET_KEY=your_secret_key
-    ```
+```env
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASS=your_password
+FLASK_SECRET_KEY=your_super_secret_key
+```
 
-4.  **Khởi tạo dữ liệu**
-    Chạy các script sau để nạp dữ liệu và tính toán AI ban đầu:
+**4. Khởi tạo dữ liệu**
+Chạy các script (đã được tổ chức trong thư mục `scripts/`) để nạp dữ liệu mẫu:
 
-    ```bash
-    # 1. Nạp dữ liệu từ Excel vào Neo4j
-    python import_data.py
+```bash
+# Nạp dữ liệu từ Excel (data/data.xlsx) vào Neo4j
+python scripts/import_data.py
 
-    # 2. Chạy thuật toán tính điểm PageRank & Similarity
-    python setup_algo.py
-    ```
+# (Tùy chọn) Tạo thêm user mẫu ngẫu nhiên
+python scripts/generate_users.py
 
-5.  **Chạy ứng dụng**
-    ```bash
-    python app.py
-    ```
-    Truy cập tại: `http://127.0.0.1:5000`
+# Chạy thuật toán tính điểm AI ban đầu
+python setup_algo.py
+```
+
+**5. Chạy ứng dụng**
+
+```bash
+python app.py
+```
+
+👉 Truy cập: `http://127.0.0.1:5000`
 
 ---
 
-## 📂 Cấu trúc dự án
+## 📂 Cấu trúc Dự án (Project Structure)
+
+Dự án được tổ chức theo mô hình Modular (Flask Blueprints) để dễ dàng mở rộng và bảo trì.
 
 ```
-📂 ban-do-du-lich-Hue
-├── 📂 static/           # Tài nguyên tĩnh (CSS, JS, Images)
-│   ├── 📂 css/          # Style.css (Giao diện chính), Map.css
-│   ├── 📂 js/           # Main.js (Logic Frontend & Map)
-│   └── 📂 images/       # Ảnh địa điểm
-├── 📂 templates/        # HTML Templates (Jinja2)
-│   └── index.html       # Trang chủ SPA (Single Page App)
-├── app.py               # Backend Flask Server & API
-├── db.py                # Module kết nối Neo4j, xử lý User/Review
-├── import_data.py       # Script nạp dữ liệu (ETL)
-├── setup_algo.py        # Script chạy thuật toán GDS
-├── data.xlsx            # Dữ liệu nguồn (Địa điểm, User mẫu)
-└── requirements.txt     # Danh sách thư viện Python
+ban-do-du-lich-Hue/
+├── 📂 data/                 # Chứa dữ liệu nguồn (Excel)
+├── 📂 routes/               # Các nhóm chức năng (Controller/View)
+│   ├── � auth.py           # Authentication (Login, Register, Profile)
+│   ├── � admin.py          # Admin Dashboard & CRUD
+│   ├── � api.py            # Core Logic (AI Recommend, Itinerary, Map Data)
+│   └── 📄 main.py           # Main View Rendering
+├── 📂 scripts/              # Các công cụ/tool chạy một lần
+│   ├── 📄 import_data.py    # ETL Dữ liệu vào Database
+│   └── 📄 generate_users.py # Tạo dữ liệu giả lập (Mocking data)
+├── 📂 static/               # Tài nguyên Frontend
+│   ├── 📂 css/              # Stylesheets (đã tách module: style, sidebar, modals...)
+│   ├── 📂 js/               # JavaScript Logic (map, planner, profile...)
+│   └── 📂 images/           # Assets hình ảnh
+├── 📂 templates/            # Giao diện HTML (Jinja2)
+├── 📄 app.py                # Entry Point (Khởi chạy Server)
+├── 📄 db.py                 # Module kết nối Database Neo4j
+├── 📄 models.py             # Định nghĩa Data Models (User)
+├── 📄 utils.py              # Các hàm tiện ích dùng chung
+├── 📄 setup_algo.py         # Script cấu hình thuật toán GDS
+└── 📄 README.md             # Tài liệu dự án
 ```
 
 ---
 
 ## 🔐 Tài khoản Demo
 
-Để trải nghiệm tính năng Admin (Quản lý dữ liệu, Chạy AI):
+Để trải nghiệm đầy đủ tính năng Admin:
 
 - **User:** `admin`
-- **Password:** `admin` (hoặc mật khẩu bạn đã thiết lập trong `import_data.py`)
+- **Password:** `admin` (Mặc định được tạo khi chạy `import_data.py`)
 
 ---
 
@@ -169,87 +153,20 @@ Dự án hiện tại đã hoàn thiện các nhóm chức năng chính phục v
 
 ---
 
-## 📜 Nhật ký Cập nhật (Update Log)
+## 📜 Nhật ký Cập nhật (Changelog)
 
-### 🚀 Phiên bản hiện tại - 02/02/2026 (Nhánh: `main`)
+### v2.0 - Refactoring & Optimization (02/02/2026)
 
-#### 1. 🗺️ AI Planner & Quản lý Lộ trình (New Core Feature)
+- 🏗️ **Back-end Overhaul:** Tái cấu trúc toàn bộ `app.py` thành mô hình **Blueprints** (`routes/`).
+- 🧹 **Code Cleanup:** Tách biệt Scripts và Data ra thư mục riêng, chuẩn hóa cấu trúc dự án.
+- 🗺️ **AI Planner:** Nâng cấp thuật toán gợi ý lộ trình dựa trên sở thích thực tế.
+- 🔒 **Security:** Cải thiện quy trình đổi mật khẩu 2 lớp và phân quyền Admin chặt chẽ.
 
-- **Cá nhân hóa Lộ trình:**
-  - Tích hợp tùy chọn **"Chỉ chọn địa điểm Đã thích"**: Cho phép AI xây dựng lộ trình dựa trên dữ liệu người dùng đã tương tác (Like) thay vì chỉ gợi ý mới.
-  - **Counter Widget:** Thay thế thanh trượt cũ bằng bộ đếm số ngày (+/-) trực quan, giới hạn hợp lý (1-5 ngày).
-  - **Giao diện Compact:** Thiết kế lại Modal Lập lộ trình theo bố cục ngang (Horizontal Layout) và lưới 3 cột, loại bỏ hoàn toàn thanh cuộn, tối ưu cho màn hình laptop.
-- **Lưu & Quản lý Lộ trình:**
-  - **Database:** Thiết kế Node `Itinerary` mới trong Neo4j, liên kết với User qua quan hệ `[:CREATED]`.
-  - **API Endpoints:**
-    - `POST /api/itineraries`: Lưu lộ trình hiện tại vào DB.
-    - `GET /api/itineraries`: Lấy danh sách lộ trình đã lưu của user.
-    - `DELETE /api/itineraries/<id>`: Xóa lộ trình cũ.
-  - **User Profile:** Thêm Tab "Lộ trình" cho phép xem lại chi tiết hoặc xóa các kế hoạch đã lưu.
+### v1.5 - UI Enhancement (30/01/2026)
 
-#### 2. 🔐 Hệ thống Bảo mật & Tài khoản (Security)
+- 🎨 **New UI:** Giao diện Glassmorphism, Sidebar co giãn, Hệ thống thông báo mới.
+- 📱 **Responsive:** Tối ưu hóa hiển thị cho thiết bị di động.
 
-- **Quy trình Đổi mật khẩu 2 bước (Two-Factor Flow):**
-  - **Bước 1 (Verify):** API `/api/verify-account` kiểm tra sự khớp nối giữa Username và Email.
-  - **Bước 2 (Reset):** Chỉ khi Verify thành công, giao diện mới hiện Form nhập mật khẩu mới và gọi API `/api/reset-password`.
-  - **UX:** Hỗ trợ phím **Enter** chuyển tiếp mượt mà giữa các bước.
-- **Role-Based Access Control (RBAC):**
-  - Nâng cấp hệ thống phân quyền: Thay vì kiểm tra cứng `username == 'admin'`, hệ thống kiểm tra thuộc tính `role='admin'` trong Database.
-  - Bảo vệ chặt chẽ các API quản trị (`/api/admin/*`) bằng Decorator kiểm tra quyền.
-- **Cơ chế Cache Invalidation:**
-  - Mỗi khi Admin thêm/sửa/xóa địa điểm, hệ thống tự động đánh dấu "Cache Dirty".
-  - Client tự động tải lại dữ liệu mới nhất mà không cần người dùng F5 (Real-time update cảm giác).
+### v1.0 - Core AI (08/01/2026)
 
-#### 3. ✨ Tối ưu UI/UX & Tương tác (Polishing)
-
-- **Hiệu ứng Micro-Interactions:**
-  - **Nút bấm:** Thêm hiệu ứng Hover Glow (phát sáng), Lift (nảy lên) và thay đổi màu sắc gradient khi di chuột.
-  - **Feedback:** Các nút "Hủy" chuyển màu đỏ cảnh báo, nút "Đóng" (X) xoay 90 độ và đổi màu đỏ khi hover.
-- **Phím tắt (Keyboard Accessibility):**
-  - Hỗ trợ phím **Enter** để submit nhanh cho tất cả các form: Đăng nhập, Đăng ký, Đổi mật khẩu.
-- **Mobile Responsive:**
-  - Thiết kế lại bố cục Mobile: Chuyển Sidebar xuống dưới đáy, Bản đồ full màn hình phía trên.
-  - Tự động ẩn các thành phần không cần thiết trên màn hình nhỏ.
-
----
-
-### 🕰️ Lịch sử phát triển các phiên bản (Legacy Branches)
-
-#### 🚀 Bản cập nhật - 30/01/2026
-
-- **Hệ thống Thông báo mới:** Thay thế toàn bộ `alert()` và `confirm()` bằng `showNotification` tùy chỉnh.
-- **Sidebar Resizable:** Nâng cấp thanh Sidebar co giãn linh hoạt.
-- **Hồ sơ chi tiết:** Hiển thị gallery "Địa điểm đã thích" dạng scroll ngang.
-
-#### 🎨 Giao diện & Trải nghiệm người dùng (UI/UX)
-
-- **Hệ thống Thông báo mới:** Thay thế toàn bộ `alert()` và `confirm()` bằng `showNotification` tùy chỉnh, hỗ trợ Success, Error, Confirm với UI hiện đại.
-- **Sidebar Linh hoạt:** Nâng cấp thanh Sidebar Resizable với `min-width: 420px`.
-- **Tinh chỉnh Form Admin:** Thêm icon đa sắc màu và căn chỉnh vị trí icon trong Input cân đối hơn.
-- **Tối ưu hiển thị:** Hiển thị tên địa điểm đầy đủ trong phần Khám phá, giảm bớt khoảng trắng dư thừa.
-
-#### 👤 Quản lý Người dùng & Backend
-
-- **Hồ sơ chi tiết:** Hiển thị Họ tên, Email và gallery "Địa điểm đã thích" dạng scroll ngang.
-- **API Enhancement:** Nâng cấp API trả về đầy đủ thông tin tọa độ và danh sách yêu thích của người dùng.
-
----
-
-### 🕰️ Lịch sử phát triển các phiên bản (Legacy Branches)
-
-#### 🔸 Nhánh `pb1` (Tiền thân là nhánh `test`)
-
-- **Thời gian:** 21/12/2025 -> 08/01/2026
-- **Chức năng chính:**
-  - Thiết lập cấu trúc đồ thị Neo4j.
-  - Triển khai thuật toán **PageRank** & **Collaborative Filtering** cơ bản.
-- **Trạng thái:** Bản thử nghiệm nền tảng về AI.
-
-#### 🔹 Nhánh `pb2` (Tiền thân là nhánh `pb1_reset`)
-
-- **Thời gian:** 21/12/2025 -> 28/01/2026
-- **Chức năng chính:**
-  - Tích hợp **Bản đồ nhiệt (Heatmap)**.
-  - Bổ sung tính năng **Similar Locations**.
-  - Sửa lỗi tọa độ, rating và chuẩn hóa dữ liệu.
-- **Trạng thái:** Bản ổn định cuối cùng trước khi đại tu giao diện.
+- 🧠 Khởi chạy thuật toán PageRank & Collaborative Filtering trên Neo4j.

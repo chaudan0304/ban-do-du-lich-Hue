@@ -4,6 +4,7 @@
 
 // Biến global để kiểm tra trạng thái login (sẽ được set từ main.js hoặc auth.js)
 let currentUser = null; 
+let userLikedSet = new Set(); 
 
 /**
  * Wrapper cho fetch API

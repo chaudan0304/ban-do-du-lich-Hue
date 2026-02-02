@@ -1,0 +1,98 @@
+/* SIDEBAR FIXED */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3000; 
+  width: var(--sidebar-width);
+  min-width: 420px;
+  max-width: 750px;
+  height: 100%;
+  overflow: visible; /* Cho phép resizer hiển thị tốt hơn */
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xl);
+  transition: width 0.3s ease; /* Mặc định có animation */
+  will-change: width;
+}
+
+/* Khi đang kéo thì bỏ animation để mượt */
+.sidebar.resizing {
+  transition: none !important;
+  user-select: none; /* Không cho highlight text */
+  pointer-events: auto;
+}
+
+/* Thanh kéo Custom */
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -6px; /* Nằm đè lên viền phải, nhưng lệch ra ngoài 1 chút để dễ bấm */
+  bottom: 0;
+  width: 12px;
+  cursor: col-resize;
+  z-index: 5000; /* Cao nhất để dễ bắt sự kiện */
+  background: transparent;
+  transition: background 0.2s;
+}
+.sidebar-resizer:hover, .sidebar-resizer.active {
+  background: rgba(79, 70, 229, 0.5); /* Hiện màu tím khi hover/kéo */
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  height: var(--header-height);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0; /* Header không bị co lại */
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand h1 { font-size: 18px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+.brand p { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.header-auth { display: flex; align-items: center; }
+
+.search-box { padding: 24px; flex-shrink: 0; }
+.results-container {
+  flex: 1; /* Chiếm 1 phần không gian */
+  padding: 0 24px;
+  overflow-y: auto; /* Scroll riêng */
+  min-height: 0;    /* QUAN TRỌNG: Cho phép co giãn trong Flexbox */
+  display: flex;
+  flex-direction: column;
+}
+
+/* History */
+.history-section { margin-top: 12px; padding-top: 0; border-top: none; flex-shrink: 0; }
+.data-explorer {
+  flex: 1.2; /* Tỷ lệ 1.2 (Lớn hơn chút) */
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* QUAN TRỌNG: Enable shrinking */
+  padding: 16px 24px;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-light);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.02);
+  z-index: 10;
+}
+
+.chip {
+  padding: 6px 14px; background: white; border: 1px solid var(--border-light);
+  border-radius: var(--radius-full); font-size: 12px; font-weight: 500; white-space: nowrap;
+  cursor: pointer; transition: var(--trans-fast); color: var(--text-secondary); box-shadow: var(--shadow-sm);
+}
+.chip:hover { background: var(--bg-body); transform: translateY(-1px); }
+.chip.active { background: var(--text-main); color: white; border-color: var(--text-main); box-shadow: var(--shadow-md); }
+
+.mini-list {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;
+  flex: 1; /* Chiếm hết không gian còn lại trong data-explorer */
+  overflow-y: auto; align-content: start; min-height: 0;
+  padding-right: 4px;
+}
+

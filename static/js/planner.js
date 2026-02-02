@@ -90,6 +90,7 @@ function closePlannerResultModal() {
 
 function renderItinerary(plan) {
     const container = document.getElementById("plannerTimeline");
+    const summaryTitle = document.getElementById("itineraryTitle");
     if(!container) return;
     container.innerHTML = "";
     
@@ -98,33 +99,47 @@ function renderItinerary(plan) {
         return;
     }
 
-    plan.forEach(day => {
-        // Timeline Item cho từng ngày
-        const dayItem = document.createElement("div");
-        dayItem.className = "timeline-item";
-        
-        let locationsHTML = "";
-        if (day.locations && day.locations.length > 0) {
-             locationsHTML = day.locations.map(loc => `
-                <div class="plan-loc-card" onclick="showDetailFromData('${loc.name}')">
-                    <img src="${loc.image}" loading="lazy" onerror="this.src='/static/images/no-image.png'"> 
-                    <span>${loc.name}</span>
-                </div>
-             `).join("");
-        } else {
-            locationsHTML = "<p>Ngày nghỉ ngơi tự do.</p>";
-        }
+    // Update Summary
+    if(summaryTitle) summaryTitle.innerText = `Hành trình ${plan.length} ngày`;
 
-        dayItem.innerHTML = `
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-                <h3>Ngày ${day.day}</h3>
-                <div class="plan-loc-list">
-                    ${locationsHTML}
-                </div>
-            </div>
-        `;
-        container.appendChild(dayItem);
+    plan.forEach(day => {
+        // Day Marker
+        const dayMarker = document.createElement("div");
+        dayMarker.className = "day-marker-pill";
+        dayMarker.innerText = `Ngày ${day.day}`;
+        container.appendChild(dayMarker);
+
+        if (day.activities && day.activities.length > 0) {
+             day.activities.forEach(act => {
+                const loc = act.location;
+                if(!loc) return;
+                
+                const node = document.createElement("div");
+                node.className = "activity-node";
+                
+                node.innerHTML = `
+                    <div class="activity-circle"></div>
+                    <div class="activity-card-fancy" onclick="showDetailFromData('${loc.name}')">
+                        <div class="activity-time-box">
+                            <i class="fas fa-camera"></i>
+                            <span>${act.time || ''}</span>
+                        </div>
+                        <div class="activity-main-info">
+                            <div class="activity-title-fancy">${loc.name}</div>
+                            <div class="activity-tag-fancy">${loc.category || 'Địa điểm'}</div>
+                            <div class="activity-desc-fancy">${loc.description || 'Khám phá địa điểm thú vị tại cố đô Huế.'}</div>
+                        </div>
+                        <img src="${loc.image}" class="activity-img-fancy" onerror="this.src='/static/images/no-image.png'">
+                    </div>
+                `;
+                container.appendChild(node);
+             });
+        } else {
+            const emptyNode = document.createElement("div");
+            emptyNode.style.padding = "0 0 30px 60px";
+            emptyNode.innerHTML = "<p style='color:#94a3b8; font-size:13px;'>Ngày nghỉ ngơi tự do.</p>";
+            container.appendChild(emptyNode);
+        }
     });
 }
 
@@ -144,8 +159,10 @@ async function saveCurrentItinerary() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                name: name,
-                plan_data: currentItineraryData
+                itinerary: {
+                    title: name,
+                    plan: currentItineraryData
+                }
             })
         });
 
@@ -203,9 +220,19 @@ async function deleteSavedItinerary(id) {
 // Lưu ý: data trả về từ API list có thể chưa có plan_data chi tiết, cần parse hoặc gọi detail
 // Ở phiên bản đơn giản, data list trả về full
 async function viewSavedItinerary(id) {
-    // Cần tìm trong list đã load hoặc fetch lại
-    // Để đơn giản, giả sử loadUserItinerariesList đã lưu data vào biến global hoặc ta fetch lại
-    // ... logic saved itinerary view ...
-    // Tạm thời mở ResultModal với data rỗng hoặc hiển thị thông báo "Tính năng đang cập nhật"
-    showNotification({type: 'info', message: 'Tính năng xem lại đang được cập nhật.'});
+    if (typeof closeUserProfile === 'function') closeUserProfile();
+    
+    // Tìm trong cache của window.userActivityData (từ profile.js)
+    let plan = null;
+    if (window.userActivityData && window.userActivityData.plans) {
+        plan = window.userActivityData.plans.find(p => p.id === id);
+    }
+    
+    if (plan && plan.data) {
+        currentItineraryData = plan.data;
+        renderItinerary(plan.data);
+        openPlannerResultModal();
+    } else {
+        showNotification({type: 'error', message: 'Không tìm thấy dữ liệu lộ trình này.'});
+    }
 }

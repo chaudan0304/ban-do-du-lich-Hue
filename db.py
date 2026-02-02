@@ -63,7 +63,7 @@ def run_query(query, params=None):
 # --------------------------------------------------------------------------------------
 # HÀM ĐỒNG BỘ DỮ LIỆU TỪ NEO4J SANG EXCEL
 # --------------------------------------------------------------------------------------
-def sync_locations_to_excel(excel_path="data.xlsx"):
+def sync_locations_to_excel(excel_path="data/data.xlsx"):
     """
     Đồng bộ dữ liệu Locations từ Neo4j vào file Excel.
     Giữ nguyên các sheet Users và Likes.
