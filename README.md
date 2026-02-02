@@ -173,23 +173,43 @@ Dự án hiện tại đã hoàn thiện các nhóm chức năng chính phục v
 
 ### 🚀 Phiên bản hiện tại - 02/02/2026 (Nhánh: `main`)
 
-#### 🗺️ AI Planner & Quản lý Lộ trình
+#### 1. 🗺️ AI Planner & Quản lý Lộ trình (New Core Feature)
 
-- **Lưu Lộ trình:** Tính năng cho phép người dùng lưu lại các kế hoạch du lịch do AI thiết kế vào cơ sở dữ liệu.
-- **Tiện ích Counter:** Thay thế thanh kéo (slider) bằng bộ đếm số ngày (+) (-) giúp thao tác chính xác và mượt mà hơn.
-- **Quản lý hành trình:** Tab "Lộ trình" mới trong trang Hồ sơ cá nhân giúp xem lại chi tiết hoặc xóa các kế hoạch cũ.
+- **Cá nhân hóa Lộ trình:**
+  - Tích hợp tùy chọn **"Chỉ chọn địa điểm Đã thích"**: Cho phép AI xây dựng lộ trình dựa trên dữ liệu người dùng đã tương tác (Like) thay vì chỉ gợi ý mới.
+  - **Counter Widget:** Thay thế thanh trượt cũ bằng bộ đếm số ngày (+/-) trực quan, giới hạn hợp lý (1-5 ngày).
+  - **Giao diện Compact:** Thiết kế lại Modal Lập lộ trình theo bố cục ngang (Horizontal Layout) và lưới 3 cột, loại bỏ hoàn toàn thanh cuộn, tối ưu cho màn hình laptop.
+- **Lưu & Quản lý Lộ trình:**
+  - **Database:** Thiết kế Node `Itinerary` mới trong Neo4j, liên kết với User qua quan hệ `[:CREATED]`.
+  - **API Endpoints:**
+    - `POST /api/itineraries`: Lưu lộ trình hiện tại vào DB.
+    - `GET /api/itineraries`: Lấy danh sách lộ trình đã lưu của user.
+    - `DELETE /api/itineraries/<id>`: Xóa lộ trình cũ.
+  - **User Profile:** Thêm Tab "Lộ trình" cho phép xem lại chi tiết hoặc xóa các kế hoạch đã lưu.
 
-#### 🔐 Bảo mật & Hệ thống (Backend)
+#### 2. 🔐 Hệ thống Bảo mật & Tài khoản (Security)
 
-- **Role-Based Access Control (RBAC):** Chuyển đổi logic kiểm tra quyền Admin từ username cứng sang thuộc tính `role`, tăng cường bảo mật và tính mở rộng.
-- **Reset Password:** Công cụ khôi phục mật khẩu thông qua xác thực Email đăng ký, bảo vệ tài khoản người dùng.
-- **Cơ chế Cache Thông minh:** Tự động làm mới bộ nhớ đệm (Invalidation) ngay khi Admin thay đổi dữ liệu, đảm bảo bản đồ luôn cập nhật tức thì (Real-time update).
+- **Quy trình Đổi mật khẩu 2 bước (Two-Factor Flow):**
+  - **Bước 1 (Verify):** API `/api/verify-account` kiểm tra sự khớp nối giữa Username và Email.
+  - **Bước 2 (Reset):** Chỉ khi Verify thành công, giao diện mới hiện Form nhập mật khẩu mới và gọi API `/api/reset-password`.
+  - **UX:** Hỗ trợ phím **Enter** chuyển tiếp mượt mà giữa các bước.
+- **Role-Based Access Control (RBAC):**
+  - Nâng cấp hệ thống phân quyền: Thay vì kiểm tra cứng `username == 'admin'`, hệ thống kiểm tra thuộc tính `role='admin'` trong Database.
+  - Bảo vệ chặt chẽ các API quản trị (`/api/admin/*`) bằng Decorator kiểm tra quyền.
+- **Cơ chế Cache Invalidation:**
+  - Mỗi khi Admin thêm/sửa/xóa địa điểm, hệ thống tự động đánh dấu "Cache Dirty".
+  - Client tự động tải lại dữ liệu mới nhất mà không cần người dùng F5 (Real-time update cảm giác).
 
-#### 📱 Tối ưu UI/UX & Hiệu năng (Frontend)
+#### 3. ✨ Tối ưu UI/UX & Tương tác (Polishing)
 
-- **Mobile Responsive:** Giao diện tự động thích ứng trên điện thoại (Stacked Layout: Bản đồ phía trên, Danh sách phía dưới).
-- **Smart Search:** Tìm kiếm toàn cục trên bộ nhớ đệm client, phản hồi cực nhanh và không bị giới hạn bởi bộ lọc danh mục hiện tại.
-- **Dynamic AI Context:** Biểu tượng giải thích gợi ý (Reason Icon) thay đổi linh hoạt theo ngữ cảnh địa điểm (Ví dụ: Chùa 🛕, Đồ ăn 🍜, Di tích 🏛️).
+- **Hiệu ứng Micro-Interactions:**
+  - **Nút bấm:** Thêm hiệu ứng Hover Glow (phát sáng), Lift (nảy lên) và thay đổi màu sắc gradient khi di chuột.
+  - **Feedback:** Các nút "Hủy" chuyển màu đỏ cảnh báo, nút "Đóng" (X) xoay 90 độ và đổi màu đỏ khi hover.
+- **Phím tắt (Keyboard Accessibility):**
+  - Hỗ trợ phím **Enter** để submit nhanh cho tất cả các form: Đăng nhập, Đăng ký, Đổi mật khẩu.
+- **Mobile Responsive:**
+  - Thiết kế lại bố cục Mobile: Chuyển Sidebar xuống dưới đáy, Bản đồ full màn hình phía trên.
+  - Tự động ẩn các thành phần không cần thiết trên màn hình nhỏ.
 
 ---
 

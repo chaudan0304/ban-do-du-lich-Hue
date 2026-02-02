@@ -691,47 +691,60 @@
             <p style="font-size: 13px; opacity: 0.9; margin-top: 4px;">AI sẽ gợi ý lộ trình tối ưu cho bạn</p>
         </div>
         
-        <div class="modal-body-fancy">
-            <!-- 1. Chọn số ngày -->
-            <label class="form-label">📅 Bạn dự định đi bao lâu?</label>
-            <div class="counter-selector" style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 10px;">
-                <button class="btn-counter" onclick="changePlanDays(-1)" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ddd; background: white; cursor: pointer; color: var(--primary); font-size: 16px; transition: all 0.2s;"><i class="fas fa-minus"></i></button>
-                <span id="dayDisplay" class="counter-value" style="font-size: 18px; font-weight: 700; color: var(--text-main); min-width: 80px; text-align: center;">1 Ngày</span>
-                <button class="btn-counter" onclick="changePlanDays(1)" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ddd; background: white; cursor: pointer; color: var(--primary); font-size: 16px; transition: all 0.2s;"><i class="fas fa-plus"></i></button>
-                <input type="hidden" id="planDays" value="1">
+        <div class="modal-body-fancy" style="padding: 15px 20px;">
+            <!-- Row: Days + Like Option -->
+            <div style="display: flex; gap: 15px; align-items: flex-end; justify-content: space-between; margin-bottom: 20px;">
+                <!-- 1. Số ngày -->
+                <div>
+                    <label class="form-label" style="font-size:13px; margin-bottom:8px; display:block;">📅 Số ngày dự kiến</label>
+                    <div class="counter-selector" style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn-counter" onclick="changePlanDays(-1)" style="width: 36px; height: 36px; padding:0; border-radius: 8px; border: 1px solid #e2e8f0; background: white; cursor: pointer; color: var(--primary);"><i class="fas fa-minus" style="font-size:12px;"></i></button>
+                        <span id="dayDisplay" class="counter-value" style="font-size: 15px; font-weight: 700; width:65px; text-align: center;">1 Ngày</span>
+                        <button class="btn-counter" onclick="changePlanDays(1)" style="width: 36px; height: 36px; padding:0; border-radius: 8px; border: 1px solid #e2e8f0; background: white; cursor: pointer; color: var(--primary);"><i class="fas fa-plus" style="font-size:12px;"></i></button>
+                        <input type="hidden" id="planDays" value="1">
+                    </div>
+                </div>
+
+                <!-- 2. Option Like -->
+                <div style="padding-bottom: 2px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; background: #f0fdf4; padding: 0 12px; border-radius: 8px; border: 1px solid #bbf7d0; height: 36px;">
+                        <input type="checkbox" id="planUseLikes" style="width: 14px; height: 14px; accent-color: #16a34a;">
+                        <span style="font-weight: 600; font-size: 12px; color: #15803d; white-space: nowrap;">Chỉ nơi Đã thích ❤️</span>
+                    </label>
+                </div>
             </div>
             
-            <!-- 2. Chọn sở thích -->
-            <label class="form-label" style="margin-top:20px;">❤️ Sở thích ưu tiên (Chọn nhiều)</label>
-            <div class="preference-grid">
-                <label class="pref-item">
+            <!-- 3. Chọn sở thích -->
+            <label class="form-label" style="font-size:13px; margin-bottom:10px; display:block;">❤️ Bạn thích trải nghiệm gì?</label>
+            <div class="preference-grid" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Di tích">
                     <span>🏛️ Di tích</span>
                 </label>
-                <label class="pref-item">
+                <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Ẩm thực">
                     <span>🍜 Ẩm thực</span>
                 </label>
-                <label class="pref-item">
+                <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Thiên nhiên">
                     <span>🌳 Thiên nhiên</span>
                 </label>
-                <label class="pref-item">
+                <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Tâm linh">
                     <span>🛕 Tâm linh</span>
                 </label>
-                 <label class="pref-item">
+                 <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Check-in">
                     <span>📸 Check-in</span>
                 </label>
-                 <label class="pref-item">
-                    <input type="checkbox" name="planPref" value="Cafe">
-                    <span>☕ Cafe</span>
+                 <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
+                    <input type="checkbox" name="planPref" value="Mua sắm">
+                    <span>🎁 Mua sắm</span>
                 </label>
             </div>
-            
-            <button class="btn-save-gradient" onclick="submitPlanner()" style="margin-top: 25px;">
-                <i class="fas fa-magic"></i> Tạo lộ trình ngay
+
+            <button class="btn-save-gradient" onclick="submitPlanner()" style="width: 100%; margin-top: 20px; padding: 12px; font-size: 15px;">
+                <i class="fas fa-magic"></i> Thiết kế Lộ trình ngay
             </button>
         </div>
     </div>
@@ -771,23 +784,43 @@
               <i class="fas fa-times"></i>
           </div>
       </div>
-      <div class="modal-body-fancy">
-          <div class="form-group">
-              <label class="label-fancy">Tên tài khoản</label>
-              <input type="text" id="resetUsername" class="input-fancy" placeholder="Tên đăng nhập...">
+      <div class="modal-body-fancy" style="padding: 25px 30px 10px;">
+          
+          <!-- Step 1: Verification -->
+          <div id="resetStep1">
+              <div class="form-group" style="margin-bottom: 15px;">
+                  <label class="label-fancy">Tên tài khoản</label>
+                  <input type="text" id="resetUsername" class="input-fancy" placeholder="Nhập tên đăng nhập">
+              </div>
+              <div class="form-group" style="margin-bottom: 20px;">
+                  <label class="label-fancy">Email đăng ký</label>
+                  <input type="email" id="resetEmail" class="input-fancy" placeholder="Nhập email đã đăng ký">
+              </div>
+              
+              <button class="btn-save-gradient" onclick="verifyResetAccount()" style="width:100%; margin-top:5px; padding: 10px;">
+                  <i class="fas fa-search"></i> Kiểm tra
+              </button>
           </div>
-          <div class="form-group">
-              <label class="label-fancy">Email đăng ký</label>
-              <input type="email" id="resetEmail" class="input-fancy" placeholder="Email đã đăng ký...">
+
+          <!-- Step 2: Set New Password -->
+          <div id="resetStep2" style="display:none;">
+              <div class="alert-box" style="background:#ecfdf5; color:#047857; padding:12px; border-radius:8px; font-size:14px; margin-bottom:20px; text-align:center;">
+                  <i class="fas fa-check-circle"></i> Xin chào <b id="resetUserDisplay"></b>
+              </div>
+              <div class="form-group" style="margin-bottom: 20px;">
+                  <label class="label-fancy">Mật khẩu mới</label>
+                  <input type="password" id="resetNewPass" class="input-fancy" placeholder="Nhập mật khẩu mới (min 6 ký tự)">
+              </div>
+              <button class="btn-save-gradient" onclick="handleResetPassword()" style="width:100%; margin-top:5px; padding: 10px;">
+                  <i class="fas fa-key"></i> Đổi mật khẩu
+              </button>
+              <button class="btn-cancel" onclick="backToResetStep1()" style="width:100%; margin-top:10px; background:none; color:#64748b; border:none; font-size: 13px;">
+                  Quay lại
+              </button>
           </div>
-          <div class="form-group">
-              <label class="label-fancy">Mật khẩu mới</label>
-              <input type="password" id="resetNewPass" class="input-fancy" placeholder="Mật khẩu mới (min 6 ký tự)...">
-          </div>
-          <button class="btn-full" onclick="handleResetPassword()" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
-              <i class="fas fa-key"></i> Đổi mật khẩu
-          </button>
-          <p id="resetMsg" style="color: red; font-size: 12px; margin-top: 10px; text-align: center;"></p>
+
+          <!-- Message area -->
+          <p id="resetMsg" style="color:red; font-size:13px; text-align:center; margin-top:10px; margin-bottom:0; min-height:0;"></p>
       </div>
     </div>
   </div>

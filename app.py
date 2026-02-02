@@ -34,6 +34,7 @@ from db import (
     save_user_itinerary,
     get_user_itineraries,
     delete_user_itinerary,
+    verify_user_account,
 )
 import logging
 
@@ -147,7 +148,27 @@ def api_login():
         return jsonify({"error": message}), 401
 
 
-# API: Quên mật khẩu
+# API: Verify Account (Bước 1 Reset Pass)
+@app.route("/api/verify-account", methods=["POST"])
+def api_verify_account():
+    data = request.json
+    username = data.get("username", "").strip()
+    email = data.get("email", "").strip()
+
+    if not username or not email:
+        return jsonify({"success": False, "error": "Vui lòng nhập đủ thông tin"}), 400
+
+    is_valid = verify_user_account(username, email)
+    if is_valid:
+        return jsonify({"success": True})
+    else:
+        return (
+            jsonify({"success": False, "error": "Thông tin tài khoản không chính xác"}),
+            200,
+        )
+
+
+# API: Quên mật khẩu (Bước 2: Đổi pass)
 @app.route("/api/reset-password", methods=["POST"])
 def api_reset_password():
     data = request.json
@@ -974,6 +995,7 @@ def api_generate_itinerary():
 
     days = int(data.get("days", 1))
     preferences = data.get("preferences", [])  # List[str]
+    use_liked = data.get("use_liked", False)
 
     # Giới hạn số ngày hợp lý
     if days < 1:
@@ -982,7 +1004,7 @@ def api_generate_itinerary():
         days = 5
 
     try:
-        plan = generate_itinerary(username, days, preferences)
+        plan = generate_itinerary(username, days, preferences, use_liked=use_liked)
         return jsonify({"success": True, "plan": plan})
     except Exception as e:
         print(f"Planner Error: {e}")

@@ -230,6 +230,15 @@ def delete_user_by_name(username):
     return True
 
 
+def verify_user_account(username, email):
+    """Kiểm tra xem username và email có khớp không"""
+    query = (
+        "MATCH (u:User {name: $name}) WHERE toLower(u.email) = toLower($email) RETURN u"
+    )
+    result = run_query(query, {"name": username, "email": email})
+    return True if result else False
+
+
 def reset_user_password(username, email, new_password):
     """
     Đặt lại mật khẩu nếu username và email trùng khớp.
@@ -432,60 +441,72 @@ def delete_review(username, location_name):
 # --------------------------------------------------------------------------------------
 # AI ITINERARY PLANNER (LẬP LỘ TRÌNH)
 # --------------------------------------------------------------------------------------
-def generate_itinerary(username, days=1, preferences=[]):
+def generate_itinerary(username, days=1, preferences=[], use_liked=False):
     """
-    Tạo lộ trình du lịch thông minh dựa trên đề xuất cá nhân hóa.
+    Tạo lộ trình du lịch thông minh.
+    :param use_liked: Nếu True, chỉ chọn từ danh sách Đã thích.
     """
-    # 1. Lấy danh sách địa điểm tốt nhất cho user này
-    # Fix: Category là Node riêng, không phải property string
+    print(
+        f"DEBUG: Generating {days}-day itinerary. Prefs: {preferences}. Using Liked: {use_liked}"
+    )
+
+    # 1. Tìm ứng viên (Candidate Selection)
+    # Lọc theo Category nếu có
     category_match = ""
     category_where = ""
 
+    pref_list = str(preferences)
     if preferences and len(preferences) > 0:
-        # Nếu có preferences, ta cần match với category
-        # Sử dụng pattern comprehension hoặc match explicit
-        # Ở đây dùng WHERE cat.name IN [...] cho đơn giản
-
-        # Build list string: ['Ẩm thực', 'Di tích']
-        pref_list = str(
-            preferences
-        )  # ra format "['a', 'b']" của python cũng ổn cho cypher
-
         category_match = "MATCH (l)-[:HAS_CATEGORY]->(cat:Category)"
         category_where = f"AND cat.name IN {pref_list}"
     else:
-        # Nếu không filter, vẫn cần lấy category info
         category_match = "OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)"
 
-    # Tái sử dụng logic Interacted/PageRank để scoring
-    # Schema Fix:
-    # - l.pagerank -> l.pagerankNorm (hoặc pagerankScore)
-    # - l.category -> cat.name
-    # - l.description -> l.desc
-
-    query = f"""
-    MATCH (u:User {{name: $name}})
-    MATCH (l:Location)
-    {category_match}
-    WHERE NOT (u)-[:INTERACTED]->(l) AND NOT (u)-[:REVIEWED]->(l)
-    {category_where}
-    
-    OPTIONAL MATCH (l)<-[i:INTERACTED]-(other:User)
-    WITH l, cat, count(i) as popularity, coalesce(l.pagerankNorm, l.pagerankScore, 0.15) as pr
-    
-    // Tính score đơn giản
-    WITH l, cat, (pr * 0.5 + log(popularity + 1) * 0.3) as score
-    ORDER BY score DESC
-    LIMIT 50
-    
-    RETURN l.name as name, 
-           cat.name as category, 
-           l.lat as lat, 
-           l.lng as lng, 
-           l.image as image, 
-           l.desc as description,
-           score
-    """
+    if use_liked:
+        # --- CHẾ ĐỘ: LẤY TỪ DANH SÁCH ĐÃ THÍCH ---
+        query = f"""
+        MATCH (u:User {{name: $name}})-[:LIKED]->(l:Location)
+        {category_match}
+        WHERE 1=1
+        {category_where}
+        
+        WITH l, cat
+        // Vẫn lấy score để sắp xếp ưu tiên
+        RETURN l.name as name, 
+               cat.name as category, 
+               l.lat as lat, 
+               l.lng as lng, 
+               l.image as image, 
+               l.desc as description,
+               coalesce(l.pagerankNorm, 0.1) as score
+        ORDER BY score DESC
+        """
+    else:
+        # --- CHẾ ĐỘ: GỢI Ý MỚI (AI RECOMMENDATION) ---
+        query = f"""
+        MATCH (u:User {{name: $name}})
+        MATCH (l:Location)
+        {category_match}
+        // Chỉ lấy địa điểm CHƯA đi (chưa interacted/reviewed)
+        WHERE NOT (u)-[:INTERACTED]->(l) AND NOT (u)-[:REVIEWED]->(l)
+        {category_where}
+        
+        OPTIONAL MATCH (l)<-[i:INTERACTED]-(other:User)
+        WITH l, cat, count(i) as popularity, coalesce(l.pagerankNorm, l.pagerankScore, 0.15) as pr
+        
+        // Scoring: PageRank + Popularity
+        WITH l, cat, (pr * 0.5 + log(popularity + 1) * 0.3) as score
+        ORDER BY score DESC
+        LIMIT 50
+        
+        RETURN l.name as name, 
+               cat.name as category, 
+               l.lat as lat, 
+               l.lng as lng, 
+               l.image as image, 
+               l.desc as description,
+               score
+        """
 
     try:
         print(f"DEBUG: Running Planner Query for user={{username}}...")
@@ -515,7 +536,7 @@ def generate_itinerary(username, days=1, preferences=[]):
                    coalesce(l.rating, 0) as score
             ORDER BY score DESC LIMIT 30
             """
-            candidates = run_query(fallback_query, {{}})
+            candidates = run_query(fallback_query, {})
             print(
                 f"DEBUG: Fallback candidates: {{len(candidates) if candidates else 0}}"
             )
