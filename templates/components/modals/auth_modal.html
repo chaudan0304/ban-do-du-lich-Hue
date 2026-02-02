@@ -1,0 +1,77 @@
+    <!-- Modal Auth -->
+    <div id="authModal" class="modal">
+      <div class="modal-content">
+        <div class="auth-header-wrapper">
+          <div class="auth-tabs">
+            <button class="tab-btn active" onclick="switchTab('login')">
+              Đăng nhập
+            </button>
+            <button class="tab-btn" onclick="switchTab('register')">
+              Đăng ký
+            </button>
+          </div>
+          <button class="close-btn-inline" onclick="closeAuthModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div id="loginForm" class="auth-form">
+          <div class="form-group">
+            <i class="fas fa-user"></i
+            ><input type="text" id="loginUser" placeholder="Tên đăng nhập" />
+          </div>
+          <div class="form-group">
+            <i class="fas fa-lock"></i
+            ><input type="password" id="loginPass" placeholder="Mật khẩu" />
+          </div>
+          <button class="btn-full" onclick="handleLogin()">Đăng nhập</button>
+          <p
+            id="loginMsg"
+            style="
+              color: red;
+              font-size: 12px;
+              margin-top: 10px;
+              text-align: center;
+            "
+          ></p>
+          <div style="text-align: center; margin-top: 5px;">
+            <a href="#" onclick="openResetPasswordModal()" style="font-size: 13px; color: #666; text-decoration: none;">Quên mật khẩu?</a>
+          </div>
+        </div>
+
+        <div id="registerForm" class="auth-form" style="display: none">
+          <div class="form-group">
+            <i class="fas fa-user"></i
+            ><input type="text" id="regUser" placeholder="Chọn tên đăng nhập" />
+          </div>
+          <div class="form-group">
+              <i class="fas fa-id-card"></i>
+              <input type="text" id="regRealName" placeholder="Họ và tên hiển thị" />
+          </div>
+          <div class="form-group">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="regEmail" placeholder="Email (để khôi phục mật khẩu)" />
+          </div>
+          <div class="form-group">
+            <i class="fas fa-lock"></i
+            ><input type="password" id="regPass" placeholder="Mật khẩu" />
+          </div>
+          
+          <!-- Hidden input for checkbox logic compatibility if needed -->
+          <input type="checkbox" id="regCheck" style="display:none" checked value="Agree">
+
+          <button class="btn-full btn-outline" onclick="handleRegister()">
+            Tạo tài khoản
+          </button>
+          <p
+            id="regMsg"
+            style="
+              color: red;
+              font-size: 12px;
+              margin-top: 10px;
+              text-align: center;
+            "
+          ></p>
+        </div>
+      </div>
+    </div>

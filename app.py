@@ -136,6 +136,7 @@ def api_login():
         return (
             jsonify(
                 {
+                    "success": True,
                     "message": "Đăng nhập thành công!",
                     "username": username,
                     "fullname": fullname or username,  # Fallback to username if empty

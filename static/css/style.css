@@ -1784,3 +1784,83 @@ body {
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
+
+/* --- FIX PROFILE MODAL STYLING --- */
+#profileModal .modal-content {
+    max-width: 400px;
+    border-radius: 12px;
+    padding: 0;
+}
+
+#profileModal .auth-header-wrapper {
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#profileModal .modal-body {
+    padding: 20px;
+}
+
+/* Form Groups matching Auth Modal */
+#profileModal .form-group {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+#profileModal .form-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    pointer-events: none;
+}
+
+#profileModal .form-group input {
+    width: 100%;
+    padding: 12px 15px 12px 40px; /* Cho icon */
+    border: 1px solid #e1e1e1;
+    border-radius: 25px;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.3s;
+    background: #fff;
+    box-sizing: border-box; /* Quan tr?ng */
+}
+
+#profileModal .form-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Button Update */
+#profileModal .btn-full {
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#profileModal .btn-full:hover {
+    filter: brightness(1.1);
+}
+
+/* Activity List */
+#activityContent {
+    border: 1px solid #eee;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #666;
+}
+

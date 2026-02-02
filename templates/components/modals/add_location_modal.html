@@ -1,0 +1,107 @@
+    <!-- Modal Add Location -->
+    <div class="modal" id="addModal">
+      <div class="modal-content-fancy">
+        <div class="modal-header-gradient">
+          <h3 class="modal-title-fancy">➕ Thêm địa điểm mới</h3>
+          <div class="close-btn-white" onclick="closeAddModal()">
+            <i class="fas fa-times"></i>
+          </div>
+        </div>
+
+        <div class="modal-body-fancy">
+          <div class="form-group">
+            <label class="label-fancy"
+              ><i class="fas fa-map-pin"></i> Tên địa điểm
+              <span class="required-mark">*</span></label
+            >
+            <input
+              type="text"
+              id="addName"
+              class="input-fancy"
+              placeholder="Ví dụ: Cầu Gỗ Lim..."
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="col">
+              <div class="form-group">
+                <label class="label-fancy"
+                  ><i class="fas fa-globe"></i> Vĩ độ (Lat)</label
+                >
+                <input
+                  type="number"
+                  id="addLat"
+                  class="input-fancy"
+                  placeholder="..."
+                />
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label class="label-fancy"
+                  ><i class="fas fa-globe"></i> Kinh độ (Lng)</label
+                >
+                <input
+                  type="number"
+                  id="addLng"
+                  class="input-fancy"
+                  placeholder="..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Helper button to pick map location could be added here if needed -->
+          <!-- 
+          <button onclick="activateMapPicker()" class="btn-map-picker">
+            <i class="fas fa-map-marked-alt"></i> Click chọn vị trí trên bản đồ
+          </button> 
+          -->
+
+          <div class="form-group">
+            <label class="label-fancy"
+              ><i class="fas fa-layer-group"></i> Danh mục
+              <span class="required-mark">*</span></label
+            >
+            <select id="addCategory" class="input-fancy select-fancy">
+              <option value="">-- Chọn danh mục --</option>
+              <option value="Di tích">Di tích</option>
+              <option value="Tâm linh">Tâm linh</option>
+              <option value="Ẩm thực">Ẩm thực</option>
+              <option value="Thiên nhiên">Thiên nhiên</option>
+              <option value="Tham quan">Tham quan</option>
+              <option value="Bãi biển">Bãi biển</option>
+              <option value="Lăng tẩm">Lăng tẩm</option>
+              <option value="Mua sắm">Mua sắm</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="label-fancy"
+              ><i class="fas fa-image"></i> Link hình ảnh</label
+            >
+            <input
+              type="text"
+              id="addImage"
+              class="input-fancy"
+              placeholder="https://..."
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="label-fancy"
+              ><i class="fas fa-pen"></i> Mô tả ngắn</label
+            >
+            <textarea
+              id="addDesc"
+              class="input-fancy textarea-fancy"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <button onclick="submitAddLocation()" class="btn-save-gradient">
+            <i class="fas fa-rocket"></i> Tạo địa điểm mới
+          </button>
+        </div>
+      </div>
+    </div>

@@ -1,0 +1,22 @@
+  <!-- MODAL: AI PLANNER RESULT -->
+  <div id="plannerResultModal" class="modal">
+    <div class="modal-content-fancy" style="max-width: 800px; height: 90vh; display: flex; flex-direction: column;">
+        <button class="close-btn-white" onclick="closePlannerResultModal()"><i class="fas fa-times"></i></button>
+        
+        <div class="modal-header-gradient" style="background: linear-gradient(135deg, #10b981, #059669); flex-shrink: 0;">
+            <h3 class="modal-title-fancy"><i class="fas fa-map-marked-alt"></i> Lộ trình gợi ý</h3>
+            <p style="font-size: 13px; opacity: 0.9;">Được cá nhân hóa dành riêng cho bạn</p>
+        </div>
+        
+        <div class="modal-body-fancy" style="flex: 1; overflow-y: auto; padding: 0; background: #f8fafc;">
+            <div id="plannerTimeline" class="timeline-container">
+                <!-- Nội dung lặp lịch trình sẽ được JS render vào đây -->
+            </div>
+        </div>
+        
+        <div class="modal-footer-fancy" style="padding: 15px; border-top: 1px solid #e2e8f0; background: white; text-align: right;">
+            <button class="btn-cancel" onclick="closePlannerResultModal()">Đóng</button>
+            <button class="btn-save" onclick="saveCurrentItinerary()"><i class="fas fa-save"></i> Lưu lộ trình</button>
+        </div>
+    </div>
+  </div>

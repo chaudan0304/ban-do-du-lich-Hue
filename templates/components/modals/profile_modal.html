@@ -1,0 +1,49 @@
+  <!-- Modal: Hồ sơ cá nhân -->
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+        <div class="auth-header-wrapper" style="justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+            <h3 style="margin:0; font-size: 18px; color: var(--primary);">Hồ sơ của tôi</h3>
+            <button class="close-btn-inline" onclick="closeUserProfile()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="modal-body">
+             <!-- Tabs -->
+            <div class="auth-tabs" style="margin-bottom: 20px;">
+                <button class="tab-btn active" data-tab="info" onclick="switchProfileTab('info')">Thông tin</button>
+                <button class="tab-btn" data-tab="plans" onclick="switchProfileTab('plans')">Lộ trình đã lưu</button>
+            </div>
+            
+            <!-- Tab Info -->
+            <div id="tab-info" class="profile-tab-content">
+                <div class="form-group">
+                    <i class="fas fa-user-tag"></i>
+                    <input type="text" id="profileFullname" placeholder="Tên hiển thị">
+                </div>
+                <div class="form-group">
+                     <i class="fas fa-envelope"></i>
+                    <input type="email" id="profileEmail" placeholder="Email liên hệ">
+                </div>
+                
+                <div style="background:#f9f9f9; padding:10px; border-radius:4px; margin-bottom:15px; font-size:13px; color:#555;">
+                    <p style="margin:5px 0;">Tài khoản: <b id="profileUsername">...</b></p>
+                    <p style="margin:5px 0;">Vai trò: <b id="profileRole">...</b></p>
+                </div>
+                
+                 <h4 style="font-size: 14px; margin-bottom: 10px;">Hoạt động gần đây</h4>
+                <div id="activityContent" style="height: 120px; overflow-y: auto; background: #eee; border-radius: 4px; padding: 10px; font-size: 13px; color: #666;">
+                    Chưa có hoạt động nào.
+                </div>
+
+                <button class="btn-full" onclick="submitProfileUpdate()" style="margin-top: 20px;">Cập nhật</button>
+            </div>
+
+            <!-- Tab Saved Plans -->
+            <div id="tab-plans" class="profile-tab-content" style="display:none;">
+                 <div id="saved-itineraries-list" style="max-height: 300px; overflow-y: auto;">
+                     <div class="empty-state" style="padding: 20px; text-align: center; color: #999;">Đang tải...</div>
+                 </div>
+            </div>
+
+        </div>
+    </div>
+  </div>

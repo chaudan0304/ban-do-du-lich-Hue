@@ -1,0 +1,102 @@
+    <!-- Modal Edit Location -->
+    <div class="modal" id="editModal">
+      <div class="modal-content-fancy">
+        <div class="modal-header-gradient">
+          <h3 class="modal-title-fancy">✏️ Chỉnh sửa thông tin</h3>
+          <div class="close-btn-white" onclick="closeEditModal()">
+            <i class="fas fa-times"></i>
+          </div>
+        </div>
+
+        <div class="modal-body-fancy">
+          <input type="hidden" id="editOldName" />
+
+          <div class="form-group">
+            <label class="label-fancy"
+              ><i class="fas fa-signature"></i> Tên địa điểm
+              <span class="required-mark">*</span></label
+            >
+            <input
+              type="text"
+              id="editName"
+              class="input-fancy"
+              placeholder="Nhập tên địa điểm..."
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="col">
+              <div class="form-group">
+                <label class="label-fancy"
+                  ><i class="fas fa-globe"></i> Vĩ độ (Lat)</label
+                >
+                <input
+                  type="number"
+                  id="editLat"
+                  class="input-fancy"
+                  step="any"
+                  placeholder="..."
+                />
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label class="label-fancy"
+                  ><i class="fas fa-globe"></i> Kinh độ (Lng)</label
+                >
+                <input
+                  type="number"
+                  id="editLng"
+                  class="input-fancy"
+                  step="any"
+                  placeholder="..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="label-fancy"
+              ><i class="fas fa-tags"></i> Danh mục</label
+            >
+            <select id="editCategory" class="input-fancy select-fancy">
+              <option value="Di tích">Di tích</option>
+              <option value="Tâm linh">Tâm linh</option>
+              <option value="Ẩm thực">Ẩm thực</option>
+              <option value="Thiên nhiên">Thiên nhiên</option>
+              <option value="Tham quan">Tham quan</option>
+              <option value="Bãi biển">Bãi biển</option>
+              <option value="Lăng tẩm">Lăng tẩm</option>
+              <option value="Mua sắm">Mua sắm</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="label-fancy"
+              ><i class="fas fa-image"></i> Link hình ảnh</label
+            >
+            <input
+              type="text"
+              id="editImage"
+              class="input-fancy"
+              placeholder="https://..."
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="label-fancy"
+              ><i class="fas fa-align-left"></i> Mô tả chi tiết</label
+            >
+            <textarea
+              id="editDesc"
+              class="input-fancy textarea-fancy"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <button onclick="submitEditLocation()" class="btn-save-gradient">
+            <i class="fas fa-save"></i> Lưu thay đổi
+          </button>
+        </div>
+      </div>
+    </div>
