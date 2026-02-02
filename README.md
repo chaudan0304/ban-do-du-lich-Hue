@@ -182,12 +182,16 @@ Dự án hiện tại đã hoàn thiện các nhóm chức năng chính phục v
 #### 🔐 Bảo mật & Hệ thống (Backend)
 
 - **Role-Based Access Control (RBAC):** Chuyển đổi logic kiểm tra quyền Admin từ username cứng sang thuộc tính `role`, tăng cường bảo mật và tính mở rộng.
-- **Reset Password:** Công cụ khôi phục mật khẩu thông qua xác thực Email đăng ký, bảo vệ tài khoản người dùng.
+- **2-Step Password Reset:** Quy trình khôi phục mật khẩu bảo mật hơn với bước xác thực tài khoản (Verify Account) trước khi cho phép đặt mật khẩu mới.
 - **Cơ chế Cache Thông minh:** Tự động làm mới bộ nhớ đệm (Invalidation) ngay khi Admin thay đổi dữ liệu, đảm bảo bản đồ luôn cập nhật tức thì (Real-time update).
 
 #### 📱 Tối ưu UI/UX & Hiệu năng (Frontend)
 
 - **Mobile Responsive:** Giao diện tự động thích ứng trên điện thoại (Stacked Layout: Bản đồ phía trên, Danh sách phía dưới).
+- **Interactive UI Elements:**
+  - Nút đóng (X) và nút xác nhận có hiệu ứng Hover/Glow nổi bật, tăng tương tác.
+  - Hỗ trợ phím **Enter** nhanh cho tất cả form Đăng nhập, Đăng ký và Reset Password.
+  - Giao diện Planner được thu gọn (Horizontal Layout), loại bỏ thao tác cuộn thừa thãi.
 - **Smart Search:** Tìm kiếm toàn cục trên bộ nhớ đệm client, phản hồi cực nhanh và không bị giới hạn bởi bộ lọc danh mục hiện tại.
 - **Dynamic AI Context:** Biểu tượng giải thích gợi ý (Reason Icon) thay đổi linh hoạt theo ngữ cảnh địa điểm (Ví dụ: Chùa 🛕, Đồ ăn 🍜, Di tích 🏛️).
 

@@ -1685,3 +1685,102 @@ body {
   }
 }
 
+
+/* --- Notification Button Hover Effects --- */
+.btn-notif {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+}
+
+.btn-notif:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    filter: brightness(1.05);
+}
+
+.btn-notif:active {
+    transform: translateY(0);
+    box-shadow: none;
+    filter: brightness(0.95);
+}
+
+.btn-notif-cancel:hover {
+    background-color: #cbd5e1 !important;
+    color: #1e293b !important;
+}
+
+
+/* --- Stronger Hover Effects (Override) --- */
+.btn-notif {
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Hi?u ?ng n?y */
+}
+
+/* Nút Chính: Hi?u ?ng Glow + Gradient d?m */
+.btn-notif:not(.btn-notif-cancel):hover {
+    background: linear-gradient(135deg, #4f46e5, #3730a3) !important; /* Tím d?m hon */
+    color: #ffffff !important;
+    transform: translateY(-3px) scale(1.05); /* Phóng to nh? */
+    box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4), 0 8px 10px -6px rgba(79, 70, 229, 0.2);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Nút H?y: Chuy?n màu Ð? c?nh báo */
+.btn-notif-cancel:hover {
+    background-color: #fee2e2 !important; /* N?n h?ng nh?t */
+    color: #ef4444 !important; /* Ch? d? tuoi */
+    border-color: #fca5a5 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+
+/* --- Enhanced Close Buttons (X) --- */
+
+/* Nút X trên n?n màu (Gradient Headers) */
+.close-btn-white {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+}
+
+.close-btn-white:hover {
+    background: #ff4d4f; /* Ð? r?c */
+    color: white;
+    transform: rotate(90deg) scale(1.1); /* Xoay và phóng to */
+    box-shadow: 0 4px 12px rgba(255, 77, 79, 0.4);
+}
+
+.close-btn-white i {
+    font-size: 16px;
+    transition: none; /* Tránh rung l?c icon */
+}
+
+/* Nút X trên n?n tr?ng (n?u có dùng class close-btn thu?ng) */
+.close-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+

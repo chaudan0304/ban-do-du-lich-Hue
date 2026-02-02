@@ -232,6 +232,22 @@ function showGuestView() {
 // --- Modal Auth Logic ---
 function openAuthModal() {
   document.getElementById("authModal").classList.add("active");
+  
+  // Hỗ trợ Enter cho Login
+  const loginInputs = document.querySelectorAll("#loginForm input");
+  loginInputs.forEach(input => {
+      input.onkeyup = function(e) {
+          if (e.key === "Enter") handleLogin();
+      }
+  });
+
+  // Hỗ trợ Enter cho Register
+  const registerInputs = document.querySelectorAll("#registerForm input");
+  registerInputs.forEach(input => {
+      input.onkeyup = function(e) {
+          if (e.key === "Enter") handleRegister();
+      }
+  });
 }
 function closeAuthModal() {
   document.getElementById("authModal").classList.remove("active");
@@ -240,10 +256,68 @@ function closeAuthModal() {
 function openResetPasswordModal() {
   closeAuthModal(); // Đóng modal đăng nhập trước
   document.getElementById("resetPasswordModal").classList.add("active");
+  backToResetStep1();
+  
+  // Hỗ trợ Enter
+  const inputs = document.querySelectorAll("#resetPasswordModal input");
+  inputs.forEach(input => {
+      input.onkeyup = function(e) {
+          if (e.key === "Enter") {
+             if (document.getElementById("resetStep1").style.display !== "none") {
+                 verifyResetAccount();
+             } else {
+                 handleResetPassword();
+             }
+          }
+      };
+  });
 }
 
 function closeResetPasswordModal() {
   document.getElementById("resetPasswordModal").classList.remove("active");
+}
+
+function backToResetStep1() {
+    document.getElementById("resetStep1").style.display = "block";
+    document.getElementById("resetStep2").style.display = "none";
+    document.getElementById("resetMsg").innerText = "";
+    document.getElementById("resetNewPass").value = "";
+}
+
+async function verifyResetAccount() {
+    const username = document.getElementById("resetUsername").value;
+    const email = document.getElementById("resetEmail").value;
+    const msgEl = document.getElementById("resetMsg");
+
+    if (!username || !email) {
+        msgEl.innerText = "Vui lòng nhập tên tài khoản và email.";
+        msgEl.style.color = "red";
+        return;
+    }
+    
+    msgEl.innerText = "Đang kiểm tra...";
+    msgEl.style.color = "#4f46e5";
+
+    try {
+        const res = await apiFetch("/api/verify-account", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email }),
+        });
+        
+        if (res.success) {
+             document.getElementById("resetStep1").style.display = "none";
+             document.getElementById("resetStep2").style.display = "block";
+             document.getElementById("resetUserDisplay").innerText = username;
+             msgEl.innerText = "";
+        } else {
+             msgEl.innerText = res.error || "Thông tin không chính xác.";
+             msgEl.style.color = "red";
+        }
+    } catch (e) {
+        msgEl.innerText = "Lỗi kết nối.";
+        msgEl.style.color = "red";
+    }
 }
 
 async function handleResetPassword() {
@@ -252,12 +326,9 @@ async function handleResetPassword() {
   const newPass = document.getElementById("resetNewPass").value;
   const msgEl = document.getElementById("resetMsg");
 
-  if (!username || !email || !newPass) {
-    msgEl.innerText = "Vui lòng nhập đầy đủ thông tin.";
-    return;
-  }
   if (newPass.length < 6) {
     msgEl.innerText = "Mật khẩu mới phải có ít nhất 6 ký tự.";
+    msgEl.style.color = "red";
     return;
   }
 
@@ -270,16 +341,22 @@ async function handleResetPassword() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, new_password: newPass }),
     });
+    
+    if (res.success) {
+        showNotification({
+          type: "success",
+          title: "Thành công",
+          message: res.message || "Đã đổi mật khẩu thành công!",
+          btnText: "Đăng nhập ngay",
+        });
 
-    showNotification({
-      type: "success",
-      title: "Thành công",
-      message: res.message || "Đã đổi mật khẩu thành công!",
-      btnText: "Đăng nhập ngay",
-    });
+        closeResetPasswordModal();
+        openAuthModal();
+    } else {
+         msgEl.innerText = res.error || "Lỗi thay đổi mật khẩu.";
+         msgEl.style.color = "red";
+    }
 
-    closeResetPasswordModal();
-    openAuthModal();
   } catch (err) {
     msgEl.innerText = err.message || "Lỗi xử lý.";
     msgEl.style.color = "red";
@@ -2079,6 +2156,7 @@ async function submitPlanner() {
     const days = document.getElementById("planDays").value;
     const prefCheckboxes = document.querySelectorAll('input[name="planPref"]:checked');
     const preferences = Array.from(prefCheckboxes).map(cb => cb.value);
+    const useLiked = document.getElementById("planUseLikes") ? document.getElementById("planUseLikes").checked : false;
     
     // UI state
     const btn = document.querySelector("#plannerInputModal .btn-save-gradient");
@@ -2092,7 +2170,8 @@ async function submitPlanner() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 days: days,
-                preferences: preferences
+                preferences: preferences,
+                use_liked: useLiked
             })
         });
         
