@@ -13,7 +13,7 @@ from db import (
     save_user_itinerary,
     delete_user_itinerary,
 )
-from utils import analyze_sentiment
+from utils import analyze_sentiment, classify_comment_topic
 
 bp = Blueprint("api", __name__)
 
@@ -295,12 +295,20 @@ def api_add_review():
     loc_name = data.get("location_name")
     rating = data.get("rating")
     comment = data.get("comment", "")
+    review_id = data.get("review_id")  # New Optional ID for editing
 
-    if not loc_name or not rating:
-        return jsonify({"error": "Thiếu thông tin rating hoặc địa điểm"}), 400
+    # Allow rating to be 0, so check explicitly for None if needed, but 'rating' comes from json .get()
+    if not loc_name:
+        return jsonify({"error": "Thiếu thông tin địa điểm"}), 400
+
+    if rating is None:
+        rating = 0
 
     sentiment = analyze_sentiment(comment)
-    success, result = add_review(current_user.id, loc_name, rating, comment, sentiment)
+    topics = classify_comment_topic(comment)
+    success, result = add_review(
+        current_user.id, loc_name, rating, comment, sentiment, review_id, topics
+    )
 
     if success:
         return (
@@ -329,9 +337,11 @@ def api_get_reviews(location_name):
 def api_delete_review():
     data = request.json
     loc_name = data.get("location_name")
+    review_id = data.get("review_id")
+
     if not loc_name:
         return jsonify({"error": "Thiếu tên địa điểm"}), 400
-    success, result = delete_review(current_user.id, loc_name)
+    success, result = delete_review(current_user.id, loc_name, review_id)
     if success:
         return (
             jsonify({"success": True, "message": "Đã xóa đánh giá!", "stats": result}),

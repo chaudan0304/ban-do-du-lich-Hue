@@ -1,0 +1,27 @@
+<!-- TEMPLATE: REVIEW SECTION -->
+<template id="review-template">
+  <div class="section-header-modern">
+      <span class="section-title"><i class="fas fa-comments"></i> ĐÁNH GIÁ & BÌNH LUẬN</span>
+      <button class="btn-pill-small" id="btn-toggle-review"><i class="fas fa-pen"></i> Viết đánh giá</button>
+  </div>
+  
+  <div id="reviewFormContainer" class="review-form" style="display:none;">
+       <div class="form-header">Chia sẻ trải nghiệm của bạn</div>
+       <div class="rating-input">
+          <input type="radio" id="star5" name="rating" value="5" /><label for="star5">★</label>
+          <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
+          <input type="radio" id="star3" name="rating" value="3" /><label for="star3">★</label>
+          <input type="radio" id="star2" name="rating" value="2" /><label for="star2">★</label>
+          <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
+       </div>
+       <textarea id="reviewComment" class="review-textarea" placeholder="Bạn thấy địa điểm này thế nào? Không gian, phục vụ..." rows="3"></textarea>
+       <div class="form-actions">
+          <button class="btn-cancel" onclick="document.getElementById('reviewFormContainer').style.display='none'">Hủy</button>
+          <button class="btn-submit" id="btn-submit-review">Gửi đánh giá</button>
+       </div>
+  </div>
+  
+  <div id="reviewList" class="review-list">
+      <div class="loading-reviews">Đang tải đánh giá...</div>
+  </div>
+</template>

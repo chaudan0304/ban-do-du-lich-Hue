@@ -22,23 +22,27 @@
 
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}?v=3"
+      href="{{ url_for('static', filename='css/style.css') }}?v=5"
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/sidebar.css') }}?v=3"
+      href="{{ url_for('static', filename='css/sidebar.css') }}?v=4"
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/modals.css') }}?v=3"
+      href="{{ url_for('static', filename='css/modals.css') }}?v=4"
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/planner.css') }}?v=3"
+      href="{{ url_for('static', filename='css/planner.css') }}?v=4"
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/map.css') }}?v=2"
+      href="{{ url_for('static', filename='css/map.css') }}?v=3"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/reviews.css') }}?v=1"
     />
   </head>
 
@@ -114,7 +118,7 @@
         <div id="logged-view" style="display: none; margin: 0 24px">
           <!-- Nút kích hoạt AI Planner -->
           <button class="btn-ai-planner" onclick="openPlannerInputModal()">
-             <i class="fas fa-magic"></i> Lập Lộ Trình Thông Minh
+            <i class="fas fa-magic"></i> Lập Lộ Trình Thông Minh
           </button>
 
           <div id="user-history" class="history-section" style="display: none">
@@ -197,7 +201,7 @@
           <div id="detail-content"></div>
         </div>
         <div class="sidebar-resizer" id="sidebarResizer"></div>
-    </aside>
+      </aside>
 
       <main class="map-container">
         <div id="map"></div>
@@ -257,13 +261,22 @@
     <!-- COMPONENT: ADD LOCATION -->
     {% include 'components/modals/add_location_modal.html' %}
 
+    <!-- TEMPLATE: REVIEW SECTION -->
+    {% include 'components/review_template.html' %}
+
     <!-- Leaflet CSS-->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Leaflet MarkerCluster -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
+    />
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-    
+
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
@@ -271,6 +284,7 @@
     <script src="{{ url_for('static', filename='js/planner.js') }}"></script>
     <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
     <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/reviews.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     <!-- COMPONENT: PROFILE -->
     {% include 'components/modals/profile_modal.html' %}
@@ -286,6 +300,5 @@
 
     <!-- COMPONENT: RESET PASSWORD -->
     {% include 'components/modals/reset_password_modal.html' %}
-
-</body>
+  </body>
 </html>

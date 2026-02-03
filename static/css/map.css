@@ -162,16 +162,22 @@
 }
 
 /* Biến thể màu sắc Marker */
-.custom-pin.pin-hot {
+.custom-pin.pin-pr {
     background: linear-gradient(135deg, #ef4444, #991b1b) !important;
     border-color: white !important;
     box-shadow: -3px 3px 10px rgba(185, 28, 28, 0.5) !important;
 }
 
-.custom-pin.pin-ai {
+.custom-pin.pin-collab {
     background: linear-gradient(135deg, #3b82f6, #1e40af) !important;
     border-color: white !important;
     box-shadow: -3px 3px 10px rgba(30, 64, 175, 0.5) !important;
+}
+
+/* Xóa hiệu ứng filter cũ */
+.custom-pin.pin-pr,
+.custom-pin.pin-collab {
+    filter: none !important;
 }
 
 .user-location-pulse {
@@ -209,3 +215,7 @@
     0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.8; }
     100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
 }
+
+
+
+

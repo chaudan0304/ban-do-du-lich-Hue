@@ -225,71 +225,8 @@ async function submitProfileUpdate() {
     }
 }
 
-// ===========================================
-// REVIEWS LOGIC
-// ===========================================
 
-function toggleReviewForm() {
-    const form = document.getElementById("reviewFormContainer");
-    if(!form) return;
-    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-}
 
-async function submitReview(locationName) {
-    const ratingInput = document.querySelector('input[name="rating"]:checked');
-    const commentInput = document.getElementById("reviewComment");
-    
-    if (!ratingInput) { showNotification({type: 'warning', message: "Vui lòng chọn số sao!"}); return; }
-    
-    const rating = parseInt(ratingInput.value);
-    const comment = commentInput.value.trim();
-
-    try {
-        const res = await apiFetch("/api/review", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ location_name: locationName, rating: rating, comment: comment })
-        });
-
-        if (res.success) {
-            showNotification({type: "success", title: "Cảm ơn", message: "Đánh giá thành công!"});
-            document.getElementById("reviewFormContainer").style.display = "none";
-            commentInput.value = "";
-            loadReviews(locationName);
-            if(typeof analyzeUser === 'function') analyzeUser(true);
-        } else {
-            showNotification({type: "error", message: res.error});
-        }
-    } catch(e) { showNotification({type: "error", message: "Lỗi gửi đánh giá"}); }
-}
-
-async function loadReviews(locationName) {
-    const container = document.getElementById("reviewList");
-    if(!container) return;
-    container.innerHTML = `<div style="text-align:center; color:#9ca3af;">Đang tải đánh giá...</div>`;
-    try {
-        const res = await apiFetch(`/api/reviews/${encodeURIComponent(locationName)}`);
-        container.innerHTML = "";
-        if (!res || res.length === 0) {
-            container.innerHTML = `<div style="text-align:center; padding:10px; color:#9ca3af; font-size:13px;">Chưa có đánh giá nào.</div>`;
-            return;
-        }
-        res.forEach(rev => {
-            const stars = "★".repeat(rev.rating) + "☆".repeat(5 - rev.rating);
-            const div = document.createElement("div");
-            div.className = "review-item";
-            div.innerHTML = `
-                <div class="review-user-avatar"><i class="fas fa-user"></i></div>
-                <div class="review-content">
-                    <div class="review-author">${rev.user_fullname || rev.username} <span class="review-stars">${stars}</span></div>
-                    <div class="review-text">${rev.comment || ""}</div>
-                    <div class="review-date">${formatTime(rev.created_at)}</div>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    } catch(e) { container.innerHTML = "Lỗi tải đánh giá."; }
-}
 
 // ===========================================
 // SIMILAR LOCATIONS & AI RECOMMEND

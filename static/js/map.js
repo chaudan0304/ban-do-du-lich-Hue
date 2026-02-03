@@ -304,8 +304,8 @@ function flyToLocation(lat, lng, name) {
 // --- Show Detail Logic (Bridge between Map & UI) ---
 // Note: This function handles heavy UI DOM manipulation
 async function showDetail(loc) {
-  // Sync Filter (keep existing logic)
-  if (currentCategory !== "All" && currentCategory !== loc.category) {
+  // Sync Filter: Always switch to location's category
+  if (currentCategory !== loc.category) {
       await filterData(loc.category, null, false);
   }
 
@@ -396,27 +396,8 @@ async function showDetail(loc) {
             </a>
         </div>
 
-        <!-- 7. Reviews -->
-        <div class="section-header-modern">
-            <span><i class="fas fa-comments"></i> ĐÁNH GIÁ & BÌNH LUẬN</span>
-            <button class="btn-pill-small" onclick="toggleReviewForm()"><i class="fas fa-pen"></i> Viết đánh giá</button>
-        </div>
-        
-        <div id="reviewFormContainer" class="review-form" style="display:none; margin-bottom:20px;">
-             <!-- Review Form Content (Simple) -->
-             <div class="rating-input">
-                <input type="radio" id="star5" name="rating" value="5" /><label for="star5">★</label>
-                <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
-                <input type="radio" id="star3" name="rating" value="3" /><label for="star3">★</label>
-                <input type="radio" id="star2" name="rating" value="2" /><label for="star2">★</label>
-                <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
-             </div>
-             <textarea id="reviewComment" class="review-textarea" placeholder="Chia sẻ trải nghiệm..." style="width:100%; margin-top:10px;"></textarea>
-             <div style="text-align:right; margin-top:10px;">
-                <button class="btn-submit" onclick="submitReview('${loc.name}')">Gửi</button>
-             </div>
-        </div>
-        <div id="reviewList" class="review-list"><div style="text-align:center; padding:10px; color:#9ca3af;">Chưa có đánh giá nào.</div></div>
+        <!-- 7. Reviews (Loaded from Template) -->
+        <div id="review-section-placeholder"></div>
 
         <!-- 8. Similar Locations -->
         <div class="section-header-modern">
@@ -428,6 +409,28 @@ async function showDetail(loc) {
         </div>
     </div>
   `;
+
+  // --- TEMPLATE LOGIC FOR REVIEWS ---
+  const reviewPlaceholder = content.querySelector("#review-section-placeholder");
+  const template = document.getElementById("review-template");
+  if (reviewPlaceholder && template) {
+      const clone = template.content.cloneNode(true);
+      
+      // Wire up events manually since we lost inline onclicks
+      const btnToggle = clone.getElementById("btn-toggle-review");
+      if(btnToggle) {
+          if (!currentUser) {
+              btnToggle.style.display = "none";
+          } else {
+              btnToggle.onclick = toggleReviewForm;
+          }
+      }
+
+      const btnSubmit = clone.getElementById("btn-submit-review");
+      if(btnSubmit) btnSubmit.onclick = () => submitReview(loc.name);
+
+      reviewPlaceholder.appendChild(clone);
+  }
 
   panel.classList.add("active");
   
