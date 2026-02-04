@@ -146,7 +146,7 @@ ban-do-du-lich-Hue/
 │   ├── 📄 import_data.py    # ETL Dữ liệu vào Database
 │   └── 📄 generate_users.py # Tạo dữ liệu giả lập (Mocking data)
 ├── 📂 static/               # Tài nguyên Frontend
-│   ├── 📂 css/              # Stylesheets (7 modules: style, sidebar, modals...)
+│   ├── 📂 css/              # Stylesheets (10 modules: style, auth, admin, profile...)
 │   ├── 📂 js/               # JavaScript Logic (map, planner, profile...)
 │   └── 📂 images/           # Assets hình ảnh
 ├── 📂 templates/            # Giao diện HTML (Jinja2)
