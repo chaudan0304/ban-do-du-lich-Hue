@@ -115,11 +115,13 @@ def get_current_user():
     if current_user.is_authenticated:
         info = get_user_info(current_user.id)
         fullname = info.get("fullname", "") if info else ""
+        role = info.get("role", "user") if info else "user"
         return jsonify(
             {
                 "is_logged_in": True,
                 "username": current_user.id,
                 "fullname": fullname or current_user.id,
+                "role": role,
             }
         )
     else:

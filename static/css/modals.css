@@ -780,3 +780,22 @@
     border: 1px solid rgba(255, 255, 255, 0.8) !important;
 }
 
+/* ==========================================================================
+   ADMIN ACTIONS - Đồng nhất với action buttons
+   ========================================================================== */
+.detail-actions-row.admin-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+/* Nút nguy hiểm (Xóa) - chỉ đổi màu khi hover */
+.btn-large-action.btn-danger-outline {
+    color: #64748b;
+}
+
+.btn-large-action.btn-danger-outline:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #ef4444;
+}

@@ -312,7 +312,10 @@ async function showDetail(loc) {
   }
 
   currentOpenLoc = loc;
+  // Logic đồng bộ điểm số hiển thị
+  // Luôn dùng điểm số thực tế của địa điểm (PageRank Norm) để hiển thị Score Tag
   let displayScore = ((loc.score || 0) * 100).toFixed(1);
+
   let mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.name + " Thừa Thiên Huế")}`;
   flyToLocation(loc.lat, loc.lng, loc.name);
   
@@ -343,50 +346,102 @@ async function showDetail(loc) {
         <!-- 3. Title & Meta -->
         <h1 class="detail-title-large">${loc.name}</h1>
         <div class="detail-tags-row">
-            <span class="tag-pill tag-green"><i class="fas fa-star"></i> ${displayScore}</span>
+            <span class="tag-pill tag-green"><i class="fas fa-fire"></i> ${displayScore}</span>
             <span class="tag-pill tag-gray"><i class="fas fa-tag"></i> ${loc.category}</span>
         </div>
 
         <!-- 4. Description -->
         <p class="detail-desc-text">${loc.description || "Một địa điểm thú vị tại Huế đang chờ bạn khám phá."}</p>
 
-        <!-- 5. AI Reason Card -->
-        <!-- 5. AI Reason Card (CHỈ HIỆN KHI ĐÃ LOGIN) -->
-        ${currentUser ? `
-        <div class="ai-reason-card">
-            <div class="ai-reason-title"><i class="fas fa-robot"></i> TẠI SAO GỢI Ý CHO BẠN?</div>
+        ${currentUser ? (() => {
+            const hasHistory = userLikedSet && userLikedSet.size > 0;
             
-            <div class="ai-highlight-box">
-                <i class="fas fa-user-friends" style="color:#6366f1;"></i>
-                <span>${simUsers} người có sở thích giống bạn đã thích địa điểm này</span>
-            </div>
+            // CHỈ hiển thị nếu có dữ liệu phân tích THẬT từ API (loc.reason_details)
+            // Tuyệt đối không dùng số liệu ngẫu nhiên.
+            if (!loc.reason_details) return "";
 
-            <!-- Progress Bars -->
-            <div class="ai-progress-row">
-                 <div class="progress-label">
-                    <span><i class="fas fa-quote-left" style="color:#6366f1; width:15px;"></i> ${simUsers} người dùng tương đồng</span>
-                    <span>${matchScore}%</span>
-                 </div>
-                 <div class="progress-track"><div class="progress-fill" style="width:${matchScore}%; background:#3b82f6;"></div></div>
-            </div>
+            // Use Backend contribution for Personalized, but Real Score for Cold Start Pop
+            const pCollab = loc.reason_details.collab.percent;
+            const pContent = loc.reason_details.content.percent;
+            const pPop = ((loc.score || 0) * 100).toFixed(1); // Độ phổ biến dựa trên PageRank Score
             
-            <div class="ai-progress-row">
-                 <div class="progress-label">
-                    <span><i class="fas fa-heart" style="color:#ec4899; width:15px;"></i> Tương tự địa điểm đã thích</span>
-                    <span>${Math.floor(matchScore * 0.9)}%</span>
-                 </div>
-                 <div class="progress-track"><div class="progress-fill" style="width:${Math.floor(matchScore * 0.9)}%; background:#10b981;"></div></div>
-            </div>
+            // ============================================================
+            // CASE 1: COLD START (Chưa có lịch sử like)
+            // Chỉ hiển thị độ nổi tiếng (PageRank), ẩn các chỉ số cá nhân hóa
+            // ============================================================
+            if (!hasHistory) {
+                // Dùng Real Score chính xác đến 1 số lẻ (90.3%)
+                const pPopReal = ((loc.score || 0) * 100).toFixed(1);
 
-            <div class="ai-progress-row">
-                 <div class="progress-label">
-                    <span><i class="fas fa-trophy" style="color:#f59e0b; width:15px;"></i> Độ nổi tiếng toàn hệ thống</span>
-                    <span>${popScore}%</span>
-                 </div>
-                 <div class="progress-track"><div class="progress-fill" style="width:${popScore}%; background:#f59e0b;"></div></div>
+                return `
+                <div class="ai-reason-card">
+                    <div class="ai-reason-title"><i class="fas fa-fire" style="color:#ea580c;"></i> ĐỊA ĐIỂM NỔI BẬT</div>
+                    
+                    <div class="ai-highlight-box" style="background: #fff7ed; border-color: #ffedd5;">
+                        <i class="fas fa-trophy" style="color:#f59e0b;"></i>
+                        <span style="color:#9a3412;">Đây là một trong những địa điểm được check-in nhiều nhất tại Huế!</span>
+                    </div>
+
+                    <div class="ai-progress-row">
+                         <div class="progress-label">
+                            <span><i class="fas fa-fire" style="color:#f59e0b; width:15px;"></i> Độ phổ biến</span>
+                            <span>${pPopReal}%</span>
+                         </div>
+                         <div class="progress-track"><div class="progress-fill" style="width:${pPopReal}%; background:#f59e0b;"></div></div>
+                    </div>
+                    
+                     <div style="margin-top:12px; font-size:12px; color:#64748b; font-style:italic; border-top:1px dashed #e2e8f0; padding-top:8px;">
+                        <i class="fas fa-info-circle"></i> Hãy thả tim <i class="far fa-heart"></i> vài địa điểm để AI hiểu gu của bạn hơn nhé!
+                     </div>
+                </div>
+                `;
+            }
+
+            // ============================================================
+            // CASE 2: PERSONALIZED (Đã có lịch sử like)
+            // Hiển thị đầy đủ các chỉ số Collaborative, Content-based
+            // ============================================================
+            // Parse text "5 người..." để lấy số lượng user tương đồng thực tế
+            const match = (loc.reason_details.collab.desc || "").match(/(\d+)/);
+            const simCount = match ? match[0] : 0;
+
+
+            return `
+            <div class="ai-reason-card">
+                <div class="ai-reason-title"><i class="fas fa-robot"></i> TẠI SAO GỢI Ý CHO BẠN?</div>
+                
+                <div class="ai-highlight-box">
+                    <i class="fas fa-user-friends" style="color:#6366f1;"></i>
+                    <span>${simCount} người có sở thích giống bạn đã thích địa điểm này</span>
+                </div>
+
+                <!-- Progress Bars -->
+                <div class="ai-progress-row">
+                     <div class="progress-label">
+                        <span><i class="fas fa-quote-left" style="color:#6366f1; width:15px;"></i> Người dùng tương đồng</span>
+                        <span>${pCollab}%</span>
+                     </div>
+                     <div class="progress-track"><div class="progress-fill" style="width:${pCollab}%; background:#3b82f6;"></div></div>
+                </div>
+                
+                <div class="ai-progress-row">
+                     <div class="progress-label">
+                        <span><i class="fas fa-heart" style="color:#ec4899; width:15px;"></i> Tương tự địa điểm đã thích</span>
+                        <span>${pContent}%</span>
+                     </div>
+                     <div class="progress-track"><div class="progress-fill" style="width:${pContent}%; background:#ec4899;"></div></div>
+                </div>
+
+                <div class="ai-progress-row">
+                     <div class="progress-label">
+                        <span><i class="fas fa-fire" style="color:#f59e0b; width:15px;"></i> Độ phổ biến</span>
+                        <span>${pPop}%</span>
+                     </div>
+                     <div class="progress-track"><div class="progress-fill" style="width:${pPop}%; background:#f59e0b;"></div></div>
+                </div>
             </div>
-        </div>
-        ` : ""}
+            `;
+        })() : ""}
 
         <!-- 6. Action Buttons -->
         <div class="detail-actions-row">
@@ -400,6 +455,18 @@ async function showDetail(loc) {
                 <i class="fas fa-directions"></i> Chỉ đường
             </a>
         </div>
+
+        <!-- Admin Actions (Edit/Delete) - Cùng layout với nút trên -->
+        ${currentUser && currentUser.role === "admin" ? `
+        <div class="detail-actions-row admin-row">
+            <button class="btn-large-action btn-outline" onclick="openEditModal()">
+                <i class="fas fa-edit"></i> Chỉnh sửa
+            </button>
+            <button class="btn-large-action btn-outline btn-danger-outline" onclick="deleteLocation('${loc.name.replace(/'/g, "\\'")}')">
+                <i class="fas fa-trash-alt"></i> Xóa địa điểm
+            </button>
+        </div>
+        ` : ""}
 
         <!-- 7. Reviews (Loaded from Template) -->
         <div id="review-section-placeholder"></div>
@@ -493,23 +560,36 @@ function showDetailFromData(name) {
     }
 }
 
-// --- TAB SWITCHING LOGIC (SIDEBAR ONLY) ---
-function switchSidebarTab(tabId) {
-    document.querySelectorAll('.sidebar-tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.onclick.toString().includes(tabId)) {
-            btn.classList.add('active');
-        }
-    });
-
-    document.querySelectorAll('.tab-pane').forEach(pane => {
-        pane.style.display = 'none';
-        pane.classList.remove('active');
-    });
+// Helper: Show Detail with injected AI Data (Fix bug click suggestion)
+function showDetailWithAI(aiLoc) {
+    console.log("🖱️ showDetailWithAI called for:", aiLoc.name);
     
-    const activePane = document.getElementById('tab-' + tabId);
-    if (activePane) {
-        activePane.style.display = 'flex';
-        activePane.classList.add('active');
+    // Đóng profile modal nếu đang mở
+    if(window.closeUserProfile) window.closeUserProfile();
+
+    // Helper chuẩn hóa chuỗi để so sánh
+    const normalize = (str) => str ? str.trim().toLowerCase() : "";
+    const targetName = normalize(aiLoc.name);
+
+    // Tìm real location trong cache
+    let realLoc = cachedAllLocations ? cachedAllLocations.find(l => normalize(l.name) === targetName) : null;
+    
+    if (realLoc) {
+        console.log(`✅ Found "${realLoc.name}" in cache`);
+        // Merge AI Data vào real location
+        realLoc.reason_details = aiLoc.reason_details;
+        realLoc.reason = aiLoc.reason;
+        realLoc.reason_icon = aiLoc.reason_icon;
+        realLoc.reason_type = aiLoc.reason_type;
+        
+        // Gọi showDetail trực tiếp
+        showDetail(realLoc);
+    } else {
+        console.warn(`⚠️ "${aiLoc.name}" not in cache, using API data directly`);
+        // Đảm bảo có category
+        if (!aiLoc.category) aiLoc.category = "Tham quan"; 
+        showDetail(aiLoc);
     }
 }
+
+

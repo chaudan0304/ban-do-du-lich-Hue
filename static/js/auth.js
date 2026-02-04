@@ -10,15 +10,34 @@ async function checkLoginStatus() {
     const res = await apiFetch("/api/current_user");
     if (res.is_logged_in) {
       currentUser = { username: res.username, role: res.role, fullname: res.fullname };
+      // 1. Load User Activity (Likes) để đồng bộ trạng thái
+      await fetchUserActivity(); 
+      // 2. Show UI
       showLoggedView(res.fullname || res.username, res.username);
     } else {
       currentUser = null;
+      userLikedSet.clear(); // Clear local state nếu chưa login
       showGuestView();
     }
   } catch (e) {
     console.error("Login check failed:", e);
     showGuestView();
   }
+}
+
+// Hàm lấy danh sách like của user để đồng bộ state
+async function fetchUserActivity() {
+    try {
+        // Gọi API lấy likes & reviews
+        const res = await apiFetch("/api/user/activity");
+        if (res.success && Array.isArray(res.likes)) {
+            // Cập nhật userLikedSet toàn cục
+            userLikedSet = new Set(res.likes.map(l => l.name));
+            console.log("Synced user likes:", userLikedSet.size);
+        }
+    } catch (e) {
+        console.warn("Failed to sync user activity:", e);
+    }
 }
 
 // --- View Switchers ---
@@ -31,7 +50,7 @@ function showLoggedView(displayName, username) {
   let btnAdminHTML = "";
   if (currentUser && currentUser.role === "admin") {
      btnAdminHTML = `
-      <div class="header-action-btn" onclick="openAdminModal()" title="Admin Dashboard">
+      <div class="header-action-btn" onclick="openAdminUserModal()" title="Admin Dashboard">
          <i class="fas fa-cogs"></i>
       </div>
      `;

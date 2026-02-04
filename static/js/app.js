@@ -57,6 +57,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 // UI HELPER FUNCTIONS
 // ===========================================
 
+// --- TAB SWITCHING LOGIC (SIDEBAR) ---
+function switchSidebarTab(tabId) {
+    document.querySelectorAll('.sidebar-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.onclick && btn.onclick.toString().includes(tabId)) {
+            btn.classList.add('active');
+        }
+    });
+
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.style.display = 'none';
+        pane.classList.remove('active');
+    });
+    
+    const activePane = document.getElementById('tab-' + tabId);
+    if (activePane) {
+        activePane.style.display = 'flex';
+        activePane.classList.add('active');
+    }
+}
+
 // Drag Scroll (Kéo thả để cuộn thanh lọc danh mục)
 function setupDragScroll() {
   const slider = document.querySelector(".filter-chips");
