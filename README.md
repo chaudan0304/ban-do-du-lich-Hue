@@ -68,7 +68,8 @@ Dành cho người quản lý để vận hành hệ thống:
 | **Database**   | **Neo4j** (Graph Database) + Neo4j GDS Library              |
 | **Frontend**   | HTML5, CSS3 (Modern UI/Glassmorphism), JavaScript (Vanilla) |
 | **Maps**       | Leaflet.js, OpenStreetMap, Leaflet-Heat                     |
-| **Algorithms** | PageRank, Community Detection, Cosine Similarity            |
+| **Algorithms** | PageRank, Collaborative Filtering, Content-Based Filtering  |
+| **Testing**    | Python Unit Tests (Custom Test Suite)                       |
 
 ---
 
@@ -137,18 +138,23 @@ Dự án được tổ chức theo mô hình Modular (Flask Blueprints) để d�
 ban-do-du-lich-Hue/
 ├── 📂 data/                 # Chứa dữ liệu nguồn (Excel)
 ├── 📂 routes/               # Các nhóm chức năng (Controller/View)
-│   ├── � auth.py           # Authentication (Login, Register, Profile)
-│   ├── � admin.py          # Admin Dashboard & CRUD
-│   ├── � api.py            # Core Logic (AI Recommend, Itinerary, Map Data)
+│   ├── 📄 auth.py           # Authentication (Login, Register, Profile)
+│   ├── 📄 admin.py          # Admin Dashboard & CRUD
+│   ├── 📄 api.py            # Core Logic (AI Recommend, Itinerary, Map Data)
 │   └── 📄 main.py           # Main View Rendering
 ├── 📂 scripts/              # Các công cụ/tool chạy một lần
 │   ├── 📄 import_data.py    # ETL Dữ liệu vào Database
 │   └── 📄 generate_users.py # Tạo dữ liệu giả lập (Mocking data)
 ├── 📂 static/               # Tài nguyên Frontend
-│   ├── 📂 css/              # Stylesheets (đã tách module: style, sidebar, modals...)
+│   ├── 📂 css/              # Stylesheets (7 modules: style, sidebar, modals...)
 │   ├── 📂 js/               # JavaScript Logic (map, planner, profile...)
 │   └── 📂 images/           # Assets hình ảnh
 ├── 📂 templates/            # Giao diện HTML (Jinja2)
+├── 📂 tests/                # Unit Tests
+│   ├── 📄 test_auth.py      # Tests cho Authentication
+│   ├── 📄 test_recommend.py # Tests cho Recommendation API
+│   ├── 📄 test_planner.py   # Tests cho AI Planner
+│   └── 📄 run_all_tests.py  # Script chạy tất cả tests
 ├── 📄 app.py                # Entry Point (Khởi chạy Server)
 ├── 📄 db.py                 # Module kết nối Database Neo4j
 ├── 📄 models.py             # Định nghĩa Data Models (User)
@@ -165,6 +171,31 @@ ban-do-du-lich-Hue/
 
 - **User:** `admin`
 - **Password:** `admin` (Mặc định được tạo khi chạy `import_data.py`)
+
+---
+
+## 🧪 Chạy Tests
+
+Dự án bao gồm bộ Unit Tests để kiểm tra các chức năng chính:
+
+```bash
+# Chạy từng test riêng lẻ
+python tests/test_auth.py       # Test Authentication
+python tests/test_recommend.py  # Test Recommendation API
+python tests/test_planner.py    # Test AI Planner
+
+# Hoặc chạy tất cả tests
+python tests/run_all_tests.py
+```
+
+**Các test bao gồm:**
+
+- ✅ User Registration & Login
+- ✅ Profile Update
+- ✅ PageRank Scores Existence
+- ✅ Cold Start Recommendation
+- ✅ Liked Locations Exclusion
+- ✅ AI Itinerary Generation
 
 ---
 
