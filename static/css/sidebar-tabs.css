@@ -1,0 +1,50 @@
+/* SIDEBAR TABS STYLE */
+.sidebar-tabs {
+  display: flex;
+  background: white;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+  gap: 24px;
+}
+
+.tab-btn {
+  padding: 14px 4px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn:hover {
+  color: var(--primary);
+}
+
+.tab-btn.active {
+  color: var(--primary);
+}
+
+/* Gạch chân dưới tab active */
+.tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px; /* Đè lên border bottom của container */
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 2px 2px 0 0;
+}
+
+.tab-pane {
+  flex: 1;
+  overflow: hidden; /* Quan trọng để scroll con hoạt động */
+  flex-direction: column;
+}

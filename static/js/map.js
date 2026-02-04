@@ -489,3 +489,24 @@ function showDetailFromData(name) {
         showNotification({type: 'error', message: 'Không tìm thấy dữ liệu địa điểm này'});
     }
 }
+
+// --- TAB SWITCHING LOGIC ---
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.onclick.toString().includes(tabId)) {
+            btn.classList.add('active');
+        }
+    });
+
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.style.display = 'none';
+        pane.classList.remove('active');
+    });
+    
+    const activePane = document.getElementById('tab-' + tabId);
+    if (activePane) {
+        activePane.style.display = 'flex';
+        activePane.classList.add('active');
+    }
+}

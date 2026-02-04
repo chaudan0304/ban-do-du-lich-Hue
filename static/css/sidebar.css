@@ -59,9 +59,9 @@
 
 .search-box { padding: 24px; flex-shrink: 0; }
 .results-container {
-  flex: 0 1 auto; /* Tự động theo nội dung */
-  max-height: 35%; /* Giảm giới hạn chiều cao xuống */
-  padding: 12px 24px; /* Giảm padding dọc */
+  flex: 0 1 auto; 
+  max-height: 25%; /* Giảm mạnh xuống còn 1/4 sidebar */
+  padding: 8px 24px; /* Giảm padding hơn nữa */
   overflow-y: auto; 
   min-height: 0;    
   display: flex;
