@@ -2327,3 +2327,138 @@ body {
   align-items: center;
   margin-top: 0;
 }
+
+/* ==========================================================================
+   RESTORED HEADER AUTH STYLES
+   ========================================================================== */
+.header-auth {
+  margin-left: auto; /* Ð?y sang ph?i */
+  display: flex;
+  align-items: center;
+}
+
+.btn-header-login {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+  border: none;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-header-login:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 30px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.user-avatar-small {
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.btn-logout-mini {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-left: 4px;
+}
+
+.btn-logout-mini:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+
+/* UI UPDATE: OUTLINE BUTTON FOR PLANNER */
+.btn-ai-planner {
+  background: white !important;
+  color: var(--primary) !important;
+  border: 1px solid var(--primary) !important;
+  box-shadow: none !important;
+}
+.btn-ai-planner:hover {
+  background: var(--primary) !important;
+  color: white !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+
+/* UI UPDATE: MINIMAL PLANNER LINK */
+.btn-ai-planner {
+  background: transparent !important;
+  border: 1px dashed #e5e7eb !important; /* Vi?n d?t r?t m? */
+  color: #6b7280 !important; /* Màu xám */
+  font-weight: 500 !important;
+  justify-content: center;
+  padding: 8px !important;
+  margin-bottom: 8px !important;
+  font-size: 12px !important;
+}
+.btn-ai-planner i {
+  color: var(--primary); /* Ch? icon có màu */
+}
+.btn-ai-planner:hover {
+  background: #f9fafb !important;
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  transform: none !important;
+}
+
+
+/* FIX HISTORY LIST: SHOW ALL (WRAP) */
+.history-chips {
+  flex-wrap: wrap !important;
+  overflow-x: visible !important;
+}
+
+
+/* HISTORY LIST: LIMIT HEIGHT & SCROLL Y */
+.history-chips {
+  max-height: 90px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 4px; /* Tránh scrollbar che n?i dung */
+  border-bottom: 1px dashed var(--border-light); /* Thêm vi?n du?i nh? d? bi?t là vùng cu?n */
+}
+/* Scrollbar m?nh */
+.history-chips::-webkit-scrollbar {
+  width: 4px;
+}
+.history-chips::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+

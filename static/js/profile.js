@@ -236,6 +236,9 @@ function analyzeUser(isLoggedInUser = false) {
     let targetUser = isLoggedInUser ? (currentUser ? currentUser.username : "") : (document.getElementById("usernameInput") ? document.getElementById("usernameInput").value.trim() : "");
     if (!targetUser) return;
   
+    // Tự động chuyển tab sang Gợi ý
+    if (typeof switchSidebarTab === 'function') switchSidebarTab('foryou');
+  
     apiFetch(`/api/history/${targetUser}`).then((data) => {
       userLikedSet.clear();
       const histDiv = document.getElementById("user-history");
@@ -244,7 +247,23 @@ function analyzeUser(isLoggedInUser = false) {
       if (data && data.length > 0) {
         data.forEach((item) => userLikedSet.add(item.name));
         histDiv.style.display = "block";
-        histList.innerHTML = data.map(place => `<div class="hist-chip" onclick="showDetailFromData('${place.name}')"><img src="${place.image}" onerror="this.src='/static/images/no-image.png'"> ${place.name}</div>`).join("");
+        
+        // LIMIT DISPLAY (2 lines approx ~ 6 items)
+        const LIMIT = 6;
+        const visibleItems = data.slice(0, LIMIT);
+        let html = visibleItems.map(place => 
+            `<div class="hist-chip" onclick="showDetailFromData('${place.name}')">
+                <img src="${place.image}" onerror="this.src='/static/images/no-image.png'"> ${place.name}
+             </div>`
+        ).join("");
+
+        if (data.length > LIMIT) {
+            html += `<div class="hist-chip more-chip" onclick="openUserProfile()" style="background: #eef2ff; color: var(--primary); font-weight: 600; cursor: pointer;">
+                        +${data.length - LIMIT} xem thêm
+                     </div>`;
+        }
+        
+        histList.innerHTML = html;
       } else { histDiv.style.display = "none"; }
     });
     getRecommendations(targetUser);

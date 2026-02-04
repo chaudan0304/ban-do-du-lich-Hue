@@ -8,7 +8,7 @@
   gap: 24px;
 }
 
-.tab-btn {
+.sidebar-tab-btn {
   padding: 14px 4px;
   background: none;
   border: none;
@@ -23,16 +23,16 @@
   gap: 8px;
 }
 
-.tab-btn:hover {
+.sidebar-tab-btn:hover {
   color: var(--primary);
 }
 
-.tab-btn.active {
+.sidebar-tab-btn.active {
   color: var(--primary);
 }
 
 /* Gạch chân dưới tab active */
-.tab-btn.active::after {
+.sidebar-tab-btn.active::after {
   content: "";
   position: absolute;
   bottom: -1px; /* Đè lên border bottom của container */

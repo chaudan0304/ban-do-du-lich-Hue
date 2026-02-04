@@ -351,6 +351,8 @@ async function showDetail(loc) {
         <p class="detail-desc-text">${loc.description || "Một địa điểm thú vị tại Huế đang chờ bạn khám phá."}</p>
 
         <!-- 5. AI Reason Card -->
+        <!-- 5. AI Reason Card (CHỈ HIỆN KHI ĐÃ LOGIN) -->
+        ${currentUser ? `
         <div class="ai-reason-card">
             <div class="ai-reason-title"><i class="fas fa-robot"></i> TẠI SAO GỢI Ý CHO BẠN?</div>
             
@@ -384,6 +386,7 @@ async function showDetail(loc) {
                  <div class="progress-track"><div class="progress-fill" style="width:${popScore}%; background:#f59e0b;"></div></div>
             </div>
         </div>
+        ` : ""}
 
         <!-- 6. Action Buttons -->
         <div class="detail-actions-row">
@@ -490,9 +493,9 @@ function showDetailFromData(name) {
     }
 }
 
-// --- TAB SWITCHING LOGIC ---
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+// --- TAB SWITCHING LOGIC (SIDEBAR ONLY) ---
+function switchSidebarTab(tabId) {
+    document.querySelectorAll('.sidebar-tab-btn').forEach(btn => {
         btn.classList.remove('active');
         if (btn.onclick.toString().includes(tabId)) {
             btn.classList.add('active');
