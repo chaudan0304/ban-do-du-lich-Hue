@@ -212,9 +212,11 @@ function renderLocations(data, autoFit = true) {
         div.className = "mini-item";
         div.innerHTML = `
         <img src="${loc.image}" loading="lazy" class="mini-img" onerror="this.src='/static/images/no-image.png'">
-        <div style="flex:1; overflow:hidden;">
+        <div class="mini-content">
             <div class="mini-name">${loc.name}</div>
-            <div class="mini-score"><i class="fas fa-chart-bar"></i> Hot: ${displayScore}</div>
+            <div class="mini-score">
+                <i class="fas fa-fire"></i> Hot: <span class="score-val">${displayScore}</span>
+            </div>
         </div>
         `;
         div.onclick = () => showDetail(loc);

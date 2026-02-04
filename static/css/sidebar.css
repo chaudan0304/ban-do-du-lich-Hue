@@ -59,41 +59,62 @@
 
 .search-box { padding: 24px; flex-shrink: 0; }
 .results-container {
-  flex: 1; /* Chiếm 1 phần không gian */
-  padding: 0 24px;
-  overflow-y: auto; /* Scroll riêng */
-  min-height: 0;    /* QUAN TRỌNG: Cho phép co giãn trong Flexbox */
+  flex: 0 1 auto; /* Tự động theo nội dung */
+  max-height: 35%; /* Giảm giới hạn chiều cao xuống */
+  padding: 12px 24px; /* Giảm padding dọc */
+  overflow-y: auto; 
+  min-height: 0;    
   display: flex;
   flex-direction: column;
+  border-bottom: 1px solid var(--border-light); 
 }
 
 /* History */
 .history-section { margin-top: 12px; padding-top: 0; border-top: none; flex-shrink: 0; }
 .data-explorer {
-  flex: 1.2; /* Tỷ lệ 1.2 (Lớn hơn chút) */
+  flex: 1; /* Chiếm toàn bộ không gian còn lại */
   display: flex;
   flex-direction: column;
-  min-height: 0; /* QUAN TRỌNG: Enable shrinking */
+  min-height: 0; 
   padding: 16px 24px;
   background: var(--bg-surface);
-  border-top: 1px solid var(--border-light);
+  /* border-top đã có ở trên .results-container border-bottom nên có thể bỏ hoặc giữ */
   box-shadow: 0 -4px 20px rgba(0,0,0,0.02);
   z-index: 10;
 }
 
+/* Updated Chip Design */
 .chip {
-  padding: 6px 14px; background: white; border: 1px solid var(--border-light);
-  border-radius: var(--radius-full); font-size: 12px; font-weight: 500; white-space: nowrap;
-  cursor: pointer; transition: var(--trans-fast); color: var(--text-secondary); box-shadow: var(--shadow-sm);
+  padding: 8px 16px; 
+  background: white; 
+  border: 1px solid #e5e7eb;
+  border-radius: 99px; /* Rounded full pill */ 
+  font-size: 13px; 
+  font-weight: 600; 
+  white-space: nowrap;
+  color: #4b5563; 
+  cursor: pointer; 
+  transition: all 0.2s ease; 
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-.chip:hover { background: var(--bg-body); transform: translateY(-1px); }
-.chip.active { background: var(--text-main); color: white; border-color: var(--text-main); box-shadow: var(--shadow-md); }
+.chip:hover { background: #f9fafb; border-color: #d1d5db; }
+.chip.active { 
+  background: #111827; /* Dark Black/Blue slate */
+  color: white; 
+  border-color: #111827; 
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+}
 
 .mini-list {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;
-  flex: 1; /* Chiếm hết không gian còn lại trong data-explorer */
-  overflow-y: auto; align-content: start; min-height: 0;
+  display: grid; 
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 16px; /* Tăng khoảng cách để thoáng hơn */
+  flex: 1; 
+  overflow-y: auto; 
+  align-content: start; 
+  min-height: 0;
   padding-right: 4px;
+  padding-bottom: 60px; /* Tăng padding đáy để scroll không bị sát mép */
 }
 
 /* ... (giữ nguyên map styles) ... */
