@@ -401,6 +401,74 @@ def api_generate_itinerary():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@bp.route("/api/planner/suggest-replacement", methods=["POST"])
+def api_suggest_replacement():
+    """Gợi ý địa điểm thay thế cho một activity trong lộ trình"""
+    data = request.json
+    exclude_names = data.get("exclude", [])  # Danh sách địa điểm đã dùng
+    activity_type = data.get("type", "visit")  # "visit" hoặc "food"
+    category = data.get("category", "")
+
+    # Xây dựng query
+    food_keywords = [
+        "ẩm thực",
+        "bún",
+        "chè",
+        "cơm",
+        "bánh",
+        "cafe",
+        "cà phê",
+        "quán",
+        "nhà hàng",
+        "chợ",
+    ]
+
+    if activity_type == "food":
+        # Tìm địa điểm ăn uống
+        category_filter = " OR ".join(
+            [f"toLower(cat.name) CONTAINS '{kw}'" for kw in food_keywords]
+        )
+        query = f"""
+        MATCH (l:Location)
+        OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+        WHERE NOT l.name IN $exclude
+        AND ({category_filter})
+        RETURN l.name as name, cat.name as category, 
+               l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
+               coalesce(l.pagerankNorm, 0) as score
+        ORDER BY score DESC, rand()
+        LIMIT 1
+        """
+    else:
+        # Tìm địa điểm tham quan (không phải ăn uống)
+        food_exclude = " AND ".join(
+            [f"NOT toLower(cat.name) CONTAINS '{kw}'" for kw in food_keywords]
+        )
+        query = f"""
+        MATCH (l:Location)
+        OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+        WHERE NOT l.name IN $exclude
+        AND ({food_exclude} OR cat IS NULL)
+        RETURN l.name as name, cat.name as category, 
+               l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
+               coalesce(l.pagerankNorm, 0) as score
+        ORDER BY score DESC, rand()
+        LIMIT 1
+        """
+
+    try:
+        result = run_query(query, {"exclude": exclude_names})
+        if result and len(result) > 0:
+            return jsonify({"success": True, "location": result[0]})
+        else:
+            return jsonify(
+                {"success": False, "error": "Không còn địa điểm phù hợp để thay thế."}
+            )
+    except Exception as e:
+        print(f"Replacement Error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @bp.route("/api/user/activity")
 @login_required
 def api_user_activity():

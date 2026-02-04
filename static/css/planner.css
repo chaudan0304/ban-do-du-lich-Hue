@@ -398,3 +398,67 @@
   font-size: 13px;
   color: #666;
 }
+
+/* ==========================================================================
+   ITINERARY EDIT BUTTONS
+   ========================================================================== */
+.activity-card-fancy {
+  position: relative;
+}
+
+.activity-edit-btns {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.activity-card-fancy:hover .activity-edit-btns {
+  opacity: 1;
+}
+
+.btn-activity-replace,
+.btn-activity-remove {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-activity-replace {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+.btn-activity-replace:hover {
+  background: #3b82f6;
+  color: white;
+  transform: rotate(180deg);
+}
+
+.btn-activity-remove {
+  background: #fef2f2;
+  color: #ef4444;
+}
+.btn-activity-remove:hover {
+  background: #ef4444;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Make activity card clickable area clearer */
+.activity-main-info {
+  cursor: pointer;
+}
+.activity-main-info:hover .activity-title-fancy {
+  color: var(--primary);
+}

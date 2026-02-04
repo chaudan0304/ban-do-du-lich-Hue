@@ -102,7 +102,7 @@ function renderItinerary(plan) {
     // Update Summary
     if(summaryTitle) summaryTitle.innerText = `Hành trình ${plan.length} ngày`;
 
-    plan.forEach(day => {
+    plan.forEach((day, dayIndex) => {
         // Day Marker
         const dayMarker = document.createElement("div");
         dayMarker.className = "day-marker-pill";
@@ -110,26 +110,36 @@ function renderItinerary(plan) {
         container.appendChild(dayMarker);
 
         if (day.activities && day.activities.length > 0) {
-             day.activities.forEach(act => {
+             day.activities.forEach((act, actIndex) => {
                 const loc = act.location;
                 if(!loc) return;
                 
                 const node = document.createElement("div");
                 node.className = "activity-node";
+                node.dataset.dayIndex = dayIndex;
+                node.dataset.actIndex = actIndex;
                 
                 node.innerHTML = `
                     <div class="activity-circle"></div>
-                    <div class="activity-card-fancy" onclick="showDetailFromData('${loc.name}')">
+                    <div class="activity-card-fancy">
                         <div class="activity-time-box">
                             <i class="fas fa-camera"></i>
                             <span>${act.time || ''}</span>
                         </div>
-                        <div class="activity-main-info">
+                        <div class="activity-main-info" onclick="showDetailFromData('${loc.name}')">
                             <div class="activity-title-fancy">${loc.name}</div>
                             <div class="activity-tag-fancy">${loc.category || 'Địa điểm'}</div>
                             <div class="activity-desc-fancy">${loc.description || 'Khám phá địa điểm thú vị tại cố đô Huế.'}</div>
                         </div>
-                        <img src="${loc.image}" class="activity-img-fancy" onerror="this.src='/static/images/no-image.png'">
+                        <img src="${loc.image}" class="activity-img-fancy" onerror="this.src='/static/images/no-image.png'" onclick="showDetailFromData('${loc.name}')">
+                        <div class="activity-edit-btns">
+                            <button class="btn-activity-replace" onclick="replaceActivity(${dayIndex}, ${actIndex})" title="Thay thế địa điểm khác">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="btn-activity-remove" onclick="removeActivity(${dayIndex}, ${actIndex})" title="Xóa khỏi lộ trình">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
                 container.appendChild(node);
@@ -141,6 +151,92 @@ function renderItinerary(plan) {
             container.appendChild(emptyNode);
         }
     });
+}
+
+// --- EDIT ITINERARY FUNCTIONS ---
+
+// Xóa một địa điểm khỏi lộ trình
+function removeActivity(dayIndex, activityIndex) {
+    if (!currentItineraryData) return;
+    
+    // Xác nhận trước khi xóa
+    const activity = currentItineraryData[dayIndex]?.activities[activityIndex];
+    if (!activity) return;
+    
+    const locName = activity.location?.name || "địa điểm này";
+    
+    if (!confirm(`Bạn muốn xóa "${locName}" khỏi lộ trình?`)) return;
+    
+    // Xóa activity
+    currentItineraryData[dayIndex].activities.splice(activityIndex, 1);
+    
+    // Re-render
+    renderItinerary(currentItineraryData);
+    showNotification({ type: 'success', message: `Đã xóa "${locName}" khỏi lộ trình.` });
+}
+
+// Thay thế địa điểm bằng gợi ý mới
+async function replaceActivity(dayIndex, activityIndex) {
+    if (!currentItineraryData) return;
+    
+    const activity = currentItineraryData[dayIndex]?.activities[activityIndex];
+    if (!activity) return;
+    
+    const oldLocName = activity.location?.name || "";
+    const actType = activity.type; // "visit" or "food"
+    
+    // Hiển thị loading
+    showNotification({ type: 'info', message: 'Đang tìm địa điểm thay thế...' });
+    
+    try {
+        // Gọi API lấy gợi ý thay thế
+        const res = await apiFetch("/api/planner/suggest-replacement", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                exclude: getUsedLocationNames(),
+                type: actType, // Giữ nguyên loại (ăn uống / tham quan)
+                category: activity.location?.category || ""
+            })
+        });
+        
+        if (res.success && res.location) {
+            // Thay thế địa điểm
+            currentItineraryData[dayIndex].activities[activityIndex].location = res.location;
+            
+            // Re-render
+            renderItinerary(currentItineraryData);
+            showNotification({ 
+                type: 'success', 
+                message: `Đã thay "${oldLocName}" bằng "${res.location.name}"` 
+            });
+        } else {
+            showNotification({ 
+                type: 'warning', 
+                message: res.error || 'Không tìm thấy địa điểm thay thế phù hợp.' 
+            });
+        }
+    } catch (e) {
+        console.error(e);
+        showNotification({ type: 'error', message: 'Lỗi kết nối khi tìm địa điểm thay thế.' });
+    }
+}
+
+// Lấy danh sách tên các địa điểm đã dùng trong lộ trình hiện tại
+function getUsedLocationNames() {
+    if (!currentItineraryData) return [];
+    
+    const names = [];
+    currentItineraryData.forEach(day => {
+        if (day.activities) {
+            day.activities.forEach(act => {
+                if (act.location?.name) {
+                    names.push(act.location.name);
+                }
+            });
+        }
+    });
+    return names;
 }
 
 // --- CRUD Itinerary (Save/Load) ---
