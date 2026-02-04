@@ -574,13 +574,20 @@ def generate_itinerary(username, days=1, preferences=[], use_liked=False):
         """
 
     try:
-        print(f"DEBUG: Running Planner Query for user={{username}}...")
+        print(f"DEBUG: Running Planner Query for user={username}...")
 
         candidates = run_query(query, {"name": username})
-        print(f"DEBUG: Candidates found: {{len(candidates) if candidates else 0}}")
+        print(f"DEBUG: Candidates found: {len(candidates) if candidates else 0}")
 
         if not candidates:
-            # Fallback nếu không có đề xuất nào
+            # NẾU CHẾ ĐỘ "USE LIKED" NHƯNG KHÔNG CÓ ĐỊA ĐIỂM NÀO ĐÃ THÍCH
+            # → Trả về lỗi rõ ràng, KHÔNG FALLBACK
+            if use_liked:
+                raise ValueError(
+                    "Bạn chưa thích địa điểm nào! Hãy thả tim một vài nơi trước khi tạo lộ trình theo sở thích."
+                )
+
+            # Chỉ fallback khi ở chế độ AI gợi ý thông thường
             print("DEBUG: No candidates found, running fallback...")
 
             # Fix fallback query tương tự
@@ -602,9 +609,7 @@ def generate_itinerary(username, days=1, preferences=[], use_liked=False):
             ORDER BY score DESC LIMIT 30
             """
             candidates = run_query(fallback_query, {})
-            print(
-                f"DEBUG: Fallback candidates: {{len(candidates) if candidates else 0}}"
-            )
+            print(f"DEBUG: Fallback candidates: {len(candidates) if candidates else 0}")
         food_keywords = [
             "ẩm thực",
             "bún",
