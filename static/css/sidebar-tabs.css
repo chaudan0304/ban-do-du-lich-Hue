@@ -1,50 +1,69 @@
-/* SIDEBAR TABS STYLE */
+/* ==========================================================================
+   SIDEBAR TABS - NEW MINIMAL DESIGN
+   ========================================================================== */
+
 .sidebar-tabs {
   display: flex;
-  background: white;
-  padding: 0 16px;
+  gap: 24px;
+  padding: 12px 24px;
+  background: var(--bg-surface);
   border-bottom: 1px solid var(--border-light);
   flex-shrink: 0;
-  gap: 24px;
 }
 
 .sidebar-tab-btn {
-  padding: 14px 4px;
-  background: none;
+  background: transparent;
   border: none;
+  padding: 8px 0;
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #9ca3af;
   cursor: pointer;
-  position: relative;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
 }
 
 .sidebar-tab-btn:hover {
-  color: var(--primary);
+  color: #6b7280;
 }
 
 .sidebar-tab-btn.active {
-  color: var(--primary);
+  color: #6366f1;
+  font-weight: 700;
 }
 
-/* Gạch chân dưới tab active */
+/* Active indicator underline */
 .sidebar-tab-btn.active::after {
-  content: "";
+  content: '';
   position: absolute;
-  bottom: -1px; /* Đè lên border bottom của container */
+  bottom: -2px;
   left: 0;
-  width: 100%;
+  right: 0;
   height: 2px;
-  background: var(--primary);
-  border-radius: 2px 2px 0 0;
+  background: #6366f1;
+  border-radius: 2px;
 }
 
+.sidebar-tab-btn i {
+  font-size: 14px;
+}
+
+/* Sparkle icon for AI tab */
+.sidebar-tab-btn .fa-sparkles {
+  color: inherit;
+}
+
+/* Tab Panes */
 .tab-pane {
-  flex: 1;
-  overflow: hidden; /* Quan trọng để scroll con hoạt động */
+  display: none;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.tab-pane.active {
+  display: flex;
 }

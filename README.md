@@ -178,6 +178,14 @@ ban-do-du-lich-Hue/
 
 ## 📜 Nhật ký Cập nhật (Changelog)
 
+### v2.1 - Algorithm Fix & Code Quality (04/02/2026)
+
+- 🧠 **Recommendation Fix:** Sửa lỗi công thức tính điểm Hybrid - bổ sung `pagerankConnectNorm` (Connection Rank) vào gợi ý AI.
+- 🔧 **Bug Fix:** Sửa `ORDER BY` trong Fallback Query để sắp xếp đúng theo `final_score`.
+- 🏗️ **CSS Refactoring:** Tách `style.css` thành 7 file module riêng biệt (`sidebar.css`, `modals.css`, `planner.css`, `map.css`, `reviews.css`, `sidebar-tabs.css`).
+- 🧹 **Code Cleanup:** Xóa các file debug, chuẩn hóa `requirements.txt` với version constraints.
+- 🧪 **Testing:** Bổ sung Unit Tests cho Authentication và Recommendation API.
+
 ### v2.0 - Refactoring & Optimization (02/02/2026)
 
 - 🏗️ **Back-end Overhaul:** Tái cấu trúc toàn bộ `app.py` thành mô hình **Blueprints** (`routes/`).

@@ -131,7 +131,7 @@ def recommend(user_name):
     WITH l, cat, common_users, avg_rating, review_count,
          score_collab_raw * 3.0 AS final_collab,
          score_content_raw * 1.0 AS final_content,
-         coalesce(l.pagerankNorm, 0) * 10.0 AS final_pagerank
+         (coalesce(l.pagerankNorm, 0) + coalesce(l.pagerankConnectNorm, 0)) * 5.0 AS final_pagerank
     
     WITH l, cat, common_users, avg_rating, review_count,
          final_collab, final_content, final_pagerank,
@@ -174,10 +174,10 @@ def recommend(user_name):
                    l.lat AS lat, l.lng AS lng, l.image as image, cat.name as category,
                    coalesce(l.pagerankNorm, 0) AS score,
                    review_count AS reviewCount,
-                   coalesce(l.pagerankNorm, 0) * 10.0 AS final_score,
+                   (coalesce(l.pagerankNorm, 0) + coalesce(l.pagerankConnectNorm, 0)) * 5.0 AS final_score,
                    0 as common_users, 0 as score_personal, 0 as score_collab, 0 as score_content,
-                   coalesce(l.pagerankNorm, 0) * 10.0 AS score_pagerank
-            ORDER BY l.pagerankNorm DESC
+                   (coalesce(l.pagerankNorm, 0) + coalesce(l.pagerankConnectNorm, 0)) * 5.0 AS score_pagerank
+            ORDER BY final_score DESC
             LIMIT 12
             """
             results = run_query(fallback_query, {"name": user_name})

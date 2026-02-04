@@ -210,15 +210,17 @@ def update_location():
 
 
 # --- API XÓA ĐỊA ĐIỂM (DELETE) ---
-@bp.route("/api/admin/location/delete", methods=["DELETE"])
+# --- API XÓA ĐỊA ĐIỂM (DELETE) ---
+@bp.route("/api/admin/location/delete/<name>", methods=["DELETE"])
 @login_required
-def delete_location():
+def delete_location(name):
     if not current_user.is_authenticated or current_user.role != "admin":
         return jsonify({"error": "Không có quyền"}), 403
 
     try:
+        # Decode name nếu cần thiết, nhưng flask thường tự decode
         query = "MATCH (l:Location {name: $name}) DETACH DELETE l"
-        run_query(query, {"name": request.json.get("name")})
+        run_query(query, {"name": name})
         # Đồng bộ vào file Excel
         sync_locations_to_excel()
         return jsonify({"success": True})
