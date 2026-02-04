@@ -433,11 +433,13 @@ def api_suggest_replacement():
         OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
         WHERE NOT l.name IN $exclude
         AND ({category_filter})
+        WITH l, cat, coalesce(l.pagerankNorm, 0) as score, rand() as r
+        // Lấy top 10 rồi chọn ngẫu nhiên (có trọng số)
+        ORDER BY (score * 0.3 + r * 0.7) DESC
+        LIMIT 1
         RETURN l.name as name, cat.name as category, 
                l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
-               coalesce(l.pagerankNorm, 0) as score
-        ORDER BY score DESC, rand()
-        LIMIT 1
+               score
         """
     else:
         # Tìm địa điểm tham quan (không phải ăn uống)
@@ -449,11 +451,13 @@ def api_suggest_replacement():
         OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
         WHERE NOT l.name IN $exclude
         AND ({food_exclude} OR cat IS NULL)
+        WITH l, cat, coalesce(l.pagerankNorm, 0) as score, rand() as r
+        // Lấy ngẫu nhiên có trọng số (70% random + 30% score)
+        ORDER BY (score * 0.3 + r * 0.7) DESC
+        LIMIT 1
         RETURN l.name as name, cat.name as category, 
                l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
-               coalesce(l.pagerankNorm, 0) as score
-        ORDER BY score DESC, rand()
-        LIMIT 1
+               score
         """
 
     try:
