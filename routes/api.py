@@ -467,9 +467,47 @@ def api_generate_itinerary():
     if days > 5:
         days = 5
 
+    # Kiểm tra trước: Nếu user chọn "Từ danh sách đã thích", kiểm tra xem có địa điểm nào không
+    if use_liked and current_user.is_authenticated:
+        from db import get_user_likes
+
+        likes = get_user_likes(username)
+        if not likes or len(likes) == 0:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": "Bạn chưa thích địa điểm nào! Hãy thả tim ❤️ một vài nơi trước, hoặc chọn chế độ 'AI gợi ý mới'.",
+                        "error_type": "no_likes",
+                    }
+                ),
+                400,
+            )
+
     try:
         plan = generate_itinerary(username, days, preferences, use_liked=use_liked)
+
+        # Kiểm tra xem plan có rỗng không
+        if not plan or all(len(day.get("activities", [])) == 0 for day in plan):
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": "Không tìm thấy địa điểm phù hợp với tiêu chí bạn chọn. Hãy thử bỏ bớt bộ lọc.",
+                        "error_type": "no_results",
+                    }
+                ),
+                400,
+            )
+
         return jsonify({"success": True, "plan": plan})
+    except ValueError as e:
+        # Lỗi validation (thiếu likes, etc.)
+        print(f"Planner Validation Error: {e}")
+        return (
+            jsonify({"success": False, "error": str(e), "error_type": "validation"}),
+            400,
+        )
     except Exception as e:
         print(f"Planner Error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500

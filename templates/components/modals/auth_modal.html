@@ -1,77 +1,141 @@
-    <!-- Modal Auth -->
-    <div id="authModal" class="modal">
-      <div class="modal-content">
-        <div class="auth-header-wrapper">
-          <div class="auth-tabs">
-            <button class="tab-btn active" onclick="switchTab('login')">
-              Đăng nhập
-            </button>
-            <button class="tab-btn" onclick="switchTab('register')">
-              Đăng ký
-            </button>
-          </div>
-          <button class="close-btn-inline" onclick="closeAuthModal()">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-
-        <div id="loginForm" class="auth-form">
-          <div class="form-group">
-            <i class="fas fa-user"></i
-            ><input type="text" id="loginUser" placeholder="Tên đăng nhập" />
-          </div>
-          <div class="form-group">
-            <i class="fas fa-lock"></i
-            ><input type="password" id="loginPass" placeholder="Mật khẩu" />
-          </div>
-          <button class="btn-full" onclick="handleLogin()">Đăng nhập</button>
-          <p
-            id="loginMsg"
-            style="
-              color: red;
-              font-size: 12px;
-              margin-top: 10px;
-              text-align: center;
-            "
-          ></p>
-          <div style="text-align: center; margin-top: 5px;">
-            <a href="#" onclick="openResetPasswordModal()" style="font-size: 13px; color: #666; text-decoration: none;">Quên mật khẩu?</a>
-          </div>
-        </div>
-
-        <div id="registerForm" class="auth-form" style="display: none">
-          <div class="form-group">
-            <i class="fas fa-user"></i
-            ><input type="text" id="regUser" placeholder="Chọn tên đăng nhập" />
-          </div>
-          <div class="form-group">
-              <i class="fas fa-id-card"></i>
-              <input type="text" id="regRealName" placeholder="Họ và tên hiển thị" />
-          </div>
-          <div class="form-group">
-              <i class="fas fa-envelope"></i>
-              <input type="email" id="regEmail" placeholder="Email (để khôi phục mật khẩu)" />
-          </div>
-          <div class="form-group">
-            <i class="fas fa-lock"></i
-            ><input type="password" id="regPass" placeholder="Mật khẩu" />
-          </div>
-          
-          <!-- Hidden input for checkbox logic compatibility if needed -->
-          <input type="checkbox" id="regCheck" style="display:none" checked value="Agree">
-
-          <button class="btn-full btn-outline" onclick="handleRegister()">
-            Tạo tài khoản
-          </button>
-          <p
-            id="regMsg"
-            style="
-              color: red;
-              font-size: 12px;
-              margin-top: 10px;
-              text-align: center;
-            "
-          ></p>
-        </div>
+<!-- Modal Auth -->
+<div id="authModal" class="modal">
+  <div class="modal-content">
+    <div class="auth-header-wrapper">
+      <div class="auth-tabs">
+        <button class="tab-btn active" onclick="switchTab('login')">
+          Đăng nhập
+        </button>
+        <button class="tab-btn" onclick="switchTab('register')">Đăng ký</button>
       </div>
+      <button class="close-btn-inline" onclick="closeAuthModal()">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
+
+    <div id="loginForm" class="auth-form">
+      <form
+        onsubmit="
+          handleLogin();
+          return false;
+        "
+        autocomplete="on"
+      >
+        <div class="form-group">
+          <i class="fas fa-user"></i
+          ><input
+            type="text"
+            id="loginUser"
+            name="username"
+            placeholder="Tên đăng nhập"
+            autocomplete="username"
+          />
+        </div>
+        <div class="form-group">
+          <i class="fas fa-lock"></i
+          ><input
+            type="password"
+            id="loginPass"
+            name="password"
+            placeholder="Mật khẩu"
+            autocomplete="current-password"
+          />
+        </div>
+        <button type="submit" class="btn-full">Đăng nhập</button>
+        <p
+          id="loginMsg"
+          style="
+            color: red;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+          "
+        ></p>
+        <div style="text-align: center; margin-top: 5px">
+          <a
+            href="#"
+            onclick="
+              openResetPasswordModal();
+              return false;
+            "
+            style="font-size: 13px; color: #666; text-decoration: none"
+            >Quên mật khẩu?</a
+          >
+        </div>
+      </form>
+    </div>
+
+    <div id="registerForm" class="auth-form" style="display: none">
+      <form
+        onsubmit="
+          handleRegister();
+          return false;
+        "
+        autocomplete="on"
+      >
+        <div class="form-group">
+          <i class="fas fa-user"></i
+          ><input
+            type="text"
+            id="regUser"
+            name="username"
+            placeholder="Chọn tên đăng nhập"
+            autocomplete="username"
+          />
+        </div>
+        <div class="form-group">
+          <i class="fas fa-id-card"></i>
+          <input
+            type="text"
+            id="regRealName"
+            name="name"
+            placeholder="Họ và tên hiển thị"
+            autocomplete="name"
+          />
+        </div>
+        <div class="form-group">
+          <i class="fas fa-envelope"></i>
+          <input
+            type="email"
+            id="regEmail"
+            name="email"
+            placeholder="Email (để khôi phục mật khẩu)"
+            autocomplete="email"
+          />
+        </div>
+        <div class="form-group">
+          <i class="fas fa-lock"></i
+          ><input
+            type="password"
+            id="regPass"
+            name="password"
+            placeholder="Mật khẩu"
+            autocomplete="new-password"
+          />
+        </div>
+
+        <!-- Hidden input for checkbox logic compatibility if needed -->
+        <input
+          type="checkbox"
+          id="regCheck"
+          style="display: none"
+          checked
+          value="Agree"
+        />
+
+        <button type="submit" class="btn-full btn-outline">
+          Tạo tài khoản
+        </button>
+        <p
+          id="regMsg"
+          style="
+            color: red;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+          "
+        ></p>
+      </form>
+    </div>
+  </div>
+</div>

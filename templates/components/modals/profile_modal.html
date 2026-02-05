@@ -272,43 +272,45 @@
 
         <div class="modal-body-teal">
             <!-- Form Section -->
-            <div class="form-group-pill">
-                <i class="fas fa-user-tag"></i>
-                <input type="text" id="profileFullname" class="input-pill" placeholder="Họ và tên">
-            </div>
-            <div class="form-group-pill">
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="profileEmail" class="input-pill" placeholder="Email liên hệ">
-            </div>
-            <div class="form-group-pill">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="profilePassword" class="input-pill" placeholder="Đổi mật khẩu mới (nếu cần)">
-            </div>
+            <form id="profileUpdateForm" onsubmit="submitProfileUpdate(); return false;" autocomplete="on">
+              <div class="form-group-pill">
+                  <i class="fas fa-user-tag"></i>
+                  <input type="text" id="profileFullname" name="name" class="input-pill" placeholder="Họ và tên" autocomplete="name">
+              </div>
+              <div class="form-group-pill">
+                  <i class="fas fa-envelope"></i>
+                  <input type="email" id="profileEmail" name="email" class="input-pill" placeholder="Email liên hệ" autocomplete="email">
+              </div>
+              <div class="form-group-pill">
+                  <i class="fas fa-lock"></i>
+                  <input type="password" id="profilePassword" name="password" class="input-pill" placeholder="Đổi mật khẩu mới (nếu cần)" autocomplete="new-password">
+              </div>
 
-            <!-- Role/Date Info -->
-            <div class="profile-info-bar">
-                <div class="info-item">VAI TRÒ: <b id="profileRole">Thành viên</b></div>
-                <div class="info-item">THAM GIA: <b id="profileJoinDate">30/01/2026</b></div>
-            </div>
+              <!-- Role/Date Info -->
+              <div class="profile-info-bar">
+                  <div class="info-item">VAI TRÒ: <b id="profileRole">Thành viên</b></div>
+                  <div class="info-item">THAM GIA: <b id="profileJoinDate">30/01/2026</b></div>
+              </div>
 
-            <!-- History Section -->
-            <div class="history-title">
-                <i class="fas fa-rotate-left"></i> Lịch sử hoạt động
-            </div>
+              <!-- History Section -->
+              <div class="history-title">
+                  <i class="fas fa-rotate-left"></i> Lịch sử hoạt động
+              </div>
 
-            <div class="activity-tabs-box">
-                <button class="activity-tab-btn active" data-subtab="liked" onclick="switchActivityTab('liked')">Đã thích</button>
-                <button class="activity-tab-btn" data-subtab="reviews" onclick="switchActivityTab('reviews')">Đánh giá</button>
-                <button class="activity-tab-btn" data-subtab="plans" onclick="switchActivityTab('plans')">Lộ trình</button>
-            </div>
+              <div class="activity-tabs-box">
+                  <button type="button" class="activity-tab-btn active" data-subtab="liked" onclick="switchActivityTab('liked')">Đã thích</button>
+                  <button type="button" class="activity-tab-btn" data-subtab="reviews" onclick="switchActivityTab('reviews')">Đánh giá</button>
+                  <button type="button" class="activity-tab-btn" data-subtab="plans" onclick="switchActivityTab('plans')">Lộ trình</button>
+              </div>
 
-            <div id="activity-content-list" class="activity-content-container">
-                <!-- Nội dung được nạp qua JS -->
-            </div>
+              <div id="activity-content-list" class="activity-content-container">
+                  <!-- Nội dung được nạp qua JS -->
+              </div>
 
-            <div class="btn-save-wrap">
-                <button class="btn-save-teal" onclick="submitProfileUpdate()">Lưu cập nhật</button>
-            </div>
+              <div class="btn-save-wrap">
+                  <button type="submit" class="btn-save-teal">Lưu cập nhật</button>
+              </div>
+            </form>
         </div>
     </div>
   </div>

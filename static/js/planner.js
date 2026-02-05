@@ -60,13 +60,32 @@ async function submitPlanner() {
             })
         });
 
-        if (res.success) {
+        if (res.success && res.plan && res.plan.length > 0) {
             closePlannerInputModal();
             currentItineraryData = res.plan;
             renderItinerary(res.plan);
             openPlannerResultModal();
         } else {
-            showNotification({ type: 'error', message: res.error || "Không thể tạo lộ trình." });
+            // Hiển thị thông báo lỗi cụ thể
+            const errorMsg = res.error || "Không thể tạo lộ trình.";
+            const errorType = res.error_type || "unknown";
+            
+            // Thông báo khác nhau tùy loại lỗi
+            if (errorType === "no_likes") {
+                showNotification({ 
+                    type: 'warning', 
+                    message: errorMsg,
+                    duration: 5000
+                });
+            } else if (errorType === "no_results") {
+                showNotification({ 
+                    type: 'info', 
+                    message: errorMsg,
+                    duration: 4000
+                });
+            } else {
+                showNotification({ type: 'error', message: errorMsg });
+            }
         }
     } catch (e) {
         console.error(e);

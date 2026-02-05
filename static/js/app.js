@@ -118,23 +118,23 @@ function setupDragScroll() {
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // Chỉ xử lý cuộn ngang
       e.preventDefault();
       slider.scrollLeft += e.deltaX || e.deltaY;
-    });
+    }, { passive: false }); // passive: false vì có e.preventDefault()
 
     // --- B. DÀNH CHO ĐIỆN THOẠI (CẢM ỨNG) ---
     slider.addEventListener("touchstart", (e) => {
       isDown = true;
       startX = e.touches[0].pageX - slider.offsetLeft;
       scrollLeft = slider.scrollLeft;
-    });
+    }, { passive: true });
     slider.addEventListener("touchend", () => {
       isDown = false;
-    });
+    }, { passive: true });
     slider.addEventListener("touchmove", (e) => {
       if (!isDown) return;
       const x = e.touches[0].pageX - slider.offsetLeft;
       const walk = (x - startX) * 2; // Tốc độ cuộn
       slider.scrollLeft = scrollLeft - walk;
-    });
+    }, { passive: true });
   }
 }
 
