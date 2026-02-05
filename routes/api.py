@@ -83,20 +83,24 @@ def recommend(user_name):
     cypher_query = """
     MATCH (me:User {name: $name})
     
-    // BƯỚC 1: COLLABORATIVE FILTERING
-    OPTIONAL MATCH (me)-[:INTERACTED]->(:Location)<-[other_int:INTERACTED]-(other:User)
+    // BƯỚC 1: COLLABORATIVE FILTERING với SIMILARITY SCORE
+    // Sử dụng quan hệ SIMILAR_TO (Jaccard) thay vì chỉ đếm
+    OPTIONAL MATCH (me)-[sim:SIMILAR_TO]-(other:User)
     WHERE other <> me
     OPTIONAL MATCH (other)-[their_int:INTERACTED]->(l_collab:Location)
     WHERE NOT (me)-[:INTERACTED]->(l_collab) AND NOT (me)-[:LIKED]->(l_collab)
     WITH me, l_collab, 
          count(DISTINCT other) AS num_similar_users,
-         avg(their_int.weight) AS avg_weight
+         avg(their_int.weight) AS avg_weight,
+         avg(sim.score) AS avg_similarity  // Điểm Jaccard similarity
     WITH me, 
          collect({
              loc: l_collab, 
-             score: num_similar_users * coalesce(avg_weight, 1),
+             // Công thức mới: kết hợp số users + trọng số + similarity
+             score: num_similar_users * coalesce(avg_weight, 1) * (1 + coalesce(avg_similarity, 0)),
              type: 'collab',
-             common_users: num_similar_users
+             common_users: num_similar_users,
+             similarity: coalesce(avg_similarity, 0)
          }) AS collab_list
 
     // BƯỚC 2: CONTENT-BASED FILTERING
@@ -353,10 +357,22 @@ def api_delete_review():
 
 @bp.route("/api/similar/<location_name>", methods=["GET"])
 def get_similar_locations(location_name):
+    """
+    Tìm địa điểm tương tự sử dụng:
+    1. LOC_SIMILAR (Jaccard Similarity) nếu có
+    2. Fallback: cùng Category
+    """
+    # Query ưu tiên LOC_SIMILAR (được tính từ setup_algo.py)
     query = """
-    MATCH (current:Location {name: $name})-[:HAS_CATEGORY]->(cat:Category)
-    MATCH (similar:Location)-[:HAS_CATEGORY]->(cat)
-    WHERE similar.name <> $name
+    MATCH (current:Location {name: $name})
+    
+    // Ưu tiên: Sử dụng Jaccard Similarity từ thuật toán
+    OPTIONAL MATCH (current)-[sim:LOC_SIMILAR]-(similar:Location)
+    OPTIONAL MATCH (similar)-[:HAS_CATEGORY]->(cat:Category)
+    
+    WITH current, similar, cat, sim.score AS similarity_score
+    WHERE similar IS NOT NULL
+    
     RETURN similar.name AS name,
            similar.desc AS description,
            similar.lat AS lat,
@@ -364,15 +380,73 @@ def get_similar_locations(location_name):
            similar.image AS image,
            similar.rating AS rating,
            cat.name AS category,
-           coalesce(similar.pagerankNorm, 0) AS score
-    ORDER BY score DESC
+           coalesce(similar.pagerankNorm, 0) AS score,
+           coalesce(similarity_score, 0) AS similarity
+    ORDER BY similarity DESC, score DESC
     LIMIT 6
     """
     try:
         results = run_query(query, {"name": location_name})
+
+        # Fallback: Nếu không có LOC_SIMILAR, dùng Category
+        if not results:
+            fallback_query = """
+            MATCH (current:Location {name: $name})-[:HAS_CATEGORY]->(cat:Category)
+            MATCH (similar:Location)-[:HAS_CATEGORY]->(cat)
+            WHERE similar.name <> $name
+            RETURN similar.name AS name,
+                   similar.desc AS description,
+                   similar.lat AS lat,
+                   similar.lng AS lng,
+                   similar.image AS image,
+                   similar.rating AS rating,
+                   cat.name AS category,
+                   coalesce(similar.pagerankNorm, 0) AS score,
+                   0 AS similarity
+            ORDER BY score DESC
+            LIMIT 6
+            """
+            results = run_query(fallback_query, {"name": location_name})
+
         return jsonify(results if results else [])
     except Exception as e:
         print(f"❌ Lỗi get_similar_locations: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/api/similar-users/<username>", methods=["GET"])
+def get_similar_users(username):
+    """
+    Lấy danh sách users tương tự dựa trên Jaccard Similarity.
+    Được tính bởi setup_algo.py (Neo4j GDS nodeSimilarity)
+    """
+    query = """
+    MATCH (me:User {name: $name})-[sim:SIMILAR_TO]-(other:User)
+    
+    // Lấy thông tin về địa điểm chung
+    OPTIONAL MATCH (me)-[:INTERACTED]->(common:Location)<-[:INTERACTED]-(other)
+    
+    WITH other, sim.score AS similarity, collect(common.name) AS common_locations
+    
+    RETURN other.name AS username,
+           round(similarity * 100, 1) AS similarity_percent,
+           size(common_locations) AS common_count,
+           common_locations[0..3] AS sample_locations
+    ORDER BY similarity DESC
+    LIMIT 10
+    """
+    try:
+        results = run_query(query, {"name": username})
+        return jsonify(
+            {
+                "success": True,
+                "user": username,
+                "similar_users": results if results else [],
+                "algorithm": "Jaccard Similarity (Neo4j GDS)",
+            }
+        )
+    except Exception as e:
+        print(f"❌ Lỗi get_similar_users: {e}")
         return jsonify({"error": str(e)}), 500
 
 
