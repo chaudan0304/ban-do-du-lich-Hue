@@ -137,6 +137,15 @@ Dự án được tổ chức theo mô hình Modular (Flask Blueprints) để d�
 ```
 ban-do-du-lich-Hue/
 ├── 📂 data/                 # Chứa dữ liệu nguồn (Excel)
+├── 📂 db/                   # 🆕 Package Database (Neo4j) - Modularized
+│   ├── 📄 __init__.py       # Export tất cả hàm (backward compatible)
+│   ├── 📄 connection.py     # Quản lý kết nối Neo4j
+│   ├── 📄 user.py           # Hàm xử lý User (đăng ký, đăng nhập, profile)
+│   ├── 📄 admin.py          # Hàm quản trị (CRUD users)
+│   ├── 📄 location.py       # Hàm xử lý Location & tương tác (like, review)
+│   ├── 📄 planner.py        # AI Itinerary Planner
+│   ├── 📄 itinerary.py      # Quản lý lộ trình đã lưu
+│   └── 📄 sync.py           # Đồng bộ dữ liệu Excel
 ├── 📂 routes/               # Các nhóm chức năng (Controller/View)
 │   ├── 📄 auth.py           # Authentication (Login, Register, Profile)
 │   ├── 📄 admin.py          # Admin Dashboard & CRUD
@@ -156,7 +165,6 @@ ban-do-du-lich-Hue/
 │   ├── 📄 test_planner.py   # Tests cho AI Planner
 │   └── 📄 run_all_tests.py  # Script chạy tất cả tests
 ├── 📄 app.py                # Entry Point (Khởi chạy Server)
-├── 📄 db.py                 # Module kết nối Database Neo4j
 ├── 📄 models.py             # Định nghĩa Data Models (User)
 ├── 📄 utils.py              # Các hàm tiện ích dùng chung
 ├── 📄 setup_algo.py         # Script cấu hình thuật toán GDS
@@ -208,6 +216,18 @@ python tests/run_all_tests.py
 ---
 
 ## 📜 Nhật ký Cập nhật (Changelog)
+
+### v2.2 - Database Modularization (05/02/2026)
+
+- 🏗️ **DB Refactoring:** Tách file `db.py` (838 dòng) thành package `db/` với 7 module riêng biệt:
+  - `connection.py` - Quản lý kết nối Neo4j
+  - `user.py` - Xử lý User (đăng ký, đăng nhập, profile)
+  - `admin.py` - Hàm quản trị
+  - `location.py` - Xử lý Location & tương tác
+  - `planner.py` - AI Itinerary Planner
+  - `itinerary.py` - Quản lý lộ trình
+  - `sync.py` - Đồng bộ Excel
+- ✅ **Backward Compatible:** Giữ nguyên API, không cần thay đổi code ở các file khác
 
 ### v2.1 - Algorithm Fix & Code Quality (04/02/2026)
 
