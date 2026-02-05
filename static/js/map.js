@@ -34,6 +34,9 @@ function initMap() {
   map.addLayer(markerLayer);
 
   // Load user location default
+  // FIXME: Chrome chặn request geolocation không từ user gesture. 
+  // Nên chuyển sang nút bấm "Vị trí của tôi" thay vì auto-load.
+  /*
   if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
           (pos) => {
@@ -48,6 +51,7 @@ function initMap() {
           (err) => console.log("Không lấy được vị trí người dùng")
       );
   }
+  */
 
   // --- RESTORED LOGIC: MAP CLICK HANDLER (FOR ADMIN) ---
   map.on("click", (e) => {
