@@ -1,4 +1,10 @@
 import pandas as pd
+import sys
+import os
+
+# Thêm thư mục gốc vào path để import được db
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from db import run_query, close_driver
 from werkzeug.security import generate_password_hash, check_password_hash
 import logging
@@ -8,16 +14,21 @@ import re
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Đường dẫn đến file data
+DATA_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "data", "data.xlsx")
+)
+
 
 def main():
-    logging.info("⏳ Đang đọc file Excel...")
+    logging.info(f"⏳ Đang đọc file Excel từ: {DATA_PATH}")
     try:
         # 1. Xóa dữ liệu cũ (Reset Database)
         logging.info("🧹 Đang dọn dẹp dữ liệu cũ...")
         run_query("MATCH (n) DETACH DELETE n")
 
         # 2. Nạp Locations
-        df_loc = pd.read_excel("data.xlsx", sheet_name=0)
+        df_loc = pd.read_excel(DATA_PATH, sheet_name=0)
         logging.info(f"📥 Đang nạp {len(df_loc)} địa điểm...")
 
         for i, row in df_loc.iterrows():
@@ -56,8 +67,8 @@ def main():
         logging.info("👤 Đang nạp người dùng từ file Excel...")
 
         try:
-            df_users = pd.read_excel("data.xlsx", sheet_name="Users")
-            df_likes = pd.read_excel("data.xlsx", sheet_name="Likes")
+            df_users = pd.read_excel(DATA_PATH, sheet_name="Users")
+            df_likes = pd.read_excel(DATA_PATH, sheet_name="Likes")
 
             default_pass = generate_password_hash("123")
             row_count_users = 0

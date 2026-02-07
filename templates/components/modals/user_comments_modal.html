@@ -1,0 +1,15 @@
+  <!-- Modal: Xem bình luận user -->
+  <div id="userCommentsModal" class="modal">
+    <div class="modal-content-fancy" style="max-width: 500px;">
+      <button class="close-btn-white" onclick="closeUserCommentsModal()"><i class="fas fa-times"></i></button>
+      <div class="modal-header-gradient" style="background: linear-gradient(135deg, #8b5cf6, #db2777);">
+        <h3 class="modal-title-fancy">💬 Lịch sử bình luận</h3>
+        <p id="commentUserTitle" style="font-size: 13px; opacity: 0.9; margin-top: 4px;">của user ...</p>
+      </div>
+      <div class="modal-body-fancy">
+        <div id="userCommentsList" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+          <!-- Comments will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,33 @@
+  <!-- MODAL: AI PLANNER RESULT (Teal History Version) -->
+  <div id="plannerResultModal" class="modal">
+    <div class="modal-content-fancy" style="max-width: 650px; height: auto; display: flex; flex-direction: column;">
+        <div class="modal-header-teal">
+            <div class="header-top">
+                <div class="header-title-box">
+                    <i class="fas fa-map-marker-alt" style="font-size: 20px;"></i>
+                    <h3 style="font-size: 18px;">Lộ trình gợi ý</h3>
+                </div>
+                <button class="close-btn-teal" onclick="closePlannerResultModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <span class="header-username-sub">Được cá nhân hóa dành riêng cho bạn</span>
+        </div>
+        
+        <div class="modal-body-teal" style="flex: 1; overflow-y: auto; padding: 0; background: #fff;">
+            <!-- Summary Section -->
+            <div id="itinerarySummary" style="text-align: center; padding: 15px 20px 5px 20px;">
+                <h2 id="itineraryTitle" style="color: #6366f1; font-size: 28px; margin-bottom: 8px;">Hành trình 1 ngày</h2>
+                <p style="color: #94a3b8; font-size: 14px;">Khám phá Huế trọn vẹn</p>
+            </div>
+
+            <div id="plannerTimeline" class="timeline-teal-container">
+                <!-- Nội dung được nạp qua JS -->
+            </div>
+        </div>
+        
+        <div class="modal-footer-teal" style="padding: 15px 25px; border-top: 1px solid #f1f5f9; background: white; text-align: right;">
+            <button class="btn-save-teal" onclick="saveCurrentItinerary()" style="padding: 10px 25px; border-radius: 12px;">
+                <i class="fas fa-save"></i> Lưu lộ trình
+            </button>
+        </div>
+    </div>
+  </div>

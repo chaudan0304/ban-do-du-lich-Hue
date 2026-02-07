@@ -1,0 +1,69 @@
+/* ==========================================================================
+   SIDEBAR TABS - NEW MINIMAL DESIGN
+   ========================================================================== */
+
+.sidebar-tabs {
+  display: flex;
+  gap: 24px;
+  padding: 12px 24px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.sidebar-tab-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.sidebar-tab-btn:hover {
+  color: #6b7280;
+}
+
+.sidebar-tab-btn.active {
+  color: #6366f1;
+  font-weight: 700;
+}
+
+/* Active indicator underline */
+.sidebar-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #6366f1;
+  border-radius: 2px;
+}
+
+.sidebar-tab-btn i {
+  font-size: 14px;
+}
+
+/* Sparkle icon for AI tab */
+.sidebar-tab-btn .fa-sparkles {
+  color: inherit;
+}
+
+/* Tab Panes */
+.tab-pane {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.tab-pane.active {
+  display: flex;
+}

@@ -1,34 +1,67 @@
 """
-Script tạo dữ liệu người dùng mẫu và thêm vào data.xlsx
+Script tạo dữ liệu người dùng mẫu và thêm vào data/data.xlsx
 - 20 người dùng với tên Việt Nam
 - Mỗi người thích ngẫu nhiên 3-8 địa điểm
 """
+
 import pandas as pd
 import random
+import os
+
+# Đường dẫn đến file data
+DATA_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "data", "data.xlsx")
+)
+print(f"📖 Đang đọc file từ: {DATA_PATH}")
 
 # Đọc danh sách địa điểm hiện có
-df_locations = pd.read_excel("data.xlsx", sheet_name=0)
+try:
+    df_locations = pd.read_excel(DATA_PATH, sheet_name=0)
+except FileNotFoundError:
+    print(
+        f"❌ Không tìm thấy file {DATA_PATH}. Vui lòng chạy import_data.py trước hoặc kiểm tra lại."
+    )
+    exit(1)
+
 location_names = df_locations["name"].tolist()
 
 print(f"📍 Tổng số địa điểm: {len(location_names)}")
 
 # Danh sách tên người dùng Việt Nam
 vietnamese_names = [
-    "Minh Anh", "Hoàng Long", "Thùy Linh", "Đức Huy", "Ngọc Hà",
-    "Quang Hải", "Phương Thảo", "Tuấn Kiệt", "Mai Lan", "Văn Nam",
-    "Thanh Tâm", "Hồng Nhung", "Bảo Ngọc", "Tiến Đạt", "Yến Nhi",
-    "Công Vinh", "Kim Chi", "Trung Hiếu", "Ánh Dương", "Hữu Phúc"
+    "Minh Anh",
+    "Hoàng Long",
+    "Thùy Linh",
+    "Đức Huy",
+    "Ngọc Hà",
+    "Quang Hải",
+    "Phương Thảo",
+    "Tuấn Kiệt",
+    "Mai Lan",
+    "Văn Nam",
+    "Thanh Tâm",
+    "Hồng Nhung",
+    "Bảo Ngọc",
+    "Tiến Đạt",
+    "Yến Nhi",
+    "Công Vinh",
+    "Kim Chi",
+    "Trung Hiếu",
+    "Ánh Dương",
+    "Hữu Phúc",
 ]
 
 # Tạo danh sách Users
 users_data = []
 for i, name in enumerate(vietnamese_names, start=1):
-    users_data.append({
-        "user_id": f"user{i:02d}",
-        "name": name,
-        "password": "123",  # Password mặc định
-        "role": "user"
-    })
+    users_data.append(
+        {
+            "user_id": f"user{i:02d}",
+            "name": name,
+            "password": "123",  # Password mặc định
+            "role": "user",
+        }
+    )
 
 df_users = pd.DataFrame(users_data)
 print(f"👤 Đã tạo {len(df_users)} người dùng")
@@ -40,19 +73,21 @@ for user in users_data:
     num_likes = random.randint(3, 8)
     # Chọn ngẫu nhiên các địa điểm (không trùng lặp)
     liked_locations = random.sample(location_names, num_likes)
-    
+
     for loc_name in liked_locations:
-        likes_data.append({
-            "user_id": user["user_id"],
-            "user_name": user["name"],
-            "location_name": loc_name
-        })
+        likes_data.append(
+            {
+                "user_id": user["user_id"],
+                "user_name": user["name"],
+                "location_name": loc_name,
+            }
+        )
 
 df_likes = pd.DataFrame(likes_data)
 print(f"❤️ Đã tạo {len(df_likes)} lượt thích")
 
 # Ghi vào file Excel với 3 sheets
-with pd.ExcelWriter("data.xlsx", engine="openpyxl") as writer:
+with pd.ExcelWriter(DATA_PATH, engine="openpyxl") as writer:
     # Sheet 1: Locations (giữ nguyên)
     df_locations.to_excel(writer, sheet_name="Locations", index=False)
     # Sheet 2: Users

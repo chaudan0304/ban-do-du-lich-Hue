@@ -21,7 +21,7 @@ from datetime import datetime
 
 # Fix encoding cho Windows console (hỗ trợ emoji)
 if sys.platform == "win32":
-    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stdout.reconfigure(encoding="utf-8")
 
 load_dotenv()
 
@@ -35,16 +35,16 @@ GRAPH_USER = "hybrid_user_graph"
 GRAPH_LOC = "hybrid_loc_graph"
 
 # Trọng số cho Interaction Weighting
-WEIGHT_LIKED = 1.0        # Like đóng góp 1 điểm
-WEIGHT_REVIEW_MAX = 5.0   # Review tối đa 5 sao → tổng cộng tối đa 6 điểm
+WEIGHT_LIKED = 1.0  # Like đóng góp 1 điểm
+WEIGHT_REVIEW_MAX = 5.0  # Review tối đa 5 sao → tổng cộng tối đa 6 điểm
 
 # Trọng số cho RELATED_TO (Location - Location)
 WEIGHT_CO_OCCURRENCE = 1.2  # Mỗi user chung like tăng weight thêm 1.2
-WEIGHT_CATEGORY = 0.8       # Cùng category
+WEIGHT_CATEGORY = 0.8  # Cùng category
 
 # PageRank config
-MAX_ITERATIONS = 12   # Đủ cho đồ thị nhỏ
-DAMPING_FACTOR = 0.88 # Cân bằng global vs local
+MAX_ITERATIONS = 12  # Đủ cho đồ thị nhỏ
+DAMPING_FACTOR = 0.88  # Cân bằng global vs local
 
 
 def run_hybrid_algo():
@@ -82,7 +82,7 @@ def run_hybrid_algo():
         # BƯỚC 2: TẠO QUAN HỆ :INTERACTED VỚI TRỌNG SỐ TỔNG HỢP
         # ==================================================================
         print("📊 Đang tạo quan hệ :INTERACTED từ :LIKED và :REVIEWED...")
-        
+
         # Bước 2a: Tạo :INTERACTED cho mỗi cặp User-Location
         # Công thức: weight = (hasLiked ? 1 : 0) + (stars từ review, 0-5)
         # Tổng điểm tối đa: 6 (1 from LIKED + 5 from 5-star review)
@@ -114,11 +114,13 @@ def run_hybrid_algo():
                 
                 RETURN count(i) AS total_interactions
                 """,
-                {"weight_liked": WEIGHT_LIKED}
+                {"weight_liked": WEIGHT_LIKED},
             )
             record = result.single()
             if record:
-                print(f"   ✅ Đã tạo {record['total_interactions']} quan hệ :INTERACTED")
+                print(
+                    f"   ✅ Đã tạo {record['total_interactions']} quan hệ :INTERACTED"
+                )
         except Exception as e:
             print(f"❌ Lỗi tạo quan hệ :INTERACTED: {e}")
 
@@ -138,8 +140,12 @@ def run_hybrid_algo():
             )
             stat = stats.single()
             if stat:
-                print(f"   Min: {stat['min_weight']}, Max: {stat['max_weight']}, Avg: {stat['avg_weight']}")
-                print(f"   Tổng: {stat['total']} | Điểm tối đa (6/6): {stat['perfect_score']}")
+                print(
+                    f"   Min: {stat['min_weight']}, Max: {stat['max_weight']}, Avg: {stat['avg_weight']}"
+                )
+                print(
+                    f"   Tổng: {stat['total']} | Điểm tối đa (6/6): {stat['perfect_score']}"
+                )
         except Exception as e:
             print(f"⚠️ Không thể lấy thống kê: {e}")
 
@@ -184,7 +190,8 @@ def run_hybrid_algo():
         print("2️⃣ Tính Weighted PageRank phổ biến (dựa trên :INTERACTED weight)...")
         try:
             session.run(
-                "CALL gds.graph.drop($name, false) YIELD graphName", {"name": GRAPH_USER}
+                "CALL gds.graph.drop($name, false) YIELD graphName",
+                {"name": GRAPH_USER},
             )
         except Exception:
             pass  # Bỏ qua lỗi nếu graph không tồn tại
@@ -227,7 +234,9 @@ def run_hybrid_algo():
                     "damping": DAMPING_FACTOR,
                 },
             )
-            print("   ✅ Weighted PageRank hoàn tất (phản ánh cả lượt tương tác & đánh giá sao)")
+            print(
+                "   ✅ Weighted PageRank hoàn tất (phản ánh cả lượt tương tác & đánh giá sao)"
+            )
         except Exception as e:
             print(f"❌ Lỗi chạy Weighted PageRank user: {e}")
             driver.close()
@@ -287,6 +296,146 @@ def run_hybrid_algo():
             return
 
         # ==================================================================
+        # BƯỚC 5b: USER SIMILARITY (Jaccard Index)
+        # ==================================================================
+        print("4️⃣ Tính User Similarity (Jaccard Index)...")
+
+        # Xóa relationship SIMILAR_TO cũ
+        try:
+            session.run("MATCH ()-[r:SIMILAR_TO]->() DELETE r")
+        except Exception:
+            pass
+
+        # Tạo graph cho Node Similarity
+        GRAPH_SIMILARITY = "user_similarity_graph"
+        try:
+            session.run(
+                "CALL gds.graph.drop($name, false) YIELD graphName",
+                {"name": GRAPH_SIMILARITY},
+            )
+        except Exception:
+            pass
+
+        try:
+            # Project graph User-Location với relationship INTERACTED
+            session.run(
+                """
+                CALL gds.graph.project(
+                    $graphName,
+                    ['User', 'Location'],
+                    {
+                        INTERACTED: {
+                            orientation: 'NATURAL'
+                        }
+                    }
+                )
+                """,
+                {"graphName": GRAPH_SIMILARITY},
+            )
+
+            # Chạy Node Similarity (Jaccard) và ghi kết quả
+            result = session.run(
+                """
+                CALL gds.nodeSimilarity.write($graphName, {
+                    writeRelationshipType: 'SIMILAR_TO',
+                    writeProperty: 'score',
+                    topK: 10,
+                    similarityCutoff: 0.1
+                })
+                YIELD nodesCompared, relationshipsWritten, similarityDistribution
+                RETURN nodesCompared, relationshipsWritten, 
+                       similarityDistribution.mean AS avgSimilarity,
+                       similarityDistribution.max AS maxSimilarity
+                """,
+                {"graphName": GRAPH_SIMILARITY},
+            )
+
+            record = result.single()
+            if record:
+                print(f"   ✅ So sánh {record['nodesCompared']} users")
+                print(f"   ✅ Tạo {record['relationshipsWritten']} quan hệ SIMILAR_TO")
+                print(
+                    f"   📊 Similarity TB: {record['avgSimilarity']:.4f}, Max: {record['maxSimilarity']:.4f}"
+                )
+
+            # Drop graph sau khi sử dụng
+            session.run(
+                "CALL gds.graph.drop($name, false) YIELD graphName",
+                {"name": GRAPH_SIMILARITY},
+            )
+
+        except Exception as e:
+            print(f"⚠️ Lỗi tính User Similarity: {e}")
+            print("   (Có thể do chưa đủ dữ liệu hoặc GDS chưa cài)")
+
+        # ==================================================================
+        # BƯỚC 5c: LOCATION SIMILARITY (Jaccard)
+        # ==================================================================
+        print("5️⃣ Tính Location Similarity (Jaccard Index)...")
+
+        # Xóa relationship LOC_SIMILAR cũ
+        try:
+            session.run("MATCH ()-[r:LOC_SIMILAR]->() DELETE r")
+        except Exception:
+            pass
+
+        GRAPH_LOC_SIM = "loc_similarity_graph"
+        try:
+            session.run(
+                "CALL gds.graph.drop($name, false) YIELD graphName",
+                {"name": GRAPH_LOC_SIM},
+            )
+        except Exception:
+            pass
+
+        try:
+            # Project graph Location-User (reverse) để tính similarity
+            session.run(
+                """
+                CALL gds.graph.project(
+                    $graphName,
+                    ['Location', 'User'],
+                    {
+                        INTERACTED: {
+                            orientation: 'REVERSE'
+                        }
+                    }
+                )
+                """,
+                {"graphName": GRAPH_LOC_SIM},
+            )
+
+            # Chạy Node Similarity cho Locations
+            result = session.run(
+                """
+                CALL gds.nodeSimilarity.write($graphName, {
+                    writeRelationshipType: 'LOC_SIMILAR',
+                    writeProperty: 'score',
+                    topK: 5,
+                    similarityCutoff: 0.15
+                })
+                YIELD nodesCompared, relationshipsWritten, similarityDistribution
+                RETURN nodesCompared, relationshipsWritten,
+                       similarityDistribution.mean AS avgSimilarity
+                """,
+                {"graphName": GRAPH_LOC_SIM},
+            )
+
+            record = result.single()
+            if record:
+                print(f"   ✅ So sánh {record['nodesCompared']} địa điểm")
+                print(f"   ✅ Tạo {record['relationshipsWritten']} quan hệ LOC_SIMILAR")
+                print(f"   📊 Similarity TB: {record['avgSimilarity']:.4f}")
+
+            session.run(
+                "CALL gds.graph.drop($name, false) YIELD graphName",
+                {"name": GRAPH_LOC_SIM},
+            )
+
+        except Exception as e:
+            print(f"⚠️ Lỗi tính Location Similarity: {e}")
+
+        # ==================================================================
         # BƯỚC 6: NORMALIZE SCORE & TÍNH AVG RATING
         # ==================================================================
         print("📊 Normalize score, tính rating trung bình, và lưu timestamp...")
@@ -301,7 +450,7 @@ def run_hybrid_algo():
                     l.reviewCount = reviewCount
                 """
             )
-            
+
             # Normalize pagerankScore và pagerankConnect
             session.run(
                 """
@@ -321,7 +470,9 @@ def run_hybrid_algo():
         # ==================================================================
         # BƯỚC 7: IN KẾT QUẢ SO SÁNH
         # ==================================================================
-        print("\n✅ SO SÁNH KẾT QUẢ (Top 50) - Phản ánh cả Lượt tương tác & Chất lượng đánh giá:")
+        print(
+            "\n✅ SO SÁNH KẾT QUẢ (Top 50) - Phản ánh cả Lượt tương tác & Chất lượng đánh giá:"
+        )
         print(
             f"{'Tên địa điểm':<36} | {'Phổ biến':^12} | {'Kết nối':^12} | {'Avg Rating':^10} | {'Tổng điểm':^12} |"
         )
@@ -347,7 +498,9 @@ def run_hybrid_algo():
         print("-" * 98)
 
     driver.close()
-    print(f"\n🚀 Hoàn tất! Dữ liệu đã cập nhật với Interaction Weighting lúc {run_timestamp}")
+    print(
+        f"\n🚀 Hoàn tất! Dữ liệu đã cập nhật với Interaction Weighting lúc {run_timestamp}"
+    )
 
 
 if __name__ == "__main__":
