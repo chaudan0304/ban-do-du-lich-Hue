@@ -41,8 +41,10 @@ def get_locations():
            l.lat AS lat, l.lng AS lng,
            l.image AS image, 
            collect(cat.name)[0] AS category,
-           coalesce(l.pagerankNorm, 0) AS score
-    ORDER BY category, score DESC           
+           (coalesce(l.pagerankNorm, 0) * 0.6 + 
+            coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
+            (coalesce(l.avgRating, 0) / 5.0) * 0.1) AS score
+    ORDER BY score DESC           
     """
 
     try:
@@ -178,7 +180,9 @@ def recommend(user_name):
             RETURN l.name AS name, l.desc AS description, 
                    coalesce(avg_rating, l.rating, 0) AS rating, 
                    l.lat AS lat, l.lng AS lng, l.image as image, collect(cat.name)[0] as category,
-                   coalesce(l.pagerankNorm, 0) AS score,
+                   (coalesce(l.pagerankNorm, 0) * 0.6 + 
+                    coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
+                    (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) AS score,
                    review_count AS reviewCount,
                    (coalesce(l.pagerankNorm, 0) * 0.6 + 
                     coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
@@ -372,10 +376,13 @@ def get_similar_locations(location_name):
     query = """
     MATCH (current:Location {name: $name})
     
-    // Ưu tiên: Sử dụng Jaccard Similarity từ thuật toán
+    // Tìm các địa điểm tương tự qua quan hệ LOC_SIMILAR (được tạo bởi GDS Node Similarity)
+    OPTIONAL MATCH (current)-[sim:LOC_SIMILAR]-(similar:Location)
+    
+    // Lấy category của địa điểm tương tự
     OPTIONAL MATCH (similar)-[:HAS_CATEGORY]->(cat_node:Category)
     
-    WITH current, similar, collect(cat_node.name)[0] as category, sim.score AS similarity_score
+    WITH similar, sim, collect(cat_node.name)[0] as category
     WHERE similar IS NOT NULL
     
     RETURN similar.name AS name,
@@ -383,10 +390,12 @@ def get_similar_locations(location_name):
            similar.lat AS lat,
            similar.lng AS lng,
            similar.image AS image,
-           similar.rating AS rating,
+           coalesce(similar.avgRating, similar.rating, 0) AS rating,
            category,
-           coalesce(similar.pagerankNorm, 0) AS score,
-           coalesce(similarity_score, 0) AS similarity
+           (coalesce(similar.pagerankNorm, 0) * 0.6 + 
+            coalesce(similar.pagerankConnectNorm, 0) * 0.3 + 
+            (coalesce(similar.avgRating, 0) / 5.0) * 0.1) AS score,
+           coalesce(sim.score, 0) AS similarity
     ORDER BY similarity DESC, score DESC
     LIMIT 6
     """
