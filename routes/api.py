@@ -40,7 +40,7 @@ def get_locations():
            l.desc AS description,
            l.lat AS lat, l.lng AS lng,
            l.image AS image, 
-           cat.name AS category,
+           collect(cat.name)[0] AS category,
            coalesce(l.pagerankNorm, 0) AS score
     ORDER BY category, score DESC           
     """
@@ -126,18 +126,20 @@ def recommend(user_name):
          sum(CASE WHEN t = 'content' THEN s ELSE 0 END) AS score_content_raw,
          max(common) AS common_users
 
-    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat_node:Category)
     OPTIONAL MATCH ()-[all_reviews:REVIEWED]->(l)
-    WITH me, l, cat, score_collab_raw, score_content_raw, common_users,
+    WITH me, l, collect(cat_node.name)[0] as category, score_collab_raw, score_content_raw, common_users,
          avg(all_reviews.rating) AS avg_rating,
          count(all_reviews) AS review_count
 
-    WITH l, cat, common_users, avg_rating, review_count,
+    WITH l, category, common_users, avg_rating, review_count,
          score_collab_raw * 3.0 AS final_collab,
          score_content_raw * 1.0 AS final_content,
-         (coalesce(l.pagerankNorm, 0) + coalesce(l.pagerankConnectNorm, 0)) * 5.0 AS final_pagerank
+         (coalesce(l.pagerankNorm, 0) * 0.6 + 
+          coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
+          (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_pagerank
     
-    WITH l, cat, common_users, avg_rating, review_count,
+    WITH l, category, common_users, avg_rating, review_count,
          final_collab, final_content, final_pagerank,
          (final_collab + final_content + final_pagerank) AS final_score
 
@@ -147,7 +149,7 @@ def recommend(user_name):
            l.lat AS lat,      
            l.lng AS lng,
            l.image AS image, 
-           cat.name AS category,
+           category,
            coalesce(l.pagerankNorm, 0) AS score,
            review_count AS reviewCount,
            final_score,
@@ -175,12 +177,16 @@ def recommend(user_name):
             WITH l, cat, avg(r.rating) AS avg_rating, count(r) AS review_count
             RETURN l.name AS name, l.desc AS description, 
                    coalesce(avg_rating, l.rating, 0) AS rating, 
-                   l.lat AS lat, l.lng AS lng, l.image as image, cat.name as category,
+                   l.lat AS lat, l.lng AS lng, l.image as image, collect(cat.name)[0] as category,
                    coalesce(l.pagerankNorm, 0) AS score,
                    review_count AS reviewCount,
-                   (coalesce(l.pagerankNorm, 0) + coalesce(l.pagerankConnectNorm, 0)) * 5.0 AS final_score,
+                   (coalesce(l.pagerankNorm, 0) * 0.6 + 
+                    coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
+                    (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_score,
                    0 as common_users, 0 as score_personal, 0 as score_collab, 0 as score_content,
-                   (coalesce(l.pagerankNorm, 0) + coalesce(l.pagerankConnectNorm, 0)) * 5.0 AS score_pagerank
+                   (coalesce(l.pagerankNorm, 0) * 0.6 + 
+                    coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
+                    (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS score_pagerank
             ORDER BY final_score DESC
             LIMIT 12
             """
@@ -367,10 +373,9 @@ def get_similar_locations(location_name):
     MATCH (current:Location {name: $name})
     
     // Ưu tiên: Sử dụng Jaccard Similarity từ thuật toán
-    OPTIONAL MATCH (current)-[sim:LOC_SIMILAR]-(similar:Location)
-    OPTIONAL MATCH (similar)-[:HAS_CATEGORY]->(cat:Category)
+    OPTIONAL MATCH (similar)-[:HAS_CATEGORY]->(cat_node:Category)
     
-    WITH current, similar, cat, sim.score AS similarity_score
+    WITH current, similar, collect(cat_node.name)[0] as category, sim.score AS similarity_score
     WHERE similar IS NOT NULL
     
     RETURN similar.name AS name,
@@ -379,7 +384,7 @@ def get_similar_locations(location_name):
            similar.lng AS lng,
            similar.image AS image,
            similar.rating AS rating,
-           cat.name AS category,
+           category,
            coalesce(similar.pagerankNorm, 0) AS score,
            coalesce(similarity_score, 0) AS similarity
     ORDER BY similarity DESC, score DESC
@@ -394,13 +399,14 @@ def get_similar_locations(location_name):
             MATCH (current:Location {name: $name})-[:HAS_CATEGORY]->(cat:Category)
             MATCH (similar:Location)-[:HAS_CATEGORY]->(cat)
             WHERE similar.name <> $name
+            WITH similar, collect(cat.name)[0] as category
             RETURN similar.name AS name,
                    similar.desc AS description,
                    similar.lat AS lat,
                    similar.lng AS lng,
                    similar.image AS image,
                    similar.rating AS rating,
-                   cat.name AS category,
+                   category,
                    coalesce(similar.pagerankNorm, 0) AS score,
                    0 AS similarity
             ORDER BY score DESC

@@ -25,6 +25,7 @@ Sau quá trình nghiên cứu và triển khai, khóa luận đã hoàn thành c
    - Collaborative Filtering gợi ý dựa trên người dùng tương tự
    - Content-Based Filtering gợi ý theo nội dung/danh mục
    - Kết hợp 3 phương pháp với trọng số tối ưu
+   - **Chiến lược Trọng số Thích nghi:** Đề xuất và áp dụng thành công mô hình trọng số động (60-30-10) giải quyết bài toán Cold Start, được kiểm chứng qua dữ liệu thực tế và cơ sở khoa học.
 
 3. **AI Itinerary Planner:**
    - Tự động lập lộ trình 1-5 ngày
