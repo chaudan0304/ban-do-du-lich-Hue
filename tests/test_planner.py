@@ -36,6 +36,9 @@ try:
     print(f"Plan 1 Result: {len(plan1)} days")
     if len(plan1) > 0:
         print(f"Day 1 Activities: {len(plan1[0]['activities'])}")
+        for act in plan1[0]["activities"]:
+            loc = act["location"]
+            print(f"  - {loc['name']} ({loc.get('category', 'Unknown')})")
     else:
         print("❌ Test 1 Failed: No plan generated")
 
@@ -44,8 +47,11 @@ try:
     plan2 = generate_itinerary(TEST_USER, 2, ["Ẩm thực", "Di tích"])
     print(f"Plan 2 Result: {len(plan2)} days")
     if len(plan2) > 0:
-        print(f"Day 1 Activities: {len(plan2[0]['activities'])}")
-        print(f"Day 2 Activities: {len(plan2[1]['activities'])}")
+        for i, day in enumerate(plan2):
+            print(f"Day {i+1} Activities: {len(day['activities'])}")
+            for act in day["activities"]:
+                loc = act["location"]
+                print(f"  - {loc['name']} ({loc.get('category', 'Unknown')})")
     else:
         print("❌ Test 2 Failed: No plan generated")
 

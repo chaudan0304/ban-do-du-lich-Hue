@@ -530,13 +530,15 @@ def api_generate_itinerary():
 
 @bp.route("/api/planner/suggest-replacement", methods=["POST"])
 def api_suggest_replacement():
-    """Gợi ý địa điểm thay thế cho một activity trong lộ trình"""
+    """Gợi ý địa điểm thay thế: Chia làm 2 phần (Đã thích & AI gợi ý)"""
     data = request.json
-    exclude_names = data.get("exclude", [])  # Danh sách địa điểm đã dùng
+    exclude_names = data.get("exclude", [])
     activity_type = data.get("type", "visit")  # "visit" hoặc "food"
-    category = data.get("category", "")
 
-    # Xây dựng query
+    # Lấy username từ current_user (Flask-Login)
+    username = current_user.id if current_user.is_authenticated else None
+
+    # Keyword cho đồ ăn
     food_keywords = [
         "ẩm thực",
         "bún",
@@ -550,51 +552,70 @@ def api_suggest_replacement():
         "chợ",
     ]
 
+    # Xây dựng điều kiện lọc chung (Food vs Visit)
+    filter_condition = ""
     if activity_type == "food":
-        # Tìm địa điểm ăn uống
-        category_filter = " OR ".join(
-            [f"toLower(cat.name) CONTAINS '{kw}'" for kw in food_keywords]
-        )
-        query = f"""
-        MATCH (l:Location)
-        OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
-        WHERE NOT l.name IN $exclude
-        AND ({category_filter})
-        WITH l, cat, coalesce(l.pagerankNorm, 0) as score, rand() as r
-        // Lấy top 10 rồi chọn ngẫu nhiên (có trọng số)
-        ORDER BY (score * 0.3 + r * 0.7) DESC
-        LIMIT 1
-        RETURN l.name as name, cat.name as category, 
-               l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
-               score
-        """
+        clauses = [f"toLower(cat.name) CONTAINS '{kw}'" for kw in food_keywords]
+        filter_str = " OR ".join(clauses)
+        filter_condition = f"AND ({filter_str})"
     else:
-        # Tìm địa điểm tham quan (không phải ăn uống)
-        food_exclude = " AND ".join(
-            [f"NOT toLower(cat.name) CONTAINS '{kw}'" for kw in food_keywords]
-        )
-        query = f"""
-        MATCH (l:Location)
+        clauses = [f"NOT toLower(cat.name) CONTAINS '{kw}'" for kw in food_keywords]
+        filter_str = " AND ".join(clauses)
+        filter_condition = f"AND ({filter_str} OR cat IS NULL)"
+
+    liked_candidates = []
+
+    # 1. Tìm danh sách ĐÃ THÍCH (Liked)
+    if username:
+        liked_query = f"""
+        MATCH (u:User {{name: $username}})-[:LIKED]->(l:Location)
         OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
         WHERE NOT l.name IN $exclude
-        AND ({food_exclude} OR cat IS NULL)
-        WITH l, cat, coalesce(l.pagerankNorm, 0) as score, rand() as r
-        // Lấy ngẫu nhiên có trọng số (70% random + 30% score)
-        ORDER BY (score * 0.3 + r * 0.7) DESC
-        LIMIT 1
+        {filter_condition}
         RETURN l.name as name, cat.name as category, 
                l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
-               score
+               coalesce(l.pagerankNorm, 0) as score
+        LIMIT 10
         """
+        try:
+            liked_candidates = run_query(
+                liked_query, {"username": username, "exclude": exclude_names}
+            )
+        except Exception as e:
+            print(f"Liked Query Error: {e}")
+
+    # 2. Tìm danh sách AI SUGGESTIONS
+    # Loại bỏ những cái đã nằm trong list Liked (để tránh trùng lặp hiển thị)
+    exclude_total = exclude_names + (
+        [loc["name"] for loc in liked_candidates] if liked_candidates else []
+    )
+
+    ai_query = f"""
+    MATCH (l:Location)
+    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+    WHERE NOT l.name IN $exclude
+    {filter_condition}
+    WITH l, cat, coalesce(l.pagerankNorm, 0) as score, rand() as r
+    // Lấy top 15 thay thế (để client có thể 'Làm mới' danh sách)
+    ORDER BY (score * 0.7 + r * 0.3) DESC
+    LIMIT 15
+    RETURN l.name as name, cat.name as category, 
+           l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
+           score
+    """
 
     try:
-        result = run_query(query, {"exclude": exclude_names})
-        if result and len(result) > 0:
-            return jsonify({"success": True, "location": result[0]})
-        else:
-            return jsonify(
-                {"success": False, "error": "Không còn địa điểm phù hợp để thay thế."}
-            )
+        ai_candidates = run_query(ai_query, {"exclude": exclude_total})
+
+        # Luôn trả về success=True dù danh sách rỗng (để frontend xử lý empty state)
+        return jsonify(
+            {
+                "success": True,
+                "liked": liked_candidates if liked_candidates else [],
+                "ai": ai_candidates if ai_candidates else [],
+            }
+        )
+
     except Exception as e:
         print(f"Replacement Error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
