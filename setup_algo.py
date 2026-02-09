@@ -482,10 +482,12 @@ def run_hybrid_algo():
             """
             MATCH (l:Location)
             RETURN l.name AS name, 
-                   round(coalesce(l.pagerankScore, 0), 4) AS score1, 
-                   round(coalesce(l.pagerankConnect, 0), 4) AS score2,
+                   round(coalesce(l.pagerankNorm, 0), 4) AS score1, 
+                   round(coalesce(l.pagerankConnectNorm, 0), 4) AS score2,
                    round(coalesce(l.avgRating, 0), 1) AS avgRating,
-                   round(coalesce(l.pagerankScore, 0) + coalesce(l.pagerankConnect, 0), 4) AS total_score
+                   round((coalesce(l.pagerankNorm, 0) * 0.6 + 
+                          coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
+                          (coalesce(l.avgRating, 0) / 5.0) * 0.1) * 10.0, 4) AS total_score
             ORDER BY total_score DESC
             LIMIT 50
             """

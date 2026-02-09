@@ -153,8 +153,10 @@ ban-do-du-lich-Hue/
 │   └── 📄 main.py           # Main View Rendering
 ├── 📂 scripts/              # Các công cụ/tool chạy một lần
 │   ├── 📄 import_data.py    # ETL Dữ liệu vào Database
-│   └── 📄 generate_users.py # Tạo dữ liệu giả lập (Mocking data)
-├── 📂 static/               # Tài nguyên Frontend
+│   ├── 📄 generate_users.py # Tạo dữ liệu giả lập (Mocking data)
+│   ├── � analyze_weights.py # Phân tích dữ liệu Rating trong DB
+│   └── 📄 migrate_review_ids.py # Migration Review IDs
+├── �📂 static/               # Tài nguyên Frontend
 │   ├── 📂 css/              # Stylesheets (10 modules: style, auth, admin, profile...)
 │   ├── 📂 js/               # JavaScript Logic (map, planner, profile...)
 │   └── 📂 images/           # Assets hình ảnh
@@ -216,6 +218,14 @@ python tests/run_all_tests.py
 ---
 
 ## 📜 Nhật ký Cập nhật (Changelog)
+
+### v2.3 - Enhanced Planner UI & Code Cleanup (09/02/2026)
+
+- ✨ **Replacement Modal v2:** Chia thành 2 section riêng biệt: "Địa điểm đã thích" và "Gợi ý AI", có nút "Đổi đề xuất" để refresh gợi ý.
+- ⚠️ **Duplicate Warning:** Cảnh báo khi chọn địa điểm đã có trong lịch trình.
+- 🔀 **Mutual Exclusive Options:** Checkbox "Chỉ nơi đã thích" và các sở thích không thể chọn cùng lúc.
+- 🔧 **API Fix:** Sửa query lấy Liked locations (User.name thay vì User.username, relationship LIKED thay vì LIKES).
+- 🧹 **Code Cleanup:** Di chuyển `analyze_weights.py` vào `scripts/`, xóa file test tạm.
 
 ### v2.2 - Database Modularization (05/02/2026)
 

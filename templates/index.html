@@ -148,44 +148,88 @@
         <!-- TABS NAVIGATION -->
         <!-- TABS NAVIGATION -->
         <div class="sidebar-tabs">
-            <button class="sidebar-tab-btn" onclick="switchSidebarTab('foryou')"><i class="fas fa-sparkles"></i> Gợi ý AI</button>
-            <button class="sidebar-tab-btn active" onclick="switchSidebarTab('explore')"><i class="fas fa-compass"></i> Khám phá</button>
+          <button class="sidebar-tab-btn" onclick="switchSidebarTab('foryou')">
+            <i class="fas fa-sparkles"></i> Gợi ý AI
+          </button>
+          <button
+            class="sidebar-tab-btn active"
+            onclick="switchSidebarTab('explore')"
+          >
+            <i class="fas fa-compass"></i> Khám phá
+          </button>
         </div>
 
         <!-- TAB CONTENT: EXPLORE -->
-        <div id="tab-explore" class="tab-pane active" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
-            <div class="data-explorer" style="flex: 1; display: flex; flex-direction: column; min-height: 0; box-shadow: none; border: none; padding-top: 0;">
-                <div class="section-head" style="margin-top: 12px;">
-                    <h2>Địa điểm nổi bật</h2>
-                    <div class="mini-search-box">
-                    <input
-                        type="text"
-                        id="miniSearchInput"
-                        placeholder="Tìm nhanh..."
-                        onkeyup="handleLocalSearch()"
-                    />
-                    <i class="fas fa-search"></i>
-                    </div>
-                </div>
-
-                <div class="filter-chips">
-                    <button class="chip active" onclick="filterData('All', this)">Tất cả</button>
-                    <button class="chip" onclick="filterData('Di tích', this)">🏛️ Di tích</button>
-                    <button class="chip" onclick="filterData('Lăng tẩm', this)">🏯 Lăng tẩm</button>
-                    <button class="chip" onclick="filterData('Tâm linh', this)">🛕 Tâm linh</button>
-                    <button class="chip" onclick="filterData('Ẩm thực', this)">🍜 Ẩm thực</button>
-                    <button class="chip" onclick="filterData('Bãi biển', this)">🏖️ Bãi biển</button>
-                    <button class="chip" onclick="filterData('Tham quan', this)">🏞️ Tham quan</button>
-                    <button class="chip" onclick="filterData('Thiên nhiên', this)">🌳 Thiên nhiên</button>
-                    <button class="chip" onclick="filterData('Mua sắm', this)">🛍️ Mua sắm</button>
-                </div>
-
-                <div class="mini-list" id="locationList"></div>
+        <div
+          id="tab-explore"
+          class="tab-pane active"
+          style="display: flex; flex-direction: column; flex: 1; min-height: 0"
+        >
+          <div
+            class="data-explorer"
+            style="
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              min-height: 0;
+              box-shadow: none;
+              border: none;
+              padding-top: 0;
+            "
+          >
+            <div class="section-head" style="margin-top: 12px">
+              <h2>Địa điểm nổi bật</h2>
+              <div class="mini-search-box">
+                <input
+                  type="text"
+                  id="miniSearchInput"
+                  placeholder="Tìm nhanh..."
+                  onkeyup="handleLocalSearch()"
+                />
+                <i class="fas fa-search"></i>
+              </div>
             </div>
+
+            <div class="filter-chips">
+              <button class="chip active" onclick="filterData('All', this)">
+                Tất cả
+              </button>
+              <button class="chip" onclick="filterData('Di tích', this)">
+                🏛️ Di tích
+              </button>
+              <button class="chip" onclick="filterData('Lăng tẩm', this)">
+                🏯 Lăng tẩm
+              </button>
+              <button class="chip" onclick="filterData('Tâm linh', this)">
+                🛕 Tâm linh
+              </button>
+              <button class="chip" onclick="filterData('Ẩm thực', this)">
+                🍜 Ẩm thực
+              </button>
+              <button class="chip" onclick="filterData('Bãi biển', this)">
+                🏖️ Bãi biển
+              </button>
+              <button class="chip" onclick="filterData('Tham quan', this)">
+                🏞️ Tham quan
+              </button>
+              <button class="chip" onclick="filterData('Thiên nhiên', this)">
+                🌳 Thiên nhiên
+              </button>
+              <button class="chip" onclick="filterData('Mua sắm', this)">
+                🛍️ Mua sắm
+              </button>
+            </div>
+
+            <div class="mini-list" id="locationList"></div>
+          </div>
         </div>
 
         <!-- TAB CONTENT: FOR YOU (AI SUGGESTIONS) -->
-        <div id="tab-foryou" class="tab-pane" style="display: none; flex-direction: column; flex: 1; min-height: 0;">
+        <div
+          id="tab-foryou"
+          class="tab-pane"
+          style="display: none; flex-direction: column; flex: 1; min-height: 0"
+        >
           <div
             class="results-container"
             style="flex: 1; max-height: none; padding-top: 16px; border: none"
@@ -295,7 +339,7 @@
     <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/planner.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/planner.js') }}?v=999"></script>
     <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
     <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
     <script src="{{ url_for('static', filename='js/recommend.js') }}"></script>
@@ -312,6 +356,45 @@
 
     <!-- COMPONENT: PLANNER RESULT -->
     {% include 'components/modals/planner_result_modal.html' %}
+
+    <!-- MODAL CHỌN ĐỊA ĐIỂM THAY THẾ (NEW) -->
+    <div class="modal-overlay" id="replacementModal">
+      <div class="modal-content-fancy" style="max-width: 500px">
+        <div class="fancy-modal-header">
+          <h3><i class="fas fa-exchange-alt"></i> Chọn địa điểm thay thế</h3>
+          <span class="close-btn" onclick="closeReplacementModal()"
+            >&times;</span
+          >
+        </div>
+        <div class="planner-body">
+          <p style="color: #64748b; font-size: 14px; margin-bottom: 15px">
+            Dưới đây là các địa điểm phù hợp để thay thế. Hãy chọn một nơi bạn
+            thích:
+          </p>
+          <div
+            id="replacement-list"
+            class="itinerary-list"
+            style="
+              max-height: 400px;
+              overflow-y: auto;
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+            "
+          >
+            <!-- JS sẽ render danh sách vào đây -->
+            <div style="text-align: center; padding: 20px; color: #94a3b8">
+              Đang tìm kiếm...
+            </div>
+          </div>
+        </div>
+        <div class="fancy-modal-footer">
+          <button class="btn-cancel" onclick="closeReplacementModal()">
+            Hủy bỏ
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- COMPONENT: RESET PASSWORD -->
     {% include 'components/modals/reset_password_modal.html' %}

@@ -156,28 +156,30 @@ User đã thích địa điểm category "Tâm linh": Chùa Thiên Mụ
 - Kết hợp với RELATED_TO weight để tăng độ chính xác
 - Giúp user khám phá các địa điểm cùng chủ đề
 
-### 4.2.5. Kết quả Hybrid Recommendation
+### 4.2.5. Kết quả Hybrid Recommendation (Adaptive Weighting)
 
-**So sánh điểm số các thành phần (User: test_user):**
+**Kịch bản thử nghiệm:** User mới, chưa có lịch sử tương tác (Cold Start).
 
-| Địa điểm       | Collab (×3) | Content (×1) | PageRank (×5) | **Final Score** |
-| -------------- | ----------- | ------------ | ------------- | --------------- |
-| Lăng Tự Đức    | 12.5        | 2.1          | 3.17          | **17.77**       |
-| Lăng Minh Mạng | 8.2         | 3.4          | 2.39          | **13.99**       |
-| Điện Hòn Chén  | 6.8         | 4.8          | 1.85          | **13.45**       |
-| Núi Ngự Bình   | 4.5         | 1.2          | 1.99          | **7.69**        |
+**So sánh điểm số các thành phần:**
+
+| Địa điểm        | PageRank (60%) | Connect (30%) | Rating (10%) | **Final Score** |
+| --------------- | -------------- | ------------- | ------------ | --------------- |
+| Đại Nội         | 0.95 × 0.6     | 0.88 × 0.3    | 0.94 × 0.1   | **9.28**        |
+| Chùa Thiên Mụ   | 0.82 × 0.6     | 0.91 × 0.3    | 0.96 × 0.1   | **8.61**        |
+| Cầu Trường Tiền | 0.75 × 0.6     | 0.95 × 0.3    | 0.88 × 0.1   | **8.23**        |
+| Bún Bò Huế      | 0.65 × 0.6     | 0.45 × 0.3    | 0.98 × 0.1   | **6.23**        |
 
 **Công thức:**
 
 ```
-Final Score = (Collab × 3) + (Content × 1) + (PageRank × 5)
+Final Score = (PR_Norm × 6.0) + (Connect_Norm × 3.0) + (Rating_Norm × 1.0)
 ```
 
 **Nhận xét:**
 
-- Hybrid kết hợp được ưu điểm của cả 3 phương pháp
-- Collaborative có trọng số cao vì gợi ý từ user tương tự chất lượng
-- PageRank đảm bảo địa điểm phổ biến không bị bỏ sót
+- **Đại Nội & Thiên Mụ:** Điểm cao nhất nhờ cân bằng tốt giữa độ phổ biến và vị trí trung tâm.
+- **Cầu Trường Tiền:** Dù ít "hot" hơn một chút nhưng nằm ở vị trí huyết mạch (Connectivity 0.95) nên vẫn lọt Top 3.
+- **Bún Bò Huế:** Dù Rating rất cao (4.9 sao) nhưng do ít kết nối hơn các di tích lớn nên xếp hạng thấp hơn trong danh sách tổng quát. Điều này **phù hợp với chiến lược Cold Start**, ưu tiên các địa điểm dễ tiếp cận cho người mới.
 
 ---
 

@@ -383,15 +383,18 @@ async function showDetail(loc) {
                     
                     <div class="ai-highlight-box" style="background: #fff7ed; border-color: #ffedd5;">
                         <i class="fas fa-trophy" style="color:#f59e0b;"></i>
-                        <span style="color:#9a3412;">Đây là một trong những địa điểm được check-in nhiều nhất tại Huế!</span>
+                        <span style="color:#9a3412;">Địa điểm được đánh giá cao nhờ sự phổ biến, vị trí thuận tiện và chất lượng dịch vụ tốt!</span>
                     </div>
 
                     <div class="ai-progress-row">
                          <div class="progress-label">
-                            <span><i class="fas fa-fire" style="color:#f59e0b; width:15px;"></i> Độ phổ biến</span>
-                            <span>${pPopReal}%</span>
+                            <span><i class="fas fa-chart-line" style="color:#f59e0b; width:15px;"></i> Điểm chất lượng AI</span>
+                            <span>${pPopReal}</span>
                          </div>
-                         <div class="progress-track"><div class="progress-fill" style="width:${pPopReal}%; background:#f59e0b;"></div></div>
+                         <div class="progress-track"><div class="progress-fill" style="width:${pPopReal}%; background: linear-gradient(90deg, #f59e0b, #ea580c);"></div></div>
+                         <div style="font-size: 10px; color: #64748b; margin-top: 4px;">
+                            (60% Phổ biến • 30% Kết nối • 10% Rating)
+                         </div>
                     </div>
                     
                      <div style="margin-top:12px; font-size:12px; color:#64748b; font-style:italic; border-top:1px dashed #e2e8f0; padding-top:8px;">
@@ -438,10 +441,13 @@ async function showDetail(loc) {
 
                 <div class="ai-progress-row">
                      <div class="progress-label">
-                        <span><i class="fas fa-fire" style="color:#f59e0b; width:15px;"></i> Độ phổ biến</span>
+                        <span><i class="fas fa-chart-line" style="color:#f59e0b; width:15px;"></i> Điểm chất lượng AI</span>
                         <span>${pPop}%</span>
                      </div>
-                     <div class="progress-track"><div class="progress-fill" style="width:${pPop}%; background:#f59e0b;"></div></div>
+                     <div class="progress-track"><div class="progress-fill" style="width:${pPop}%; background: linear-gradient(90deg, #f59e0b, #ea580c);"></div></div>
+                     <div style="font-size: 10px; color: #64748b; margin-top: 4px;">
+                        (Kết hợp: Phổ biến • Kết nối • Rating)
+                     </div>
                 </div>
             </div>
             `;
