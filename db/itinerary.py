@@ -11,10 +11,21 @@ logger = logging.getLogger(__name__)
 
 def save_user_itinerary(username, itinerary_data):
     """Lưu lộ trình vào DB"""
-    data_json = json.dumps(itinerary_data, ensure_ascii=False)
-    # Lấy tiêu đề đại diện (VD: 3 ngày tham quan Huế)
-    days_count = len(itinerary_data)
-    title = f"Lịch trình {days_count} ngày tại Huế"
+    # itinerary_data có thể là: {"title": "...", "plan": [...]} hoặc trực tiếp là array
+    if isinstance(itinerary_data, dict):
+        plan = itinerary_data.get("plan", [])
+        title = itinerary_data.get("title", "")
+    else:
+        plan = itinerary_data
+        title = ""
+
+    # Tính số ngày từ plan array
+    days_count = len(plan) if isinstance(plan, list) else 0
+    if not title:
+        title = f"Lịch trình {days_count} ngày tại Huế"
+
+    # Chỉ lưu plan array (không lưu wrapper object)
+    data_json = json.dumps(plan, ensure_ascii=False)
 
     query = """
     MATCH (u:User {name: $username})

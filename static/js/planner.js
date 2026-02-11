@@ -633,19 +633,46 @@ async function deleteSavedItinerary(id) {
 // Xem lại lịch trình đã lưu
 async function viewSavedItinerary(id) {
     if (typeof closeUserProfile === 'function') closeUserProfile();
+    
     let plan = null;
+    
+    // 1. Thử tìm trong cache trước
     if (window.userActivityData && window.userActivityData.plans) {
         plan = window.userActivityData.plans.find(p => p.id == id);
     }
+    
+    // 2. Nếu không có trong cache, fetch từ API
+    if (!plan) {
+        try {
+            const res = await apiFetch("/api/itineraries");
+            if (res.success && res.data) {
+                window.userActivityData.plans = res.data;
+                plan = res.data.find(p => p.id == id);
+            }
+        } catch(e) {
+            console.error("Fetch itinerary error:", e);
+        }
+    }
+    
     if (plan && plan.data) {
         let pData = plan.data;
         if(typeof pData === 'string') {
             try { pData = JSON.parse(pData); } catch(e) { console.error("JSON parse error", e); }
         }
-        currentItineraryData = pData;
-        if (typeof renderItinerary === 'function') {
-             renderItinerary(pData);
-             openPlannerResultModal();
+        
+        // Handle data cũ dạng {title, plan} wrapper
+        if (pData && !Array.isArray(pData) && pData.plan) {
+            pData = pData.plan;
+        }
+        
+        if (Array.isArray(pData) && pData.length > 0) {
+            currentItineraryData = pData;
+            if (typeof renderItinerary === 'function') {
+                renderItinerary(pData);
+                openPlannerResultModal();
+            }
+        } else {
+            showNotification({type: 'error', message: 'Dữ liệu lộ trình không hợp lệ.'});
         }
     } else {
         showNotification({type: 'error', message: 'Không tìm thấy dữ liệu lộ trình này.'});
