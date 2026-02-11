@@ -102,7 +102,19 @@ Gợi ý các địa điểm có cùng thuộc tính (Category, Description) v�
 
 ### 3.3.4. Mô hình Gợi ý Lai & Chiến lược Trọng số (Adaptive Hybrid)
 
-Đây là đóng góp chính của đề tài. Hệ thống không chỉ cộng gộp các điểm số một cách máy móc mà sử dụng chiến lược **Trọng số Thích nghi** để giải quyết bài toán "Khởi động lạnh" (Cold Start).
+Đây là đóng góp chính của đề tài. Hệ thống sử dụng pipeline **4 bước** để đưa ra gợi ý đa dạng và cá nhân hóa:
+
+**Pipeline xử lý:**
+
+```
+Bước 1: Collaborative Filtering → collab_list (từ users tương đồng)
+Bước 2: Content-Based Filtering → content_list (từ category đã thích)
+Bước 2.5: PageRank Diversity Pool → pagerank_list (Top 20 phổ biến nhất)
+Bước 3: Gộp tất cả → all_candidates = collab + content + pagerank
+Bước 4: Tính Final Score → sắp xếp → Top 12
+```
+
+**Bước 2.5 (PageRank Diversity Pool)** là cải tiến quan trọng giải quyết vấn đề "filter bubble": khi user chỉ thích 1 loại category (VD: Mua sắm), Content-Based chỉ trả về cùng loại → kết quả bị hẹp. Bằng cách luôn bổ sung Top 20 địa điểm PageRank cao nhất, hệ thống đảm bảo sự đa dạng (VD: 3 kết quả → 15 kết quả đa chủ đề).
 
 **Công thức tổng quát:**
 $$ FinalScore = (P \times w_P) + (C \times w_C) + (R \times w_R) $$
@@ -115,7 +127,7 @@ Trong đó, với giai đoạn hiện tại (dữ liệu còn thưa), bộ trọ
 | **Độ Kết Nối (Connectivity - C)** | **0.3 (30%)**  | Tận dụng cấu trúc đồ thị. Các địa điểm "trung tâm" (Hubs) thuận tiện cho việc di chuyển luồng tuyến du lịch (_Page et al., 1999_).            |
 | **Chất Lượng (Rating - R)**       | **0.1 (10%)**  | Chỉ đóng vai trò bổ trợ. Do số lượng đánh giá còn ít, tránh việc một vài đánh giá 5 sao ngẫu nhiên làm lệch bảng xếp hạng (_Burke, 2002_).    |
 
-**Kết quả:** Hệ thống đưa ra danh sách gọi ý cân bằng giữa "Hot trend" (để thu hút) và "Thuận tiện" (để dễ đi), đồng thời vẫn đảm bảo chất lượng dịch vụ ở mức chấp nhận được.
+**Kết quả:** Hệ thống đưa ra danh sách gợi ý cân bằng giữa "Hot trend" (để thu hút), "Thuận tiện" (để dễ đi), và "Đa dạng" (tránh filter bubble), đồng thời vẫn đảm bảo chất lượng dịch vụ.
 
 ---
 
