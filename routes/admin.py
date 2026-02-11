@@ -19,7 +19,7 @@ def api_get_users():
 
     try:
         users = get_all_users()
-        logger.info(f"📋 Get all users result: {users}")
+        logger.debug(f"📋 Get all users result: {len(users or [])} users")
         # Lọc bỏ admin khỏi danh sách (optional)
         filtered_users = [u for u in (users or []) if u.get("name") != "admin"]
         return jsonify(filtered_users)
