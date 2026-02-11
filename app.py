@@ -16,6 +16,9 @@ from routes.main import bp as main_bp
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Ẩn log HTTP request từ werkzeug (quá nhiều noise)
+logging.getLogger("werkzeug").setLevel(logging.WARNING)
+
 # ======================================================
 # LOAD ENV & APP CONFIG
 # ======================================================
