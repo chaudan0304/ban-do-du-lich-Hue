@@ -217,14 +217,26 @@ def recommend(user_name):
             s_pagerank = loc.get("score_pagerank", 0) or 0
             common_users = loc.get("common_users", 0) or 0
 
-            # Calculate percentages
-            total = s_collab + s_content + s_pagerank  # Personal removed
-            if total > 0:
-                pct_collab = (s_collab / total) * 100
-                pct_content = (s_content / total) * 100
-                pct_pagerank = (s_pagerank / total) * 100
+            # === TÍNH % TƯƠNG ĐỒNG THỰC SỰ (thay vì % đóng góp) ===
+
+            # 1. Content-Based: "Bao nhiêu % sở thích của bạn trùng với địa điểm này?"
+            #    score_content > 0 nghĩa là location cùng category với ít nhất 1 nơi đã thích
+            #    Công thức: min(100, score_content / baseline * 100)
+            #    baseline = 1.0 (1 match với weight mặc định) → 1 match = 100%
+            if s_content > 0:
+                pct_content = min(100, (s_content / max(s_content, 1.0)) * 100)
             else:
-                pct_collab = pct_content = pct_pagerank = 0
+                pct_content = 0
+
+            # 2. Collaborative: "Bao nhiêu người giống bạn đã thích nơi này?"
+            #    Dùng common_users trên thang 5 (5+ users = 100%)
+            if common_users > 0:
+                pct_collab = min(100, (common_users / 5.0) * 100)
+            else:
+                pct_collab = 0
+
+            # 3. PageRank: Hiển thị điểm chất lượng AI thực tế (đã ở thang 0-10)
+            pct_pagerank = min(100, (s_pagerank / 10.0) * 100)
 
             reason = ""
             reason_icon = "🤖"
