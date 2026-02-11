@@ -574,9 +574,15 @@ def api_suggest_replacement():
     else:
         filter_condition = "AND (none(kw IN $food_keywords WHERE toLower(cat.name) CONTAINS kw) OR cat IS NULL)"
 
+    # Công thức Hybrid PageRank Score (thay vì chỉ pagerankNorm)
+    # Giống công thức trong tab "Gợi ý AI": Popularity(60%) + Connectivity(30%) + Rating(10%)
+    score_formula = """(coalesce(l.pagerankNorm, 0) * 0.6 +
+        coalesce(l.pagerankConnectNorm, 0) * 0.3 +
+        (coalesce(l.rating, 0) / 5.0) * 0.1)"""
+
     liked_candidates = []
 
-    # 1. Tìm danh sách ĐÃ THÍCH (Liked)
+    # 1. Tìm danh sách ĐÃ THÍCH (Liked) — Full Hybrid Score
     if username:
         liked_query = f"""
         MATCH (u:User {{name: $username}})-[:LIKED]->(l:Location)
@@ -585,7 +591,8 @@ def api_suggest_replacement():
         {filter_condition}
         RETURN l.name as name, cat.name as category, 
                l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
-               coalesce(l.pagerankNorm, 0) as score
+               {score_formula} as score
+        ORDER BY score DESC
         LIMIT 10
         """
         try:
@@ -600,30 +607,57 @@ def api_suggest_replacement():
         except Exception as e:
             logger.error(f"Liked Query Error: {e}")
 
-    # 2. Tìm danh sách AI SUGGESTIONS
+    # 2. Tìm danh sách AI SUGGESTIONS — Hybrid Score + Content-Based Bonus
     # Loại bỏ những cái đã nằm trong list Liked (để tránh trùng lặp hiển thị)
     exclude_total = exclude_names + (
         [loc["name"] for loc in liked_candidates] if liked_candidates else []
     )
 
-    ai_query = f"""
-    MATCH (l:Location)
-    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
-    WHERE NOT l.name IN $exclude
-    {filter_condition}
-    WITH l, cat, coalesce(l.pagerankNorm, 0) as score, rand() as r
-    // Lấy top 15 thay thế (để client có thể 'Làm mới' danh sách)
-    ORDER BY (score * 0.7 + r * 0.3) DESC
-    LIMIT 15
-    RETURN l.name as name, cat.name as category, 
-           l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
-           score
-    """
+    if username:
+        # Đã đăng nhập: Hybrid Score + Content-Based bonus
+        # Nếu category trùng với sở thích user → +0.2 điểm (cá nhân hóa)
+        ai_query = f"""
+        MATCH (l:Location)
+        OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+        WHERE NOT l.name IN $exclude
+        {filter_condition}
+        OPTIONAL MATCH (me:User {{name: $username}})-[:INTERACTED]->(:Location)-[:HAS_CATEGORY]->(user_cat:Category)
+        WHERE user_cat.name = cat.name
+        WITH l, cat, 
+             count(DISTINCT user_cat) as category_match,
+             rand() as r
+        WITH l, cat,
+             {score_formula} + CASE WHEN category_match > 0 THEN 0.2 ELSE 0 END as hybrid_score,
+             r
+        ORDER BY (hybrid_score * 0.7 + r * 0.3) DESC
+        LIMIT 15
+        RETURN l.name as name, cat.name as category, 
+               l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
+               hybrid_score as score
+        """
+        ai_params = {
+            "username": username,
+            "exclude": exclude_total,
+            "food_keywords": food_keywords,
+        }
+    else:
+        # Chưa đăng nhập: Hybrid PageRank Score only
+        ai_query = f"""
+        MATCH (l:Location)
+        OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+        WHERE NOT l.name IN $exclude
+        {filter_condition}
+        WITH l, cat, {score_formula} as score, rand() as r
+        ORDER BY (score * 0.7 + r * 0.3) DESC
+        LIMIT 15
+        RETURN l.name as name, cat.name as category, 
+               l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
+               score
+        """
+        ai_params = {"exclude": exclude_total, "food_keywords": food_keywords}
 
     try:
-        ai_candidates = run_query(
-            ai_query, {"exclude": exclude_total, "food_keywords": food_keywords}
-        )
+        ai_candidates = run_query(ai_query, ai_params)
 
         # Luôn trả về success=True dù danh sách rỗng (để frontend xử lý empty state)
         return jsonify(
