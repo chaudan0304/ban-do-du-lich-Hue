@@ -70,13 +70,16 @@ def add_review(
     comment,
     sentiment="Neutral",
     review_id=None,
-    topics=[],
+    topics=None,
 ):
     """
     Thêm hoặc cập nhật đánh giá của user.
     Nếu có review_id -> Update.
     Nếu không -> Create New (cho phép nhiều review).
     """
+    if topics is None:
+        topics = []
+
     # Logic: Only auto-assign if rating is not provided (0 or None)
     if not rating or rating == 0:
         if sentiment == "Positive":

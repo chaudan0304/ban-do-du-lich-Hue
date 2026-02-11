@@ -2,8 +2,11 @@
 db/sync.py - Đồng bộ dữ liệu giữa Neo4j và Excel
 """
 
+import logging
 import pandas as pd
 from .connection import run_query
+
+logger = logging.getLogger(__name__)
 
 
 def sync_locations_to_excel(excel_path="data/data.xlsx"):
@@ -25,7 +28,7 @@ def sync_locations_to_excel(excel_path="data/data.xlsx"):
         locations = run_query(query)
 
         if not locations:
-            print("⚠️ Không có dữ liệu locations để đồng bộ")
+            logger.warning("Không có dữ liệu locations để đồng bộ")
             return False
 
         # 2. Đọc các sheet hiện có (Users, Likes)
@@ -36,7 +39,7 @@ def sync_locations_to_excel(excel_path="data/data.xlsx"):
                 if sheet != "Locations":
                     existing_sheets[sheet] = pd.read_excel(excel_path, sheet_name=sheet)
         except FileNotFoundError:
-            print(f"📝 File {excel_path} chưa tồn tại, sẽ tạo mới")
+            logger.info(f"File {excel_path} chưa tồn tại, sẽ tạo mới")
 
         # 3. Tạo DataFrame từ locations
         df_locations = pd.DataFrame(locations)
@@ -50,9 +53,9 @@ def sync_locations_to_excel(excel_path="data/data.xlsx"):
             for sheet_name, df in existing_sheets.items():
                 df.to_excel(writer, sheet_name=sheet_name, index=False)
 
-        print(f"✅ Đã đồng bộ {len(locations)} địa điểm vào {excel_path}")
+        logger.info(f"Đã đồng bộ {len(locations)} địa điểm vào {excel_path}")
         return True
 
     except Exception as e:
-        print(f"❌ Lỗi đồng bộ Excel: {e}")
+        logger.error(f"Lỗi đồng bộ Excel: {e}")
         return False

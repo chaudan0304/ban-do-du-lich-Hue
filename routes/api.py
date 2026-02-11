@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
+import logging
 from db import (
     run_query,
     toggle_like_location,
@@ -15,6 +16,7 @@ from db import (
 )
 from utils import analyze_sentiment, classify_comment_topic
 
+logger = logging.getLogger(__name__)
 bp = Blueprint("api", __name__)
 
 
@@ -22,7 +24,7 @@ bp = Blueprint("api", __name__)
 @bp.route("/api/locations", methods=["GET"])
 def get_locations():
     category_filter = request.args.get("category")
-    print(f"DEBUG: Filtering locations by category: '{category_filter}'")
+    logger.debug(f"Filtering locations by category: '{category_filter}'")
 
     query = """
     MATCH (l:Location)
@@ -285,7 +287,7 @@ def recommend(user_name):
 
         return jsonify(processed_results)
     except Exception as e:
-        print(f"❌ Lỗi Recommend: {e}")
+        logger.error(f"Lỗi Recommend: {e}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -425,7 +427,7 @@ def get_similar_locations(location_name):
 
         return jsonify(results if results else [])
     except Exception as e:
-        print(f"❌ Lỗi get_similar_locations: {e}")
+        logger.error(f"Lỗi get_similar_locations: {e}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -461,7 +463,7 @@ def get_similar_users(username):
             }
         )
     except Exception as e:
-        print(f"❌ Lỗi get_similar_users: {e}")
+        logger.error(f"Lỗi get_similar_users: {e}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -518,13 +520,13 @@ def api_generate_itinerary():
         return jsonify({"success": True, "plan": plan})
     except ValueError as e:
         # Lỗi validation (thiếu likes, etc.)
-        print(f"Planner Validation Error: {e}")
+        logger.warning(f"Planner Validation Error: {e}")
         return (
             jsonify({"success": False, "error": str(e), "error_type": "validation"}),
             400,
         )
     except Exception as e:
-        print(f"Planner Error: {e}")
+        logger.error(f"Planner Error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -552,16 +554,13 @@ def api_suggest_replacement():
         "chợ",
     ]
 
-    # Xây dựng điều kiện lọc chung (Food vs Visit)
-    filter_condition = ""
+    # Xây dựng điều kiện lọc chung (Food vs Visit) — Parameterized Query
     if activity_type == "food":
-        clauses = [f"toLower(cat.name) CONTAINS '{kw}'" for kw in food_keywords]
-        filter_str = " OR ".join(clauses)
-        filter_condition = f"AND ({filter_str})"
+        filter_condition = (
+            "AND any(kw IN $food_keywords WHERE toLower(cat.name) CONTAINS kw)"
+        )
     else:
-        clauses = [f"NOT toLower(cat.name) CONTAINS '{kw}'" for kw in food_keywords]
-        filter_str = " AND ".join(clauses)
-        filter_condition = f"AND ({filter_str} OR cat IS NULL)"
+        filter_condition = "AND (none(kw IN $food_keywords WHERE toLower(cat.name) CONTAINS kw) OR cat IS NULL)"
 
     liked_candidates = []
 
@@ -579,10 +578,15 @@ def api_suggest_replacement():
         """
         try:
             liked_candidates = run_query(
-                liked_query, {"username": username, "exclude": exclude_names}
+                liked_query,
+                {
+                    "username": username,
+                    "exclude": exclude_names,
+                    "food_keywords": food_keywords,
+                },
             )
         except Exception as e:
-            print(f"Liked Query Error: {e}")
+            logger.error(f"Liked Query Error: {e}")
 
     # 2. Tìm danh sách AI SUGGESTIONS
     # Loại bỏ những cái đã nằm trong list Liked (để tránh trùng lặp hiển thị)
@@ -605,7 +609,9 @@ def api_suggest_replacement():
     """
 
     try:
-        ai_candidates = run_query(ai_query, {"exclude": exclude_total})
+        ai_candidates = run_query(
+            ai_query, {"exclude": exclude_total, "food_keywords": food_keywords}
+        )
 
         # Luôn trả về success=True dù danh sách rỗng (để frontend xử lý empty state)
         return jsonify(
@@ -617,7 +623,7 @@ def api_suggest_replacement():
         )
 
     except Exception as e:
-        print(f"Replacement Error: {e}")
+        logger.error(f"Replacement Error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -630,7 +636,7 @@ def api_user_activity():
         reviews = get_user_reviews(username)
         return jsonify({"success": True, "likes": likes, "reviews": reviews})
     except Exception as e:
-        print(f"Error fetching user activity: {e}")
+        logger.error(f"Error fetching user activity: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 

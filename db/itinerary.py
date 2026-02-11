@@ -3,7 +3,10 @@ db/itinerary.py - Quản lý lộ trình đã lưu của người dùng
 """
 
 import json
+import logging
 from .connection import run_query
+
+logger = logging.getLogger(__name__)
 
 
 def save_user_itinerary(username, itinerary_data):
@@ -37,7 +40,7 @@ def save_user_itinerary(username, itinerary_data):
         )
         return True, "Lưu thành công!"
     except Exception as e:
-        print(f"Error saving itinerary: {e}")
+        logger.error(f"Error saving itinerary: {e}")
         return False, str(e)
 
 
@@ -53,7 +56,7 @@ def get_user_itineraries(username):
     for r in results:
         try:
             r["data"] = json.loads(r["data"])
-        except:
+        except Exception:
             r["data"] = []
     return results
 

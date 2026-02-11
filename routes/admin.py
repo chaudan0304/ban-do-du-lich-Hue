@@ -210,7 +210,6 @@ def update_location():
 
 
 # --- API XÓA ĐỊA ĐIỂM (DELETE) ---
-# --- API XÓA ĐỊA ĐIỂM (DELETE) ---
 @bp.route("/api/admin/location/delete/<name>", methods=["DELETE"])
 @login_required
 def delete_location(name):

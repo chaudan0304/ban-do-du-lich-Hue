@@ -78,8 +78,8 @@ def test_update_user_info():
     new_fullname = "Test User Fullname"
     new_email = "test@example.com"
 
-    success = update_user_info(TEST_USER, new_fullname, new_email)
-    assert success, "Update should succeed"
+    success, msg = update_user_info(TEST_USER, new_fullname, new_email)
+    assert success, f"Update should succeed: {msg}"
 
     # Verify update
     info = get_user_info(TEST_USER)
