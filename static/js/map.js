@@ -219,7 +219,7 @@ function renderLocations(data, autoFit = true) {
         <div class="mini-content">
             <div class="mini-name">${loc.name}</div>
             <div class="mini-score">
-                <i class="fas fa-fire"></i> Hot: <span class="score-val">${displayScore}</span>
+                <i class="fas fa-fire"></i> Hot: <span class="score-val">${displayScore}</span><span style="color:#94a3b8; font-weight:400;">/100</span>
             </div>
         </div>
         `;
@@ -350,7 +350,7 @@ async function showDetail(loc) {
         <!-- 3. Title & Meta -->
         <h1 class="detail-title-large">${loc.name}</h1>
         <div class="detail-tags-row">
-            <span class="tag-pill tag-green"><i class="fas fa-fire"></i> ${displayScore}</span>
+            <span class="tag-pill tag-green"><i class="fas fa-fire"></i> ${displayScore}<span style="font-weight:400; opacity:0.6;">/100</span></span>
             <span class="tag-pill tag-gray"><i class="fas fa-tag"></i> ${loc.category}</span>
         </div>
 
