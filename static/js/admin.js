@@ -309,6 +309,31 @@ async function viewUserDetails(username) {
               `).join("") + `</div>`
          }
       </div>
+
+      <div style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase;">
+        <i class="fas fa-comment-dots"></i> Bình luận & Đánh giá
+      </div>
+      <div style="margin-bottom: 10px;">
+         ${
+            (!profile.reviews || profile.reviews.length === 0) 
+            ? `<div style="text-align:center; padding:15px; color:#94a3b8; font-size:12px; background: #f8fafc; border:1px dashed #e2e8f0; border-radius:8px;">Chưa có bình luận nào</div>`
+            : profile.reviews.map(r => {
+                const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
+                const reviewDate = r.time ? new Date(r.time).toLocaleDateString('vi-VN') : '';
+                return `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <div style="font-weight: 600; font-size: 13px; color: var(--text-main);">
+                            <i class="fas fa-map-marker-alt" style="color: var(--primary); margin-right: 4px;"></i>${r.location}
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-light);">${reviewDate}</div>
+                    </div>
+                    <div style="color: #f59e0b; font-size: 13px; letter-spacing: 2px; margin-bottom: 4px;">${stars}</div>
+                    ${r.comment ? `<div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; background: white; padding: 8px 10px; border-radius: 6px; border: 1px solid #f1f5f9;">${r.comment}</div>` : ''}
+                </div>`;
+              }).join("")
+         }
+      </div>
     `;
     list.innerHTML = html;
   } catch (err) {

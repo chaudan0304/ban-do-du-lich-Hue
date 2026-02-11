@@ -86,7 +86,8 @@ def api_get_user_profile(username):
     # 3. Get Liked Locations
     liked_query = """
     MATCH (u:User {name: $name})-[r:LIKED]->(l:Location)
-    RETURN l.name AS name, l.image AS image, l.category AS category, l.lat AS lat, l.lng AS lng
+    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+    RETURN l.name AS name, l.image AS image, cat.name AS category, l.lat AS lat, l.lng AS lng
     ORDER BY r.timestamp DESC
     """
     liked_locs = run_query(liked_query, {"name": username})

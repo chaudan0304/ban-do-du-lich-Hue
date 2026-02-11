@@ -28,7 +28,6 @@ function openPlannerInputModal() {
                         p.parentElement.style.opacity = "0.5";
                         p.parentElement.style.pointerEvents = "none"; // Disable click
                     });
-                    showNotification({type:'info', message:'AI sẽ chỉ sắp xếp từ danh sách Yêu thích của bạn ❤️'});
                 } else {
                     // Enable lại
                     prefs.forEach(p => {

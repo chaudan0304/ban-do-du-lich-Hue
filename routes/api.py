@@ -117,8 +117,20 @@ def recommend(user_name):
     WITH me, collab_list,
          collect({loc: l_content, score: score_content, type: 'content'}) AS content_list
 
-    // BƯỚC 3: GỘP CANDIDATES VÀ TÍNH ĐIỂM CUỐI CÙNG
-    WITH me, collab_list + content_list AS all_candidates
+    // BƯỚC 2.5: PAGERANK DIVERSITY POOL (Đa dạng hóa kết quả)
+    // Luôn thêm top 20 địa điểm nổi tiếng nhất vào pool ứng viên
+    // → Tránh kẹt trong 1 category khi Content-Based/Collab quá hẹp
+    WITH me, collab_list, content_list
+    MATCH (l_global:Location)
+    WHERE NOT (me)-[:INTERACTED]->(l_global) AND NOT (me)-[:LIKED]->(l_global)
+    WITH me, collab_list, content_list, l_global
+    ORDER BY coalesce(l_global.pagerankNorm, 0) DESC
+    LIMIT 20
+    WITH me, collab_list, content_list,
+         collect({loc: l_global, score: 0, type: 'pagerank', common_users: 0, similarity: 0}) AS pagerank_list
+
+    // BƯỚC 3: GỘP TẤT CẢ CANDIDATES VÀ TÍNH ĐIỂM CUỐI CÙNG
+    WITH me, collab_list + content_list + pagerank_list AS all_candidates
     UNWIND all_candidates AS c
     WITH me, c.loc AS l, c.score AS s, c.type AS t, 
          CASE WHEN c.common_users IS NOT NULL THEN c.common_users ELSE 0 END AS common
