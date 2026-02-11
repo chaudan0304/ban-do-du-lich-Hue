@@ -394,22 +394,26 @@ def api_delete_review():
 @bp.route("/api/similar/<location_name>", methods=["GET"])
 def get_similar_locations(location_name):
     """
-    Tìm địa điểm tương tự sử dụng:
-    1. LOC_SIMILAR (Jaccard Similarity) nếu có
-    2. Fallback: cùng Category
+    Tìm địa điểm tương tự CÙNG DANH MỤC, sử dụng:
+    1. LOC_SIMILAR (Jaccard Similarity) nếu có — lọc cùng category
+    2. Fallback: cùng Category, sắp xếp theo PageRank
     """
-    # Query ưu tiên LOC_SIMILAR (được tính từ setup_algo.py)
+    # Query ưu tiên LOC_SIMILAR + filter cùng category
     query = """
     MATCH (current:Location {name: $name})
+    OPTIONAL MATCH (current)-[:HAS_CATEGORY]->(current_cat:Category)
+    WITH current, collect(current_cat.name) as current_categories
     
-    // Tìm các địa điểm tương tự qua quan hệ LOC_SIMILAR (được tạo bởi GDS Node Similarity)
+    // Tìm các địa điểm tương tự qua quan hệ LOC_SIMILAR
     OPTIONAL MATCH (current)-[sim:LOC_SIMILAR]-(similar:Location)
     
     // Lấy category của địa điểm tương tự
     OPTIONAL MATCH (similar)-[:HAS_CATEGORY]->(cat_node:Category)
     
-    WITH similar, sim, collect(cat_node.name)[0] as category
+    WITH similar, sim, collect(cat_node.name)[0] as category, current_categories
     WHERE similar IS NOT NULL
+    // CHỈ lấy địa điểm cùng danh mục
+    AND category IN current_categories
     
     RETURN similar.name AS name,
            similar.desc AS description,
@@ -428,7 +432,7 @@ def get_similar_locations(location_name):
     try:
         results = run_query(query, {"name": location_name})
 
-        # Fallback: Nếu không có LOC_SIMILAR, dùng Category
+        # Fallback: Nếu không có LOC_SIMILAR cùng category, tìm theo Category
         if not results:
             fallback_query = """
             MATCH (current:Location {name: $name})-[:HAS_CATEGORY]->(cat:Category)
@@ -442,7 +446,9 @@ def get_similar_locations(location_name):
                    similar.image AS image,
                    similar.rating AS rating,
                    category,
-                   coalesce(similar.pagerankNorm, 0) AS score,
+                   (coalesce(similar.pagerankNorm, 0) * 0.6 + 
+                    coalesce(similar.pagerankConnectNorm, 0) * 0.3 + 
+                    (coalesce(similar.rating, 0) / 5.0) * 0.1) AS score,
                    0 AS similarity
             ORDER BY score DESC
             LIMIT 6
