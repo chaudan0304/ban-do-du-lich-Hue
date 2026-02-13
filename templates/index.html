@@ -130,17 +130,19 @@
           </div>
         </div>
 
-        <div class="search-box" id="main-search-box">
-          <div class="input-group" id="guest-search-box">
-            <input
-              type="text"
-              id="usernameInput"
-              placeholder="Nhập tên User để phân tích..."
-            />
-            <button class="btn-submit" onclick="analyzeUser(false)">
-              <i class="fas fa-search"></i>
-            </button>
+        <div class="guest-cta-banner" id="guest-cta-banner" onclick="openAuthModal()">
+          <div class="cta-content">
+            <div class="cta-icon">
+              <i class="fas fa-wand-magic-sparkles"></i>
+            </div>
+            <div class="cta-text">
+              <p class="cta-title">Đăng nhập để nhận gợi ý AI</p>
+              <p class="cta-desc">
+                Gợi ý cá nhân hóa dựa trên sở thích của bạn
+              </p>
+            </div>
           </div>
+          <i class="fas fa-chevron-right cta-arrow"></i>
         </div>
 
         <div id="logged-view" style="display: none; margin: 0 24px">
@@ -257,9 +259,9 @@
                   src="https://cdn-icons-png.flaticon.com/512/1086/1086933.png"
                   alt="AI"
                 />
-                <h3>Sẵn sàng phân tích</h3>
+                <h3>Đang tải gợi ý...</h3>
                 <p>
-                  Hệ thống sử dụng <b>PageRank</b> &
+                  Hệ thống sử dụng <b>AI</b> &
                   <b>Collaborative Filtering</b>.
                 </p>
               </div>
@@ -297,17 +299,14 @@
           </div>
         </div>
         <div class="map-legend">
-          <div
-            class="legend-item"
-            title="PageRank: đo độ phổ biến toàn cục của địa điểm trên đồ thị (càng nhiều người ghé càng cao)"
-          >
-            <span class="dot dot-pr"></span> Top PageRank (Nổi tiếng toàn Huế)
+          <div class="legend-item" title="Địa điểm nổi bật nhất tại Huế">
+            <span class="dot dot-top1"></span> Top 1 Nổi bật
           </div>
-          <div
-            class="legend-item"
-            title="Collaborative Filtering: gợi ý dựa trên sự tương đồng sở thích giữa các người dùng"
-          >
-            <span class="dot dot-collab"></span> Gợi ý cá nhân hóa (AI)
+          <div class="legend-item" title="Top 5 địa điểm nổi bật nhất">
+            <span class="dot dot-top5"></span> Top 5 Nổi bật
+          </div>
+          <div class="legend-item" title="Top 10 địa điểm nổi bật nhất">
+            <span class="dot dot-top10"></span> Top 10 Nổi bật
           </div>
         </div>
       </main>

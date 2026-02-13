@@ -143,11 +143,14 @@ def add_review(
             i.created_at = datetime()
         """
 
-    # Sau đó tính lại rating trung bình
+    # Sau đó tính lại rating trung bình (đồng bộ cả l.rating và l.avgRating)
     recalc_query = """
-    MATCH (l:Location {name: $l_name})<-[r:REVIEWED]-(:User)
+    MATCH (l:Location {name: $l_name})
+    OPTIONAL MATCH (l)<-[r:REVIEWED]-(:User)
     WITH l, avg(r.rating) AS avgRating, count(r) AS totalReviews
-    SET l.rating = avgRating, l.reviewCount = totalReviews
+    SET l.rating = coalesce(avgRating, 0), 
+        l.avgRating = coalesce(avgRating, 0),
+        l.reviewCount = totalReviews
     RETURN avgRating, totalReviews
     """
 
@@ -224,12 +227,13 @@ def delete_review(username, location_name, review_id=None):
         )
         """
 
-    # Tính lại rating
+    # Tính lại rating (đồng bộ cả l.rating và l.avgRating)
     recalc_query = """
     MATCH (l:Location {name: $l_name})
     OPTIONAL MATCH (l)<-[r:REVIEWED]-(:User)
     WITH l, avg(r.rating) AS avgRating, count(r) AS totalReviews
-    SET l.rating = CASE WHEN totalReviews > 0 THEN avgRating ELSE 0 END, 
+    SET l.rating = CASE WHEN totalReviews > 0 THEN avgRating ELSE 0 END,
+        l.avgRating = CASE WHEN totalReviews > 0 THEN avgRating ELSE 0 END,
         l.reviewCount = totalReviews
     RETURN avgRating, totalReviews
     """

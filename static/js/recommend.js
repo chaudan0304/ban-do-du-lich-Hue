@@ -97,6 +97,67 @@ function getRecommendations(user) {
 }
 
 /**
+ * Load gợi ý mặc định cho khách chưa đăng nhập
+ * Hiển thị Top 12 địa điểm phổ biến nhất (PageRank) 
+ */
+function loadGuestRecommendations() {
+    const recArea = document.getElementById("recommendation-area");
+    if (!recArea) return;
+
+    // Loading state
+    recArea.innerHTML = `<div style="text-align:center; padding:40px; color:#6b7280;"><i class="fas fa-circle-notch fa-spin fa-2x"></i></div>`;
+
+    apiFetch("/api/locations").then((data) => {
+        recArea.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            recArea.innerHTML = `<div class="empty-state">Chưa có dữ liệu địa điểm</div>`;
+            return;
+        }
+
+        // Sắp xếp theo score (PageRank) giảm dần, lấy Top 12
+        const topLocations = data
+            .sort((a, b) => (b.score || 0) - (a.score || 0))
+            .slice(0, 12);
+
+        topLocations.forEach((loc, index) => {
+            const rank = index + 1;
+            
+            // Xác định badge theo rank
+            let badgeHTML = '';
+            if (rank === 1) {
+                badgeHTML = `<div class="algo-badge badge-top1">🥇 Top 1 Nổi bật</div>`;
+            } else if (rank <= 5) {
+                badgeHTML = `<div class="algo-badge badge-top5">🔥 Top ${rank} Nổi bật</div>`;
+            } else if (rank <= 10) {
+                badgeHTML = `<div class="algo-badge badge-top10">⭐ Top ${rank} Nổi bật</div>`;
+            } else {
+                badgeHTML = `<div class="algo-badge badge-pr">📍 Địa điểm nổi bật</div>`;
+            }
+
+            const card = document.createElement("div");
+            card.className = "ai-card";
+            card.innerHTML = `
+                <div class="card-thumb">
+                    <img src="${loc.image}" onerror="this.src='/static/images/no-image.png'">
+                </div>
+                <div class="card-content">
+                    <div class="card-title">${loc.name}</div>
+                    <div class="card-desc">${loc.description || "..."}</div>
+                    ${badgeHTML}
+                </div>`;
+
+            card.onclick = () => {
+                if (typeof showDetailWithAI === 'function') showDetailWithAI(loc);
+                else if (typeof showDetail === 'function') showDetail(loc);
+            };
+
+            recArea.appendChild(card);
+        });
+    });
+}
+
+/**
  * Tải và hiển thị các địa điểm tương tự
  * @param {string} locationName - Tên địa điểm cần tìm tương tự
  */

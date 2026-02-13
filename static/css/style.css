@@ -383,6 +383,10 @@ body {
 .badge-pr { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
 .badge-collab { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
 .badge-content { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-top1 { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border: 1px solid #fbbf24; }
+.badge-top5 { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.badge-top10 { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.badge-pagerank { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
 
 /* Compact Empty State */
 .empty-state {

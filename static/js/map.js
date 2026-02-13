@@ -149,12 +149,17 @@ function getDynamicIcon(loc) {
         }
     }
 
-    // Luôn dùng class 'custom-pin' cơ bản, không biến đổi màu sắc theo PR/AI
+    // Phân biệt 3 mức Top PageRank
+    let pinClass = 'custom-pin';
+    if (loc.topRank === 1)       pinClass = 'custom-pin pin-top1';  // Vàng gold
+    else if (loc.topRank <= 5)   pinClass = 'custom-pin pin-top5';  // Đỏ
+    else if (loc.topRank <= 10)  pinClass = 'custom-pin pin-top10'; // Cam
+
     return L.divIcon({
       className: "custom-div-icon",
-      html: `<div class='custom-pin'>${symbol}</div>`,
-      iconSize: [30, 42],      // Kích thước cũ
-      iconAnchor: [15, 42],    // Căn chỉnh lại anchor cho chuẩn với size 30
+      html: `<div class='${pinClass}'><span>${symbol}</span></div>`,
+      iconSize: [30, 42],
+      iconAnchor: [15, 42],
       popupAnchor: [0, -40]
     });
 }
@@ -206,6 +211,21 @@ function renderLocations(data, autoFit = true) {
     return;
   }
 
+  // Xác định Top 1/5/10 PageRank Score từ toàn bộ cache
+  const allData = cachedAllLocations || data;
+  const sortedByScore = [...allData].sort((a, b) => (b.score || 0) - (a.score || 0));
+  
+  // Tạo map: tên location → thứ hạng (1-based)
+  const rankMap = {};
+  sortedByScore.forEach((loc, index) => {
+    rankMap[loc.name] = index + 1;
+  });
+  
+  // Gán topRank cho data hiện tại
+  data.forEach(loc => {
+    loc.topRank = rankMap[loc.name] || 999;
+  });
+
   const latLngs = [];
   data.forEach((loc) => {
     let displayScore = ((loc.score || 0) * 100).toFixed(1);
@@ -220,6 +240,7 @@ function renderLocations(data, autoFit = true) {
             <div class="mini-name">${loc.name}</div>
             <div class="mini-score">
                 <i class="fas fa-fire"></i> Hot: <span class="score-val">${displayScore}</span><span style="color:#94a3b8; font-weight:400;">/100</span>
+                ${loc.topRank === 1 ? '<span class="top-badge top-1">Top 1</span>' : loc.topRank <= 5 ? '<span class="top-badge top-5">Top 5</span>' : loc.topRank <= 10 ? '<span class="top-badge top-10">Top 10</span>' : ''}
             </div>
         </div>
         `;

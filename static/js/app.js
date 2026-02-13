@@ -18,17 +18,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // 3. Setup Global Events
-  
-  // Guest Search Input Enter Key
-  const guestInput = document.getElementById("usernameInput");
-  if (guestInput) {
-      guestInput.addEventListener("keypress", (e) => {
-          if (e.key === "Enter") {
-              e.preventDefault();
-              if(typeof analyzeUser === 'function') analyzeUser(false);
-          }
-      });
-  }
 
   // Search debounce
   const searchInput = document.getElementById("miniSearchInput");

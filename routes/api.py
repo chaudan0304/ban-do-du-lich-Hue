@@ -46,7 +46,7 @@ def get_locations():
            (coalesce(l.pagerankNorm, 0) * 0.6 + 
             coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
             (coalesce(l.avgRating, 0) / 5.0) * 0.1) AS score
-    ORDER BY score DESC           
+    ORDER BY score DESC, point.distance(point({latitude: l.lat, longitude: l.lng}), point({latitude: 16.4698, longitude: 107.5784})) ASC           
     """
 
     try:
@@ -153,7 +153,7 @@ def recommend(user_name):
          score_content_raw * 1.0 AS final_content,
          (coalesce(l.pagerankNorm, 0) * 0.6 + 
           coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
-          (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_pagerank
+          (coalesce(avg_rating, l.avgRating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_pagerank
     
     WITH l, category, common_users, avg_rating, review_count,
          final_collab, final_content, final_pagerank,
@@ -161,7 +161,7 @@ def recommend(user_name):
 
     RETURN l.name AS name, 
            l.desc AS description, 
-           coalesce(avg_rating, l.rating, 0) AS rating,
+           coalesce(avg_rating, l.avgRating, l.rating, 0) AS rating,
            l.lat AS lat,      
            l.lng AS lng,
            l.image AS image, 
@@ -175,13 +175,27 @@ def recommend(user_name):
            final_content AS score_content,
            final_pagerank AS score_pagerank
            
-    ORDER BY final_score DESC
+    ORDER BY final_score DESC, point.distance(point({latitude: l.lat, longitude: l.lng}), point({latitude: 16.4698, longitude: 107.5784})) ASC
     LIMIT 12
     """
     try:
-        results = run_query(cypher_query, {"name": user_name})
+        # Pre-check: User có tương tác nào không?
+        # Nếu không có LIKED/INTERACTED → SIMILAR_TO cũ không còn ý nghĩa → dùng fallback
+        has_activity = run_query(
+            """MATCH (u:User {name: $name})
+               OPTIONAL MATCH (u)-[:LIKED|INTERACTED]->(l:Location)
+               RETURN count(l) AS activity_count""",
+            {"name": user_name},
+        )
+        user_has_activity = (
+            has_activity and has_activity[0].get("activity_count", 0) > 0
+        )
 
-        # Fallback for New Users (Cold Start)
+        results = None
+        if user_has_activity:
+            results = run_query(cypher_query, {"name": user_name})
+
+        # Fallback for New Users (Cold Start) or users with no activity
         if not results:
             fallback_query = """
             OPTIONAL MATCH (me:User {name: $name})-[:LIKED|INTERACTED]->(liked:Location)
@@ -192,20 +206,20 @@ def recommend(user_name):
             OPTIONAL MATCH ()-[r:REVIEWED]->(l)
             WITH l, cat, avg(r.rating) AS avg_rating, count(r) AS review_count
             RETURN l.name AS name, l.desc AS description, 
-                   coalesce(avg_rating, l.rating, 0) AS rating, 
+                   coalesce(avg_rating, l.avgRating, l.rating, 0) AS rating, 
                    l.lat AS lat, l.lng AS lng, l.image as image, collect(cat.name)[0] as category,
                    (coalesce(l.pagerankNorm, 0) * 0.6 + 
                     coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
-                    (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) AS score,
+                    (coalesce(avg_rating, l.avgRating, l.rating, 0) / 5.0) * 0.1) AS score,
                    review_count AS reviewCount,
                    (coalesce(l.pagerankNorm, 0) * 0.6 + 
                     coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
-                    (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_score,
+                    (coalesce(avg_rating, l.avgRating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_score,
                    0 as common_users, 0 as score_personal, 0 as score_collab, 0 as score_content,
                    (coalesce(l.pagerankNorm, 0) * 0.6 + 
                     coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
-                    (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS score_pagerank
-            ORDER BY final_score DESC
+                    (coalesce(avg_rating, l.avgRating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS score_pagerank
+            ORDER BY final_score DESC, point.distance(point({latitude: l.lat, longitude: l.lng}), point({latitude: 16.4698, longitude: 107.5784})) ASC
             LIMIT 12
             """
             results = run_query(fallback_query, {"name": user_name})
@@ -220,11 +234,9 @@ def recommend(user_name):
             # === TÍNH % TƯƠNG ĐỒNG THỰC SỰ (thay vì % đóng góp) ===
 
             # 1. Content-Based: "Bao nhiêu % sở thích của bạn trùng với địa điểm này?"
-            #    score_content > 0 nghĩa là location cùng category với ít nhất 1 nơi đã thích
-            #    Công thức: min(100, score_content / baseline * 100)
-            #    baseline = 1.0 (1 match với weight mặc định) → 1 match = 100%
+            #    Baseline = 5.0 (5+ category/related matches = 100%)
             if s_content > 0:
-                pct_content = min(100, (s_content / max(s_content, 1.0)) * 100)
+                pct_content = min(100, (s_content / 5.0) * 100)
             else:
                 pct_content = 0
 
