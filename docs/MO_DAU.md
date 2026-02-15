@@ -2,7 +2,7 @@
 
 ## 1. Lý do Chọn Đề tài
 
-Trong bối cảnh ngành du lịch Việt Nam đang phục hồi mạnh mẽ sau đại dịch COVID-19, Thừa Thiên Huế là một trong những điểm đến hấp dẫn nhất miền Trung với hệ thống di sản văn hóa thế giới phong phú. Theo thống kê của Sở Du lịch tỉnh Thừa Thiên Huế, năm 2024 tỉnh đón hơn 4 triệu lượt khách, tăng 25% so với năm trước.
+Trong bối cảnh ngành du lịch Việt Nam đang phục hồi mạnh mẽ sau đại dịch COVID-19, Thừa Thiên Huế là một trong những điểm đến hấp dẫn nhất miền Trung với hệ thống di sản văn hóa thế giới phong phú. Theo thống kê của Sở Du lịch tỉnh Thừa Thiên Huế, năm 2024 tỉnh đón hơn 4 triệu lượt khách, tăng 25% so với năm trước [1].
 
 Tuy nhiên, du khách thường gặp khó khăn trong việc:
 
@@ -31,13 +31,13 @@ Xây dựng một hệ thống web gợi ý du lịch thông minh cho thành ph�
    - Sử dụng Neo4j để lưu trữ và truy vấn hiệu quả
 
 2. **Triển khai thuật toán Hybrid Recommendation:**
-   - Weighted PageRank để đánh giá độ phổ biến địa điểm
+   - Weighted PageRank (trên 2 đồ thị: User–Location và Location–Location) để đánh giá độ phổ biến địa điểm
    - Collaborative Filtering để gợi ý dựa trên người dùng tương tự
-   - Content-Based Filtering để gợi ý theo nội dung
+   - Content-Based Filtering để gợi ý theo sở thích danh mục
 
 3. **Xây dựng tính năng AI Planner:**
-   - Tự động lập lộ trình du lịch theo số ngày
-   - Tối ưu hóa quãng đường di chuyển bằng thuật toán Nearest Neighbor
+   - Tự động lập lộ trình du lịch theo số ngày, phân bổ tham quan và ẩm thực xen kẽ
+   - Tối ưu hóa quãng đường di chuyển bằng thuật toán Nearest Neighbor (Greedy TSP)
 
 4. **Phát triển giao diện web hiện đại:**
    - Bản đồ tương tác với Leaflet.js
@@ -110,12 +110,12 @@ Khóa luận được trình bày trong 4 chương:
 
 **Mở đầu:** Giới thiệu lý do chọn đề tài, mục tiêu, phạm vi và phương pháp nghiên cứu.
 
-**Chương 1 - Cơ sở Lý thuyết:** Trình bày các khái niệm về Graph Database, Neo4j, các thuật toán Recommendation System (PageRank, Collaborative Filtering, Content-Based Filtering).
+**Chương 1 - Cơ sở Lý thuyết:** Tổng quan về Hệ thống Gợi ý (Recommendation System) và các phương pháp (Content-Based, Collaborative Filtering, Hybrid). Trình bày lý thuyết về Graph Database, Neo4j & Cypher, thuật toán Weighted PageRank, thuật toán Nearest Neighbor cho bài toán lập lộ trình (TSP), và các công nghệ liên quan (Flask, Leaflet.js, OpenStreetMap).
 
-**Chương 2 - Phân tích và Thiết kế Hệ thống:** Phân tích yêu cầu, thiết kế kiến trúc, mô hình dữ liệu và giao diện hệ thống.
+**Chương 2 - Phân tích và Thiết kế Hệ thống:** Phân tích yêu cầu chức năng và phi chức năng, biểu đồ Use Case, thiết kế kiến trúc 3-Layer, mô hình cơ sở dữ liệu đồ thị (Graph Schema), thiết kế RESTful API, wireframe giao diện và flowchart thuật toán Hybrid Recommendation & AI Planner.
 
-**Chương 3 - Triển khai và Cài đặt:** Chi tiết quá trình triển khai backend, frontend, các thuật toán AI và hướng dẫn cài đặt.
+**Chương 3 - Triển khai và Cài đặt:** Chi tiết quá trình triển khai cơ sở dữ liệu đồ thị Neo4j, các thuật toán gợi ý lai (Weighted PageRank, Collaborative Filtering với Node Similarity, Content-Based Filtering, Adaptive Hybrid Weighting), ứng dụng web (Flask Blueprints, Leaflet.js) và module AI Planner (Nearest Neighbor).
 
-**Chương 4 - Kết quả và Đánh giá:** Trình bày kết quả thử nghiệm thuật toán, đánh giá hiệu năng và phản hồi người dùng.
+**Chương 4 - Kết quả và Đánh giá:** Trình bày kết quả triển khai giao diện, kết quả thử nghiệm từng thuật toán (PageRank, CF, CB, Hybrid, Diversity Pool), kết quả AI Planner, đánh giá hiệu năng API, kết quả Unit Tests (14/14 pass), so sánh với các hệ thống tương tự (Google Maps, TripAdvisor, Traveloka) và phản hồi người dùng thực tế (User Acceptance Testing).
 
 **Kết luận:** Tổng kết kết quả đạt được, hạn chế và hướng phát triển.

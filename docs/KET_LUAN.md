@@ -25,7 +25,8 @@ Sau quá trình nghiên cứu và triển khai, khóa luận đã hoàn thành c
    - Collaborative Filtering gợi ý dựa trên người dùng tương tự
    - Content-Based Filtering gợi ý theo nội dung/danh mục
    - Kết hợp 3 phương pháp với trọng số tối ưu
-   - **Chiến lược Trọng số Thích nghi:** Đề xuất và áp dụng thành công mô hình trọng số động (60-30-10) giải quyết bài toán Cold Start, được kiểm chứng qua dữ liệu thực tế và cơ sở khoa học.
+   - **Chiến lược Trọng số Thích nghi:** Đề xuất và áp dụng thành công mô hình trọng số động (60-30-10) giải quyết bài toán Cold Start.
+   - **PageRank Diversity Pool:** Cải tiến pipeline thêm bước 2.5, tăng kết quả từ 3 → 15 địa điểm đa dạng, giải quyết vấn đề "filter bubble".
 
 3. **AI Itinerary Planner:**
    - Tự động lập lộ trình 1-5 ngày
@@ -36,7 +37,8 @@ Sau quá trình nghiên cứu và triển khai, khóa luận đã hoàn thành c
    - Bản đồ tương tác với Leaflet.js
    - Heatmap hiển thị độ phổ biến
    - Responsive design cho mobile và desktop
-   - 18 API endpoints hoạt động ổn định
+   - 20+ API endpoints hoạt động ổn định
+   - Bảo mật: parameterized queries, custom exceptions, strong secret keys
 
 ### 1.3. Kết quả Đánh giá
 
@@ -138,11 +140,13 @@ Sau quá trình nghiên cứu và triển khai, khóa luận đã hoàn thành c
 
 ### 5.1. Đóng góp Khoa học
 
-1. Đề xuất mô hình **Hybrid Recommendation** trên **Graph Database** phù hợp cho bài toán du lịch.
+1. Đề xuất mô hình **Hybrid Recommendation** trên **Graph Database** phù hợp cho bài toán du lịch, với pipeline 4 bước (Collab + Content + Diversity + Scoring).
 
 2. Kết hợp **Weighted PageRank** với trọng số tương tác (Like + Rating) để đánh giá độ phổ biến chính xác hơn.
 
-3. Triển khai **Neo4j Graph Data Science** cho hệ thống gợi ý thực tế.
+3. Đề xuất **PageRank Diversity Pool** giải quyết vấn đề "filter bubble" (bẫy bong bóng lọc) trong hệ thống gợi ý.
+
+4. Triển khai **Neo4j Graph Data Science** cho hệ thống gợi ý thực tế.
 
 ### 5.2. Đóng góp Thực tiễn
 

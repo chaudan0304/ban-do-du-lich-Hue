@@ -14,12 +14,12 @@ bp = Blueprint("admin", __name__)
 @bp.route("/api/admin/users", methods=["GET"])
 @login_required
 def api_get_users():
-    if current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     try:
         users = get_all_users()
-        logger.info(f"📋 Get all users result: {users}")
+        logger.debug(f"📋 Get all users result: {len(users or [])} users")
         # Lọc bỏ admin khỏi danh sách (optional)
         filtered_users = [u for u in (users or []) if u.get("name") != "admin"]
         return jsonify(filtered_users)
@@ -31,7 +31,7 @@ def api_get_users():
 @bp.route("/api/admin/users/<username>", methods=["DELETE"])
 @login_required
 def api_delete_user(username):
-    if current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     delete_user_by_name(username)
@@ -41,7 +41,7 @@ def api_delete_user(username):
 @bp.route("/api/admin/user_comments/<username>", methods=["GET"])
 @login_required
 def api_get_user_comments(username):
-    if current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     query = """
@@ -56,7 +56,7 @@ def api_get_user_comments(username):
 @bp.route("/api/admin/user_profile/<username>", methods=["GET"])
 @login_required
 def api_get_user_profile(username):
-    if current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     # 1. Get User Info & Stats
@@ -86,7 +86,8 @@ def api_get_user_profile(username):
     # 3. Get Liked Locations
     liked_query = """
     MATCH (u:User {name: $name})-[r:LIKED]->(l:Location)
-    RETURN l.name AS name, l.image AS image, l.category AS category, l.lat AS lat, l.lng AS lng
+    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+    RETURN l.name AS name, l.image AS image, cat.name AS category, l.lat AS lat, l.lng AS lng
     ORDER BY r.timestamp DESC
     """
     liked_locs = run_query(liked_query, {"name": username})
@@ -99,7 +100,7 @@ def api_get_user_profile(username):
 @bp.route("/api/admin/stats", methods=["GET"])
 @login_required
 def get_admin_stats():
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền"}), 403
 
     query = """
@@ -120,7 +121,7 @@ def get_admin_stats():
 @bp.route("/api/admin/run-algo", methods=["POST"])
 @login_required
 def run_algo_trigger():
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền"}), 403
 
     try:
@@ -134,7 +135,7 @@ def run_algo_trigger():
 @bp.route("/api/admin/location/add", methods=["POST"])
 @login_required
 def add_location():
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền"}), 403
 
     data = request.json
@@ -172,7 +173,7 @@ def add_location():
 @bp.route("/api/admin/location/update", methods=["PUT"])
 @login_required
 def update_location():
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền"}), 403
 
     data = request.json
@@ -210,11 +211,10 @@ def update_location():
 
 
 # --- API XÓA ĐỊA ĐIỂM (DELETE) ---
-# --- API XÓA ĐỊA ĐIỂM (DELETE) ---
 @bp.route("/api/admin/location/delete/<name>", methods=["DELETE"])
 @login_required
 def delete_location(name):
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền"}), 403
 
     try:

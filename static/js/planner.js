@@ -28,7 +28,6 @@ function openPlannerInputModal() {
                         p.parentElement.style.opacity = "0.5";
                         p.parentElement.style.pointerEvents = "none"; // Disable click
                     });
-                    showNotification({type:'info', message:'AI sẽ chỉ sắp xếp từ danh sách Yêu thích của bạn ❤️'});
                 } else {
                     // Enable lại
                     prefs.forEach(p => {
@@ -207,22 +206,30 @@ function renderItinerary(plan) {
                             <i class="fas fa-camera"></i>
                             <span>${act.time || ''}</span>
                         </div>
-                        <div class="activity-main-info" onclick="showDetailFromData('${loc.name}')">
-                            <div class="activity-title-fancy">${loc.name}</div>
-                            <div class="activity-tag-fancy">${loc.category || 'Địa điểm'}</div>
-                            <div class="activity-desc-fancy">${loc.description || 'Khám phá địa điểm thú vị tại cố đô Huế.'}</div>
+                        <div class="activity-main-info">
+                            <div class="activity-title-fancy">${escapeHTML(loc.name)}</div>
+                            <div class="activity-tag-fancy">${escapeHTML(loc.category || 'Địa điểm')}</div>
+                            <div class="activity-desc-fancy">${escapeHTML(loc.description || 'Khám phá địa điểm thú vị tại cố đô Huế.')}</div>
                         </div>
-                        <img src="${loc.image}" class="activity-img-fancy" onerror="this.src='/static/images/no-image.png'" onclick="showDetailFromData('${loc.name}')">
+                        <img src="${loc.image}" class="activity-img-fancy" onerror="this.src='/static/images/no-image.png'">
                         <div class="activity-edit-btns">
-                            <button class="btn-activity-replace" onclick="replaceActivity(${dayIndex}, ${actIndex})" title="Thay thế địa điểm khác">
+                            <button class="btn-activity-replace" title="Thay thế địa điểm khác">
                                 <i class="fas fa-sync-alt"></i>
                             </button>
-                            <button class="btn-activity-remove" onclick="removeActivity(${dayIndex}, ${actIndex})" title="Xóa khỏi lộ trình">
+                            <button class="btn-activity-remove" title="Xóa khỏi lộ trình">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
                     </div>
                 `;
+
+                // Gắn event an toàn (tránh XSS từ loc.name)
+                const locName = loc.name; // closure capture
+                node.querySelector('.activity-main-info').addEventListener('click', () => showDetailFromData(locName));
+                node.querySelector('.activity-img-fancy').addEventListener('click', () => showDetailFromData(locName));
+                node.querySelector('.btn-activity-replace').addEventListener('click', () => replaceActivity(dayIndex, actIndex));
+                node.querySelector('.btn-activity-remove').addEventListener('click', () => removeActivity(dayIndex, actIndex));
+
                 container.appendChild(node);
              });
         } else {
@@ -246,14 +253,18 @@ function removeActivity(dayIndex, activityIndex) {
     
     const locName = activity.location?.name || "địa điểm này";
     
-    if (!confirm(`Bạn muốn xóa "${locName}" khỏi lộ trình?`)) return;
-    
-    // Xóa activity
-    currentItineraryData[dayIndex].activities.splice(activityIndex, 1);
-    
-    // Re-render
-    renderItinerary(currentItineraryData);
-    showNotification({ type: 'success', message: `Đã xóa "${locName}" khỏi lộ trình.` });
+    showNotification({
+        type: 'question',
+        title: 'Xóa địa điểm',
+        message: `Bạn muốn xóa "${locName}" khỏi lộ trình?`,
+        btnText: 'Xóa',
+        showCancel: true,
+        onConfirm: () => {
+            currentItineraryData[dayIndex].activities.splice(activityIndex, 1);
+            renderItinerary(currentItineraryData);
+            showNotification({ type: 'success', message: `Đã xóa "${locName}" khỏi lộ trình.` });
+        }
+    });
 }
 
 // --- REPLACEMENT MODAL LOGIC (New Dual Section + Refresh) ---
@@ -526,18 +537,31 @@ function confirmReplacement(newLocation) {
     }
 
     if (isDuplicate) {
-        const accept = confirm(`⚠️ Cảnh báo trùng lặp!\n\nĐịa điểm "${newLocName}" đã có trong lịch trình của bạn.\nBạn có chắc chắn muốn chọn địa điểm này lần nữa không?`);
-        if (!accept) return; // Hủy bỏ nếu user chọn Cancel
+        // Dùng showNotification async thay confirm()
+        showNotification({
+            type: 'question',
+            title: 'Cảnh báo trùng lặp',
+            message: `Địa điểm "${newLocName}" đã có trong lịch trình. Bạn vẫn muốn chọn?`,
+            btnText: 'Vẫn chọn',
+            showCancel: true,
+            onConfirm: () => {
+                _doReplacement(day, act, oldLocName, newLocation);
+            }
+        });
+        return; // Chờ user confirm
     }
 
-    // Update Data
+    // Không trùng → thực hiện luôn
+    _doReplacement(day, act, oldLocName, newLocation);
+}
+
+// Helper: Thực hiện thay thế (tách ra để dùng chung cho cả confirm callback)
+function _doReplacement(day, act, oldLocName, newLocation) {
     currentItineraryData[day].activities[act].location = newLocation;
     console.log(`✅ Updated location: ${oldLocName} -> ${newLocation.name}`);
     
-    // UI Update - Force Re-render
     renderItinerary(currentItineraryData);
     
-    // Đóng Modal (Delay 1 xíu cho mượt)
     setTimeout(() => {
         closeReplacementModal();
         showNotification({ 
@@ -609,12 +633,24 @@ async function loadUserItinerariesList() {
                 div.className = "saved-itinerary-item"; 
                 div.innerHTML = `
                     <div style="flex:1">
-                        <strong>${it.name}</strong><br>
+                        <strong>${escapeHTML(it.name || '')}</strong><br>
                         <small>${formatTime(it.created_at)}</small>
                     </div>
-                    <button class="btn-icon" onclick="viewSavedItinerary('${it.id}')"><i class="fas fa-eye"></i></button>
-                    <button class="btn-icon delete" onclick="deleteSavedItinerary('${it.id}')"><i class="fas fa-trash"></i></button>
                 `;
+                // Nút Xem — dùng addEventListener
+                const btnView = document.createElement('button');
+                btnView.className = 'btn-icon';
+                btnView.innerHTML = '<i class="fas fa-eye"></i>';
+                btnView.addEventListener('click', () => viewSavedItinerary(it.id));
+                div.appendChild(btnView);
+
+                // Nút Xóa — dùng addEventListener
+                const btnDel = document.createElement('button');
+                btnDel.className = 'btn-icon delete';
+                btnDel.innerHTML = '<i class="fas fa-trash"></i>';
+                btnDel.addEventListener('click', () => deleteSavedItinerary(it.id));
+                div.appendChild(btnDel);
+
                 listContainer.appendChild(div);
             });
         } else {
@@ -623,30 +659,68 @@ async function loadUserItinerariesList() {
     } catch (e) { console.error(e); }
 }
 
-async function deleteSavedItinerary(id) {
-    if(!confirm("Xóa lịch trình này?")) return;
-    try {
-        await apiFetch(`/api/itineraries/${id}`, { method: "DELETE" });
-        loadUserItinerariesList(); // Reload list
-    } catch(e) { alert("Lỗi xóa"); }
+function deleteSavedItinerary(id) {
+    showNotification({
+        type: 'question',
+        title: 'Xóa lịch trình',
+        message: 'Bạn có chắc muốn xóa lịch trình này?',
+        btnText: 'Xóa',
+        showCancel: true,
+        onConfirm: async () => {
+            try {
+                await apiFetch(`/api/itineraries/${id}`, { method: "DELETE" });
+                loadUserItinerariesList();
+                showNotification({ type: 'success', message: 'Đã xóa lịch trình.' });
+            } catch(e) {
+                showNotification({ type: 'error', message: 'Lỗi khi xóa lịch trình.' });
+            }
+        }
+    });
 }
 
 // Xem lại lịch trình đã lưu
 async function viewSavedItinerary(id) {
     if (typeof closeUserProfile === 'function') closeUserProfile();
+    
     let plan = null;
+    
+    // 1. Thử tìm trong cache trước
     if (window.userActivityData && window.userActivityData.plans) {
         plan = window.userActivityData.plans.find(p => p.id == id);
     }
+    
+    // 2. Nếu không có trong cache, fetch từ API
+    if (!plan) {
+        try {
+            const res = await apiFetch("/api/itineraries");
+            if (res.success && res.data) {
+                window.userActivityData.plans = res.data;
+                plan = res.data.find(p => p.id == id);
+            }
+        } catch(e) {
+            console.error("Fetch itinerary error:", e);
+        }
+    }
+    
     if (plan && plan.data) {
         let pData = plan.data;
         if(typeof pData === 'string') {
             try { pData = JSON.parse(pData); } catch(e) { console.error("JSON parse error", e); }
         }
-        currentItineraryData = pData;
-        if (typeof renderItinerary === 'function') {
-             renderItinerary(pData);
-             openPlannerResultModal();
+        
+        // Handle data cũ dạng {title, plan} wrapper
+        if (pData && !Array.isArray(pData) && pData.plan) {
+            pData = pData.plan;
+        }
+        
+        if (Array.isArray(pData) && pData.length > 0) {
+            currentItineraryData = pData;
+            if (typeof renderItinerary === 'function') {
+                renderItinerary(pData);
+                openPlannerResultModal();
+            }
+        } else {
+            showNotification({type: 'error', message: 'Dữ liệu lộ trình không hợp lệ.'});
         }
     } else {
         showNotification({type: 'error', message: 'Không tìm thấy dữ liệu lộ trình này.'});

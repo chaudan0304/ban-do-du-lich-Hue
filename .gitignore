@@ -25,6 +25,7 @@ instance/
 # =========================================
 # Neo4j Desktop databases (thư mục data lớn, không cần push)
 data/
+!data/data.xlsx
 databases/
 import/
 plugins/

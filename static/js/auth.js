@@ -70,7 +70,7 @@ function showLoggedView(displayName, username) {
     ${btnLogout}
   `;
 
-  document.querySelector(".search-box").style.display = "none";
+  document.getElementById("guest-cta-banner").style.display = "none";
   document.getElementById("logged-view").style.display = "block";
   checkAdminAccess(username);
   
@@ -83,37 +83,23 @@ function showLoggedView(displayName, username) {
 function showGuestView() {
   document.getElementById("header-login-btn").style.display = "flex";
   document.getElementById("header-user-info").style.display = "none";
-  document.querySelector(".search-box").style.display = "block";
-  document.getElementById("guest-search-box").style.display = "flex";
+  document.getElementById("guest-cta-banner").style.display = "flex";
   document.getElementById("logged-view").style.display = "none";
   
   const adminPanel = document.getElementById("admin-panel");
   if (adminPanel) adminPanel.style.display = "none";
   
-  const recArea = document.getElementById("recommendation-area");
-  if (recArea) recArea.innerHTML = `<div class="empty-state">...Sẵn sàng phân tích...</div>`;
+  // Tự động load gợi ý Top PageRank cho khách chưa đăng nhập
+  if (typeof loadGuestRecommendations === 'function') {
+      loadGuestRecommendations();
+  }
 }
 
 
 // --- Modal Handlers ---
 function openAuthModal() {
   document.getElementById("authModal").classList.add("active");
-  
-  // Hỗ trợ Enter cho Login
-  const loginInputs = document.querySelectorAll("#loginForm input");
-  loginInputs.forEach(input => {
-      input.onkeyup = function(e) {
-          if (e.key === "Enter") handleLogin();
-      }
-  });
-
-  // Hỗ trợ Enter cho Register
-  const registerInputs = document.querySelectorAll("#registerForm input");
-  registerInputs.forEach(input => {
-      input.onkeyup = function(e) {
-          if (e.key === "Enter") handleRegister();
-      }
-  });
+  // Enter đã được xử lý bởi form onsubmit trong HTML, không cần thêm onkeyup
 }
 
 function closeAuthModal() {
@@ -143,14 +129,18 @@ function switchTab(tab) {
 async function handleLogin() {
   const user = document.getElementById("loginUser").value;
   const pass = document.getElementById("loginPass").value;
-  if (!user || !pass) return alert("Vui lòng điền đủ thông tin!");
+  if (!user || !pass) return showNotification({ type: 'error', title: 'Thiếu thông tin', message: 'Vui lòng điền đủ thông tin!' });
 
   try {
-    const res = await apiFetch("/api/login", {
+    // Dùng fetch trực tiếp thay vì apiFetch
+    // Vì apiFetch chặn 401 với modal "Phiên đăng nhập hết hạn"
+    // nhưng /api/login trả 401 khi sai mật khẩu là bình thường
+    const raw = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: user, password: pass }),
     });
+    const res = await raw.json();
 
     if (res.success) {
       closeAuthModal();
@@ -165,24 +155,32 @@ async function handleLogin() {
       showNotification({
           type: "error",
           title: "Lỗi đăng nhập",
-          message: res.error || res.message
+          message: res.error || "Sai tên đăng nhập hoặc mật khẩu"
       });
     }
   } catch (e) {
     console.error(e);
-    alert("Lỗi kết nối login");
+    showNotification({
+        type: "error",
+        title: "Lỗi kết nối",
+        message: "Không thể kết nối đến máy chủ."
+    });
   }
 }
 
 
 async function handleRegister() {
-  const user = document.getElementById("regUser").value;
-  const pass = document.getElementById("regPass").value;
-  const email = document.getElementById("regEmail").value;
-  const fullname = document.getElementById("regRealName").value || user; // Fallback to username if empty
- 
+  const user = document.getElementById("regUser").value.trim();
+  const pass = document.getElementById("regPass").value.trim();
 
-  if (!user || !pass || !email) return alert("Vui lòng điền đủ thông tin!");
+  if (!user || !pass) {
+    showNotification({
+        type: "error",
+        title: "Thiếu thông tin",
+        message: "Vui lòng nhập tên đăng nhập và mật khẩu!"
+    });
+    return;
+  }
 
   try {
     const res = await apiFetch("/api/register", {
@@ -191,13 +189,18 @@ async function handleRegister() {
       body: JSON.stringify({
         username: user,
         password: pass,
-        email: email,
-        fullname: fullname,
       }),
     });
 
     if (res.success) {
-      alert("Đăng ký thành công! Hãy đăng nhập.");
+      showNotification({
+          type: "success",
+          title: "Đăng ký thành công!",
+          message: "Hãy đăng nhập để bắt đầu khám phá."
+      });
+      // Tự động điền tài khoản & mật khẩu vào form đăng nhập
+      document.getElementById("loginUser").value = user;
+      document.getElementById("loginPass").value = pass;
       switchTab("login");
     } else {
       showNotification({
@@ -207,7 +210,11 @@ async function handleRegister() {
       });
     }
   } catch (e) {
-    alert("Lỗi kết nối register");
+    showNotification({
+        type: "error",
+        title: "Lỗi kết nối",
+        message: "Không thể kết nối đến máy chủ."
+    });
   }
 }
 

@@ -20,18 +20,19 @@
 
 ### 🧠 1. Hệ thống Gợi ý Lai (Hybrid Recommendation Engine)
 
-Trái tim của ứng dụng là thuật toán AI kết hợp 3 phương pháp tiên tiến để đưa ra những gợi ý "đúng ý" người dùng nhất:
+Trái tim của ứng dụng là thuật toán AI kết hợp **4 nguồn ứng viên** tiên tiến để đưa ra những gợi ý "đúng ý" người dùng nhất:
 
 - **Collaborative Filtering (Lọc cộng tác):** Phân tích đồ thị quan hệ `(:User)-[:INTERACTED]->(:Location)` để tìm những người dùng có "gu" du lịch giống bạn và gợi ý những địa điểm họ thích mà bạn chưa khám phá.
 - **Content-Based Filtering (Lọc theo nội dung):** Nếu bạn thường xuyên check-in tại các "Chùa chiền" hay "Di tích", hệ thống sẽ ưu tiên đề xuất các địa điểm tương tự cùng danh mục.
 - **Weighted PageRank (Độ phổ biến):** Đánh giá độ "hot" của địa điểm dựa trên tổng số lượng tương tác, chất lượng đánh giá (sao) và mức độ uy tín của người review.
+- **PageRank Diversity Pool (Đa dạng hóa):** Luôn bổ sung Top 20 địa điểm nổi tiếng nhất vào pool ứng viên, đảm bảo gợi ý đa dạng về danh mục, tránh "bẫy bong bóng lọc" (filter bubble).
 
 ### 📅 2. Lập kế hoạch Du lịch Thông minh (AI Planner)
 
 Giải quyết nỗi lo "không biết đi đâu" chỉ trong 3 giây:
 
 - **Tùy chỉnh linh hoạt:** Chọn số ngày đi (1-5 ngày) và sở thích ưu tiên (Văn hóa, Ẩm thực, Thiên nhiên...).
-- **Tối ưu hóa:** Thuật toán tự động sắp xếp các địa điểm gần nhau vào cùng một buổi để tối ưu thời gian di chuyển.
+- **Tối ưu hóa:** Thuật toán **Nearest Neighbor (Greedy TSP)** tự động sắp xếp các địa điểm gần nhau vào cùng một buổi để tối ưu quãng đường di chuyển.
 - **Chế độ "Dựa trên sở thích" (Use Liked):** Ưu tiên đưa các địa điểm bạn đã "Thả tim" vào lịch trình, kết hợp với các gợi ý phù hợp nhất từ AI.
 - **Lưu trữ:** Dễ dàng lưu lại và quản lý các lịch trình đã tạo trong hồ sơ cá nhân.
 
@@ -97,13 +98,18 @@ pip install -r requirements.txt
 ```
 
 **3. Cấu hình môi trường**
-Tạo file `.env` tại thư mục gốc và điền thông tin kết nối Neo4j:
+Copy file `.env.example` thành `.env` và điền thông tin kết nối Neo4j:
+
+```bash
+cp .env.example .env
+# Sau đó chỉnh sửa giá trị trong .env
+```
 
 ```env
 NEO4J_URI=bolt://localhost:7687
 NEO4J_USER=neo4j
 NEO4J_PASS=your_password
-FLASK_SECRET_KEY=your_super_secret_key
+FLASK_SECRET_KEY=your_super_secret_key  # Nên dùng: python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
 **4. Khởi tạo dữ liệu**
@@ -218,6 +224,28 @@ python tests/run_all_tests.py
 ---
 
 ## 📜 Nhật ký Cập nhật (Changelog)
+
+### v2.6 - Security Hardening & Documentation Sync (15/02/2026)
+
+- 🔒 **Security Hardening:** Loại bỏ hoàn toàn `alert()`, `confirm()` và inline `onclick` trên toàn hệ thống. Thay thế bằng modal `showNotification` thống nhất và `addEventListener` an toàn để ngăn chặn XSS.
+- 📚 **Documentation:** Cập nhật tài liệu khóa luận (`docs/`) phản ánh chính xác các công nghệ đã triển khai (Weighted PageRank, Nearest Neighbor, Kiến trúc 3-Layer).
+- 🧹 **Code Cleanup:** Kiểm tra và đảm bảo mã nguồn sạch, tuân thủ các chuẩn bảo mật và syntax.
+
+### v2.5 - Recommendation Diversity & UI Improvements (11/02/2026)
+
+- 🧠 **PageRank Diversity Pool:** Thêm bước 2.5 vào thuật toán - luôn bổ sung Top 20 địa điểm nổi tiếng nhất vào pool ứng viên. Trước đây ứng viên chỉ đến từ Collab + Content → nếu cả 2 đều hẹp (VD: user chỉ like 1 category), kết quả giới hạn trong 1 loại. Giờ đảm bảo **đa dạng** (3 → 15 kết quả).
+- 👤 **Admin User Profile:** Thêm phần hiển thị bình luận/đánh giá trong modal Hồ sơ người dùng.
+- 🔧 **Fix Cypher Query:** Sửa `l.category` (property không tồn tại) sang dùng relationship `HAS_CATEGORY` đúng schema.
+- 🧹 **UX:** Loại bỏ popup thông báo không cần thiết khi chọn "Chỉ nơi đã thích".
+
+### v2.4 - Security & Code Quality Improvements (11/02/2026)
+
+- 🔒 **Fix Cypher Injection:** Chuyển toàn bộ f-string query sang parameterized queries (`$param`) trong `planner.py` và `api.py`.
+- 🔑 **Security:** Tạo `FLASK_SECRET_KEY` mạnh (256-bit), thêm `.env.example` template.
+- 🐍 **Fix Mutable Default Args:** `preferences=[]` → `preferences=None`, `topics=[]` → `topics=None`.
+- 📝 **Error Handling:** Thêm custom exceptions (`DatabaseError`, `ConstraintViolationError`), thống nhất return type.
+- 📊 **Logging:** Thay thế tất cả `print()` bằng module `logging` chuẩn.
+- 🧪 **Test Fixes:** Sửa lỗi unpack tuple return, typo `AssertionError`.
 
 ### v2.3 - Enhanced Planner UI & Code Cleanup (09/02/2026)
 

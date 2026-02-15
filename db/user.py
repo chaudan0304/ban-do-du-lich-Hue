@@ -2,8 +2,11 @@
 db/user.py - Các hàm xử lý User (đăng ký, đăng nhập, profile)
 """
 
+import logging
 from werkzeug.security import generate_password_hash, check_password_hash
-from .connection import run_query
+from .connection import run_query, ConstraintViolationError
+
+logger = logging.getLogger(__name__)
 
 
 def register_user(username, password):
@@ -15,20 +18,19 @@ def register_user(username, password):
     if existing:
         return False, "Tài khoản đã tồn tại"
 
-    if existing == "CONSTRAINT_VIOLATION":  # Double check
-        return False, "Tài khoản đã tồn tại"
-
     # 2. Hash mật khẩu và lưu
     hashed_pw = generate_password_hash(password)
     create_query = """
     CREATE (u:User {name: $name, password: $password, role: 'user', created_at: datetime()})
     RETURN u
     """
-    result = run_query(create_query, {"name": username, "password": hashed_pw})
-
-    if result:
-        return True, "Đăng ký thành công"
-    return False, "Lỗi khi tạo tài khoản"
+    try:
+        result = run_query(create_query, {"name": username, "password": hashed_pw})
+        if result:
+            return True, "Đăng ký thành công"
+        return False, "Lỗi khi tạo tài khoản"
+    except ConstraintViolationError:
+        return False, "Tài khoản đã tồn tại"
 
 
 def get_user_info(username):

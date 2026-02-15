@@ -7,7 +7,14 @@ Các file import từ `db` vẫn hoạt động bình thường:
 """
 
 # Connection & Query
-from .connection import get_driver, close_driver, run_query
+from .connection import (
+    get_driver,
+    close_driver,
+    run_query,
+    run_write_transaction,
+    DatabaseError,
+    ConstraintViolationError,
+)
 
 # User Management
 from .user import (
@@ -51,6 +58,9 @@ __all__ = [
     "get_driver",
     "close_driver",
     "run_query",
+    "run_write_transaction",
+    "DatabaseError",
+    "ConstraintViolationError",
     # User
     "register_user",
     "get_user_info",

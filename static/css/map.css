@@ -81,15 +81,20 @@
   border-radius: 50%;
   display: inline-block;
 }
-.dot-pr {
-  background: linear-gradient(135deg, #ef4444, #991b1b);
+.dot-top1 {
+  background: linear-gradient(135deg, #fbbf24, #d97706);
   border: 2px solid white;
-  box-shadow: 0 0 0 1px #ef4444;
+  box-shadow: 0 0 0 1px #fbbf24;
 }
-.dot-collab {
+.dot-top5 {
   background: linear-gradient(135deg, #3b82f6, #1e40af);
   border: 2px solid white;
   box-shadow: 0 0 0 1px #3b82f6;
+}
+.dot-top10 {
+  background: linear-gradient(135deg, #10b981, #047857);
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #10b981;
 }
 
 /* CUSTOM PIN */
@@ -106,7 +111,7 @@
   border: 3px solid var(--info);
   transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
-.custom-pin div {
+.custom-pin span {
   transform: rotate(45deg) !important;
   font-size: 16px !important;
 }
@@ -114,11 +119,42 @@
   transform: rotate(-45deg) scale(1.2) translateY(-8px);
   z-index: 9999;
 }
-.custom-pin.pin-pr {
-  background: linear-gradient(135deg, #ef4444, #b91c1c);
+.custom-pin.pin-top1 {
+  background: linear-gradient(135deg, #fbbf24, #d97706);
   border-color: white;
+  box-shadow: -3px 3px 10px rgba(251, 191, 36, 0.5);
 }
-.custom-pin.pin-collab {
+.custom-pin.pin-top5 {
   background: linear-gradient(135deg, #3b82f6, #1e40af);
   border-color: white;
+  box-shadow: -3px 3px 8px rgba(59, 130, 246, 0.4);
+}
+.custom-pin.pin-top10 {
+  background: linear-gradient(135deg, #10b981, #047857);
+  border-color: white;
+  box-shadow: -3px 3px 8px rgba(16, 185, 129, 0.35);
+}
+
+/* Top PageRank Badges */
+.top-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 4px;
+  margin-left: 4px;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.top-badge.top-1 {
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+  box-shadow: 0 1px 4px rgba(251, 191, 36, 0.4);
+}
+.top-badge.top-5 {
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+}
+.top-badge.top-10 {
+  background: linear-gradient(135deg, #10b981, #047857);
 }

@@ -510,8 +510,10 @@ CREATE INDEX location_category IF NOT EXISTS FOR (l:Location) ON (l.pagerankScor
               │            │            │
               ▼            ▼            ▼
     ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-    │ Collaborative│ │Content-Based │ │   PageRank   │
-    │  Filtering   │ │  Filtering   │ │    Score     │
+    │ Bước 1:      │ │ Bước 2:      │ │ Bước 2.5:    │
+    │ Collaborative│ │Content-Based │ │  PageRank    │
+    │  Filtering   │ │  Filtering   │ │Diversity Pool│
+    │  (collab)    │ │  (content)   │ │ (Top 20)     │
     └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
            │                │                │
            │ score × 3      │ score × 1      │ score × 5
@@ -519,8 +521,16 @@ CREATE INDEX location_category IF NOT EXISTS FOR (l:Location) ON (l.pagerankScor
            └────────────────┼────────────────┘
                             │
                             ▼
+                  ┌───────────────────┐
+                  │ Bước 3: GỘP TẤT CẢ│
+                  │ collab + content  │
+                  │ + pagerank        │
+                  └────────┬──────────┘
+                           │
+                           ▼
                     ┌─────────────────┐
-                    │ Tính Final Score│
+                    │ Bước 4: Tính    │
+                    │ Final Score     │
                     │ = CF + CB + PR  │
                     └────────┬────────┘
                              │

@@ -11,7 +11,7 @@ Sau quá trình phát triển, hệ thống **Huế Travel AI** đã hoàn thàn
 | Tổng số dòng code Python | ~2,500 dòng              |
 | Tổng số dòng JavaScript  | ~3,200 dòng              |
 | Tổng số file CSS         | 10 files (~80 KB)        |
-| Số lượng API Endpoints   | 18 endpoints             |
+| Số lượng API Endpoints   | 20+ endpoints            |
 | Số lượng địa điểm        | 50+ địa điểm du lịch Huế |
 | Số lượng danh mục        | 8 categories             |
 
@@ -179,7 +179,34 @@ Final Score = (PR_Norm × 6.0) + (Connect_Norm × 3.0) + (Rating_Norm × 1.0)
 
 - **Đại Nội & Thiên Mụ:** Điểm cao nhất nhờ cân bằng tốt giữa độ phổ biến và vị trí trung tâm.
 - **Cầu Trường Tiền:** Dù ít "hot" hơn một chút nhưng nằm ở vị trí huyết mạch (Connectivity 0.95) nên vẫn lọt Top 3.
-- **Bún Bò Huế:** Dù Rating rất cao (4.9 sao) nhưng do ít kết nối hơn các di tích lớn nên xếp hạng thấp hơn trong danh sách tổng quát. Điều này **phù hợp với chiến lược Cold Start**, ưu tiên các địa điểm dễ tiếp cận cho người mới.
+- **Bún Bò Huế:** Dù Rating rất cao (4.9 sao) nhưng do ít kết nối hơn các di tích lớn nên xếp hạng thấp hơn.
+
+### 4.2.6. Kết quả Cải tiến PageRank Diversity Pool (v2.5)
+
+**Vấn đề được giải quyết:** Thuật toán cũ lấy ứng viên chỉ từ Collaborative Filtering và Content-Based. Khi user chỉ thích 1 category (VD: "Mua sắm"), kết quả bị giới hạn trong cùng loại.
+
+**So sánh trước/sau:**
+
+| Metric                 | Trước (v2.4)       | Sau (v2.5)                    |
+| ---------------------- | ------------------ | ----------------------------- |
+| Số kết quả gợi ý       | 3 (đều là Mua sắm) | **15** (đa chủ đề)            |
+| Số category xuất hiện  | 1                  | **5+** (Di tích, Chùa, TN...) |
+| Content-Based toạn chợ | 100% (đơn điệu)    | 20% (cân bằng)                |
+| PageRank Diversity     | 0%                 | **80%** (phong phú)           |
+
+**Kết quả thực tế (user **admin** — chỉ thích 2 chợ):**
+
+| Tên                     | Collab | Content | PageRank | **TOTAL** | Nguồn         |
+| ----------------------- | ------ | ------- | -------- | --------- | ------------- |
+| Chợ Đông Ba             | 0.0    | 3.6     | 5.25     | **8.85**  | Content       |
+| Chợ An Cựu              | 0.0    | 3.6     | 5.11     | **8.71**  | Content       |
+| Chợ Xép                 | 0.0    | 3.6     | 5.09     | **8.69**  | Content       |
+| Công viên Hồ Thủy Tiên  | 0.0    | 0.0     | 7.71     | **7.71**  | **Diversity** |
+| Làng mây tre đan Bao La | 0.0    | 0.0     | 7.62     | **7.62**  | **Diversity** |
+| Quốc Tử Giám            | 0.0    | 0.0     | 7.33     | **7.33**  | **Diversity** |
+| Ngọ Môn                 | 0.0    | 0.0     | 7.26     | **7.26**  | **Diversity** |
+
+**Nhận xét:** Top 3 vẫn là địa điểm cùng category (đúng ý user), từ vị trí 4 trở đi là những địa điểm nổi tiếng khác loại — giúp user khám phá đa dạng hơn.
 
 ---
 
@@ -415,14 +442,15 @@ Chương này đã trình bày kết quả triển khai và đánh giá hệ th�
 
 1. **Hệ thống hoàn chỉnh:**
    - Giao diện hiện đại, thân thiện người dùng
-   - 18 API endpoints hoạt động ổn định
+   - 20+ API endpoints hoạt động ổn định
    - 100% unit tests pass
 
 2. **Thuật toán hiệu quả:**
    - Weighted PageRank phản ánh đúng độ phổ biến
    - Collaborative Filtering gợi ý chính xác theo sở thích
-   - Hybrid Recommendation kết hợp ưu điểm 3 phương pháp
+   - Hybrid Recommendation kết hợp ưu điểm 3 phương pháp + PageRank Diversity Pool
    - Nearest Neighbor giảm 47% quãng đường lộ trình
+   - Diversity Pool tăng kết quả từ 3 → 15 địa điểm đa dạng
 
 3. **Hiệu năng tốt:**
    - Thời gian phản hồi API < 500ms
@@ -436,7 +464,7 @@ Chương này đã trình bày kết quả triển khai và đánh giá hệ th�
 ### Hạn chế cần khắc phục:
 
 1. Mở rộng dữ liệu địa điểm và người dùng
-2. Cải thiện Cold Start cho user mới
+2. Cải thiện Cold Start cho user mới (hỏi sở thích khi đăng ký)
 3. Phát triển ứng dụng mobile
 4. Tích hợp GPS real-time
 

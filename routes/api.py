@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
+import logging
 from db import (
     run_query,
     toggle_like_location,
@@ -15,6 +16,7 @@ from db import (
 )
 from utils import analyze_sentiment, classify_comment_topic
 
+logger = logging.getLogger(__name__)
 bp = Blueprint("api", __name__)
 
 
@@ -22,7 +24,7 @@ bp = Blueprint("api", __name__)
 @bp.route("/api/locations", methods=["GET"])
 def get_locations():
     category_filter = request.args.get("category")
-    print(f"DEBUG: Filtering locations by category: '{category_filter}'")
+    logger.debug(f"Filtering locations by category: '{category_filter}'")
 
     query = """
     MATCH (l:Location)
@@ -44,7 +46,7 @@ def get_locations():
            (coalesce(l.pagerankNorm, 0) * 0.6 + 
             coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
             (coalesce(l.avgRating, 0) / 5.0) * 0.1) AS score
-    ORDER BY score DESC           
+    ORDER BY score DESC, point.distance(point({latitude: l.lat, longitude: l.lng}), point({latitude: 16.4698, longitude: 107.5784})) ASC           
     """
 
     try:
@@ -56,7 +58,12 @@ def get_locations():
 
 # --- 3. API: LẤY LỊCH SỬ NGƯỜI DÙNG (MỚI) ---
 @bp.route("/api/history/<user_name>", methods=["GET"])
+@login_required
 def get_user_history(user_name):
+    # Chỉ cho phép xem lịch sử của chính mình
+    if current_user.id != user_name:
+        return jsonify({"error": "Không có quyền truy cập"}), 403
+
     query = """
     MATCH (u:User {name: $name})-[:LIKED]->(l:Location)
     RETURN l.name AS name, 
@@ -74,7 +81,12 @@ def get_user_history(user_name):
 
 # --- 4. API: GỢI Ý THÔNG MINH (CORE AI) - V2.0 với Interaction Weighting ---
 @bp.route("/api/recommend/<user_name>", methods=["GET"])
+@login_required
 def recommend(user_name):
+    # Chỉ cho phép xem gợi ý của chính mình
+    if current_user.id != user_name:
+        return jsonify({"error": "Không có quyền truy cập"}), 403
+
     """
     CHIẾN THUẬT: HYBRID RECOMMENDATION V2.0 với 3 thành phần chính:
     1. PERSONALIZED RATING (x5)
@@ -115,8 +127,20 @@ def recommend(user_name):
     WITH me, collab_list,
          collect({loc: l_content, score: score_content, type: 'content'}) AS content_list
 
-    // BƯỚC 3: GỘP CANDIDATES VÀ TÍNH ĐIỂM CUỐI CÙNG
-    WITH me, collab_list + content_list AS all_candidates
+    // BƯỚC 2.5: PAGERANK DIVERSITY POOL (Đa dạng hóa kết quả)
+    // Luôn thêm top 20 địa điểm nổi tiếng nhất vào pool ứng viên
+    // → Tránh kẹt trong 1 category khi Content-Based/Collab quá hẹp
+    WITH me, collab_list, content_list
+    MATCH (l_global:Location)
+    WHERE NOT (me)-[:INTERACTED]->(l_global) AND NOT (me)-[:LIKED]->(l_global)
+    WITH me, collab_list, content_list, l_global
+    ORDER BY coalesce(l_global.pagerankNorm, 0) DESC
+    LIMIT 20
+    WITH me, collab_list, content_list,
+         collect({loc: l_global, score: 0, type: 'pagerank', common_users: 0, similarity: 0}) AS pagerank_list
+
+    // BƯỚC 3: GỘP TẤT CẢ CANDIDATES VÀ TÍNH ĐIỂM CUỐI CÙNG
+    WITH me, collab_list + content_list + pagerank_list AS all_candidates
     UNWIND all_candidates AS c
     WITH me, c.loc AS l, c.score AS s, c.type AS t, 
          CASE WHEN c.common_users IS NOT NULL THEN c.common_users ELSE 0 END AS common
@@ -139,7 +163,7 @@ def recommend(user_name):
          score_content_raw * 1.0 AS final_content,
          (coalesce(l.pagerankNorm, 0) * 0.6 + 
           coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
-          (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_pagerank
+          (coalesce(avg_rating, l.avgRating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_pagerank
     
     WITH l, category, common_users, avg_rating, review_count,
          final_collab, final_content, final_pagerank,
@@ -147,7 +171,7 @@ def recommend(user_name):
 
     RETURN l.name AS name, 
            l.desc AS description, 
-           coalesce(avg_rating, l.rating, 0) AS rating,
+           coalesce(avg_rating, l.avgRating, l.rating, 0) AS rating,
            l.lat AS lat,      
            l.lng AS lng,
            l.image AS image, 
@@ -161,13 +185,27 @@ def recommend(user_name):
            final_content AS score_content,
            final_pagerank AS score_pagerank
            
-    ORDER BY final_score DESC
+    ORDER BY final_score DESC, point.distance(point({latitude: l.lat, longitude: l.lng}), point({latitude: 16.4698, longitude: 107.5784})) ASC
     LIMIT 12
     """
     try:
-        results = run_query(cypher_query, {"name": user_name})
+        # Pre-check: User có tương tác nào không?
+        # Nếu không có LIKED/INTERACTED → SIMILAR_TO cũ không còn ý nghĩa → dùng fallback
+        has_activity = run_query(
+            """MATCH (u:User {name: $name})
+               OPTIONAL MATCH (u)-[:LIKED|INTERACTED]->(l:Location)
+               RETURN count(l) AS activity_count""",
+            {"name": user_name},
+        )
+        user_has_activity = (
+            has_activity and has_activity[0].get("activity_count", 0) > 0
+        )
 
-        # Fallback for New Users (Cold Start)
+        results = None
+        if user_has_activity:
+            results = run_query(cypher_query, {"name": user_name})
+
+        # Fallback for New Users (Cold Start) or users with no activity
         if not results:
             fallback_query = """
             OPTIONAL MATCH (me:User {name: $name})-[:LIKED|INTERACTED]->(liked:Location)
@@ -178,23 +216,68 @@ def recommend(user_name):
             OPTIONAL MATCH ()-[r:REVIEWED]->(l)
             WITH l, cat, avg(r.rating) AS avg_rating, count(r) AS review_count
             RETURN l.name AS name, l.desc AS description, 
-                   coalesce(avg_rating, l.rating, 0) AS rating, 
+                   coalesce(avg_rating, l.avgRating, l.rating, 0) AS rating, 
                    l.lat AS lat, l.lng AS lng, l.image as image, collect(cat.name)[0] as category,
                    (coalesce(l.pagerankNorm, 0) * 0.6 + 
                     coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
-                    (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) AS score,
+                    (coalesce(avg_rating, l.avgRating, l.rating, 0) / 5.0) * 0.1) AS score,
                    review_count AS reviewCount,
                    (coalesce(l.pagerankNorm, 0) * 0.6 + 
                     coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
-                    (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_score,
+                    (coalesce(avg_rating, l.avgRating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_score,
                    0 as common_users, 0 as score_personal, 0 as score_collab, 0 as score_content,
                    (coalesce(l.pagerankNorm, 0) * 0.6 + 
                     coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
-                    (coalesce(avg_rating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS score_pagerank
-            ORDER BY final_score DESC
+                    (coalesce(avg_rating, l.avgRating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS score_pagerank
+            ORDER BY final_score DESC, point.distance(point({latitude: l.lat, longitude: l.lng}), point({latitude: 16.4698, longitude: 107.5784})) ASC
             LIMIT 12
             """
             results = run_query(fallback_query, {"name": user_name})
+
+        # === EXPLAINABLE AI: Lấy thêm dữ liệu chi tiết để giải thích gợi ý ===
+        similar_users_map = {}  # {location_name: [{name, score}]}
+        matched_likes_map = {}  # {location_name: [liked_loc_name]}
+
+        if user_has_activity:
+            # 1. Lấy danh sách users tương đồng đã thích từng địa điểm gợi ý
+            loc_names = [r["name"] for r in (results or [])]
+            if loc_names:
+                sim_query = run_query(
+                    """
+                    MATCH (me:User {name: $name})-[sim:SIMILAR_TO]-(other:User)-[:INTERACTED|LIKED]->(l:Location)
+                    WHERE l.name IN $locations AND other <> me
+                    RETURN l.name AS loc_name, other.name AS user_name, round(sim.score * 100) AS similarity
+                    ORDER BY sim.score DESC
+                """,
+                    {"name": user_name, "locations": loc_names},
+                )
+                for r in sim_query or []:
+                    ln = r["loc_name"]
+                    if ln not in similar_users_map:
+                        similar_users_map[ln] = []
+                    if len(similar_users_map[ln]) < 5:  # Giới hạn 5 users
+                        similar_users_map[ln].append(
+                            {"name": r["user_name"], "similarity": int(r["similarity"])}
+                        )
+
+                # 2. Lấy danh sách địa điểm đã like cùng category
+                match_query = run_query(
+                    """
+                    MATCH (me:User {name: $name})-[:LIKED|INTERACTED]->(liked:Location)-[:HAS_CATEGORY]->(cat:Category)
+                    WITH collect({name: liked.name, category: cat.name}) AS liked_cats
+                    UNWIND $locations AS loc_name
+                    MATCH (l:Location {name: loc_name})-[:HAS_CATEGORY]->(c:Category)
+                    WITH l, c, liked_cats
+                    UNWIND liked_cats AS lc
+                    WITH l, lc WHERE lc.category = c.name
+                    RETURN l.name AS loc_name, collect(DISTINCT lc.name) AS matched_likes
+                """,
+                    {"name": user_name, "locations": loc_names},
+                )
+                for r in match_query or []:
+                    matched_likes_map[r["loc_name"]] = r["matched_likes"][
+                        :3
+                    ]  # Giới hạn 3
 
         processed_results = []
         for loc in results or []:
@@ -202,16 +285,38 @@ def recommend(user_name):
             s_content = loc.get("score_content", 0) or 0
             s_pagerank = loc.get("score_pagerank", 0) or 0
             common_users = loc.get("common_users", 0) or 0
+            loc_name = loc.get("name", "")
 
-            # Calculate percentages
-            total = s_collab + s_content + s_pagerank  # Personal removed
-            if total > 0:
-                pct_collab = (s_collab / total) * 100
-                pct_content = (s_content / total) * 100
-                pct_pagerank = (s_pagerank / total) * 100
+            # === TÍNH % TƯƠNG ĐỒNG ===
+            # 1. Content-Based: Baseline = 5.0 (5+ matches = 100%)
+            if s_content > 0:
+                pct_content = min(100, (s_content / 5.0) * 100)
             else:
-                pct_collab = pct_content = pct_pagerank = 0
+                pct_content = 0
 
+            # 2. Collaborative: Baseline = 5 users = 100%
+            if common_users > 0:
+                pct_collab = min(100, (common_users / 5.0) * 100)
+            else:
+                pct_collab = 0
+
+            # 3. PageRank: thang 0-10 → 0-100%
+            pct_pagerank = min(100, (s_pagerank / 10.0) * 100)
+
+            # === TÍNH TỶ LỆ ĐÓNG GÓP CHO BIỂU ĐỒ TRÒN ===
+            total_raw = s_collab + s_content + s_pagerank
+            if total_raw > 0:
+                chart_collab = round((s_collab / total_raw) * 100)
+                chart_content = round((s_content / total_raw) * 100)
+                chart_pagerank = (
+                    100 - chart_collab - chart_content
+                )  # Đảm bảo tổng = 100
+            else:
+                chart_collab = 0
+                chart_content = 0
+                chart_pagerank = 100
+
+            # === XÁC ĐỊNH REASON CHÍNH ===
             reason = ""
             reason_icon = "🤖"
             reason_type = "default"
@@ -238,7 +343,11 @@ def recommend(user_name):
                     if k in cat:
                         reason_icon = v
                         break
-                reason = f"Gợi ý phù hợp vì bạn hay ghé {loc.get('category', '')}"
+                matched = matched_likes_map.get(loc_name, [])
+                if matched:
+                    reason = f"Gợi ý vì bạn đã thích {matched[0]}"
+                else:
+                    reason = f"Gợi ý phù hợp vì bạn hay ghé {loc.get('category', '')}"
                 reason_type = "content"
             elif s_pagerank > 0:
                 reason = "Địa điểm đang rất Hot trong cộng đồng du lịch Huế"
@@ -249,7 +358,10 @@ def recommend(user_name):
                 reason_icon = "🤖"
                 reason_type = "default"
 
-            # Create details
+            # === EXPLAINABLE AI DATA ===
+            sim_users = similar_users_map.get(loc_name, [])
+            matched_likes = matched_likes_map.get(loc_name, [])
+
             reason_details = {
                 "personal": {
                     "score": 0,
@@ -262,18 +374,25 @@ def recommend(user_name):
                     "percent": round(pct_collab, 1),
                     "label": "Collaborative Filtering",
                     "desc": f"{int(common_users)} người dùng tương đồng",
+                    "similar_users": sim_users,  # [{name, similarity}]
                 },
                 "content": {
                     "score": round(s_content, 2),
                     "percent": round(pct_content, 1),
                     "label": "Content-based",
                     "desc": "Tương tự địa điểm đã thích",
+                    "matched_likes": matched_likes,  # [loc_name]
                 },
                 "pagerank": {
                     "score": round(s_pagerank, 2),
                     "percent": round(pct_pagerank, 1),
                     "label": "PageRank",
                     "desc": "Độ nổi tiếng toàn hệ thống",
+                },
+                "chart": {
+                    "collab": chart_collab,
+                    "content": chart_content,
+                    "pagerank": chart_pagerank,
                 },
             }
 
@@ -285,7 +404,7 @@ def recommend(user_name):
 
         return jsonify(processed_results)
     except Exception as e:
-        print(f"❌ Lỗi Recommend: {e}")
+        logger.error(f"Lỗi Recommend: {e}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -311,12 +430,19 @@ def api_add_review():
     comment = data.get("comment", "")
     review_id = data.get("review_id")  # New Optional ID for editing
 
-    # Allow rating to be 0, so check explicitly for None if needed, but 'rating' comes from json .get()
     if not loc_name:
         return jsonify({"error": "Thiếu thông tin địa điểm"}), 400
 
+    # Validate rating range (0-5)
     if rating is None:
         rating = 0
+    else:
+        try:
+            rating = float(rating)
+            if rating < 0 or rating > 5:
+                return jsonify({"error": "Điểm đánh giá phải từ 0 đến 5"}), 400
+        except (ValueError, TypeError):
+            return jsonify({"error": "Điểm đánh giá không hợp lệ"}), 400
 
     sentiment = analyze_sentiment(comment)
     topics = classify_comment_topic(comment)
@@ -355,7 +481,14 @@ def api_delete_review():
 
     if not loc_name:
         return jsonify({"error": "Thiếu tên địa điểm"}), 400
-    success, result = delete_review(current_user.id, loc_name, review_id)
+
+    # Admin có thể xóa đánh giá của bất kỳ user nào
+    if current_user.is_admin and data.get("review_user"):
+        target_user = data.get("review_user")
+    else:
+        target_user = current_user.id
+
+    success, result = delete_review(target_user, loc_name, review_id)
     if success:
         return (
             jsonify({"success": True, "message": "Đã xóa đánh giá!", "stats": result}),
@@ -368,22 +501,26 @@ def api_delete_review():
 @bp.route("/api/similar/<location_name>", methods=["GET"])
 def get_similar_locations(location_name):
     """
-    Tìm địa điểm tương tự sử dụng:
-    1. LOC_SIMILAR (Jaccard Similarity) nếu có
-    2. Fallback: cùng Category
+    Tìm địa điểm tương tự CÙNG DANH MỤC, sử dụng:
+    1. LOC_SIMILAR (Jaccard Similarity) nếu có — lọc cùng category
+    2. Fallback: cùng Category, sắp xếp theo PageRank
     """
-    # Query ưu tiên LOC_SIMILAR (được tính từ setup_algo.py)
+    # Query ưu tiên LOC_SIMILAR + filter cùng category
     query = """
     MATCH (current:Location {name: $name})
+    OPTIONAL MATCH (current)-[:HAS_CATEGORY]->(current_cat:Category)
+    WITH current, collect(current_cat.name) as current_categories
     
-    // Tìm các địa điểm tương tự qua quan hệ LOC_SIMILAR (được tạo bởi GDS Node Similarity)
+    // Tìm các địa điểm tương tự qua quan hệ LOC_SIMILAR
     OPTIONAL MATCH (current)-[sim:LOC_SIMILAR]-(similar:Location)
     
     // Lấy category của địa điểm tương tự
     OPTIONAL MATCH (similar)-[:HAS_CATEGORY]->(cat_node:Category)
     
-    WITH similar, sim, collect(cat_node.name)[0] as category
+    WITH similar, sim, collect(cat_node.name)[0] as category, current_categories
     WHERE similar IS NOT NULL
+    // CHỈ lấy địa điểm cùng danh mục
+    AND category IN current_categories
     
     RETURN similar.name AS name,
            similar.desc AS description,
@@ -402,7 +539,7 @@ def get_similar_locations(location_name):
     try:
         results = run_query(query, {"name": location_name})
 
-        # Fallback: Nếu không có LOC_SIMILAR, dùng Category
+        # Fallback: Nếu không có LOC_SIMILAR cùng category, tìm theo Category
         if not results:
             fallback_query = """
             MATCH (current:Location {name: $name})-[:HAS_CATEGORY]->(cat:Category)
@@ -416,7 +553,9 @@ def get_similar_locations(location_name):
                    similar.image AS image,
                    similar.rating AS rating,
                    category,
-                   coalesce(similar.pagerankNorm, 0) AS score,
+                   (coalesce(similar.pagerankNorm, 0) * 0.6 + 
+                    coalesce(similar.pagerankConnectNorm, 0) * 0.3 + 
+                    (coalesce(similar.rating, 0) / 5.0) * 0.1) AS score,
                    0 AS similarity
             ORDER BY score DESC
             LIMIT 6
@@ -425,16 +564,21 @@ def get_similar_locations(location_name):
 
         return jsonify(results if results else [])
     except Exception as e:
-        print(f"❌ Lỗi get_similar_locations: {e}")
+        logger.error(f"Lỗi get_similar_locations: {e}")
         return jsonify({"error": str(e)}), 500
 
 
 @bp.route("/api/similar-users/<username>", methods=["GET"])
+@login_required
 def get_similar_users(username):
     """
     Lấy danh sách users tương tự dựa trên Jaccard Similarity.
     Được tính bởi setup_algo.py (Neo4j GDS nodeSimilarity)
     """
+    # Chỉ cho phép xem dữ liệu của chính mình
+    if current_user.id != username:
+        return jsonify({"error": "Không có quyền truy cập"}), 403
+
     query = """
     MATCH (me:User {name: $name})-[sim:SIMILAR_TO]-(other:User)
     
@@ -461,7 +605,7 @@ def get_similar_users(username):
             }
         )
     except Exception as e:
-        print(f"❌ Lỗi get_similar_users: {e}")
+        logger.error(f"Lỗi get_similar_users: {e}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -469,9 +613,10 @@ def get_similar_users(username):
 # 6. AI PLANNER API
 # ==========================================================
 @bp.route("/api/planner/generate", methods=["POST"])
+@login_required
 def api_generate_itinerary():
     data = request.json
-    username = current_user.id if current_user.is_authenticated else "Guest"
+    username = current_user.id
 
     days = int(data.get("days", 1))
     preferences = data.get("preferences", [])
@@ -483,8 +628,7 @@ def api_generate_itinerary():
         days = 5
 
     # Kiểm tra trước: Nếu user chọn "Từ danh sách đã thích", kiểm tra xem có địa điểm nào không
-    if use_liked and current_user.is_authenticated:
-        from db import get_user_likes
+    if use_liked:
 
         likes = get_user_likes(username)
         if not likes or len(likes) == 0:
@@ -518,25 +662,30 @@ def api_generate_itinerary():
         return jsonify({"success": True, "plan": plan})
     except ValueError as e:
         # Lỗi validation (thiếu likes, etc.)
-        print(f"Planner Validation Error: {e}")
+        logger.warning(f"Planner Validation Error: {e}")
         return (
             jsonify({"success": False, "error": str(e), "error_type": "validation"}),
             400,
         )
     except Exception as e:
-        print(f"Planner Error: {e}")
+        logger.error(f"Planner Error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
 @bp.route("/api/planner/suggest-replacement", methods=["POST"])
+@login_required
 def api_suggest_replacement():
     """Gợi ý địa điểm thay thế: Chia làm 2 phần (Đã thích & AI gợi ý)"""
     data = request.json
     exclude_names = data.get("exclude", [])
     activity_type = data.get("type", "visit")  # "visit" hoặc "food"
 
+    # Validate activity_type (chỉ chấp nhận 'visit' hoặc 'food')
+    if activity_type not in ("visit", "food"):
+        activity_type = "visit"
+
     # Lấy username từ current_user (Flask-Login)
-    username = current_user.id if current_user.is_authenticated else None
+    username = current_user.id
 
     # Keyword cho đồ ăn
     food_keywords = [
@@ -552,60 +701,91 @@ def api_suggest_replacement():
         "chợ",
     ]
 
-    # Xây dựng điều kiện lọc chung (Food vs Visit)
-    filter_condition = ""
-    if activity_type == "food":
-        clauses = [f"toLower(cat.name) CONTAINS '{kw}'" for kw in food_keywords]
-        filter_str = " OR ".join(clauses)
-        filter_condition = f"AND ({filter_str})"
-    else:
-        clauses = [f"NOT toLower(cat.name) CONTAINS '{kw}'" for kw in food_keywords]
-        filter_str = " AND ".join(clauses)
-        filter_condition = f"AND ({filter_str} OR cat IS NULL)"
+    # Sử dụng flag $is_food để chuyển logic lọc vào Cypher parameterized
+    is_food = activity_type == "food"
+
+    # ============================================================
+    # Công thức Hybrid PageRank Score (parameterized, không dùng f-string)
+    # Popularity(60%) + Connectivity(30%) + Rating(10%)
+    # ============================================================
 
     liked_candidates = []
 
-    # 1. Tìm danh sách ĐÃ THÍCH (Liked)
-    if username:
-        liked_query = f"""
-        MATCH (u:User {{name: $username}})-[:LIKED]->(l:Location)
-        OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
-        WHERE NOT l.name IN $exclude
-        {filter_condition}
-        RETURN l.name as name, cat.name as category, 
-               l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
-               coalesce(l.pagerankNorm, 0) as score
-        LIMIT 10
-        """
-        try:
-            liked_candidates = run_query(
-                liked_query, {"username": username, "exclude": exclude_names}
-            )
-        except Exception as e:
-            print(f"Liked Query Error: {e}")
+    # 1. Tìm danh sách ĐÃ THÍCH (Liked) — Full Hybrid Score
+    liked_query = """
+    MATCH (u:User {name: $username})-[:LIKED]->(l:Location)
+    OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
+    WHERE NOT l.name IN $exclude
+    AND (
+        ($is_food = true AND any(kw IN $food_keywords WHERE toLower(cat.name) CONTAINS kw))
+        OR
+        ($is_food = false AND (none(kw IN $food_keywords WHERE toLower(cat.name) CONTAINS kw) OR cat IS NULL))
+    )
+    WITH l, cat,
+         (coalesce(l.pagerankNorm, 0) * 0.6 +
+          coalesce(l.pagerankConnectNorm, 0) * 0.3 +
+          (coalesce(l.rating, 0) / 5.0) * 0.1) AS score
+    RETURN l.name as name, cat.name as category, 
+           l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
+           score
+    ORDER BY score DESC
+    LIMIT 10
+    """
+    try:
+        liked_candidates = run_query(
+            liked_query,
+            {
+                "username": username,
+                "exclude": exclude_names,
+                "food_keywords": food_keywords,
+                "is_food": is_food,
+            },
+        )
+    except Exception as e:
+        logger.error(f"Liked Query Error: {e}")
 
-    # 2. Tìm danh sách AI SUGGESTIONS
+    # 2. Tìm danh sách AI SUGGESTIONS — Hybrid Score + Content-Based Bonus
     # Loại bỏ những cái đã nằm trong list Liked (để tránh trùng lặp hiển thị)
     exclude_total = exclude_names + (
         [loc["name"] for loc in liked_candidates] if liked_candidates else []
     )
 
-    ai_query = f"""
+    # Đã đăng nhập: Hybrid Score + Content-Based bonus
+    # Nếu category trùng với sở thích user → +0.2 điểm (cá nhân hóa)
+    ai_query = """
     MATCH (l:Location)
     OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
     WHERE NOT l.name IN $exclude
-    {filter_condition}
-    WITH l, cat, coalesce(l.pagerankNorm, 0) as score, rand() as r
-    // Lấy top 15 thay thế (để client có thể 'Làm mới' danh sách)
-    ORDER BY (score * 0.7 + r * 0.3) DESC
+    AND (
+        ($is_food = true AND any(kw IN $food_keywords WHERE toLower(cat.name) CONTAINS kw))
+        OR
+        ($is_food = false AND (none(kw IN $food_keywords WHERE toLower(cat.name) CONTAINS kw) OR cat IS NULL))
+    )
+    OPTIONAL MATCH (me:User {name: $username})-[:INTERACTED]->(:Location)-[:HAS_CATEGORY]->(user_cat:Category)
+    WHERE user_cat.name = cat.name
+    WITH l, cat, 
+         count(DISTINCT user_cat) as category_match,
+         rand() as r
+    WITH l, cat,
+         (coalesce(l.pagerankNorm, 0) * 0.6 +
+          coalesce(l.pagerankConnectNorm, 0) * 0.3 +
+          (coalesce(l.rating, 0) / 5.0) * 0.1) + CASE WHEN category_match > 0 THEN 0.2 ELSE 0 END as hybrid_score,
+         r
+    ORDER BY (hybrid_score * 0.7 + r * 0.3) DESC
     LIMIT 15
     RETURN l.name as name, cat.name as category, 
            l.lat as lat, l.lng as lng, l.image as image, l.desc as description,
-           score
+           hybrid_score as score
     """
+    ai_params = {
+        "username": username,
+        "exclude": exclude_total,
+        "food_keywords": food_keywords,
+        "is_food": is_food,
+    }
 
     try:
-        ai_candidates = run_query(ai_query, {"exclude": exclude_total})
+        ai_candidates = run_query(ai_query, ai_params)
 
         # Luôn trả về success=True dù danh sách rỗng (để frontend xử lý empty state)
         return jsonify(
@@ -617,7 +797,7 @@ def api_suggest_replacement():
         )
 
     except Exception as e:
-        print(f"Replacement Error: {e}")
+        logger.error(f"Replacement Error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -630,7 +810,7 @@ def api_user_activity():
         reviews = get_user_reviews(username)
         return jsonify({"success": True, "likes": likes, "reviews": reviews})
     except Exception as e:
-        print(f"Error fetching user activity: {e}")
+        logger.error(f"Error fetching user activity: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 

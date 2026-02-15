@@ -7,7 +7,13 @@
  * Phân tích lịch sử người dùng và hiển thị gợi ý
  * @param {boolean} isLoggedInUser - true nếu là user đang đăng nhập
  */
+let _analyzeTimeout = null;
 function analyzeUser(isLoggedInUser = false) {
+    clearTimeout(_analyzeTimeout);
+    _analyzeTimeout = setTimeout(() => _runAnalyzeUser(isLoggedInUser), 500);
+}
+
+function _runAnalyzeUser(isLoggedInUser = false) {
     let targetUser = isLoggedInUser 
         ? (currentUser ? currentUser.username : "") 
         : (document.getElementById("usernameInput") ? document.getElementById("usernameInput").value.trim() : "");
@@ -32,19 +38,29 @@ function analyzeUser(isLoggedInUser = false) {
             // LIMIT DISPLAY (2 lines approx ~ 6 items)
             const LIMIT = 6;
             const visibleItems = data.slice(0, LIMIT);
-            let html = visibleItems.map(place => 
-                `<div class="hist-chip" onclick="showDetailFromData('${place.name}')">
-                    <img src="${place.image}" onerror="this.src='/static/images/no-image.png'"> ${place.name}
-                 </div>`
-            ).join("");
+            
+            // Build history chips using DOM API (chống XSS)
+            histList.innerHTML = "";
+            visibleItems.forEach(place => {
+                const chip = document.createElement("div");
+                chip.className = "hist-chip";
+                const img = document.createElement("img");
+                img.src = place.image;
+                img.onerror = function() { this.src = '/static/images/no-image.png'; };
+                chip.appendChild(img);
+                chip.appendChild(document.createTextNode(" " + place.name));
+                chip.addEventListener("click", () => showDetailFromData(place.name));
+                histList.appendChild(chip);
+            });
 
             if (data.length > LIMIT) {
-                html += `<div class="hist-chip more-chip" onclick="openUserProfile()" style="background: #eef2ff; color: var(--primary); font-weight: 600; cursor: pointer;">
-                            +${data.length - LIMIT} xem thêm
-                         </div>`;
+                const moreChip = document.createElement("div");
+                moreChip.className = "hist-chip more-chip";
+                moreChip.style.cssText = "background: #eef2ff; color: var(--primary); font-weight: 600; cursor: pointer;";
+                moreChip.textContent = `+${data.length - LIMIT} xem thêm`;
+                moreChip.addEventListener("click", () => openUserProfile());
+                histList.appendChild(moreChip);
             }
-            
-            histList.innerHTML = html;
         } else { 
             histDiv.style.display = "none"; 
         }
@@ -81,9 +97,9 @@ function getRecommendations(user) {
                     <img src="${loc.image}" onerror="this.src='/static/images/no-image.png'">
                 </div>
                 <div class="card-content">
-                    <div class="card-title">${loc.name}</div>
-                    <div class="card-desc">${loc.description || "..."}</div>
-                    <div class="algo-badge badge-${loc.reason_type || 'default'}">${loc.reason_icon || '🤖'} ${loc.reason || 'AI'}</div>
+                    <div class="card-title">${escapeHTML(loc.name)}</div>
+                    <div class="card-desc">${escapeHTML(loc.description) || "..."}</div>
+                    <div class="algo-badge badge-${loc.reason_type || 'default'}">${loc.reason_icon || '🤖'} ${escapeHTML(loc.reason) || 'AI'}</div>
                 </div>`;
             
             card.onclick = () => { 
@@ -91,6 +107,72 @@ function getRecommendations(user) {
                 else showDetail(loc); 
             };
             
+            recArea.appendChild(card);
+        });
+    });
+}
+
+/**
+ * Load gợi ý mặc định cho khách chưa đăng nhập
+ * Hiển thị Top 12 địa điểm phổ biến nhất (PageRank) 
+ */
+function loadGuestRecommendations() {
+    const recArea = document.getElementById("recommendation-area");
+    if (!recArea) return;
+
+    // Loading state
+    recArea.innerHTML = `<div style="text-align:center; padding:40px; color:#6b7280;"><i class="fas fa-circle-notch fa-spin fa-2x"></i></div>`;
+
+    // Sử dụng cache nếu đã có, tránh gọi API trùng lặp
+    const dataPromise = (typeof cachedAllLocations !== 'undefined' && cachedAllLocations && cachedAllLocations.length > 0)
+        ? Promise.resolve(cachedAllLocations)
+        : apiFetch("/api/locations");
+
+    dataPromise.then((data) => {
+        recArea.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            recArea.innerHTML = `<div class="empty-state">Chưa có dữ liệu địa điểm</div>`;
+            return;
+        }
+
+        // Sắp xếp theo score (PageRank) giảm dần, lấy Top 12
+        const topLocations = [...data]
+            .sort((a, b) => (b.score || 0) - (a.score || 0))
+            .slice(0, 12);
+
+        topLocations.forEach((loc, index) => {
+            const rank = index + 1;
+            
+            // Xác định badge theo rank
+            let badgeHTML = '';
+            if (rank === 1) {
+                badgeHTML = `<div class="algo-badge badge-top1">🥇 Top 1 Nổi bật</div>`;
+            } else if (rank <= 5) {
+                badgeHTML = `<div class="algo-badge badge-top5">🔥 Top ${rank} Nổi bật</div>`;
+            } else if (rank <= 10) {
+                badgeHTML = `<div class="algo-badge badge-top10">⭐ Top ${rank} Nổi bật</div>`;
+            } else {
+                badgeHTML = `<div class="algo-badge badge-pr">📍 Địa điểm nổi bật</div>`;
+            }
+
+            const card = document.createElement("div");
+            card.className = "ai-card";
+            card.innerHTML = `
+                <div class="card-thumb">
+                    <img src="${loc.image}" onerror="this.src='/static/images/no-image.png'">
+                </div>
+                <div class="card-content">
+                    <div class="card-title">${escapeHTML(loc.name)}</div>
+                    <div class="card-desc">${escapeHTML(loc.description) || "..."}</div>
+                    ${badgeHTML}
+                </div>`;
+
+            card.onclick = () => {
+                if (typeof showDetailWithAI === 'function') showDetailWithAI(loc);
+                else if (typeof showDetail === 'function') showDetail(loc);
+            };
+
             recArea.appendChild(card);
         });
     });
@@ -120,7 +202,7 @@ function loadSimilarLocations(locationName) {
                 card.innerHTML = `
                     <img src="${loc.image}" loading="lazy" class="similar-card-img" onerror="this.src='/static/images/no-image.png'">
                     <div class="similar-card-info">
-                        <div class="similar-card-name">${loc.name}</div>
+                        <div class="similar-card-name">${escapeHTML(loc.name)}</div>
                         <div class="similar-card-score"><i class="fas fa-chart-bar"></i> ${score}</div>
                     </div>
                 `;

@@ -63,6 +63,14 @@ Có 3 phương pháp chính trong xây dựng hệ thống gợi ý:
 - **Mixed:** Hiển thị kết quả từ cả hai phương pháp
 - **Feature combination:** Kết hợp đặc trưng
 
+#### d) Vấn đề Filter Bubble (Bẫy Bong bóng Lọc)
+
+**Định nghĩa:** Filter Bubble là hiện tượng khi hệ thống gợi ý chỉ đề xuất nội dung cùng loại với những gì người dùng đã tương tác, dẫn đến việc "giam" người dùng trong một vòng tròn nội dung hẹp.
+
+**Ví dụ:** Nếu user chỉ thích "Chợ" (category Mua sắm), Content-Based chỉ gợi ý các chợ khác → user không bao giờ khám phá di tích, chùa chiền hay thiên nhiên.
+
+**Giải pháp - Diversity Pool:** Bổ sung thêm một pool ứng viên đa dạng (VD: Top N địa điểm phổ biến nhất không phân biệt category) vào tập ứng viên gợi ý. Các ứng viên này được xếp hạng bởi PageRank và chỉ xuất hiện ở cuối danh sách (sau các gợi ý cá nhân hóa), đảm bảo cân bằng giữa cá nhân hóa và đa dạng.
+
 ---
 
 ## 1.2. Cơ sở dữ liệu Đồ thị (Graph Database)

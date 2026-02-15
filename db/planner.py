@@ -2,16 +2,22 @@
 db/planner.py - AI Itinerary Planner (Lập lộ trình thông minh)
 """
 
+import logging
 from .connection import run_query
 
+logger = logging.getLogger(__name__)
 
-def generate_itinerary(username, days=1, preferences=[], use_liked=False):
+
+def generate_itinerary(username, days=1, preferences=None, use_liked=False):
     """
     Tạo lộ trình du lịch thông minh.
     :param use_liked: Nếu True, chỉ chọn từ danh sách Đã thích.
     """
-    print(
-        f"DEBUG: Generating {days}-day itinerary. Prefs: {preferences}. Using Liked: {use_liked}"
+    if preferences is None:
+        preferences = []
+
+    logger.debug(
+        f"Generating {days}-day itinerary. Prefs: {preferences}. Using Liked: {use_liked}"
     )
 
     # 1. Tìm ứng viên (Candidate Selection)
@@ -19,10 +25,9 @@ def generate_itinerary(username, days=1, preferences=[], use_liked=False):
     category_match = ""
     category_where = ""
 
-    pref_list = str(preferences)
     if preferences and len(preferences) > 0:
         category_match = "MATCH (l)-[:HAS_CATEGORY]->(cat:Category)"
-        category_where = f"AND cat.name IN {pref_list}"
+        category_where = "AND cat.name IN $preferences"
     else:
         category_match = "OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)"
 
@@ -73,10 +78,12 @@ def generate_itinerary(username, days=1, preferences=[], use_liked=False):
         """
 
     try:
-        print(f"DEBUG: Running Planner Query for user={username}...")
+        logger.debug(f"Running Planner Query for user={username}...")
 
-        candidates = run_query(query, {"name": username})
-        print(f"DEBUG: Candidates found: {len(candidates) if candidates else 0}")
+        candidates = run_query(
+            query, {"name": username, "preferences": preferences or []}
+        )
+        logger.debug(f"Candidates found: {len(candidates) if candidates else 0}")
 
         if not candidates:
             # NẾU CHẾ ĐỘ "USE LIKED" NHƯNG KHÔNG CÓ ĐỊA ĐIỂM NÀO ĐÃ THÍCH
@@ -87,12 +94,12 @@ def generate_itinerary(username, days=1, preferences=[], use_liked=False):
                 )
 
             # Chỉ fallback khi ở chế độ AI gợi ý thông thường
-            print("DEBUG: No candidates found, running fallback...")
+            logger.debug("No candidates found, running fallback...")
 
             # Fix fallback query tương tự
             fallback_where = ""
             if preferences and len(preferences) > 0:
-                fallback_where = f"WHERE cat.name IN {str(preferences)}"
+                fallback_where = "WHERE cat.name IN $preferences"
 
             fallback_query = f"""
             MATCH (l:Location)
@@ -107,8 +114,8 @@ def generate_itinerary(username, days=1, preferences=[], use_liked=False):
                    coalesce(l.rating, 0) as score
             ORDER BY score DESC LIMIT 30
             """
-            candidates = run_query(fallback_query, {})
-            print(f"DEBUG: Fallback candidates: {len(candidates) if candidates else 0}")
+            candidates = run_query(fallback_query, {"preferences": preferences or []})
+            logger.debug(f"Fallback candidates: {len(candidates) if candidates else 0}")
 
         food_keywords = [
             "ẩm thực",
@@ -150,7 +157,7 @@ def generate_itinerary(username, days=1, preferences=[], use_liked=False):
                 lat1, lng1 = float(loc1.get("lat", 0)), float(loc1.get("lng", 0))
                 lat2, lng2 = float(loc2.get("lat", 0)), float(loc2.get("lng", 0))
                 return (lat1 - lat2) ** 2 + (lng1 - lng2) ** 2
-            except:
+            except (ValueError, TypeError):
                 return float("inf")
 
         # Helper: Lấy địa điểm gần nhất từ pool so với vị trí hiện tại
@@ -174,8 +181,8 @@ def generate_itinerary(username, days=1, preferences=[], use_liked=False):
 
             return pool.pop(nearest_idx)
 
-        print(
-            f"DEBUG: Sightseeing pool: {len(pool_sightseeing)}, Food pool: {len(pool_food)}"
+        logger.debug(
+            f"Sightseeing pool: {len(pool_sightseeing)}, Food pool: {len(pool_food)}"
         )
 
         itinerary = []
@@ -232,12 +239,11 @@ def generate_itinerary(username, days=1, preferences=[], use_liked=False):
 
             itinerary.append(day_plan)
 
-        print("DEBUG: Itinerary generated successfully with Spatial Optimization")
+        logger.info("Itinerary generated successfully with Spatial Optimization")
         return itinerary
 
+    except ValueError:
+        raise  # Re-raise ValueError cho API layer xử lý
     except Exception as e:
-        print(f"[ERROR] Generating itinerary: {e}")
-        import traceback
-
-        traceback.print_exc()
+        logger.error(f"Generating itinerary: {e}", exc_info=True)
         return []

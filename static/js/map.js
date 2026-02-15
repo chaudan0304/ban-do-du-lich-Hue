@@ -149,12 +149,17 @@ function getDynamicIcon(loc) {
         }
     }
 
-    // Luôn dùng class 'custom-pin' cơ bản, không biến đổi màu sắc theo PR/AI
+    // Phân biệt 3 mức Top PageRank
+    let pinClass = 'custom-pin';
+    if (loc.topRank === 1)       pinClass = 'custom-pin pin-top1';  // Vàng gold
+    else if (loc.topRank <= 5)   pinClass = 'custom-pin pin-top5';  // Đỏ
+    else if (loc.topRank <= 10)  pinClass = 'custom-pin pin-top10'; // Cam
+
     return L.divIcon({
       className: "custom-div-icon",
-      html: `<div class='custom-pin'>${symbol}</div>`,
-      iconSize: [30, 42],      // Kích thước cũ
-      iconAnchor: [15, 42],    // Căn chỉnh lại anchor cho chuẩn với size 30
+      html: `<div class='${pinClass}'><span>${symbol}</span></div>`,
+      iconSize: [30, 42],
+      iconAnchor: [15, 42],
       popupAnchor: [0, -40]
     });
 }
@@ -206,6 +211,21 @@ function renderLocations(data, autoFit = true) {
     return;
   }
 
+  // Xác định Top 1/5/10 PageRank Score từ toàn bộ cache
+  const allData = cachedAllLocations || data;
+  const sortedByScore = [...allData].sort((a, b) => (b.score || 0) - (a.score || 0));
+  
+  // Tạo map: tên location → thứ hạng (1-based)
+  const rankMap = {};
+  sortedByScore.forEach((loc, index) => {
+    rankMap[loc.name] = index + 1;
+  });
+  
+  // Gán topRank cho data hiện tại
+  data.forEach(loc => {
+    loc.topRank = rankMap[loc.name] || 999;
+  });
+
   const latLngs = [];
   data.forEach((loc) => {
     let displayScore = ((loc.score || 0) * 100).toFixed(1);
@@ -217,9 +237,10 @@ function renderLocations(data, autoFit = true) {
         div.innerHTML = `
         <img src="${loc.image}" loading="lazy" class="mini-img" onerror="this.src='/static/images/no-image.png'">
         <div class="mini-content">
-            <div class="mini-name">${loc.name}</div>
+            <div class="mini-name">${escapeHTML(loc.name)}</div>
             <div class="mini-score">
-                <i class="fas fa-fire"></i> Hot: <span class="score-val">${displayScore}</span>
+                <i class="fas fa-fire"></i> Hot: <span class="score-val">${displayScore}</span><span style="color:#94a3b8; font-weight:400;">/100</span>
+                ${loc.topRank === 1 ? '<span class="top-badge top-1">Top 1</span>' : loc.topRank <= 5 ? '<span class="top-badge top-5">Top 5</span>' : loc.topRank <= 10 ? '<span class="top-badge top-10">Top 10</span>' : ''}
             </div>
         </div>
         `;
@@ -232,8 +253,8 @@ function renderLocations(data, autoFit = true) {
     const popupContent = document.createElement("div");
     popupContent.innerHTML = `
       <div style="text-align:center; cursor:pointer;">
-        <b style="font-size:13px">${loc.name}</b><br>
-        <span style="font-size:11px; color:#666">${loc.category}</span>
+        <b style="font-size:13px">${escapeHTML(loc.name)}</b><br>
+        <span style="font-size:11px; color:#666">${escapeHTML(loc.category)}</span>
       </div>
     `;
     popupContent.onclick = () => showDetail(loc);
@@ -326,15 +347,134 @@ async function showDetail(loc) {
   const panel = document.getElementById("detail-panel");
   const content = document.getElementById("detail-content");
   
-  // Fake stats for UI demo if not present
-  const simUsers = Math.floor(Math.random() * 5) + 2; 
-  const matchScore = Math.floor((loc.score || 0.8) * 100);
-  const popScore = Math.floor(Math.random() * 40) + 40;
-
   // Like Button State
   const isLiked = userLikedSet.has(loc.name);
   
+  // === BUILD EXPLAINABLE AI HTML ===
+  let explainHTML = '';
+  if (currentUser && loc.reason_details) {
+      const hasHistory = userLikedSet && userLikedSet.size > 0;
+      const rd = loc.reason_details;
+      const pCollab = rd.collab.percent;
+      const pContent = rd.content.percent;
+      const pPopReal = ((loc.score || 0) * 100).toFixed(1);
+      const chart = rd.chart || {collab: 0, content: 0, pagerank: 100};
+
+      if (!hasHistory) {
+          // CASE 1: COLD START
+          explainHTML = `
+          <div class="ai-reason-card">
+              <div class="ai-reason-title"><i class="fas fa-fire" style="color:#ea580c;"></i> ĐỊA ĐIỂM NỔI BẬT</div>
+              <div class="ai-highlight-box" style="background: #fff7ed; border-color: #ffedd5;">
+                  <i class="fas fa-trophy" style="color:#f59e0b;"></i>
+                  <span style="color:#9a3412;">Địa điểm được đánh giá cao nhờ sự phổ biến, vị trí thuận tiện và chất lượng dịch vụ tốt!</span>
+              </div>
+              <div class="ai-progress-row">
+                   <div class="progress-label">
+                      <span><i class="fas fa-chart-line" style="color:#f59e0b; width:15px;"></i> Điểm chất lượng AI</span>
+                      <span>${pPopReal}</span>
+                   </div>
+                   <div class="progress-track"><div class="progress-fill" style="width:${pPopReal}%; background: linear-gradient(90deg, #f59e0b, #ea580c);"></div></div>
+                   <div style="font-size: 10px; color: #64748b; margin-top: 4px;">(60% Phổ biến • 30% Kết nối • 10% Rating)</div>
+              </div>
+              <div style="margin-top:12px; font-size:12px; color:#64748b; font-style:italic; border-top:1px dashed #e2e8f0; padding-top:8px;">
+                  <i class="fas fa-info-circle"></i> Hãy thả tim <i class="far fa-heart"></i> vài địa điểm để AI hiểu gu của bạn hơn nhé!
+              </div>
+          </div>`;
+      } else {
+          // CASE 2: PERSONALIZED
+          const simUsersData = rd.collab.similar_users || [];
+          const matchedLikes = rd.content.matched_likes || [];
+
+          // Dynamic highlight
+          let highlightIcon = '🤖', highlightMsg = 'Được gợi ý bởi hệ thống AI thông minh';
+          let highlightBg = '#eff6ff', highlightBorder = '#dbeafe', highlightColor = '#1e40af';
+
+          if (loc.reason_type === 'collab' && simUsersData.length > 0) {
+              highlightIcon = '👥';
+              highlightMsg = simUsersData.map(u => '<b>' + u.name + '</b> (giống ' + u.similarity + '%)').join(', ') + ' đã thích nơi này';
+              highlightBg = '#eef2ff'; highlightBorder = '#e0e7ff'; highlightColor = '#3730a3';
+          } else if (loc.reason_type === 'content' && matchedLikes.length > 0) {
+              highlightIcon = '🎯';
+              highlightMsg = 'Gợi ý vì bạn đã thích <b>' + matchedLikes.join('</b>, <b>') + '</b>';
+              highlightBg = '#fdf2f8'; highlightBorder = '#fce7f3'; highlightColor = '#9d174d';
+          } else if (loc.reason_type === 'pagerank') {
+              highlightIcon = '🔥';
+              highlightMsg = 'Địa điểm được đánh giá cao bởi cộng đồng du lịch';
+              highlightBg = '#fff7ed'; highlightBorder = '#ffedd5'; highlightColor = '#9a3412';
+          }
+
+          // Donut chart
+          const c1 = chart.collab, c2 = chart.content, c3 = chart.pagerank;
+          const conicGrad = 'conic-gradient(#6366f1 0% ' + c1 + '%, #ec4899 ' + c1 + '% ' + (c1+c2) + '%, #f59e0b ' + (c1+c2) + '% 100%)';
+          const finalScore = loc.final_score ? loc.final_score.toFixed(1) : pPopReal;
+
+          // Similar users chips
+          let simUsersHTML = '';
+          if (simUsersData.length > 0) {
+              simUsersHTML = '<div class="explai-section">' +
+                  '<div class="explai-section-title"><i class="fas fa-user-friends" style="color:#6366f1;"></i> Người dùng tương đồng</div>' +
+                  '<div class="explai-users-list">' +
+                  simUsersData.map(u =>
+                      '<div class="explai-user-chip">' +
+                          '<div class="explai-user-avatar">' + u.name.charAt(0).toUpperCase() + '</div>' +
+                          '<div class="explai-user-info">' +
+                              '<span class="explai-user-name">' + u.name + '</span>' +
+                              '<span class="explai-user-score">Giống ' + u.similarity + '%</span>' +
+                          '</div>' +
+                      '</div>'
+                  ).join('') +
+                  '</div></div>';
+          }
+
+          // Matched likes chips (dùng data attribute thay vì inline onclick)
+          let matchedHTML = '';
+          if (matchedLikes.length > 0) {
+              matchedHTML = '<div class="explai-section">' +
+                  '<div class="explai-section-title"><i class="fas fa-heart" style="color:#ec4899;"></i> Cùng thể loại với nơi bạn thích</div>' +
+                  '<div class="explai-matched-list">' +
+                  matchedLikes.map(name =>
+                      '<div class="explai-matched-chip" data-loc-name="' + escapeHTML(name) + '" style="cursor:pointer;">' +
+                          '<i class="fas fa-map-marker-alt"></i> ' + escapeHTML(name) +
+                      '</div>'
+                  ).join('') +
+                  '</div></div>';
+          }
+
+          explainHTML = '<div class="ai-reason-card">' +
+              '<div class="ai-reason-title"><i class="fas fa-robot"></i> TẠI SAO GỢI Ý CHO BẠN?</div>' +
+              '<div class="ai-highlight-box" style="background:' + highlightBg + '; border-color:' + highlightBorder + ';">' +
+                  '<span style="font-size:18px;">' + highlightIcon + '</span>' +
+                  '<span style="color:' + highlightColor + ';">' + highlightMsg + '</span>' +
+              '</div>' +
+              '<div class="explai-chart-row">' +
+                  '<div class="explai-donut-wrap">' +
+                      '<div class="explai-donut" style="background:' + conicGrad + ';">' +
+                          '<div class="explai-donut-hole">' +
+                              '<span class="explai-donut-score">' + finalScore + '</span>' +
+                              '<span class="explai-donut-label">điểm</span>' +
+                          '</div>' +
+                      '</div>' +
+                      '<div class="explai-donut-legend">' +
+                          '<span><i class="fas fa-circle" style="color:#6366f1; font-size:8px;"></i> Collab ' + c1 + '%</span>' +
+                          '<span><i class="fas fa-circle" style="color:#ec4899; font-size:8px;"></i> Content ' + c2 + '%</span>' +
+                          '<span><i class="fas fa-circle" style="color:#f59e0b; font-size:8px;"></i> PageRank ' + c3 + '%</span>' +
+                      '</div>' +
+                  '</div>' +
+                  '<div class="explai-bars">' +
+                      '<div class="ai-progress-row"><div class="progress-label"><span><i class="fas fa-users" style="color:#6366f1; width:14px;"></i> Collaborative</span><span>' + pCollab + '%</span></div><div class="progress-track"><div class="progress-fill" style="width:' + pCollab + '%; background:#6366f1;"></div></div></div>' +
+                      '<div class="ai-progress-row"><div class="progress-label"><span><i class="fas fa-heart" style="color:#ec4899; width:14px;"></i> Content-based</span><span>' + pContent + '%</span></div><div class="progress-track"><div class="progress-fill" style="width:' + pContent + '%; background:#ec4899;"></div></div></div>' +
+                      '<div class="ai-progress-row"><div class="progress-label"><span><i class="fas fa-chart-line" style="color:#f59e0b; width:14px;"></i> PageRank</span><span>' + pPopReal + '%</span></div><div class="progress-track"><div class="progress-fill" style="width:' + pPopReal + '%; background: linear-gradient(90deg, #f59e0b, #ea580c);"></div></div></div>' +
+                  '</div>' +
+              '</div>' +
+              simUsersHTML +
+              matchedHTML +
+          '</div>';
+      }
+  }
+
   // HTML Construction
+
   content.innerHTML = `
     <!-- 1. Header Navigation -->
     <div class="detail-header-nav" onclick="closeDetail()">
@@ -348,115 +488,22 @@ async function showDetail(loc) {
 
     <div class="detail-main-content">
         <!-- 3. Title & Meta -->
-        <h1 class="detail-title-large">${loc.name}</h1>
+        <h1 class="detail-title-large">${escapeHTML(loc.name)}</h1>
         <div class="detail-tags-row">
-            <span class="tag-pill tag-green"><i class="fas fa-fire"></i> ${displayScore}</span>
-            <span class="tag-pill tag-gray"><i class="fas fa-tag"></i> ${loc.category}</span>
+            <span class="tag-pill tag-green"><i class="fas fa-fire"></i> ${displayScore}<span style="font-weight:400; opacity:0.6;">/100</span></span>
+            <span class="tag-pill tag-gray"><i class="fas fa-tag"></i> ${escapeHTML(loc.category)}</span>
         </div>
 
         <!-- 4. Description -->
-        <p class="detail-desc-text">${loc.description || "Một địa điểm thú vị tại Huế đang chờ bạn khám phá."}</p>
+        <p class="detail-desc-text">${escapeHTML(loc.description) || "Một địa điểm thú vị tại Huế đang chờ bạn khám phá."}</p>
 
-        ${currentUser ? (() => {
-            const hasHistory = userLikedSet && userLikedSet.size > 0;
-            
-            // CHỈ hiển thị nếu có dữ liệu phân tích THẬT từ API (loc.reason_details)
-            // Tuyệt đối không dùng số liệu ngẫu nhiên.
-            if (!loc.reason_details) return "";
+        ${explainHTML}
 
-            // Use Backend contribution for Personalized, but Real Score for Cold Start Pop
-            const pCollab = loc.reason_details.collab.percent;
-            const pContent = loc.reason_details.content.percent;
-            const pPop = ((loc.score || 0) * 100).toFixed(1); // Độ phổ biến dựa trên PageRank Score
-            
-            // ============================================================
-            // CASE 1: COLD START (Chưa có lịch sử like)
-            // Chỉ hiển thị độ nổi tiếng (PageRank), ẩn các chỉ số cá nhân hóa
-            // ============================================================
-            if (!hasHistory) {
-                // Dùng Real Score chính xác đến 1 số lẻ (90.3%)
-                const pPopReal = ((loc.score || 0) * 100).toFixed(1);
-
-                return `
-                <div class="ai-reason-card">
-                    <div class="ai-reason-title"><i class="fas fa-fire" style="color:#ea580c;"></i> ĐỊA ĐIỂM NỔI BẬT</div>
-                    
-                    <div class="ai-highlight-box" style="background: #fff7ed; border-color: #ffedd5;">
-                        <i class="fas fa-trophy" style="color:#f59e0b;"></i>
-                        <span style="color:#9a3412;">Địa điểm được đánh giá cao nhờ sự phổ biến, vị trí thuận tiện và chất lượng dịch vụ tốt!</span>
-                    </div>
-
-                    <div class="ai-progress-row">
-                         <div class="progress-label">
-                            <span><i class="fas fa-chart-line" style="color:#f59e0b; width:15px;"></i> Điểm chất lượng AI</span>
-                            <span>${pPopReal}</span>
-                         </div>
-                         <div class="progress-track"><div class="progress-fill" style="width:${pPopReal}%; background: linear-gradient(90deg, #f59e0b, #ea580c);"></div></div>
-                         <div style="font-size: 10px; color: #64748b; margin-top: 4px;">
-                            (60% Phổ biến • 30% Kết nối • 10% Rating)
-                         </div>
-                    </div>
-                    
-                     <div style="margin-top:12px; font-size:12px; color:#64748b; font-style:italic; border-top:1px dashed #e2e8f0; padding-top:8px;">
-                        <i class="fas fa-info-circle"></i> Hãy thả tim <i class="far fa-heart"></i> vài địa điểm để AI hiểu gu của bạn hơn nhé!
-                     </div>
-                </div>
-                `;
-            }
-
-            // ============================================================
-            // CASE 2: PERSONALIZED (Đã có lịch sử like)
-            // Hiển thị đầy đủ các chỉ số Collaborative, Content-based
-            // ============================================================
-            // Parse text "5 người..." để lấy số lượng user tương đồng thực tế
-            const match = (loc.reason_details.collab.desc || "").match(/(\d+)/);
-            const simCount = match ? match[0] : 0;
-
-
-            return `
-            <div class="ai-reason-card">
-                <div class="ai-reason-title"><i class="fas fa-robot"></i> TẠI SAO GỢI Ý CHO BẠN?</div>
-                
-                <div class="ai-highlight-box">
-                    <i class="fas fa-user-friends" style="color:#6366f1;"></i>
-                    <span>${simCount} người có sở thích giống bạn đã thích địa điểm này</span>
-                </div>
-
-                <!-- Progress Bars -->
-                <div class="ai-progress-row">
-                     <div class="progress-label">
-                        <span><i class="fas fa-quote-left" style="color:#6366f1; width:15px;"></i> Người dùng tương đồng</span>
-                        <span>${pCollab}%</span>
-                     </div>
-                     <div class="progress-track"><div class="progress-fill" style="width:${pCollab}%; background:#3b82f6;"></div></div>
-                </div>
-                
-                <div class="ai-progress-row">
-                     <div class="progress-label">
-                        <span><i class="fas fa-heart" style="color:#ec4899; width:15px;"></i> Tương tự địa điểm đã thích</span>
-                        <span>${pContent}%</span>
-                     </div>
-                     <div class="progress-track"><div class="progress-fill" style="width:${pContent}%; background:#ec4899;"></div></div>
-                </div>
-
-                <div class="ai-progress-row">
-                     <div class="progress-label">
-                        <span><i class="fas fa-chart-line" style="color:#f59e0b; width:15px;"></i> Điểm chất lượng AI</span>
-                        <span>${pPop}%</span>
-                     </div>
-                     <div class="progress-track"><div class="progress-fill" style="width:${pPop}%; background: linear-gradient(90deg, #f59e0b, #ea580c);"></div></div>
-                     <div style="font-size: 10px; color: #64748b; margin-top: 4px;">
-                        (Kết hợp: Phổ biến • Kết nối • Rating)
-                     </div>
-                </div>
-            </div>
-            `;
-        })() : ""}
 
         <!-- 6. Action Buttons -->
         <div class="detail-actions-row">
             ${currentUser 
-              ? `<button class="${isLiked ? "btn-large-action btn-outline liked" : "btn-large-action btn-outline"}" onclick="handleLike(this, '${loc.name}')">
+              ? `<button id="btn-like-detail" class="${isLiked ? "btn-large-action btn-outline liked" : "btn-large-action btn-outline"}">
                   <i class="${isLiked ? "fas" : "far"} fa-heart"></i> ${isLiked ? "Đã thích" : "Yêu thích"}
                  </button>`
               : `<button class="btn-large-action btn-outline" onclick="openAuthModal()"><i class="fas fa-lock"></i> Đăng nhập để thích</button>`
@@ -466,13 +513,13 @@ async function showDetail(loc) {
             </a>
         </div>
 
-        <!-- Admin Actions (Edit/Delete) - Cùng layout với nút trên -->
+        <!-- Admin Actions (Edit/Delete) -->
         ${currentUser && currentUser.role === "admin" ? `
         <div class="detail-actions-row admin-row">
             <button class="btn-large-action btn-outline" onclick="openEditModal()">
                 <i class="fas fa-edit"></i> Chỉnh sửa
             </button>
-            <button class="btn-large-action btn-outline btn-danger-outline" onclick="deleteLocation('${loc.name.replace(/'/g, "\\'")}')">
+            <button id="btn-delete-location" class="btn-large-action btn-outline btn-danger-outline">
                 <i class="fas fa-trash-alt"></i> Xóa địa điểm
             </button>
         </div>
@@ -485,7 +532,7 @@ async function showDetail(loc) {
         <div class="section-header-modern">
             <span><i class="fas fa-map-marker-alt"></i> KHÁM PHÁ THÊM</span>
         </div>
-        <div id="similar-locations-list" class="similar-locations-list" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+        <div id="similar-locations-list" class="similar-locations-list">
              <!-- Will be populated by JS -->
              <div style="text-align:center; grid-column:span 3; padding:20px; color:#94a3b8;">Đang tải...</div>
         </div>
@@ -513,6 +560,24 @@ async function showDetail(loc) {
 
       reviewPlaceholder.appendChild(clone);
   }
+
+  // --- Gắn event bảo mật (thay thế inline onclick) ---
+  // Like button
+  const btnLike = content.querySelector('#btn-like-detail');
+  if (btnLike) {
+      btnLike.addEventListener('click', function() { handleLike(this, loc.name); });
+  }
+
+  // Delete button (admin)
+  const btnDelete = content.querySelector('#btn-delete-location');
+  if (btnDelete) {
+      btnDelete.addEventListener('click', () => deleteLocation(loc.name));
+  }
+
+  // Matched likes chips
+  content.querySelectorAll('.explai-matched-chip[data-loc-name]').forEach(chip => {
+      chip.addEventListener('click', () => showDetailFromData(chip.dataset.locName));
+  });
 
   panel.classList.add("active");
   
