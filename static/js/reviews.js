@@ -92,27 +92,39 @@ async function submitReview(locationName) {
     } catch(e) { showNotification({type: "error", message: "Lỗi gửi đánh giá"}); }
 }
 
-async function deleteReview(locationName, reviewId) {
-    if(!confirm("Bạn có chắc chắn muốn xóa đánh giá này không?")) return;
-    
-    try {
-        const res = await apiFetch("/api/review", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ location_name: locationName, review_id: reviewId })
-        });
-        
-        if (res.success) {
-            showNotification({type: "success", message: "Đã xóa đánh giá"});
-            loadReviews(locationName);
-            if(typeof analyzeUser === 'function') analyzeUser(true);
-        } else {
-             showNotification({type: "error", message: res.error || "Không thể xóa"});
+function deleteReview(locationName, reviewId, reviewUser) {
+    showNotification({
+        type: "question",
+        title: "Xóa đánh giá",
+        message: "Bạn có chắc chắn muốn xóa đánh giá này không?",
+        btnText: "Xóa",
+        showCancel: true,
+        onConfirm: async () => {
+            try {
+                const bodyData = { location_name: locationName, review_id: reviewId };
+                // Admin xóa review của user khác
+                if (currentUser && currentUser.role === "admin" && reviewUser && reviewUser !== currentUser.username) {
+                    bodyData.review_user = reviewUser;
+                }
+                const res = await apiFetch("/api/review", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(bodyData)
+                });
+                
+                if (res.success) {
+                    showNotification({type: "success", message: "Đã xóa đánh giá"});
+                    loadReviews(locationName);
+                    if(typeof analyzeUser === 'function') analyzeUser(true);
+                } else {
+                     showNotification({type: "error", message: res.error || "Không thể xóa"});
+                }
+            } catch(e) {
+                console.error(e);
+                showNotification({type: "error", message: "Lỗi kết nối"});
+            }
         }
-    } catch(e) {
-        console.error(e);
-        showNotification({type: "error", message: "Lỗi kết nối"});
-    }
+    });
 }
 
 function editReview(locationName, rating, encodedComment, reviewId) {
@@ -294,7 +306,6 @@ function renderReviewItems(reviews, container) {
 
     reviews.forEach((rev, index) => {
         const stars = "★".repeat(rev.rating); 
-        const isOwner = currentUser && (currentUser.username === rev.username);
         const reviewId = rev.id || "";
         
         let dateStr = "";
@@ -309,6 +320,7 @@ function renderReviewItems(reviews, container) {
 
         let displayName = rev.user_fullname || rev.username || "Người dùng ẩn danh";
         if(displayName === "undefined") displayName = "Người dùng ẩn danh";
+        displayName = escapeHTML(displayName);
 
         let sentiment = "neutral";
         let sentimentLabel = "Đánh giá chung";
@@ -327,13 +339,17 @@ function renderReviewItems(reviews, container) {
              else { sentimentLabel = "Trung tính"; }
         }
 
-        const safeComment = encodeURIComponent(rev.comment || "");
-        const safeLocName = activeReviewLocation.replace(/'/g, "\\'"); 
+        const encodedComment = encodeURIComponent(rev.comment || "");
+
+        // Admin có thể xóa/sửa đánh giá của bất kỳ ai
+        const isOwner = currentUser && (currentUser.username === rev.username);
+        const isAdmin = currentUser && currentUser.role === "admin";
+        const canManage = isOwner || isAdmin;
 
         let topicsHtml = "";
         if (rev.topics && Array.isArray(rev.topics) && rev.topics.length > 0) {
              topicsHtml = `<div class="review-topics" style="display:flex; gap:5px; margin-bottom:6px; flex-wrap:wrap;">` + 
-                rev.topics.map(t => `<span style="background:#f1f5f9; color:#475569; font-size:10px; padding:2px 8px; border-radius:10px; font-weight:600;">#${t}</span>`).join("") +
+                rev.topics.map(t => `<span style="background:#f1f5f9; color:#475569; font-size:10px; padding:2px 8px; border-radius:10px; font-weight:600;">#${escapeHTML(t)}</span>`).join("") +
              `</div>`;
         }
 
@@ -359,21 +375,30 @@ function renderReviewItems(reviews, container) {
                     </div>
                     <span class="review-date">${dateStr}</span>
                 </div>
-                ${rev.comment ? `<div class="review-text-content">${rev.comment}</div>` : ""}
+                ${rev.comment ? `<div class="review-text-content">${escapeHTML(rev.comment)}</div>` : ""}
                 ${topicsHtml}
                 <div class="review-row-bottom">
                     <div class="review-meta-left">
                          <span class="review-stars">${stars}</span>
                     </div>
                     <div class="review-actions-right">
-                        ${isOwner ? `
-                            <span class="action-link link-edit" onclick="editReview('${safeLocName}', ${rev.rating}, '${safeComment}', '${reviewId}')">Sửa</span>
-                            <span class="action-link link-delete" onclick="deleteReview('${safeLocName}', '${reviewId}')">Xóa</span>
-                        ` : ""}
+                        ${isOwner ? `<span class="action-link link-edit">Sửa</span>` : ""}
+                        ${canManage ? `<span class="action-link link-delete">Xóa</span>` : ""}
                     </div>
                 </div>
             </div>
         `;
+
+        // Gắn event an toàn (tránh XSS từ tên địa điểm / username)
+        const editBtn = div.querySelector('.link-edit');
+        if (editBtn) {
+            editBtn.addEventListener('click', () => editReview(activeReviewLocation, rev.rating, encodedComment, reviewId));
+        }
+        const deleteBtn = div.querySelector('.link-delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => deleteReview(activeReviewLocation, reviewId, rev.username || ""));
+        }
+
         container.appendChild(div);
     });
 
@@ -382,7 +407,14 @@ function renderReviewItems(reviews, container) {
          moreBtn.style.textAlign = "center";
          moreBtn.style.marginTop = "10px";
          moreBtn.style.marginBottom = "10px";
-         moreBtn.innerHTML = `<span style="color:#2563eb; cursor:pointer; font-weight:600; font-size:13px;" onclick="document.querySelectorAll('.review-hidden-item').forEach(e=>e.style.display='flex'); this.parentNode.style.display='none';">Xem thêm ${reviews.length - 3} đánh giá <i class="fas fa-chevron-down"></i></span>`;
+         const moreSpan = document.createElement("span");
+         moreSpan.style.cssText = "color:#2563eb; cursor:pointer; font-weight:600; font-size:13px;";
+         moreSpan.innerHTML = `Xem thêm ${reviews.length - 3} đánh giá <i class="fas fa-chevron-down"></i>`;
+         moreSpan.addEventListener('click', function() {
+             document.querySelectorAll('.review-hidden-item').forEach(e => e.style.display = 'flex');
+             moreBtn.style.display = 'none';
+         });
+         moreBtn.appendChild(moreSpan);
          container.appendChild(moreBtn);
     }
 }

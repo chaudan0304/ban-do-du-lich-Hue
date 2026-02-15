@@ -98,46 +98,66 @@ function renderActivityList() {
         return;
     }
 
-    listContainer.innerHTML = items.map(item => {
+    // Xóa nội dung cũ
+    listContainer.innerHTML = "";
+
+    items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.style.cursor = "pointer";
+
         if(currentActivityTab === "liked") {
-            return `
-                <div class="history-item" style="cursor: pointer;" onclick="showDetailFromData('${item.location}')">
-                    <img src="${item.image}" class="item-thumb" onerror="this.src='/static/images/no-image.png'">
-                    <div class="item-info">
-                        <p class="item-name">${item.location}</p>
-                        <span class="item-cat">${item.category || "Địa điểm"}</span>
-                    </div>
-                    <button class="delete-btn" onclick="event.stopPropagation(); handleUnlikeFromProfile('${item.location}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
+            div.innerHTML = `
+                <img src="${escapeHTML(item.image)}" class="item-thumb" onerror="this.src='/static/images/no-image.png'">
+                <div class="item-info">
+                    <p class="item-name">${escapeHTML(item.location)}</p>
+                    <span class="item-cat">${escapeHTML(item.category) || "Địa điểm"}</span>
                 </div>
+                <button class="delete-btn"><i class="fas fa-trash"></i></button>
             `;
+            // Attach event bằng addEventListener thay vì inline onclick (chống XSS)
+            div.addEventListener("click", () => showDetailFromData(item.location));
+            const deleteBtn = div.querySelector(".delete-btn");
+            if(deleteBtn) {
+                deleteBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    handleUnlikeFromProfile(item.location);
+                });
+            }
         } else if(currentActivityTab === "reviews") {
-            return `
-                <div class="history-item" style="cursor: pointer;" onclick="showDetailFromData('${item.location}')">
-                    <img src="${item.image}" class="item-thumb" onerror="this.src='/static/images/no-image.png'">
-                    <div class="item-info">
-                        <p class="item-name">${item.location}</p>
-                        <span class="item-cat">${"★".repeat(item.rating)} - ${item.comment.substring(0, 30)}...</span>
-                    </div>
+            div.innerHTML = `
+                <img src="${escapeHTML(item.image)}" class="item-thumb" onerror="this.src='/static/images/no-image.png'">
+                <div class="item-info">
+                    <p class="item-name">${escapeHTML(item.location)}</p>
+                    <span class="item-cat">${"★".repeat(item.rating)} - ${escapeHTML((item.comment || "").substring(0, 30))}...</span>
                 </div>
             `;
+            div.addEventListener("click", () => showDetailFromData(item.location));
         } else {
-            return `
-                <div class="history-item" style="cursor: pointer;" onclick="if(typeof viewSavedItinerary === 'function') viewSavedItinerary('${item.id}')">
-                     <i class="fas fa-map-marked-alt" style="font-size: 24px; color:#14b8a6; margin: 0 10px;"></i>
-                    <div class="item-info">
-                        <p class="item-name">${item.title}</p>
-                        <span class="item-cat">${item.days} ngày - ${new Date(item.created_at).toLocaleDateString('vi-VN')}</span>
-                    </div>
-                    <button class="delete-btn" onclick="event.stopPropagation(); handleDeletePlanFromProfile('${item.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
+            div.innerHTML = `
+                 <i class="fas fa-map-marked-alt" style="font-size: 24px; color:#14b8a6; margin: 0 10px;"></i>
+                <div class="item-info">
+                    <p class="item-name">${escapeHTML(item.title)}</p>
+                    <span class="item-cat">${item.days} ngày - ${new Date(item.created_at).toLocaleDateString('vi-VN')}</span>
                 </div>
+                <button class="delete-btn"><i class="fas fa-trash"></i></button>
             `;
+            div.addEventListener("click", () => {
+                if(typeof viewSavedItinerary === 'function') viewSavedItinerary(item.id);
+            });
+            const deleteBtn = div.querySelector(".delete-btn");
+            if(deleteBtn) {
+                deleteBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    handleDeletePlanFromProfile(item.id);
+                });
+            }
         }
-    }).join("");
+
+        listContainer.appendChild(div);
+    });
 }
+
 
 async function handleUnlikeFromProfile(locName) {
     try {
@@ -186,13 +206,22 @@ async function handleLike(btn, name) {
     }
 }
 
-async function handleDeletePlanFromProfile(planId) {
-    if(!confirm("Bạn có chắc chắn muốn xóa lộ trình này?")) return;
-    try {
-        await apiFetch(`/api/itineraries/${planId}`, { method: "DELETE" });
-        userActivityData.plans = userActivityData.plans.filter(p => p.id !== planId);
-        renderActivityList();
-    } catch(e) { console.error(e); }
+function handleDeletePlanFromProfile(planId) {
+    showNotification({
+        type: "question",
+        title: "Xóa lộ trình",
+        message: "Bạn có chắc chắn muốn xóa lộ trình này?",
+        btnText: "Xóa",
+        showCancel: true,
+        onConfirm: async () => {
+            try {
+                await apiFetch(`/api/itineraries/${planId}`, { method: "DELETE" });
+                userActivityData.plans = userActivityData.plans.filter(p => p.id !== planId);
+                renderActivityList();
+                showNotification({type: "success", message: "Đã xóa lộ trình"});
+            } catch(e) { console.error(e); }
+        }
+    });
 }
 
 async function submitProfileUpdate() {

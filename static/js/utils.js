@@ -7,6 +7,16 @@ let currentUser = null;
 let userLikedSet = new Set(); 
 
 /**
+ * Escape HTML để tránh XSS khi chèn dữ liệu vào innerHTML
+ */
+function escapeHTML(str) {
+    if (!str) return "";
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+/**
  * Wrapper cho fetch API
  */
 async function apiFetch(url, options = {}) {

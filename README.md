@@ -32,7 +32,7 @@ Trái tim của ứng dụng là thuật toán AI kết hợp **4 nguồn ứng 
 Giải quyết nỗi lo "không biết đi đâu" chỉ trong 3 giây:
 
 - **Tùy chỉnh linh hoạt:** Chọn số ngày đi (1-5 ngày) và sở thích ưu tiên (Văn hóa, Ẩm thực, Thiên nhiên...).
-- **Tối ưu hóa:** Thuật toán tự động sắp xếp các địa điểm gần nhau vào cùng một buổi để tối ưu thời gian di chuyển.
+- **Tối ưu hóa:** Thuật toán **Nearest Neighbor (Greedy TSP)** tự động sắp xếp các địa điểm gần nhau vào cùng một buổi để tối ưu quãng đường di chuyển.
 - **Chế độ "Dựa trên sở thích" (Use Liked):** Ưu tiên đưa các địa điểm bạn đã "Thả tim" vào lịch trình, kết hợp với các gợi ý phù hợp nhất từ AI.
 - **Lưu trữ:** Dễ dàng lưu lại và quản lý các lịch trình đã tạo trong hồ sơ cá nhân.
 
@@ -224,6 +224,12 @@ python tests/run_all_tests.py
 ---
 
 ## 📜 Nhật ký Cập nhật (Changelog)
+
+### v2.6 - Security Hardening & Documentation Sync (15/02/2026)
+
+- 🔒 **Security Hardening:** Loại bỏ hoàn toàn `alert()`, `confirm()` và inline `onclick` trên toàn hệ thống. Thay thế bằng modal `showNotification` thống nhất và `addEventListener` an toàn để ngăn chặn XSS.
+- 📚 **Documentation:** Cập nhật tài liệu khóa luận (`docs/`) phản ánh chính xác các công nghệ đã triển khai (Weighted PageRank, Nearest Neighbor, Kiến trúc 3-Layer).
+- 🧹 **Code Cleanup:** Kiểm tra và đảm bảo mã nguồn sạch, tuân thủ các chuẩn bảo mật và syntax.
 
 ### v2.5 - Recommendation Diversity & UI Improvements (11/02/2026)
 

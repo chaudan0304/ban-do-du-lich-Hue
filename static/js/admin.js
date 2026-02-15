@@ -195,47 +195,64 @@ async function loadAdminUsersList() {
     
     tbody.innerHTML = "";
     filteredUsers.forEach((u) => {
-      tbody.innerHTML += `
-                <tr style="border-bottom:1px solid #eee">
-                    <td style="padding:10px;">
-                        <div style="font-weight:600; color:var(--text-main);">${u.name}</div>
-                        <div style="font-size:11px; color:var(--text-light); cursor:pointer;" onclick="viewUserDetails('${u.name}')">
-                            <span style="color:var(--primary); text-decoration: underline;">Xem thông tin chi tiết</span>
-                        </div>
-                    </td>
-                    <td style="padding:10px">
-                        <div style="display:flex; flex-direction:column; gap:4px; font-size:12px;">
-                            <span style="color:#e11d48"><i class="fas fa-heart"></i> ${u.liked_count || 0} thích</span>
-                            <span style="color:#2563eb"><i class="fas fa-comment"></i> ${u.comment_count || 0} đánh giá</span>
-                        </div>
-                    </td>
-                    <td style="padding:10px; text-align:right">
-                        <div style="display:flex; justify-content:flex-end; gap:6px;">
-                            <button onclick="deleteUser('${u.name}')" title="Xóa tài khoản" style="background:#fee2e2; color:red; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; transition:all 0.2s;"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>`;
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid #eee';
+      tr.innerHTML = `
+                <td style="padding:10px;">
+                    <div style="font-weight:600; color:var(--text-main);">${escapeHTML(u.name)}</div>
+                    <div class="admin-view-details" style="font-size:11px; color:var(--text-light); cursor:pointer;">
+                        <span style="color:var(--primary); text-decoration: underline;">Xem thông tin chi tiết</span>
+                    </div>
+                </td>
+                <td style="padding:10px">
+                    <div style="display:flex; flex-direction:column; gap:4px; font-size:12px;">
+                        <span style="color:#e11d48"><i class="fas fa-heart"></i> ${u.liked_count || 0} thích</span>
+                        <span style="color:#2563eb"><i class="fas fa-comment"></i> ${u.comment_count || 0} đánh giá</span>
+                    </div>
+                </td>
+                <td style="padding:10px; text-align:right">
+                    <div style="display:flex; justify-content:flex-end; gap:6px;">
+                        <button class="admin-delete-user-btn" title="Xóa tài khoản" style="background:#fee2e2; color:red; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; transition:all 0.2s;"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+      `;
+      // Gắn event an toàn (tránh XSS từ username)
+      const viewBtn = tr.querySelector('.admin-view-details');
+      if (viewBtn) viewBtn.addEventListener('click', () => viewUserDetails(u.name));
+
+      const delBtn = tr.querySelector('.admin-delete-user-btn');
+      if (delBtn) delBtn.addEventListener('click', () => deleteUser(u.name));
+
+      tbody.appendChild(tr);
     });
   } catch (e) {
     tbody.innerHTML = '<tr><td colspan="3" style="color:red">Lỗi tải danh sách</td></tr>';
   }
 }
 
-async function deleteUser(name) {
-  if (!confirm(`⚠️ Xóa user "${name}"?\n(Hành động không thể hoàn tác)`)) return;
-  try {
-      await apiFetch(`/api/admin/users/${name}`, { method: "DELETE" });
-      showNotification({
-        type: "success",
-        title: "Xóa thành công",
-        message: `Tài khoản <b>${name}</b> đã bị xóa khỏi hệ thống.`,
-        btnText: "Đóng",
-      });
-      loadAdminUsersList();
-      loadAdminStats();
-  } catch(e) {
-      showNotification({type: 'error', message: 'Lỗi khi xóa người dùng'});
-  }
+function deleteUser(name) {
+    showNotification({
+        type: 'warning',
+        title: 'Xóa tài khoản',
+        message: `Xóa user <b>${escapeHTML(name)}</b>?<br>(Hành động không thể hoàn tác)`,
+        btnText: 'Xóa',
+        showCancel: true,
+        onConfirm: async () => {
+            try {
+                await apiFetch(`/api/admin/users/${name}`, { method: "DELETE" });
+                showNotification({
+                    type: "success",
+                    title: "Xóa thành công",
+                    message: `Tài khoản <b>${escapeHTML(name)}</b> đã bị xóa khỏi hệ thống.`,
+                    btnText: "Đóng",
+                });
+                loadAdminUsersList();
+                loadAdminStats();
+            } catch(e) {
+                showNotification({type: 'error', message: 'Lỗi khi xóa người dùng'});
+            }
+        }
+    });
 }
 
 async function viewUserDetails(username) {
@@ -294,16 +311,16 @@ async function viewUserDetails(username) {
          ${
             (!profile.liked_locations || profile.liked_locations.length === 0) 
             ? `<div style="text-align:center; padding:15px; color:#94a3b8; font-size:12px; background: #f8fafc; border:1px dashed #e2e8f0; border-radius:8px;">Chưa thích địa điểm nào</div>`
-            : `<div style="display:flex; overflow-x:auto; gap:10px; padding-bottom:5px; scrollbar-width:thin;">` + 
+            : `<div id="admin-liked-locations-scroll" style="display:flex; overflow-x:auto; gap:10px; padding-bottom:5px; scrollbar-width:thin;">` + 
               profile.liked_locations.map(l => `
-               <div onclick="if(typeof showDetailFromData === 'function') showDetailFromData('${l.name}')" 
-                    title="${l.name}"
+               <div class="admin-liked-card" data-loc-name="${escapeHTML(l.name)}" 
+                    title="${escapeHTML(l.name)}"
                     style="min-width:100px; width:100px; cursor:pointer; background:white; border-radius:8px; overflow:hidden; border:1px solid #e2e8f0; transition:transform 0.2s;">
                   <div style="height:70px; width:100%; background:#f1f5f9;">
                       <img src="${l.image || ''}" loading="lazy" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='/static/images/no-image.png'">
                   </div>
                   <div style="padding:6px;">
-                      <div style="font-size:11px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text-main);">${l.name}</div>
+                      <div style="font-size:11px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text-main);">${escapeHTML(l.name)}</div>
                   </div>
                </div>
               `).join("") + `</div>`
@@ -336,6 +353,15 @@ async function viewUserDetails(username) {
       </div>
     `;
     list.innerHTML = html;
+
+    // Gắn event cho liked location cards (tránh inline onclick)
+    list.querySelectorAll('.admin-liked-card[data-loc-name]').forEach(card => {
+        card.addEventListener('click', () => {
+            if (typeof showDetailFromData === 'function') {
+                showDetailFromData(card.dataset.locName);
+            }
+        });
+    });
   } catch (err) {
     list.innerHTML = `<div style="color:red; text-align:center;">Lỗi tải hồ sơ: ${err.message}</div>`;
   }

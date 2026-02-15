@@ -11,6 +11,7 @@ from .connection import (
     get_driver,
     close_driver,
     run_query,
+    run_write_transaction,
     DatabaseError,
     ConstraintViolationError,
 )
@@ -57,6 +58,7 @@ __all__ = [
     "get_driver",
     "close_driver",
     "run_query",
+    "run_write_transaction",
     "DatabaseError",
     "ConstraintViolationError",
     # User

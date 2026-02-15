@@ -129,7 +129,7 @@ function switchTab(tab) {
 async function handleLogin() {
   const user = document.getElementById("loginUser").value;
   const pass = document.getElementById("loginPass").value;
-  if (!user || !pass) return alert("Vui lòng điền đủ thông tin!");
+  if (!user || !pass) return showNotification({ type: 'error', title: 'Thiếu thông tin', message: 'Vui lòng điền đủ thông tin!' });
 
   try {
     // Dùng fetch trực tiếp thay vì apiFetch

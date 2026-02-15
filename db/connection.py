@@ -82,3 +82,41 @@ def run_query(query, params=None):
         if "constraint" in error_str or "already exists" in error_str:
             raise ConstraintViolationError(f"Vi phạm ràng buộc: {e}") from e
         raise DatabaseError(f"Lỗi truy vấn database: {e}") from e
+
+
+def run_write_transaction(queries_with_params):
+    """
+    Chạy nhiều lệnh Cypher trong MỘT transaction duy nhất (atomic).
+    Nếu bất kỳ query nào lỗi → rollback tất cả.
+
+    Args:
+        queries_with_params: list of (query_string, params_dict) tuples.
+
+    Returns:
+        list[list[dict]]: Danh sách kết quả cho từng query.
+
+    Raises:
+        DatabaseError: Khi có lỗi kết nối hoặc lỗi query.
+    """
+    driver = get_driver()
+    if not driver:
+        raise DatabaseError("Không thể kết nối đến Neo4j Database")
+
+    def _execute(tx):
+        all_results = []
+        for query, params in queries_with_params:
+            result = tx.run(query, params or {})
+            records = [record.data() for record in result]
+            all_results.append(records)
+        return all_results
+
+    try:
+        with driver.session() as session:
+            return session.execute_write(_execute)
+    except Exception as e:
+        error_str = str(e).lower()
+        logger.error(f"NEO4J Transaction Error: {e}")
+
+        if "constraint" in error_str or "already exists" in error_str:
+            raise ConstraintViolationError(f"Vi phạm ràng buộc: {e}") from e
+        raise DatabaseError(f"Lỗi transaction database: {e}") from e

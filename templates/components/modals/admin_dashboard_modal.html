@@ -1,83 +1,93 @@
-    <!-- Modal Admin User Dashboard -->
-    <div id="adminModal" class="modal">
-      <div class="modal-content-fancy">
-        <div class="modal-header-gradient">
-          <h3 class="modal-title-fancy">
-            <i class="fas fa-user-shield"></i> Quản trị hệ thống
-          </h3>
-          <div class="close-btn-white" onclick="closeAdminModal()">
-            <i class="fas fa-times"></i>
+<!-- Modal Admin User Dashboard -->
+<div id="adminModal" class="modal">
+  <div class="modal-content-fancy">
+    <div class="modal-header-gradient">
+      <h3 class="modal-title-fancy">
+        <i class="fas fa-user-shield"></i> Quản trị hệ thống
+      </h3>
+      <div class="close-btn-white" onclick="closeAdminModal()">
+        <i class="fas fa-times"></i>
+      </div>
+    </div>
+
+    <div class="modal-body-fancy">
+      <div class="dashboard-stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon i-users"><i class="fas fa-users"></i></div>
+          <div class="stat-data">
+            <span>Users</span>
+            <b id="stat-user">0</b>
           </div>
         </div>
-
-        <div class="modal-body-fancy">
-          <div class="dashboard-stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon i-users"><i class="fas fa-users"></i></div>
-              <div class="stat-data">
-                <span>Users</span>
-                <b id="stat-user">0</b>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon i-locs">
-                <i class="fas fa-map-marker-alt"></i>
-              </div>
-              <div class="stat-data">
-                <span>Địa điểm</span>
-                <b id="stat-loc">0</b>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon i-likes"><i class="fas fa-heart"></i></div>
-              <div class="stat-data">
-                <span>Lượt thích</span>
-                <b id="stat-like">0</b>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon i-links">
-                <i class="fas fa-project-diagram"></i>
-              </div>
-              <div class="stat-data">
-                <span>Liên kết</span>
-                <b id="stat-link">0</b>
-              </div>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon i-locs">
+            <i class="fas fa-map-marker-alt"></i>
           </div>
-
-          <div class="dashboard-actions">
-            <!-- triggerAI function needs to be defined in admin.js or similar -->
-            <button onclick="if(typeof triggerAI === 'function') triggerAI(); else alert('Chức năng đang cập nhật');" class="btn-dash btn-ai">
-              <i class="fas fa-brain"></i> Chạy thuật toán AI
-            </button>
-            <button onclick="openAddModal()" class="btn-dash btn-add">
-              <i class="fas fa-plus-circle"></i> Thêm địa điểm
-            </button>
+          <div class="stat-data">
+            <span>Địa điểm</span>
+            <b id="stat-loc">0</b>
           </div>
-          <p
-            id="algo-status"
-            class="admin-status-text"
-            style="color: #333; margin-bottom: 20px"
-          ></p>
-
-          <h4
-            style="
-              margin: 0 0 15px;
-              padding-bottom: 8px;
-              border-bottom: 2px solid #e2e8f0;
-              font-size: 15px;
-              color: #475569;
-            "
-          >
-            <i class="fas fa-list"></i> Danh sách người dùng
-          </h4>
-
-          <div class="user-list-scroll">
-            <table style="width: 100%; border-collapse: collapse">
-              <tbody id="adminUserList"></tbody>
-            </table>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon i-likes"><i class="fas fa-heart"></i></div>
+          <div class="stat-data">
+            <span>Lượt thích</span>
+            <b id="stat-like">0</b>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon i-links">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <div class="stat-data">
+            <span>Liên kết</span>
+            <b id="stat-link">0</b>
           </div>
         </div>
       </div>
+
+      <div class="dashboard-actions">
+        <!-- triggerAI function needs to be defined in admin.js or similar -->
+        <button
+          onclick="
+            if (typeof triggerAI === 'function') triggerAI();
+            else
+              showNotification({
+                type: 'warning',
+                message: 'Chức năng đang cập nhật',
+              });
+          "
+          class="btn-dash btn-ai"
+        >
+          <i class="fas fa-brain"></i> Chạy thuật toán AI
+        </button>
+        <button onclick="openAddModal()" class="btn-dash btn-add">
+          <i class="fas fa-plus-circle"></i> Thêm địa điểm
+        </button>
+      </div>
+      <p
+        id="algo-status"
+        class="admin-status-text"
+        style="color: #333; margin-bottom: 20px"
+      ></p>
+
+      <h4
+        style="
+          margin: 0 0 15px;
+          padding-bottom: 8px;
+          border-bottom: 2px solid #e2e8f0;
+          font-size: 15px;
+          color: #475569;
+        "
+      >
+        <i class="fas fa-list"></i> Danh sách người dùng
+      </h4>
+
+      <div class="user-list-scroll">
+        <table style="width: 100%; border-collapse: collapse">
+          <tbody id="adminUserList"></tbody>
+        </table>
+      </div>
     </div>
+  </div>
+</div>

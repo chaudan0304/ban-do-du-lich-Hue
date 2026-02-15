@@ -26,8 +26,8 @@ def api_register():
     if len(username) < 3:
         return jsonify({"error": "Tên tài khoản phải có ít nhất 3 ký tự"}), 400
 
-    if len(password) < 3:
-        return jsonify({"error": "Mật khẩu phải có ít nhất 3 ký tự"}), 400
+    if len(password) < 6:
+        return jsonify({"error": "Mật khẩu phải có ít nhất 6 ký tự"}), 400
 
     success, message = register_user(username, password)
     if success:

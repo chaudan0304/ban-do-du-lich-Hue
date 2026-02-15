@@ -14,7 +14,7 @@ bp = Blueprint("admin", __name__)
 @bp.route("/api/admin/users", methods=["GET"])
 @login_required
 def api_get_users():
-    if current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     try:
@@ -31,7 +31,7 @@ def api_get_users():
 @bp.route("/api/admin/users/<username>", methods=["DELETE"])
 @login_required
 def api_delete_user(username):
-    if current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     delete_user_by_name(username)
@@ -41,7 +41,7 @@ def api_delete_user(username):
 @bp.route("/api/admin/user_comments/<username>", methods=["GET"])
 @login_required
 def api_get_user_comments(username):
-    if current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     query = """
@@ -56,7 +56,7 @@ def api_get_user_comments(username):
 @bp.route("/api/admin/user_profile/<username>", methods=["GET"])
 @login_required
 def api_get_user_profile(username):
-    if current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     # 1. Get User Info & Stats
@@ -100,7 +100,7 @@ def api_get_user_profile(username):
 @bp.route("/api/admin/stats", methods=["GET"])
 @login_required
 def get_admin_stats():
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền"}), 403
 
     query = """
@@ -121,7 +121,7 @@ def get_admin_stats():
 @bp.route("/api/admin/run-algo", methods=["POST"])
 @login_required
 def run_algo_trigger():
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền"}), 403
 
     try:
@@ -135,7 +135,7 @@ def run_algo_trigger():
 @bp.route("/api/admin/location/add", methods=["POST"])
 @login_required
 def add_location():
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền"}), 403
 
     data = request.json
@@ -173,7 +173,7 @@ def add_location():
 @bp.route("/api/admin/location/update", methods=["PUT"])
 @login_required
 def update_location():
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền"}), 403
 
     data = request.json
@@ -214,7 +214,7 @@ def update_location():
 @bp.route("/api/admin/location/delete/<name>", methods=["DELETE"])
 @login_required
 def delete_location(name):
-    if not current_user.is_authenticated or current_user.role != "admin":
+    if not current_user.is_admin:
         return jsonify({"error": "Không có quyền"}), 403
 
     try:
