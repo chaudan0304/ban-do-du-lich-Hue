@@ -1,16 +1,68 @@
 """
-setup_algo.py - Thuật toán Hybrid Recommendation cho Huế Travel AI (v2.0)
-=========================================================================
-Mục tiêu:
-- TẠO QUAN HỆ :INTERACTED với trọng số tổng hợp từ :LIKED và :REVIEWED
-  + Công thức: LIKED = 1 điểm, REVIEWED = 1-5 sao → Tổng tối đa 6 điểm/user-location
-- Tạo relationship :RELATED_TO với trọng số động (co-occurrence + category)
-- Chạy Weighted PageRank trên 2 đồ thị:
-  + User-Location (dựa trên :INTERACTED với weight) → pagerankScore (phổ biến + chất lượng)
-  + Location-Location (dựa trên :RELATED_TO) → pagerankConnect (kết nối mạng lưới)
-- Normalize score để dùng trong Cypher recommend
-- Hỗ trợ Collaborative Filtering (qua co-occurrence) & Content-based (qua category)
-- Tương thích Neo4j 5.11.2 + GDS 2.24.0
+=============================================================================
+setup_algo.py - Thuật toán Hybrid Recommendation v2.0 (AI Engine)
+setup_algo.py - Hybrid Recommendation Algorithm v2.0 (AI Engine)
+=============================================================================
+Mô tả / Description:
+    File quan trọng nhất chứa TOÀN BỘ logic thuật toán AI:
+    Most important file containing ALL AI algorithm logic:
+
+    1. TẠO QUAN HỆ :INTERACTED (Interaction Weighting)
+       CREATE :INTERACTED RELATIONSHIP (Interaction Weighting)
+       Công thức: weight = LIKED(0-1) + REVIEWED(0-5) → Max 6 điểm
+       Formula: weight = LIKED(0-1) + REVIEWED(0-5) → Max 6 points
+
+    2. TẠO QUAN HỆ :RELATED_TO (Location Linking)
+       CREATE :RELATED_TO RELATIONSHIP (Location Linking)
+       - Co-occurrence: Nếu nhiều user thích cả 2 nơi → liên kết mạnh
+         Co-occurrence: If many users like both places → strong link
+       - Category: Cùng danh mục → liên kết nhẹ
+         Category: Same category → lighter link
+
+    3. WEIGHTED PAGERANK (2 đồ thị riêng biệt / 2 separate graphs)
+       a. User-Location (pagerankScore): Phổ biến + Chất lượng
+          User-Location (pagerankScore): Popularity + Quality
+       b. Location-Location (pagerankConnect): Kết nối mạng lưới
+          Location-Location (pagerankConnect): Network connectivity
+
+    4. USER SIMILARITY (Jaccard Index via GDS nodeSimilarity)
+       Tạo :SIMILAR_TO giữa các user có sở thích giống nhau
+       Creates :SIMILAR_TO between users with similar preferences
+
+    5. LOCATION SIMILARITY (Jaccard Index)
+       Tạo :LOC_SIMILAR giữa các địa điểm tương tự
+       Creates :LOC_SIMILAR between similar locations
+
+    6. NORMALIZE SCORE & AVG RATING
+       Chuẩn hóa điểm về thang 0-1 để dùng trong recommendation query
+       Normalizes scores to 0-1 scale for recommendation queries
+
+Phụ thuộc / Dependencies:
+    - neo4j (Neo4j Python Driver)
+    - Neo4j GDS Plugin (Graph Data Science) — cần cài trong Neo4j
+      Neo4j GDS Plugin (Graph Data Science) — must be installed in Neo4j
+    - python-dotenv
+
+Cấu hình / Configuration:
+    - MAX_ITERATIONS: Số vòng lặp PageRank (12 — đủ cho đồ thị nhỏ)
+      PageRank iterations (12 — sufficient for small graphs)
+    - DAMPING_FACTOR: Hệ số tắt dần (0.88 — cân bằng global/local)
+      Damping factor (0.88 — balances global/local)
+    - WEIGHT_LIKED: Trọng số từ Like (1.0 điểm)
+      Weight from Like (1.0 points)
+    - WEIGHT_CO_OCCURRENCE: Trọng số co-occurrence (1.2/user chung)
+      Co-occurrence weight (1.2/common user)
+    - WEIGHT_CATEGORY: Trọng số cùng category (0.8)
+      Same category weight (0.8)
+
+Ghi chú / Notes:
+    - Phải chạy lại khi có thay đổi lớn về dữ liệu (nhiều user mới, nhiều review mới).
+      Must re-run when significant data changes (many new users, many new reviews).
+    - Admin có thể trigger từ Dashboard (POST /api/admin/run-algo).
+      Admin can trigger from Dashboard (POST /api/admin/run-algo).
+    - Tương thích Neo4j 5.11.2 + GDS 2.24.0.
+      Compatible with Neo4j 5.11.2 + GDS 2.24.0.
+=============================================================================
 """
 
 from neo4j import GraphDatabase, NotificationSeverity
@@ -20,42 +72,72 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 # Fix encoding cho Windows console (hỗ trợ emoji)
+# Fix encoding for Windows console (emoji support)
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
 
 load_dotenv()
 
+# -----------------------------------------------------------
+# CẤU HÌNH KẾT NỐI NEO4J (Neo4j Connection Config)
+# -----------------------------------------------------------
 URI = os.getenv("NEO4J_URI")
 USER = os.getenv("NEO4J_USER")
 PASS = os.getenv("NEO4J_PASS")
 AUTH = (USER, PASS)
 
-# Tên graph động
+# -----------------------------------------------------------
+# TÊN GRAPH CHO GDS (GDS Graph Names)
+# Sử dụng tên duy nhất để tránh xung đột khi chạy song song
+# Uses unique names to avoid conflicts when running in parallel
+# -----------------------------------------------------------
 GRAPH_USER = "hybrid_user_graph"
 GRAPH_LOC = "hybrid_loc_graph"
 
-# Trọng số cho Interaction Weighting
-WEIGHT_LIKED = 1.0  # Like đóng góp 1 điểm
-WEIGHT_REVIEW_MAX = 5.0  # Review tối đa 5 sao → tổng cộng tối đa 6 điểm
+# -----------------------------------------------------------
+# TRỌNG SỐ CẤU HÌNH (Weight Configuration)
+# -----------------------------------------------------------
+WEIGHT_LIKED = 1.0  # Like đóng góp 1 điểm / Like contributes 1 point
+WEIGHT_REVIEW_MAX = 5.0  # Review tối đa 5 sao / Review max 5 stars
+# → Tổng tối đa: 6 điểm/user-location / Max total: 6 pts/user-location
 
-# Trọng số cho RELATED_TO (Location - Location)
-WEIGHT_CO_OCCURRENCE = 1.2  # Mỗi user chung like tăng weight thêm 1.2
-WEIGHT_CATEGORY = 0.8  # Cùng category
+WEIGHT_CO_OCCURRENCE = 1.2  # Trọng số co-occurrence: mỗi user chung +1.2
+# Co-occurrence weight: each common user +1.2
+WEIGHT_CATEGORY = 0.8  # Cùng category +0.8 / Same category +0.8
 
-# PageRank config
-MAX_ITERATIONS = 12  # Đủ cho đồ thị nhỏ
-DAMPING_FACTOR = 0.88  # Cân bằng global vs local
+# -----------------------------------------------------------
+# CẤU HÌNH PAGERANK (PageRank Configuration)
+# -----------------------------------------------------------
+MAX_ITERATIONS = (
+    12  # Đủ cho đồ thị nhỏ (~100 nodes) / Sufficient for small graph (~100 nodes)
+)
+DAMPING_FACTOR = 0.88  # Cân bằng global vs local / Balances global vs local
 
 
 def run_hybrid_algo():
     """
-    Chạy thuật toán hybrid recommendation v2.0:
-    1. Dọn dẹp quan hệ :INTERACTED và :RELATED_TO cũ
-    2. Tạo quan hệ :INTERACTED từ :LIKED và :REVIEWED với trọng số tổng hợp
-    3. Tạo liên kết :RELATED_TO với trọng số động (co-occurrence + category)
-    4. Chạy Weighted PageRank trên 2 đồ thị riêng biệt
-    5. Normalize score & lưu timestamp
-    6. In bảng so sánh kết quả
+    Chạy thuật toán Hybrid Recommendation v2.0.
+    Run the Hybrid Recommendation Algorithm v2.0.
+
+    Quy trình 7 bước / 7-Step Process:
+        1. Dọn dẹp quan hệ :INTERACTED và :RELATED_TO cũ
+           Clean old :INTERACTED and :RELATED_TO relationships
+        2. Tạo :INTERACTED từ :LIKED và :REVIEWED (trọng số tổng hợp)
+           Create :INTERACTED from :LIKED and :REVIEWED (combined weights)
+        3. Tạo :RELATED_TO (co-occurrence + category)
+           Create :RELATED_TO (co-occurrence + category)
+        4. Chạy Weighted PageRank (User-Location graph)
+           Run Weighted PageRank (User-Location graph)
+        5. Chạy PageRank Kết nối (Location-Location graph)
+           Run Connectivity PageRank (Location-Location graph)
+        5b. Tính User Similarity (Jaccard Index) → :SIMILAR_TO
+            Calculate User Similarity (Jaccard Index) → :SIMILAR_TO
+        5c. Tính Location Similarity (Jaccard Index) → :LOC_SIMILAR
+            Calculate Location Similarity (Jaccard Index) → :LOC_SIMILAR
+        6. Normalize score & tính rating trung bình
+           Normalize scores & calculate average rating
+        7. In bảng so sánh kết quả (Top 50)
+           Print comparison table (Top 50)
     """
     driver = GraphDatabase.driver(
         URI,
@@ -66,11 +148,18 @@ def run_hybrid_algo():
     with driver.session() as session:
         print("⏳ Đang xử lý dữ liệu Hybrid v2.0 (Interaction Weighting)...")
 
-        # --- 0. Lưu timestamp phiên bản ---
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 0: Lưu timestamp phiên bản
+        # STEP 0: Save version timestamp
+        # ═══════════════════════════════════════════════════════
         run_timestamp = datetime.now().isoformat()
         print(f"📅 Thời gian chạy: {run_timestamp}")
 
-        # --- 1. Dọn dẹp quan hệ cũ ---
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 1: DỌN DẸP QUAN HỆ CŨ (Clean Old Relationships)
+        # Xóa :INTERACTED và :RELATED_TO cũ trước khi tính lại
+        # Delete old :INTERACTED and :RELATED_TO before recalculating
+        # ═══════════════════════════════════════════════════════
         print("🧹 Đang dọn dẹp quan hệ :INTERACTED và :RELATED_TO cũ...")
         try:
             session.run("MATCH ()-[r:INTERACTED]->() DELETE r")
@@ -78,34 +167,38 @@ def run_hybrid_algo():
         except Exception as e:
             print(f"⚠️ Lỗi dọn dẹp liên kết: {e}")
 
-        # ==================================================================
-        # BƯỚC 2: TẠO QUAN HỆ :INTERACTED VỚI TRỌNG SỐ TỔNG HỢP
-        # ==================================================================
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 2: TẠO QUAN HỆ :INTERACTED (Interaction Weighting)
+        # STEP 2: CREATE :INTERACTED RELATIONSHIP (Interaction Weighting)
+        #
+        # Công thức trọng số / Weight formula:
+        #   weight = (hasLiked ? 1.0 : 0) + (review_stars ∈ [0-5])
+        #   → Tối đa 6 điểm (1 from LIKED + 5 from 5-star review)
+        #     Maximum 6 points (1 from LIKED + 5 from 5-star review)
+        # ═══════════════════════════════════════════════════════
         print("📊 Đang tạo quan hệ :INTERACTED từ :LIKED và :REVIEWED...")
 
-        # Bước 2a: Tạo :INTERACTED cho mỗi cặp User-Location
-        # Công thức: weight = (hasLiked ? 1 : 0) + (stars từ review, 0-5)
-        # Tổng điểm tối đa: 6 (1 from LIKED + 5 from 5-star review)
         try:
             result = session.run(
                 """
                 // Tìm tất cả các tương tác User-Location
+                // Find all User-Location interactions
                 MATCH (u:User), (l:Location)
                 WHERE (u)-[:LIKED]->(l) OR (u)-[:REVIEWED]->(l)
                 
-                // Kiểm tra LIKED (1 điểm nếu có)
+                // Kiểm tra LIKED (1 điểm nếu có) / Check LIKED (1 point if exists)
                 OPTIONAL MATCH (u)-[like:LIKED]->(l)
                 WITH u, l, CASE WHEN like IS NOT NULL THEN $weight_liked ELSE 0 END AS liked_score
                 
-                // Lấy số sao từ REVIEWED (0-5 điểm)
+                // Lấy số sao từ REVIEWED (0-5 điểm) / Get stars from REVIEWED (0-5 points)
                 OPTIONAL MATCH (u)-[rev:REVIEWED]->(l)
                 WITH u, l, liked_score, coalesce(rev.rating, 0) AS review_score
                 
-                // Tính trọng số tổng hợp
+                // Tính trọng số tổng hợp / Calculate combined weight
                 WITH u, l, liked_score + review_score AS total_weight
                 WHERE total_weight > 0
                 
-                // Tạo quan hệ :INTERACTED với weight
+                // Tạo quan hệ :INTERACTED / Create :INTERACTED relationship
                 MERGE (u)-[i:INTERACTED]->(l)
                 SET i.weight = total_weight,
                     i.liked_score = CASE WHEN (u)-[:LIKED]->(l) THEN $weight_liked ELSE 0 END,
@@ -124,7 +217,7 @@ def run_hybrid_algo():
         except Exception as e:
             print(f"❌ Lỗi tạo quan hệ :INTERACTED: {e}")
 
-        # Bước 2b: Hiển thị thống kê phân bổ trọng số
+        # ─── Thống kê phân bổ trọng số / Weight distribution statistics ───
         print("📈 Thống kê phân bổ trọng số :INTERACTED:")
         try:
             stats = session.run(
@@ -149,10 +242,18 @@ def run_hybrid_algo():
         except Exception as e:
             print(f"⚠️ Không thể lấy thống kê: {e}")
 
-        # ==================================================================
+        # ═══════════════════════════════════════════════════════
         # BƯỚC 3: TẠO QUAN HỆ :RELATED_TO (Location - Location)
-        # ==================================================================
-        # 3a: Từ co-occurrence (Collaborative Filtering)
+        # STEP 3: CREATE :RELATED_TO RELATIONSHIP (Location - Location)
+        #
+        # Hai nguồn trọng số / Two weight sources:
+        #   a. Co-occurrence: Users chung (Collaborative Filtering)
+        #      Co-occurrence: Common users (Collaborative Filtering)
+        #   b. Cùng Category (Content-Based)
+        #      Same Category (Content-Based)
+        # ═══════════════════════════════════════════════════════
+
+        # 3a: Co-occurrence — Collaborative Filtering
         print("1️⃣a Đang tạo liên kết co-occurrence (trọng số động)...")
         try:
             session.run(
@@ -169,7 +270,7 @@ def run_hybrid_algo():
         except Exception as e:
             print(f"❌ Lỗi tạo liên kết co-occurrence: {e}")
 
-        # 3b: Từ cùng category (Content-based)
+        # 3b: Cùng Category — Content-Based
         print("1️⃣b Tạo liên kết cùng danh mục...")
         try:
             session.run(
@@ -184,20 +285,32 @@ def run_hybrid_algo():
         except Exception as e:
             print(f"❌ Lỗi tạo liên kết category: {e}")
 
-        # ==================================================================
-        # BƯỚC 4: WEIGHTED PAGERANK (User-Location với :INTERACTED)
-        # ==================================================================
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 4: WEIGHTED PAGERANK — User-Location Graph
+        # STEP 4: WEIGHTED PAGERANK — User-Location Graph
+        #
+        # Input: Đồ thị User↔Location qua :INTERACTED (có weight)
+        #        Graph User↔Location via :INTERACTED (weighted)
+        # Output: l.pagerankScore — phản ánh phổ biến + chất lượng
+        #         l.pagerankScore — reflects popularity + quality
+        #
+        # Sử dụng GDS: gds.pageRank.write()
+        #   - relationshipWeightProperty: 'weight' (trọng số từ INTERACTED)
+        # ═══════════════════════════════════════════════════════
         print("2️⃣ Tính Weighted PageRank phổ biến (dựa trên :INTERACTED weight)...")
+
+        # Drop graph cũ (nếu có) / Drop old graph (if exists)
         try:
             session.run(
                 "CALL gds.graph.drop($name, false) YIELD graphName",
                 {"name": GRAPH_USER},
             )
         except Exception:
-            pass  # Bỏ qua lỗi nếu graph không tồn tại
+            pass  # Bỏ qua lỗi nếu graph không tồn tại / Ignore if graph doesn't exist
 
         try:
-            # Project graph với relationshipProperties để lấy weight
+            # Project graph User-Location với weight từ :INTERACTED
+            # Project User-Location graph with weight from :INTERACTED
             session.run(
                 """
                 CALL gds.graph.project(
@@ -218,7 +331,7 @@ def run_hybrid_algo():
             return
 
         try:
-            # Chạy Weighted PageRank với relationshipWeightProperty
+            # Chạy Weighted PageRank / Run Weighted PageRank
             session.run(
                 """
                 CALL gds.pageRank.write($graphName, {
@@ -242,10 +355,17 @@ def run_hybrid_algo():
             driver.close()
             return
 
-        # ==================================================================
-        # BƯỚC 5: PAGERANK KẾT NỐI (Location network)
-        # ==================================================================
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 5: PAGERANK KẾT NỐI — Location Network
+        # STEP 5: CONNECTIVITY PAGERANK — Location Network
+        #
+        # Input: Đồ thị Location↔Location qua :RELATED_TO (undirected)
+        #        Graph Location↔Location via :RELATED_TO (undirected)
+        # Output: l.pagerankConnect — phản ánh "trung tâm" của mạng lưới
+        #         l.pagerankConnect — reflects "centrality" in the network
+        # ═══════════════════════════════════════════════════════
         print("3️⃣ Tính PageRank kết nối (dựa trên :RELATED_TO)...")
+
         try:
             session.run(
                 "CALL gds.graph.drop($name, false) YIELD graphName", {"name": GRAPH_LOC}
@@ -254,6 +374,7 @@ def run_hybrid_algo():
             pass
 
         try:
+            # Project graph Location-Location (UNDIRECTED)
             session.run(
                 """
                 CALL gds.graph.project(
@@ -295,18 +416,29 @@ def run_hybrid_algo():
             driver.close()
             return
 
-        # ==================================================================
+        # ═══════════════════════════════════════════════════════
         # BƯỚC 5b: USER SIMILARITY (Jaccard Index)
-        # ==================================================================
+        # STEP 5b: USER SIMILARITY (Jaccard Index)
+        #
+        # Sử dụng GDS nodeSimilarity để tính Jaccard giữa các User
+        # Uses GDS nodeSimilarity to compute Jaccard between Users
+        # Tạo :SIMILAR_TO {score} — dùng cho Collaborative Filtering
+        # Creates :SIMILAR_TO {score} — used for Collaborative Filtering
+        #
+        # Config:
+        #   - topK: 10 (giữ top 10 user tương đồng nhất)
+        #     topK: 10 (keep top 10 most similar users)
+        #   - similarityCutoff: 0.1 (bỏ qua ≤10% giống)
+        #     similarityCutoff: 0.1 (ignore ≤10% similar)
+        # ═══════════════════════════════════════════════════════
         print("4️⃣ Tính User Similarity (Jaccard Index)...")
 
-        # Xóa relationship SIMILAR_TO cũ
+        # Xóa relationship SIMILAR_TO cũ / Delete old SIMILAR_TO
         try:
             session.run("MATCH ()-[r:SIMILAR_TO]->() DELETE r")
         except Exception:
             pass
 
-        # Tạo graph cho Node Similarity
         GRAPH_SIMILARITY = "user_similarity_graph"
         try:
             session.run(
@@ -317,7 +449,7 @@ def run_hybrid_algo():
             pass
 
         try:
-            # Project graph User-Location với relationship INTERACTED
+            # Project graph User-Location (NATURAL direction)
             session.run(
                 """
                 CALL gds.graph.project(
@@ -334,6 +466,7 @@ def run_hybrid_algo():
             )
 
             # Chạy Node Similarity (Jaccard) và ghi kết quả
+            # Run Node Similarity (Jaccard) and write results
             result = session.run(
                 """
                 CALL gds.nodeSimilarity.write($graphName, {
@@ -358,7 +491,7 @@ def run_hybrid_algo():
                     f"   📊 Similarity TB: {record['avgSimilarity']:.4f}, Max: {record['maxSimilarity']:.4f}"
                 )
 
-            # Drop graph sau khi sử dụng
+            # Drop graph sau khi sử dụng / Drop graph after use
             session.run(
                 "CALL gds.graph.drop($name, false) YIELD graphName",
                 {"name": GRAPH_SIMILARITY},
@@ -368,12 +501,26 @@ def run_hybrid_algo():
             print(f"⚠️ Lỗi tính User Similarity: {e}")
             print("   (Có thể do chưa đủ dữ liệu hoặc GDS chưa cài)")
 
-        # ==================================================================
-        # BƯỚC 5c: LOCATION SIMILARITY (Jaccard)
-        # ==================================================================
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 5c: LOCATION SIMILARITY (Jaccard Index)
+        # STEP 5c: LOCATION SIMILARITY (Jaccard Index)
+        #
+        # Tạo :LOC_SIMILAR giữa các địa điểm có user chung
+        # Creates :LOC_SIMILAR between locations with common users
+        # Dùng cho: /api/similar/<location_name>
+        # Used for: /api/similar/<location_name>
+        #
+        # Config:
+        #   - topK: 5 (mỗi location giữ 5 nơi tương tự nhất)
+        #     topK: 5 (each location keeps 5 most similar places)
+        #   - similarityCutoff: 0.15 (ngưỡng cao hơn User)
+        #     similarityCutoff: 0.15 (higher threshold than User)
+        #   - orientation: REVERSE (Location←User thay vì User→Location)
+        #     orientation: REVERSE (Location←User instead of User→Location)
+        # ═══════════════════════════════════════════════════════
         print("5️⃣ Tính Location Similarity (Jaccard Index)...")
 
-        # Xóa relationship LOC_SIMILAR cũ
+        # Xóa relationship LOC_SIMILAR cũ / Delete old LOC_SIMILAR
         try:
             session.run("MATCH ()-[r:LOC_SIMILAR]->() DELETE r")
         except Exception:
@@ -389,7 +536,9 @@ def run_hybrid_algo():
             pass
 
         try:
-            # Project graph Location-User (reverse) để tính similarity
+            # Project graph Location-User (REVERSE direction)
+            # Đảo chiều để tính similarity từ góc nhìn Location
+            # Reverse direction to compute similarity from Location perspective
             session.run(
                 """
                 CALL gds.graph.project(
@@ -406,6 +555,7 @@ def run_hybrid_algo():
             )
 
             # Chạy Node Similarity cho Locations
+            # Run Node Similarity for Locations
             result = session.run(
                 """
                 CALL gds.nodeSimilarity.write($graphName, {
@@ -427,6 +577,7 @@ def run_hybrid_algo():
                 print(f"   ✅ Tạo {record['relationshipsWritten']} quan hệ LOC_SIMILAR")
                 print(f"   📊 Similarity TB: {record['avgSimilarity']:.4f}")
 
+            # Drop graph sau khi sử dụng / Drop graph after use
             session.run(
                 "CALL gds.graph.drop($name, false) YIELD graphName",
                 {"name": GRAPH_LOC_SIM},
@@ -435,12 +586,22 @@ def run_hybrid_algo():
         except Exception as e:
             print(f"⚠️ Lỗi tính Location Similarity: {e}")
 
-        # ==================================================================
+        # ═══════════════════════════════════════════════════════
         # BƯỚC 6: NORMALIZE SCORE & TÍNH AVG RATING
-        # ==================================================================
+        # STEP 6: NORMALIZE SCORES & CALCULATE AVG RATING
+        #
+        # Chuẩn hóa điểm về thang 0-1:
+        # Normalize scores to 0-1 scale:
+        #   pagerankNorm = pagerankScore / max(pagerankScore)
+        #   pagerankConnectNorm = pagerankConnect / max(pagerankConnect)
+        #
+        # Tính rating trung bình cho mỗi Location:
+        # Calculate average rating for each Location:
+        #   avgRating = AVG(REVIEWED.rating)
+        # ═══════════════════════════════════════════════════════
         print("📊 Normalize score, tính rating trung bình, và lưu timestamp...")
         try:
-            # Tính rating trung bình cho mỗi Location
+            # Tính rating trung bình / Calculate average rating
             session.run(
                 """
                 MATCH (l:Location)
@@ -451,7 +612,8 @@ def run_hybrid_algo():
                 """
             )
 
-            # Normalize pagerankScore và pagerankConnect
+            # Normalize PageRank scores (0-1) + lưu metadata
+            # Normalize PageRank scores (0-1) + save metadata
             session.run(
                 """
                 MATCH (l:Location)
@@ -467,9 +629,13 @@ def run_hybrid_algo():
         except Exception as e:
             print(f"⚠️ Lỗi normalize & timestamp: {e}")
 
-        # ==================================================================
-        # BƯỚC 7: IN KẾT QUẢ SO SÁNH
-        # ==================================================================
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 7: IN BẢNG SO SÁNH KẾT QUẢ (Top 50)
+        # STEP 7: PRINT RESULTS COMPARISON TABLE (Top 50)
+        #
+        # Công thức tổng điểm hiển thị / Total display score formula:
+        #   total = (pagerankNorm * 0.6 + pagerankConnectNorm * 0.3 + avgRating/5 * 0.1) * 10
+        # ═══════════════════════════════════════════════════════
         print(
             "\n✅ SO SÁNH KẾT QUẢ (Top 50) - Phản ánh cả Lượt tương tác & Chất lượng đánh giá:"
         )
@@ -505,5 +671,8 @@ def run_hybrid_algo():
     )
 
 
+# ═══════════════════════════════════════════════════════
+# ENTRY POINT — Chạy trực tiếp bằng: python setup_algo.py
+# ═══════════════════════════════════════════════════════
 if __name__ == "__main__":
     run_hybrid_algo()

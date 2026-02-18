@@ -1,53 +1,79 @@
 /* ==========================================================================
-   HUE TRAVEL AI - PREMIUM DESIGN SYSTEM (CORE STYLES)
+   HUE TRAVEL AI - KIỂU DÁNG GỐC & BIẾN CSS
+   (Core Styles & CSS Variables)
+   
+   Mô tả / Description:
+   File này chứa các biến CSS toàn cục, reset mặc định, bố cục chính,
+   các thành phần header và hiệu ứng loading toàn trang.
+   This file contains global CSS variables, default resets, main layout,
+   header components and full-page loading effects.
    ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   BIẾN CSS GỐC / CSS ROOT VARIABLES
+   Bảng màu, kích thước, bo góc, bóng đổ và hiệu ứng chuyển tiếp
+   Color palette, sizing, border-radius, box-shadows and transitions
+   -------------------------------------------------------------------------- */
 :root {
-  /* --- PALETTE MAU SAC PREMIUM --- */
+  /* --- Bảng màu chính / Primary Color Palette --- */
   --primary: #4f46e5;       /* Indigo 600 */
   --primary-hover: #4338ca; /* Indigo 700 */
   --primary-light: #e0e7ff; /* Indigo 100 */
 
+  /* --- Màu nhấn / Accent Colors --- */
   --accent: #f59e0b;        /* Amber 500 */
   --accent-hover: #d97706;  /* Amber 600 */
   --accent-light: #fef3c7;  /* Amber 100 */
 
+  /* --- Màu trạng thái / Status Colors --- */
   --success: #10b981;       /* Emerald 500 */
   --danger: #ef4444;        /* Red 500 */
   --info: #3b82f6;          /* Blue 500 */
   --warning: #f59e0b;       /* Amber 500 */
 
+  /* --- Màu chữ / Text Colors --- */
   --text-main: #0f172a;     /* Slate 900 */
   --text-secondary: #334155;/* Slate 700 */
   --text-muted: #64748b;    /* Slate 500 */
   --text-light: #94a3b8;    /* Slate 400 */
 
+  /* --- Màu nền / Background Colors --- */
   --bg-body: #f1f5f9;       /* Slate 100 */
   --bg-surface: #ffffff;
   --bg-glass: rgba(255, 255, 255, 0.85);
 
+  /* --- Viền / Border Colors --- */
   --border-light: #e2e8f0;  /* Slate 200 */
   --border-subtle: #f1f5f9; /* Slate 100 */
 
+  /* --- Kích thước bố cục / Layout Sizing --- */
   --sidebar-width: 45vw;
   --header-height: 64px;
 
+  /* --- Bo góc / Border Radius --- */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-full: 9999px;
 
+  /* --- Bóng đổ / Box Shadows --- */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
+  /* --- Hiệu ứng chuyển tiếp / Transitions --- */
   --trans-fast: 0.2s ease;
   --trans-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* --------------------------------------------------------------------------
+   RESET & CƠ SỞ / RESET & BASE STYLES
+   Đặt lại mặc định trình duyệt, kiểu chữ và thanh cuộn
+   Reset browser defaults, typography and scrollbar styling
+   -------------------------------------------------------------------------- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -60,7 +86,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Glass & Scrollbar */
+/* Hiệu ứng kính mờ / Glass morphism effect */
 .glass {
   background: var(--bg-glass);
   backdrop-filter: blur(12px);
@@ -68,13 +94,16 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+/* Tùy chỉnh thanh cuộn / Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* --------------------------------------------------------------------------
-   LAYOUT
+   BỐ CỤC CHÍNH / MAIN LAYOUT
+   Bố cục flex toàn trang (sidebar + bản đồ)
+   Full-page flex layout (sidebar + map)
    -------------------------------------------------------------------------- */
 .app-layout {
   display: flex;
@@ -83,34 +112,13 @@ body {
   overflow: hidden;
 }
 
-/* ADMIN STATS RESPONSIVE */
-.dashboard-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-/* MAP CONTAINER */
-.map-container {
-  flex: 1;
-  position: relative;
-  background: #e2e8f0;
-  overflow: hidden;
-  z-index: 1;
-}
-
-#map { width: 100%; height: 100%; }
-
 /* --------------------------------------------------------------------------
-   HEADER AUTH
+   THÀNH PHẦN HEADER / HEADER COMPONENTS
+   Logo, nút đăng nhập, thông tin người dùng, nút đăng xuất
+   Logo, login button, user info, logout button
    -------------------------------------------------------------------------- */
-.header-auth {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-}
 
+/* Biểu tượng logo gradient / Gradient logo icon */
 .logo-icon {
   font-size: 26px;
   background: linear-gradient(135deg, var(--primary), var(--accent));
@@ -120,6 +128,7 @@ body {
   filter: drop-shadow(0 2px 4px rgba(79, 70, 229, 0.3));
 }
 
+/* Nút đăng nhập trên header / Header login button */
 .btn-header-login {
   display: flex;
   align-items: center;
@@ -141,6 +150,7 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+/* Thông tin người dùng trên header / Header user info */
 .header-user {
   display: flex;
   align-items: center;
@@ -152,6 +162,7 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+/* Tên người dùng / Username display */
 #header-username {
   font-size: 13px;
   font-weight: 600;
@@ -162,6 +173,7 @@ body {
   text-overflow: ellipsis;
 }
 
+/* Ảnh đại diện nhỏ / Small user avatar */
 .user-avatar-small {
   width: 28px;
   height: 28px;
@@ -175,6 +187,7 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+/* Nút đăng xuất nhỏ / Mini logout button */
 .btn-logout-mini {
   width: 28px;
   height: 28px;
@@ -195,60 +208,15 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   SEARCH BOX & INPUTS
+   THÀNH PHẦN DÙNG CHUNG / COMMON ELEMENTS
+   Nhóm input, nút AI Planner, tiêu đề phần
+   Input groups, AI Planner button, section headings
    -------------------------------------------------------------------------- */
+
+/* Nhóm input tìm kiếm / Search input group */
 .input-group { position: relative; display: flex; gap: 8px; }
-#guest-search-box { display: flex; width: 100%; }
 
-#usernameInput {
-  width: 100%;
-  padding: 12px 16px;
-  padding-right: 48px;
-  background: white;
-  border: 2px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  font-size: 14px;
-  color: var(--text-main);
-  transition: var(--trans-fast);
-  box-shadow: var(--shadow-sm);
-}
-#usernameInput:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-light);
-  outline: none;
-}
-
-/* Search Submit Button */
-.btn-submit {
-  position: absolute;
-  right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
-}
-.btn-submit:hover {
-  transform: translateY(-50%) scale(1.05);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
-}
-.btn-submit:active {
-  transform: translateY(-50%) scale(0.98);
-}
-
-/* --------------------------------------------------------------------------
-   AI PLANNER BUTTON
-   -------------------------------------------------------------------------- */
+/* Nút mở AI Planner / AI Planner trigger button */
 .btn-ai-planner {
   width: 100%;
   background: transparent !important;
@@ -274,9 +242,7 @@ body {
   transform: none !important;
 }
 
-/* --------------------------------------------------------------------------
-   RESULTS & CARDS
-   -------------------------------------------------------------------------- */
+/* Tiêu đề phần / Section headings */
 .section-head {
   display: flex;
   justify-content: space-between;
@@ -292,6 +258,8 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* Huy hiệu đếm số lượng / Counter badge */
 .badge-counter {
   padding: 4px 8px;
   background: var(--bg-body);
@@ -302,446 +270,10 @@ body {
   color: var(--text-muted);
 }
 
-.cards-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 20px; }
-
-/* AI Card - Compact Version */
-.ai-card {
-  display: flex;
-  background: white;
-  border-radius: var(--radius-lg);
-  padding: 10px;
-  border: 1px solid transparent;
-  box-shadow: var(--shadow-sm);
-  transition: var(--trans-smooth);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.ai-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: rgba(79, 70, 229, 0.1);
-}
-.card-content {
-  flex: 1;
-  padding-left: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-}
-.card-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 2px;
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.card-desc {
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.3;
-  margin-bottom: 6px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-}
-
-.card-thumb {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  flex-shrink: 0;
-  background: var(--bg-body);
-}
-.card-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-.ai-card:hover .card-thumb img { transform: scale(1.1); }
-
-/* Badges */
-.algo-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.badge-pr { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-.badge-collab { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
-.badge-content { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-.badge-top1 { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border: 1px solid #fbbf24; }
-.badge-top5 { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
-.badge-top10 { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-.badge-pagerank { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-
-/* Compact Empty State */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px;
-  text-align: center;
-  border-radius: var(--radius-lg);
-  color: var(--text-muted);
-}
-.empty-state img { width: 40px; margin-bottom: 8px; opacity: 0.8; }
-.empty-state h3 { font-size: 14px; margin-bottom: 4px; }
-.empty-state p { font-size: 11px; margin: 0; }
-
-/* History - Single Line Scroll */
-.history-section { margin-top: 8px; padding-top: 0; border-top: none; flex-shrink: 0; }
-.history-title {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--text-light);
-  margin-bottom: 6px;
-}
-.history-chips {
-  display: flex;
-  flex-wrap: wrap !important;
-  overflow-x: hidden !important;
-  max-height: 90px !important;
-  overflow-y: auto !important;
-  gap: 8px;
-  padding-right: 4px;
-  border-bottom: 1px dashed var(--border-light);
-  scrollbar-width: thin;
-}
-.history-chips::-webkit-scrollbar { width: 4px; }
-.history-chips::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
-
-.hist-chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  background: white;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: var(--trans-fast);
-  box-shadow: var(--shadow-sm);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.hist-chip img {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
 /* --------------------------------------------------------------------------
-   DATA EXPLORER
-   -------------------------------------------------------------------------- */
-.mini-search-box {
-  position: relative;
-  width: auto;
-  flex: 0 1 240px;
-  margin-left: auto;
-}
-.mini-search-box input {
-  width: 100%;
-  padding: 10px 40px 10px 16px;
-  border: 1px solid transparent;
-  border-radius: 99px;
-  font-size: 13px;
-  background: #f3f4f6;
-  color: #1f2937;
-  transition: all 0.2s;
-}
-.mini-search-box input:focus {
-  background: white;
-  border-color: #e5e7eb;
-  box-shadow: 0 0 0 3px rgba(243, 244, 246, 0.5);
-  outline: none;
-}
-.mini-search-box i {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  font-size: 13px;
-  pointer-events: none;
-}
-
-.filter-chips {
-  display: flex;
-  flex-shrink: 0;
-  gap: 8px;
-  padding-bottom: 12px;
-  margin: 8px 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.filter-chips::-webkit-scrollbar { display: none; }
-
-/* MINI ITEM (CARD) DESIGN - REFINED VERTICAL */
-.mini-item {
-  display: flex !important;
-  flex-direction: column;
-  padding: 8px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-  height: auto;
-  min-height: 160px;
-}
-.mini-item:hover {
-  border-color: #6366f1;
-  transform: translateY(-4px);
-  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
-}
-.mini-item::before { display: none; }
-
-.mini-img {
-  width: 100%;
-  height: 84px;
-  object-fit: cover;
-  display: block;
-  background: #f3f4f6;
-  margin: 0 0 8px 0;
-  border-radius: 10px;
-}
-
-.mini-content {
-  padding: 0 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-}
-
-.mini-name {
-  font-size: 13px;
-  font-weight: 700;
-  color: #111827;
-  line-height: 1.35;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
-}
-
-.mini-score {
-  font-size: 11px;
-  color: #059669;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: auto;
-  padding-top: 4px;
-}
-.mini-score i { font-size: 11px; color: #9ca3af; }
-.score-val { color: #059669; font-weight: 700; }
-
-/* --------------------------------------------------------------------------
-   DETAIL PANEL
-   -------------------------------------------------------------------------- */
-.btn-back {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 16px 24px;
-  background: white;
-  border: none;
-  border-bottom: 1px solid var(--border-light);
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 14px;
-  text-align: left;
-  cursor: pointer;
-  transition: var(--trans-fast);
-}
-.btn-back:hover { background: #f8fafc; color: var(--primary-hover); }
-
-.detail-hero { width: 100%; height: 220px; object-fit: cover; display: block; }
-.detail-body { padding: 24px; }
-.detail-title { margin-bottom: 12px; font-size: 22px; font-weight: 800; color: var(--text-main); line-height: 1.2; }
-.detail-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; font-size: 13px; color: var(--text-secondary); }
-.meta-tag { display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--bg-body); border-radius: var(--radius-sm); font-weight: 500; }
-.detail-desc { margin-bottom: 24px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
-
-/* AI Reason */
-.ai-reason-main {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px;
-  margin-bottom: 16px;
-  background: white;
-  border-radius: var(--radius-md);
-  border-left: 4px solid var(--primary);
-  box-shadow: var(--shadow-sm);
-}
-.ai-reason-main.collab { border-color: var(--info); }
-.ai-reason-main.content { border-color: var(--success); }
-.ai-reason-main.pagerank { border-color: var(--warning); }
-.ai-reason-main .reason-text { font-size: 13px; font-weight: 600; color: var(--text-main); line-height: 1.5; }
-
-/* Score Bars */
-.ai-score-breakdown { display: flex; flex-direction: column; gap: 12px; }
-.score-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); font-weight: 500; }
-.score-bar { height: 6px; background: var(--border-light); border-radius: var(--radius-full); overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: var(--radius-full); transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
-.score-bar-fill.collab { background: var(--info); }
-.score-bar-fill.content { background: var(--success); }
-.score-bar-fill.pagerank { background: var(--warning); }
-
-/* Detail Actions */
-.detail-actions { display: flex; gap: 10px; margin-top: 24px; }
-.btn-action {
-  flex: 1;
-  padding: 12px;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  background: white;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: var(--trans-fast);
-  box-shadow: var(--shadow-sm);
-}
-.btn-action:hover { background: var(--bg-body); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.btn-like.liked {
-  color: #dc2626;
-  border-color: #fca5a5;
-  background: #fef2f2;
-  font-weight: 700;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
-}
-.btn-maps { background: #eff6ff; color: #2563eb; border-color: #dbeafe; text-decoration: none; }
-.btn-maps:hover { background: #2563eb; color: white; border-color: #2563eb; }
-
-/* Admin in Detail */
-.admin-actions-container { display: flex; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border-light); }
-.btn-admin-tool {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  opacity: 0.9;
-  transition: var(--trans-fast);
-  box-shadow: var(--shadow-sm);
-}
-.btn-admin-tool:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); opacity: 1; }
-.btn-tool-edit { background: #fde047; color: #854d0e; }
-.btn-tool-delete { background: #fca5a5; color: #7f1d1d; }
-
-/* --------------------------------------------------------------------------
-   DETAIL ACTIONS - Large Action Buttons (NEW UI)
-   -------------------------------------------------------------------------- */
-.detail-actions-row { display: flex; gap: 15px; margin-bottom: 30px; }
-
-.btn-large-action {
-  flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.btn-outline { background: white; border: 1px solid #e2e8f0; color: #475569; }
-.btn-outline:hover { border-color: #cbd5e1; background: #f8fafc; }
-.btn-outline.liked { color: #ef4444; border-color: #fecaca; background: #fef2f2; }
-
-/* --------------------------------------------------------------------------
-   ADMIN DASHBOARD STATS
-   -------------------------------------------------------------------------- */
-.stat-card {
-  padding: 12px;
-  background: white;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: var(--shadow-sm);
-}
-.stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  color: white;
-  flex-shrink: 0;
-}
-.i-users { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-.i-locs { background: linear-gradient(135deg, #10b981, #059669); }
-.i-likes { background: linear-gradient(135deg, #f43f5e, #e11d48); }
-.i-links { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-.stat-data { display: flex; flex-direction: column; }
-.stat-data span { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
-.stat-data b { font-size: 18px; font-weight: 800; color: var(--text-main); }
-.dashboard-actions { display: flex; gap: 10px; margin-bottom: 10px; }
-.btn-dash {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: var(--radius-md);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 13px;
-  transition: var(--trans-fast);
-}
-.btn-ai { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-.btn-add { background: linear-gradient(135deg, #10b981, #059669); }
-
-/* --------------------------------------------------------------------------
-   GLOBAL LOADING
+   HIỆU ỨNG TẢI TRANG / GLOBAL LOADING OVERLAY
+   Màn hình loading toàn trang với spinner xoay
+   Full-page loading screen with spinning animation
    -------------------------------------------------------------------------- */
 .global-loading {
   position: fixed;
@@ -759,6 +291,8 @@ body {
   justify-content: center;
   transition: opacity 0.3s ease;
 }
+
+/* Vòng xoay loading / Loading spinner */
 .spinner-large {
   width: 50px;
   height: 50px;
@@ -770,21 +304,22 @@ body {
 }
 .global-loading p { font-size: 16px; font-weight: 600; color: var(--text-main); letter-spacing: 0.5px; animation: pulse 1.5s ease-in-out infinite; }
 
+/* --------------------------------------------------------------------------
+   HOẠT HÌNH / ANIMATIONS
+   Các keyframes dùng chung trong toàn ứng dụng
+   Shared keyframes used throughout the application
+   -------------------------------------------------------------------------- */
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 @keyframes fadeInScale { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-/* Fix Login Message */
+/* Thông báo đăng nhập/đăng ký / Login/Register messages */
 #loginMsg, #regMsg { font-weight: 500; margin-top: 12px; }
 
-/* User List Scroll Fix */
-.user-list-scroll { max-height: 250px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: var(--radius-md); margin-top: 10px; }
-.user-list-scroll table { width: 100%; border-collapse: collapse; }
-.user-list-scroll td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-.user-list-scroll tr:last-child td { border-bottom: none; }
-
 /* --------------------------------------------------------------------------
-   MEDIA QUERIES
+   RESPONSIVE / MEDIA QUERIES
+   Điều chỉnh bố cục cho màn hình nhỏ (≤768px)
+   Layout adjustments for small screens (≤768px)
    -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
   .app-layout { flex-direction: column; }
@@ -800,7 +335,4 @@ body {
   }
 
   .leaflet-bottom { bottom: 42vh !important; }
-
-  .admin-table th:nth-child(4),
-  .admin-table td:nth-child(4) { display: none; }
 }

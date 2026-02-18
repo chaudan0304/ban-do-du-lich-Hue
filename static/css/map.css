@@ -1,8 +1,33 @@
 /* ==========================================================================
-   MAP CONTROLS & PINS
+   BẢN ĐỒ - ĐIỀU KHIỂN & GHIM ĐỊA ĐIỂM
+   (Map - Controls & Location Pins)
+   
+   Mô tả / Description:
+   File này chứa kiểu dáng cho khung bản đồ, các nút điều khiển,
+   chú giải bản đồ, ghim địa điểm tùy chỉnh và huy hiệu xếp hạng.
+   This file contains styles for the map container, control buttons,
+   map legends, custom location pins and ranking badges.
    ========================================================================== */
 
-/* MAP CONTROLS OVERLAY */
+/* --------------------------------------------------------------------------
+   KHUNG BẢN ĐỒ / MAP CONTAINER
+   Vùng hiển thị bản đồ Leaflet chiếm phần còn lại của màn hình
+   Leaflet map display area taking remaining screen space
+   -------------------------------------------------------------------------- */
+.map-container {
+  flex: 1;
+  position: relative;
+  background: #e2e8f0;
+  overflow: hidden;
+  z-index: 1;
+}
+#map { width: 100%; height: 100%; }
+
+/* --------------------------------------------------------------------------
+   CÁC NÚT ĐIỀU KHIỂN BẢN ĐỒ / MAP CONTROL BUTTONS
+   Nút bật/tắt heatmap, chế độ xem bản đồ
+   Heatmap toggle, map view mode buttons
+   -------------------------------------------------------------------------- */
 .map-controls-overlay {
   position: absolute;
   bottom: 30px;
@@ -32,7 +57,11 @@
 .btn-map-control:hover { transform: translateY(-2px); }
 .btn-map-control.active { background: #fef2f2; color: var(--danger); }
 
-/* HEATMAP LEGEND */
+/* --------------------------------------------------------------------------
+   CHÚ GIẢI HEATMAP / HEATMAP LEGEND
+   Thanh gradient hiển thị mật độ điểm nóng
+   Gradient bar showing hotspot density
+   -------------------------------------------------------------------------- */
 .heatmap-legend {
   background: white;
   padding: 10px;
@@ -52,7 +81,11 @@
 }
 .legend-labels { display: flex; justify-content: space-between; font-weight: 600; }
 
-/* MAP LEGEND */
+/* --------------------------------------------------------------------------
+   CHÚ GIẢI BẢN ĐỒ / MAP LEGEND
+   Hiển thị ký hiệu Top 1/5/10 trên bản đồ
+   Display Top 1/5/10 symbols on map
+   -------------------------------------------------------------------------- */
 .map-legend {
   position: absolute;
   bottom: 30px;
@@ -75,6 +108,8 @@
   color: var(--text-secondary);
   font-weight: 500;
 }
+
+/* Chấm tròn ký hiệu xếp hạng / Ranking indicator dots */
 .dot {
   width: 12px;
   height: 12px;
@@ -97,7 +132,11 @@
   box-shadow: 0 0 0 1px #10b981;
 }
 
-/* CUSTOM PIN */
+/* --------------------------------------------------------------------------
+   GHIM ĐỊA ĐIỂM TÙY CHỈNH / CUSTOM LOCATION PINS
+   Ghim hình giọt nước xoay 45° với biểu tượng bên trong
+   Teardrop-shaped pins rotated 45° with icons inside
+   -------------------------------------------------------------------------- */
 .custom-pin {
   width: 34px;
   height: 34px;
@@ -119,6 +158,8 @@
   transform: rotate(-45deg) scale(1.2) translateY(-8px);
   z-index: 9999;
 }
+
+/* Ghim theo xếp hạng PageRank / PageRank-ranked pins */
 .custom-pin.pin-top1 {
   background: linear-gradient(135deg, #fbbf24, #d97706);
   border-color: white;
@@ -135,7 +176,11 @@
   box-shadow: -3px 3px 8px rgba(16, 185, 129, 0.35);
 }
 
-/* Top PageRank Badges */
+/* --------------------------------------------------------------------------
+   HUY HIỆU XẾP HẠNG PAGERANK / PAGERANK RANKING BADGES
+   Nhãn nhỏ hiển thị Top 1/5/10 kèm theo tên địa điểm
+   Small labels showing Top 1/5/10 next to location names
+   -------------------------------------------------------------------------- */
 .top-badge {
   display: inline-block;
   padding: 1px 6px;

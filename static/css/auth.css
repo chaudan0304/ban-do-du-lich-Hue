@@ -1,15 +1,27 @@
 /* ==========================================================================
-   AUTH MODAL STYLES
-   Styles for Login/Register Modal and Authentication UI
+   MODAL XÁC THỰC - ĐĂNG NHẬP / ĐĂNG KÝ
+   (Auth Modal - Login / Register)
+   
+   Mô tả / Description:
+   File này chứa kiểu dáng cho modal xác thực, bao gồm form đăng nhập,
+   đăng ký, tab chuyển đổi, ô nhập liệu và nút xác nhận.
+   This file contains styles for the auth modal, including login/register
+   forms, tab switching, input fields and submit buttons.
    ========================================================================== */
 
-/* Auth Modal Specific */
+/* --------------------------------------------------------------------------
+   MODAL XÁC THỰC / AUTH MODAL SPECIFIC
+   Cấu hình riêng cho modal đăng nhập/đăng ký
+   Specific configuration for login/register modal
+   -------------------------------------------------------------------------- */
 #authModal .modal-content { padding: 24px; }
 #authModal .auth-form { padding: 12px 0 0; }
 
+/* Wrapper chứa tabs và nút đóng / Header wrapper with tabs and close button */
 .auth-header-wrapper { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .auth-header-wrapper .auth-tabs { flex: 1; margin-bottom: 0; }
 
+/* Nút đóng dạng inline / Inline close button */
 .close-btn-inline {
   width: 40px;
   height: 40px;
@@ -31,7 +43,11 @@
   transform: rotate(90deg);
 }
 
-/* Auth Tabs */
+/* --------------------------------------------------------------------------
+   TAB ĐĂNG NHẬP / ĐĂNG KÝ / AUTH TABS
+   Chuyển đổi giữa form đăng nhập và đăng ký
+   Toggle between login and register forms
+   -------------------------------------------------------------------------- */
 .auth-tabs {
   display: flex;
   margin-bottom: 0;
@@ -54,6 +70,8 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .tab-btn:hover { color: #334155; }
+
+/* Tab đang chọn với chữ gradient / Active tab with gradient text */
 .tab-btn.active {
   background: white;
   background-clip: text;
@@ -65,7 +83,11 @@
   font-weight: 800;
 }
 
-/* Form Inputs */
+/* --------------------------------------------------------------------------
+   Ô NHẬP LIỆU / FORM INPUTS
+   Ô nhập có biểu tượng bên trái và hiệu ứng focus
+   Input fields with left icon and focus effects
+   -------------------------------------------------------------------------- */
 .form-group { margin-bottom: 20px; position: relative; }
 
 .input-fancy, .auth-form input {
@@ -92,7 +114,7 @@
   outline: none;
 }
 
-/* Form Icons */
+/* Biểu tượng trong ô nhập / Input field icons */
 .form-group i, .auth-form i {
   position: absolute;
   left: 16px;
@@ -105,10 +127,14 @@
 }
 .form-group:focus-within i, .auth-form:focus-within i { color: #4f46e5; }
 
-/* Auth Form Animation */
+/* Hoạt hình form / Form animation */
 .auth-form { padding: 24px 0 0; animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 
-/* Auth Buttons */
+/* --------------------------------------------------------------------------
+   NÚT XÁC NHẬN / AUTH SUBMIT BUTTON
+   Nút đăng nhập/đăng ký gradient với hiệu ứng hover
+   Login/Register gradient button with hover effect
+   -------------------------------------------------------------------------- */
 .btn-auth-submit {
   width: 100%;
   padding: 12px;
@@ -126,7 +152,7 @@
   box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
 }
 
-/* Forgot Password Link */
+/* Liên kết quên mật khẩu / Forgot password link */
 .forgot-password-link {
   display: block;
   text-align: center;
@@ -138,7 +164,11 @@
 }
 .forgot-password-link:hover { color: var(--primary); }
 
-/* Login/Register Messages */
+/* --------------------------------------------------------------------------
+   THÔNG BÁO ĐĂNG NHẬP / LOGIN MESSAGES
+   Hiển thị kết quả đăng nhập/đăng ký (thành công/lỗi)
+   Display login/register results (success/error)
+   -------------------------------------------------------------------------- */
 #loginMsg, #regMsg {
   font-weight: 500;
   margin-top: 12px;

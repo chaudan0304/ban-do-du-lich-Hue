@@ -1,3 +1,32 @@
+"""
+=============================================================================
+routes/admin.py - Route quản trị hệ thống (Admin Routes)
+routes/admin.py - System administration routes (Admin Routes)
+=============================================================================
+Mô tả / Description:
+    - Quản lý người dùng (xem danh sách, xem hồ sơ, xóa user).
+      User management (list users, view profiles, delete users).
+    - Quản lý địa điểm (CRUD: thêm, sửa, xóa).
+      Location management (CRUD: create, update, delete).
+    - Thống kê hệ thống (số user, location, like, link).
+      System statistics (user, location, like, link counts).
+    - Trigger chạy lại thuật toán AI (PageRank, Similarity).
+      Trigger AI algorithm re-run (PageRank, Similarity).
+
+Phụ thuộc / Dependencies:
+    - Flask, Flask-Login
+    - db (run_query, get_all_users, delete_user_by_name, sync_locations_to_excel)
+    - utils (safe_float)
+    - setup_algo (run_hybrid_algo)
+
+Bảo mật / Security:
+    - TẤT CẢ route đều kiểm tra is_admin trước khi xử lý.
+      ALL routes check is_admin before processing.
+    - Trả về 403 Forbidden nếu user không phải admin.
+      Returns 403 Forbidden if user is not admin.
+=============================================================================
+"""
+
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
 from db import run_query, get_all_users, delete_user_by_name, sync_locations_to_excel
@@ -7,10 +36,21 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Đăng ký Blueprint "admin" — xử lý quản trị
+# Register "admin" Blueprint — handles administration
 bp = Blueprint("admin", __name__)
 
 
-# --- 5. API ADMIN: QUẢN LÝ NGƯỜI DÙNG ---
+# =============================================================
+# API QUẢN LÝ NGƯỜI DÙNG (User Management)
+# =============================================================
+
+
+# --- Lấy danh sách user (GET /api/admin/users) ---
+# --- Get user list (GET /api/admin/users) ---
+# Trả về: name, role, liked_count, comment_count
+# Tự động loại bỏ admin khỏi danh sách
+# Auto-excludes admin from the list
 @bp.route("/api/admin/users", methods=["GET"])
 @login_required
 def api_get_users():
@@ -20,7 +60,8 @@ def api_get_users():
     try:
         users = get_all_users()
         logger.debug(f"📋 Get all users result: {len(users or [])} users")
-        # Lọc bỏ admin khỏi danh sách (optional)
+        # Lọc bỏ admin khỏi danh sách hiển thị
+        # Filter out admin from display list
         filtered_users = [u for u in (users or []) if u.get("name") != "admin"]
         return jsonify(filtered_users)
     except Exception as e:
@@ -28,6 +69,10 @@ def api_get_users():
         return jsonify({"error": str(e)}), 500
 
 
+# --- Xóa user (DELETE /api/admin/users/<username>) ---
+# --- Delete user (DELETE /api/admin/users/<username>) ---
+# DETACH DELETE — xóa user và TẤT CẢ quan hệ liên quan
+# DETACH DELETE — removes user and ALL connected relationships
 @bp.route("/api/admin/users/<username>", methods=["DELETE"])
 @login_required
 def api_delete_user(username):
@@ -38,6 +83,8 @@ def api_delete_user(username):
     return jsonify({"message": f"Đã xóa user {username}"}), 200
 
 
+# --- Xem đánh giá của user (GET /api/admin/user_comments/<username>) ---
+# --- View user's reviews (GET /api/admin/user_comments/<username>) ---
 @bp.route("/api/admin/user_comments/<username>", methods=["GET"])
 @login_required
 def api_get_user_comments(username):
@@ -53,13 +100,17 @@ def api_get_user_comments(username):
     return jsonify(results if results else [])
 
 
+# --- Xem hồ sơ chi tiết user (GET /api/admin/user_profile/<username>) ---
+# --- View detailed user profile (GET /api/admin/user_profile/<username>) ---
+# Trả về: thông tin cá nhân + stats + reviews + liked locations
+# Returns: personal info + stats + reviews + liked locations
 @bp.route("/api/admin/user_profile/<username>", methods=["GET"])
 @login_required
 def api_get_user_profile(username):
     if not current_user.is_admin:
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
-    # 1. Get User Info & Stats
+    # 1. Lấy thông tin User & thống kê / Get User Info & Stats
     user_query = """
     MATCH (u:User {name: $name})
     OPTIONAL MATCH (u)-[r:LIKED]->()
@@ -74,7 +125,7 @@ def api_get_user_profile(username):
 
     profile = user_data[0]
 
-    # 2. Get Reviews List
+    # 2. Lấy danh sách Reviews / Get Reviews List
     reviews_query = """
     MATCH (u:User {name: $name})-[r:REVIEWED]->(l:Location)
     RETURN l.name AS location, r.rating AS rating, r.comment AS comment, toString(r.timestamp) AS time
@@ -83,7 +134,7 @@ def api_get_user_profile(username):
     reviews = run_query(reviews_query, {"name": username})
     profile["reviews"] = reviews if reviews else []
 
-    # 3. Get Liked Locations
+    # 3. Lấy danh sách Liked Locations / Get Liked Locations
     liked_query = """
     MATCH (u:User {name: $name})-[r:LIKED]->(l:Location)
     OPTIONAL MATCH (l)-[:HAS_CATEGORY]->(cat:Category)
@@ -96,7 +147,11 @@ def api_get_user_profile(username):
     return jsonify(profile)
 
 
-# --- API LẤY THỐNG KÊ ---
+# =============================================================
+# API THỐNG KÊ HỆ THỐNG (System Statistics)
+# GET /api/admin/stats
+# Trả về: user_count, location_count, like_count, link_count
+# =============================================================
 @bp.route("/api/admin/stats", methods=["GET"])
 @login_required
 def get_admin_stats():
@@ -117,7 +172,14 @@ def get_admin_stats():
         return jsonify({"error": str(e)}), 500
 
 
-# --- API CHẠY LẠI THUẬT TOÁN (TRIGGER AI) ---
+# =============================================================
+# API CHẠY LẠI THUẬT TOÁN AI (Trigger AI Algorithm Re-run)
+# POST /api/admin/run-algo
+# Gọi hàm run_hybrid_algo() trong setup_algo.py
+# Calls run_hybrid_algo() in setup_algo.py
+# Bao gồm: PageRank, User Similarity, Location Similarity
+# Includes: PageRank, User Similarity, Location Similarity
+# =============================================================
 @bp.route("/api/admin/run-algo", methods=["POST"])
 @login_required
 def run_algo_trigger():
@@ -131,7 +193,13 @@ def run_algo_trigger():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-# --- API THÊM ĐỊA ĐIỂM MỚI (CREATE) ---
+# =============================================================
+# API THÊM ĐỊA ĐIỂM MỚI (Create Location)
+# POST /api/admin/location/add
+# Body: {name, category, description, image, lat, lng}
+# Tự động đồng bộ vào file Excel sau khi thêm
+# Auto-syncs to Excel file after adding
+# =============================================================
 @bp.route("/api/admin/location/add", methods=["POST"])
 @login_required
 def add_location():
@@ -162,14 +230,20 @@ def add_location():
                 "lng": safe_float(data.get("lng")),
             },
         )
-        # Đồng bộ vào file Excel
+        # Đồng bộ vào file Excel / Sync to Excel file
         sync_locations_to_excel()
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-# --- API SỬA ĐỊA ĐIỂM (UPDATE) ---
+# =============================================================
+# API SỬA ĐỊA ĐIỂM (Update Location)
+# PUT /api/admin/location/update
+# Body: {old_name, name, category, description, image, lat, lng}
+# Cập nhật thuộc tính + đổi category nếu cần
+# Updates properties + changes category if needed
+# =============================================================
 @bp.route("/api/admin/location/update", methods=["PUT"])
 @login_required
 def update_location():
@@ -203,14 +277,19 @@ def update_location():
                 "image": data.get("image"),
             },
         )
-        # Đồng bộ vào file Excel
+        # Đồng bộ vào file Excel / Sync to Excel file
         sync_locations_to_excel()
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-# --- API XÓA ĐỊA ĐIỂM (DELETE) ---
+# =============================================================
+# API XÓA ĐỊA ĐIỂM (Delete Location)
+# DELETE /api/admin/location/delete/<name>
+# DETACH DELETE — xóa location và TẤT CẢ quan hệ liên quan
+# DETACH DELETE — removes location and ALL connected relationships
+# =============================================================
 @bp.route("/api/admin/location/delete/<name>", methods=["DELETE"])
 @login_required
 def delete_location(name):
@@ -218,10 +297,9 @@ def delete_location(name):
         return jsonify({"error": "Không có quyền"}), 403
 
     try:
-        # Decode name nếu cần thiết, nhưng flask thường tự decode
         query = "MATCH (l:Location {name: $name}) DETACH DELETE l"
         run_query(query, {"name": name})
-        # Đồng bộ vào file Excel
+        # Đồng bộ vào file Excel / Sync to Excel file
         sync_locations_to_excel()
         return jsonify({"success": True})
     except Exception as e:

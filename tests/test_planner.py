@@ -1,3 +1,31 @@
+"""
+=============================================================================
+tests/test_planner.py - Test lộ trình AI (AI Planner Integration Tests)
+tests/test_planner.py - AI Planner Integration Tests
+=============================================================================
+Mô tả / Description:
+    Kiểm tra tích hợp của hàm generate_itinerary() trong db/planner.py.
+    Integration tests for generate_itinerary() function in db/planner.py.
+
+    Test 1: Tạo lộ trình 1 ngày, không có preferences (fallback mode)
+            Generate 1-day itinerary, no preferences (fallback mode)
+    Test 2: Tạo lộ trình 2 ngày với preferences 'Ẩm thực' và 'Di tích'
+            Generate 2-day itinerary with 'Ẩm thực' and 'Di tích' preferences
+
+Phụ thuộc / Dependencies:
+    - db (generate_itinerary, register_user, delete_user_by_name)
+
+Cách chạy / How to run:
+    python tests/test_planner.py
+
+Lưu ý / Notes:
+    - Tạo user tạm thời và xóa sau khi test xong.
+      Creates temporary user and deletes after test.
+    - User mới không có likes → planner sẽ dùng fallback/AI gợi ý.
+      New user has no likes → planner will use fallback/AI suggestion.
+=============================================================================
+"""
+
 from db import (
     generate_itinerary,
     close_driver,
@@ -7,12 +35,13 @@ from db import (
 )
 import sys
 
-# Force UTF-8 encoding
+# Fix encoding cho Windows / Fix encoding for Windows
 try:
     sys.stdout.reconfigure(encoding="utf-8")
 except:
     pass
 
+# User test tạm thời / Temporary test user
 TEST_USER = "test_planner_user"
 
 try:
@@ -20,17 +49,21 @@ try:
     print("--- TESTING AI PLANNER (INTEGRATION) ---")
     print("=" * 50)
 
-    # 1. Setup: Ensure user exists
+    # ─── SETUP: Tạo user test / Create test user ───
     print(f"\n[SETUP] Creating temporary user: {TEST_USER}")
-    # Delete if exists to be clean
-    delete_user_by_name(TEST_USER)
+    delete_user_by_name(TEST_USER)  # Dọn dẹp nếu còn / Clean if exists
     success, msg = register_user(TEST_USER, "123456")
     if success:
         print("User created successfully.")
     else:
         print(f"User creation failed: {msg}")
 
-    # 2. Test 1: Basic (Fallback likely, unless we add history)
+    # ═══════════════════════════════════════════════════════
+    # TEST 1: Lộ trình cơ bản (1 ngày, không preferences)
+    # TEST 1: Basic itinerary (1 day, no preferences)
+    # User mới → không có likes → sẽ dùng fallback query
+    # New user → no likes → will use fallback query
+    # ═══════════════════════════════════════════════════════
     print("\n[TEST 1] 1 Day, No Prefs")
     plan1 = generate_itinerary(TEST_USER, 1, [])
     print(f"Plan 1 Result: {len(plan1)} days")
@@ -42,7 +75,12 @@ try:
     else:
         print("❌ Test 1 Failed: No plan generated")
 
-    # 3. Test 2: With Preferences (Accented)
+    # ═══════════════════════════════════════════════════════
+    # TEST 2: Lộ trình với preferences (2 ngày, 'Ẩm thực' + 'Di tích')
+    # TEST 2: Itinerary with preferences (2 days, 'Ẩm thực' + 'Di tích')
+    # Kiểm tra lọc theo category có hoạt động đúng
+    # Verify category filtering works correctly
+    # ═══════════════════════════════════════════════════════
     print("\n[TEST 2] 2 Days, Preferences: 'Ẩm thực', 'Di tích'")
     plan2 = generate_itinerary(TEST_USER, 2, ["Ẩm thực", "Di tích"])
     print(f"Plan 2 Result: {len(plan2)} days")
@@ -55,7 +93,7 @@ try:
     else:
         print("❌ Test 2 Failed: No plan generated")
 
-    # 4. Teardown
+    # ─── TEARDOWN: Xóa user test / Delete test user ───
     print(f"\n[TEARDOWN] Deleting user: {TEST_USER}")
     delete_user_by_name(TEST_USER)
     print("Clean up complete.")

@@ -14,6 +14,10 @@
       type="image/svg+xml"
     />
 
+    <!-- ============================================================
+         THƯ VIỆN BÊN NGOÀI / EXTERNAL LIBRARIES
+         Google Fonts, Font Awesome, Leaflet Map
+         ============================================================ -->
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
       rel="stylesheet"
@@ -23,11 +27,12 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
 
-    <!-- Leaflet CSS -->
+    <!-- Leaflet CSS - Thư viện bản đồ tương tác / Interactive map library -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
+    <!-- Leaflet MarkerCluster - Gom nhóm ghim / Pin clustering plugin -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
@@ -37,42 +42,57 @@
       href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
     />
 
+    <!-- ============================================================
+         CSS ỨNG DỤNG / APPLICATION STYLESHEETS
+         Mỗi file CSS tương ứng với một module giao diện
+         Each CSS file corresponds to a UI module
+         ============================================================ -->
+    <!-- Kiểu dáng gốc & biến CSS / Core styles & CSS variables -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}?v=1"
     />
+    <!-- Thanh bên & thành phần / Sidebar & components -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/sidebar.css') }}?v=1"
     />
+    <!-- Tab chuyển đổi sidebar / Sidebar tab switching -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/sidebar-tabs.css') }}?v=1"
     />
+    <!-- Modal & form dùng chung / Shared modals & forms -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/modals.css') }}?v=1"
     />
+    <!-- Lập lịch trình AI / AI itinerary planner -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/planner.css') }}?v=1"
     />
+    <!-- Bản đồ, ghim & điều khiển / Map, pins & controls -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/map.css') }}?v=1"
     />
+    <!-- Đánh giá & xếp hạng / Reviews & ratings -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/reviews.css') }}?v=1"
     />
+    <!-- Modal xác thực / Auth modal -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/auth.css') }}?v=1"
     />
+    <!-- Modal hồ sơ / Profile modal -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/profile.css') }}?v=1"
     />
+    <!-- Bảng quản trị / Admin dashboard -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/admin.css') }}?v=1"
@@ -80,14 +100,33 @@
   </head>
 
   <body>
-    <!-- Loading toàn cục (hiển thị khi gọi API dài) -->
+    <!-- ================================================================
+         LOADING TOÀN CỤC / GLOBAL LOADING OVERLAY
+         Hiển thị khi gọi API tốn thời gian (gợi ý AI, lập lịch trình...)
+         Displayed during time-consuming API calls (AI suggestions, planning...)
+         ================================================================ -->
     <div id="global-loading" class="global-loading" style="display: none">
       <div class="spinner-large"></div>
       <p>Đang xử lý... Vui lòng đợi</p>
     </div>
 
+    <!-- ================================================================
+         BỐ CỤC CHÍNH / MAIN APP LAYOUT
+         Chia thành 2 phần: Sidebar (trái) + Bản đồ (phải)
+         Split into 2 sections: Sidebar (left) + Map (right)
+         ================================================================ -->
     <div class="app-layout">
+
+      <!-- ==============================================================
+           THANH BÊN / SIDEBAR
+           Chứa: Header, Banner CTA, Tabs, Danh sách địa điểm, Chi tiết
+           Contains: Header, CTA Banner, Tabs, Location list, Details
+           ============================================================== -->
       <aside class="sidebar">
+
+        <!-- ── HEADER SIDEBAR / SIDEBAR HEADER ──
+             Logo thương hiệu + Khu vực đăng nhập/đăng xuất
+             Brand logo + Login/Logout area -->
         <div class="sidebar-header">
           <div class="brand">
             <i class="fas fa-map-marked-alt logo-icon"></i>
@@ -97,7 +136,10 @@
             </div>
           </div>
 
+          <!-- Khu vực xác thực / Authentication area -->
           <div class="header-auth">
+            <!-- Nút đăng nhập (hiển thị khi chưa đăng nhập)
+                 Login button (shown when not logged in) -->
             <button
               id="header-login-btn"
               class="btn-header-login"
@@ -106,6 +148,8 @@
               <i class="fas fa-user-circle"></i> Đăng nhập
             </button>
 
+            <!-- Thông tin người dùng (hiển thị sau đăng nhập)
+                 User info (shown after login) -->
             <div
               id="header-user-info"
               class="header-user"
@@ -114,6 +158,8 @@
               <div class="user-avatar-small"><i class="fas fa-user"></i></div>
               <span id="header-username">User</span>
 
+              <!-- Nút quản lý người dùng (chỉ admin)
+                   User management button (admin only) -->
               <button
                 id="btn-admin-panel"
                 class="btn-logout-mini"
@@ -124,6 +170,7 @@
                 <i class="fas fa-users-cog"></i>
               </button>
 
+              <!-- Nút đăng xuất / Logout button -->
               <button
                 class="btn-logout-mini"
                 onclick="handleLogout()"
@@ -135,6 +182,9 @@
           </div>
         </div>
 
+        <!-- ── BANNER KÊU GỌI ĐĂNG NHẬP / GUEST CTA BANNER ──
+             Hiển thị cho khách chưa đăng nhập, khuyến khích dùng tính năng AI
+             Shown for guests, encouraging AI feature usage -->
         <div
           class="guest-cta-banner"
           id="guest-cta-banner"
@@ -154,12 +204,16 @@
           <i class="fas fa-chevron-right cta-arrow"></i>
         </div>
 
+        <!-- ── VÙNG ĐÃ ĐĂNG NHẬP / LOGGED-IN VIEW ──
+             Nút AI Planner + Lịch sử địa điểm đã thích
+             AI Planner button + Liked locations history -->
         <div id="logged-view" style="display: none; margin: 0 24px">
-          <!-- Nút kích hoạt AI Planner -->
+          <!-- Nút kích hoạt AI Planner / AI Planner trigger button -->
           <button class="btn-ai-planner" onclick="openPlannerInputModal()">
             <i class="fas fa-magic"></i> Lập Lộ Trình Thông Minh
           </button>
 
+          <!-- Danh sách địa điểm đã thích / Liked locations history -->
           <div id="user-history" class="history-section" style="display: none">
             <div class="history-title">
               <i class="fas fa-history"></i> Địa điểm đã thích:
@@ -168,7 +222,9 @@
           </div>
         </div>
 
-        <!-- TABS NAVIGATION -->
+        <!-- ── TAB ĐIỀU HƯỚNG / NAVIGATION TABS ──
+             Chuyển đổi giữa "Gợi ý AI" và "Khám phá"
+             Toggle between "AI Suggestions" and "Explore" -->
         <div class="sidebar-tabs">
           <button class="sidebar-tab-btn" onclick="switchSidebarTab('foryou')">
             <i class="fas fa-sparkles"></i> Gợi ý AI
@@ -181,7 +237,9 @@
           </button>
         </div>
 
-        <!-- TAB CONTENT: EXPLORE -->
+        <!-- ── TAB NỘI DUNG: KHÁM PHÁ / TAB CONTENT: EXPLORE ──
+             Hiển thị tất cả địa điểm dạng lưới, có tìm kiếm & lọc danh mục
+             Shows all locations in grid, with search & category filters -->
         <div
           id="tab-explore"
           class="tab-pane active"
@@ -199,6 +257,7 @@
               padding-top: 0;
             "
           >
+            <!-- Tiêu đề + Ô tìm kiếm nhanh / Title + Quick search box -->
             <div class="section-head" style="margin-top: 12px">
               <h2>Địa điểm nổi bật</h2>
               <div class="mini-search-box">
@@ -212,6 +271,7 @@
               </div>
             </div>
 
+            <!-- Chip lọc danh mục / Category filter chips -->
             <div class="filter-chips">
               <button class="chip active" onclick="filterData('All', this)">
                 Tất cả
@@ -242,11 +302,15 @@
               </button>
             </div>
 
+            <!-- Lưới danh sách địa điểm (render bằng JS)
+                 Location grid list (rendered by JS) -->
             <div class="mini-list" id="locationList"></div>
           </div>
         </div>
 
-        <!-- TAB CONTENT: FOR YOU (AI SUGGESTIONS) -->
+        <!-- ── TAB NỘI DUNG: GỢI Ý AI / TAB CONTENT: AI SUGGESTIONS ──
+             Hiển thị danh sách gợi ý cá nhân hóa từ thuật toán AI
+             Shows personalized suggestion list from AI algorithms -->
         <div
           id="tab-foryou"
           class="tab-pane"
@@ -261,6 +325,8 @@
               <span class="badge-counter">AI Recommended</span>
             </div>
 
+            <!-- Vùng hiển thị kết quả gợi ý (render bằng JS)
+                 Suggestion results area (rendered by JS) -->
             <div id="recommendation-area" class="cards-list">
               <div class="empty-state">
                 <img
@@ -276,17 +342,29 @@
           </div>
         </div>
 
+        <!-- ── BẢNG CHI TIẾT ĐỊA ĐIỂM / LOCATION DETAIL PANEL ──
+             Panel trượt hiển thị thông tin chi tiết khi click vào địa điểm
+             Sliding panel showing detailed info when clicking a location -->
         <div id="detail-panel" class="detail-panel">
           <div id="detail-content"></div>
         </div>
+
+        <!-- Thanh kéo thay đổi kích thước sidebar / Sidebar resize handle -->
         <div class="sidebar-resizer" id="sidebarResizer"></div>
       </aside>
 
+      <!-- ==============================================================
+           BẢN ĐỒ CHÍNH / MAIN MAP AREA
+           Bản đồ Leaflet tương tác với ghim, heatmap và chú giải
+           Interactive Leaflet map with pins, heatmap and legends
+           ============================================================== -->
       <main class="map-container">
+        <!-- Vùng render bản đồ Leaflet / Leaflet map render area -->
         <div id="map"></div>
 
-        <!-- Map Controls -->
+        <!-- Nút điều khiển bản đồ / Map control buttons -->
         <div class="map-controls-overlay">
+          <!-- Nút bật/tắt bản đồ nhiệt / Heatmap toggle button -->
           <button
             id="btn-toggle-heatmap"
             class="btn-map-control"
@@ -295,7 +373,8 @@
             <i class="fas fa-fire"></i> Bản đồ nhiệt
           </button>
 
-          <!-- Heatmap Legend (Hidden by default) -->
+          <!-- Chú giải bản đồ nhiệt (ẩn mặc định)
+               Heatmap legend (hidden by default) -->
           <div id="heatmap-legend" class="heatmap-legend" style="display: none">
             <div class="gradient-bar"></div>
             <div class="legend-labels">
@@ -305,6 +384,8 @@
             </div>
           </div>
         </div>
+
+        <!-- Chú giải xếp hạng PageRank / PageRank ranking legend -->
         <div class="map-legend">
           <div class="legend-item" title="Địa điểm nổi bật nhất tại Huế">
             <span class="dot dot-top1"></span> Top 1 Nổi bật
@@ -319,94 +400,86 @@
       </main>
     </div>
 
-    <!-- Modal Auth -->
-    <!-- COMPONENT: AUTH -->
+    <!-- ================================================================
+         CÁC MODAL COMPONENT / MODAL COMPONENTS
+         Mỗi modal được tách riêng thành file component để dễ quản lý
+         Each modal is split into separate component files for maintainability
+         ================================================================ -->
+
+    <!-- Modal Đăng nhập/Đăng ký / Login/Register Modal -->
     {% include 'components/modals/auth_modal.html' %}
 
-    <!-- Modal Admin User -->
-    <!-- COMPONENT: ADMIN DASHBOARD -->
+    <!-- Modal Bảng quản trị Admin / Admin Dashboard Modal -->
     {% include 'components/modals/admin_dashboard_modal.html' %}
 
-    <!-- Modal Notification -->
-    <!-- COMPONENT: NOTIFICATION -->
+    <!-- Modal Thông báo (thành công/lỗi/cảnh báo) / Notification Modal (success/error/warning) -->
     {% include 'components/modals/notification_modal.html' %}
 
-    <!-- COMPONENT: EDIT LOCATION -->
+    <!-- Modal Sửa địa điểm / Edit Location Modal -->
     {% include 'components/modals/edit_location_modal.html' %}
 
-    <!-- COMPONENT: ADD LOCATION -->
+    <!-- Modal Thêm địa điểm mới / Add New Location Modal -->
     {% include 'components/modals/add_location_modal.html' %}
 
-    <!-- TEMPLATE: REVIEW SECTION -->
+    <!-- Template Phần đánh giá / Review Section Template -->
     {% include 'components/review_template.html' %}
 
-    <!-- Leaflet JS -->
+    <!-- ================================================================
+         THƯ VIỆN JAVASCRIPT / JAVASCRIPT LIBRARIES
+         ================================================================ -->
+    <!-- Leaflet JS - Thư viện bản đồ / Map library -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Leaflet MarkerCluster JS -->
+    <!-- Leaflet MarkerCluster - Gom nhóm ghim / Pin clustering -->
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-
+    <!-- Leaflet Heatmap - Bản đồ nhiệt / Heatmap layer -->
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <!-- ================================================================
+         JAVASCRIPT ỨNG DỤNG / APPLICATION SCRIPTS
+         Thứ tự nạp quan trọng: utils → auth → map → planner → admin → ...
+         Load order matters: utils → auth → map → planner → admin → ...
+         ================================================================ -->
+    <!-- Hàm tiện ích dùng chung / Shared utility functions -->
     <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <!-- Xác thực & quản lý phiên / Authentication & session management -->
     <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <!-- Bản đồ & ghim địa điểm / Map & location pins -->
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+    <!-- Lập lịch trình AI / AI itinerary planner -->
     <script src="{{ url_for('static', filename='js/planner.js') }}?v=1"></script>
+    <!-- Bảng quản trị admin / Admin dashboard -->
     <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <!-- Hồ sơ người dùng / User profile -->
     <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+    <!-- Thuật toán gợi ý AI / AI recommendation algorithms -->
     <script src="{{ url_for('static', filename='js/recommend.js') }}"></script>
+    <!-- Đánh giá & bình luận / Reviews & comments -->
     <script src="{{ url_for('static', filename='js/reviews.js') }}"></script>
+    <!-- Khởi tạo ứng dụng chính / Main app initialization -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <!-- COMPONENT: PROFILE -->
+
+    <!-- ================================================================
+         CÁC MODAL BỔ SUNG / ADDITIONAL MODALS
+         Nạp sau JS để đảm bảo các hàm đã sẵn sàng
+         Loaded after JS to ensure functions are available
+         ================================================================ -->
+
+    <!-- Modal Hồ sơ cá nhân / User Profile Modal -->
     {% include 'components/modals/profile_modal.html' %}
 
-    <!-- COMPONENT: USER COMMENTS -->
+    <!-- Modal Bình luận người dùng / User Comments Modal -->
     {% include 'components/modals/user_comments_modal.html' %}
 
-    <!-- COMPONENT: PLANNER INPUT -->
+    <!-- Modal Nhập liệu lịch trình / Planner Input Modal -->
     {% include 'components/modals/planner_input_modal.html' %}
 
-    <!-- COMPONENT: PLANNER RESULT -->
+    <!-- Modal Kết quả lịch trình / Planner Result Modal -->
     {% include 'components/modals/planner_result_modal.html' %}
 
-    <!-- MODAL CHỌN ĐỊA ĐIỂM THAY THẾ (NEW) -->
-    <div class="modal-overlay" id="replacementModal">
-      <div class="modal-content-fancy" style="max-width: 500px">
-        <div class="fancy-modal-header">
-          <h3><i class="fas fa-exchange-alt"></i> Chọn địa điểm thay thế</h3>
-          <span class="close-btn" onclick="closeReplacementModal()"
-            >&times;</span
-          >
-        </div>
-        <div class="planner-body">
-          <p style="color: #64748b; font-size: 14px; margin-bottom: 15px">
-            Dưới đây là các địa điểm phù hợp để thay thế. Hãy chọn một nơi bạn
-            thích:
-          </p>
-          <div
-            id="replacement-list"
-            class="itinerary-list"
-            style="
-              max-height: 400px;
-              overflow-y: auto;
-              display: flex;
-              flex-direction: column;
-              gap: 10px;
-            "
-          >
-            <!-- JS sẽ render danh sách vào đây -->
-            <div style="text-align: center; padding: 20px; color: #94a3b8">
-              Đang tìm kiếm...
-            </div>
-          </div>
-        </div>
-        <div class="fancy-modal-footer">
-          <button class="btn-cancel" onclick="closeReplacementModal()">
-            Hủy bỏ
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Modal Thay thế hoạt động / Activity Replacement Modal -->
+    {% include 'components/modals/replacement_modal.html' %}
 
-    <!-- COMPONENT: RESET PASSWORD -->
+    <!-- Modal Đặt lại mật khẩu / Reset Password Modal -->
     {% include 'components/modals/reset_password_modal.html' %}
   </body>
 </html>

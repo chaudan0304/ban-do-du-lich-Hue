@@ -1,8 +1,21 @@
 /* ==========================================================================
-   MODALS & FORMS
+   MODAL & FORM DÙNG CHUNG
+   (Modals & Shared Forms)
+   
+   Mô tả / Description:
+   File này chứa kiểu dáng cho tất cả modal (popup), bao gồm:
+   bảng chi tiết trượt, modal xác thực, modal thêm/sửa địa điểm,
+   modal thông báo, phần đánh giá và giao diện AI giải thích.
+   This file contains styles for all modals (popups), including:
+   sliding detail panel, auth modal, add/edit location modal,
+   notification modal, review section and explainable AI interface.
    ========================================================================== */
 
-/* DETAIL PANEL */
+/* --------------------------------------------------------------------------
+   BẢNG CHI TIẾT TRƯỢT / SLIDING DETAIL PANEL
+   Panel trượt từ trái qua hiển thị chi tiết địa điểm
+   Left-to-right sliding panel showing location details
+   -------------------------------------------------------------------------- */
 .detail-panel {
   position: absolute;
   top: 0;
@@ -20,7 +33,11 @@
 .detail-panel.active { transform: translateX(0); }
 #detail-content { flex: 1; padding: 0; overflow-y: auto; background: var(--bg-surface); }
 
-/* MODALS */
+/* --------------------------------------------------------------------------
+   MODAL CƠ SỞ / BASE MODAL
+   Lớp phủ mờ nền và modal container
+   Backdrop overlay and modal container
+   -------------------------------------------------------------------------- */
 .modal {
   z-index: 5000;
   position: fixed;
@@ -39,7 +56,7 @@
 }
 .modal.active { display: flex; opacity: 1; }
 
-/* Base Modal Content */
+/* Nội dung modal cơ bản / Base modal content box */
 .modal-content {
   background: white;
   width: 90%;
@@ -53,7 +70,11 @@
 }
 .modal.active .modal-content { transform: scale(1); }
 
-/* FANCY MODAL */
+/* --------------------------------------------------------------------------
+   MODAL NÂNG CAO / FANCY MODAL
+   Modal với hiệu ứng phóng to mượt mà, dùng cho form thêm/sửa địa điểm
+   Modal with smooth scale-up effect, used for add/edit location forms
+   -------------------------------------------------------------------------- */
 .modal-content-fancy {
   background: white;
   width: 90%;
@@ -72,6 +93,7 @@
 }
 .modal.active .modal-content-fancy { transform: scale(1) translateY(0); opacity: 1; }
 
+/* Phần thân modal nâng cao / Fancy modal body */
 .modal-body-fancy {
   padding: 24px;
   overflow-y: auto;
@@ -82,7 +104,13 @@
 .modal-body-fancy::-webkit-scrollbar { width: 6px; }
 .modal-body-fancy::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
 
-/* Close Buttons */
+/* --------------------------------------------------------------------------
+   NÚT ĐÓNG MODAL / MODAL CLOSE BUTTONS
+   Các biến thể nút đóng (tối, sáng, trên nền gradient)
+   Close button variants (dark, light, on gradient background)
+   -------------------------------------------------------------------------- */
+
+/* Nút đóng mặc định / Default close button */
 .close-modal, .close-btn-white {
   position: absolute;
   top: 16px;
@@ -102,6 +130,7 @@
 }
 .close-modal:hover, .close-btn-white:hover { background: var(--danger); color: white; transform: rotate(90deg); }
 
+/* Nút đóng trắng trên nền tối / White close button on dark background */
 .close-btn-white {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(4px);
@@ -114,6 +143,7 @@
 }
 .close-btn-white i { font-size: 16px; transition: none; }
 
+/* Nút đóng nhỏ / Compact close button */
 .close-btn {
   width: 32px;
   height: 32px;
@@ -133,17 +163,27 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
-/* Modal Header */
+/* --------------------------------------------------------------------------
+   HEADER MODAL / MODAL HEADER
+   Tiêu đề modal với gradient hoặc nền trắng
+   Modal title with gradient or white background
+   -------------------------------------------------------------------------- */
 .modal-header-gradient { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); padding: 20px; color: white; }
 .modal-title-fancy { font-size: 18px; font-weight: 700; margin: 0; }
 
-/* Auth Modal Specific */
+/* --------------------------------------------------------------------------
+   MODAL XÁC THỰC / AUTH MODAL
+   Cấu hình riêng cho modal đăng nhập/đăng ký
+   Specific config for login/register modal
+   -------------------------------------------------------------------------- */
 #authModal .modal-content { padding: 24px; }
 #authModal .auth-form { padding: 12px 0 0; }
 
+/* Wrapper header xác thực / Auth header wrapper */
 .auth-header-wrapper { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .auth-header-wrapper .auth-tabs { flex: 1; margin-bottom: 0; }
 
+/* Nút đóng inline / Inline close button */
 .close-btn-inline {
   width: 40px;
   height: 40px;
@@ -165,7 +205,11 @@
   transform: rotate(90deg);
 }
 
-/* Auth Tabs */
+/* --------------------------------------------------------------------------
+   TAB XÁC THỰC / AUTH TABS
+   Chuyển đổi giữa form đăng nhập và đăng ký trong modal
+   Toggle between login and register forms within modal
+   -------------------------------------------------------------------------- */
 .auth-tabs {
   display: flex;
   margin-bottom: 0;
@@ -175,6 +219,7 @@
   border: 1px solid #e2e8f0;
 }
 
+/* Nút tab / Tab buttons */
 .tab-btn {
   flex: 1;
   padding: 10px;
@@ -188,6 +233,8 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .tab-btn:hover { color: #334155; }
+
+/* Tab đang chọn / Active tab */
 .tab-btn.active {
   background: white;
   background-clip: text;
@@ -199,7 +246,11 @@
   font-weight: 800;
 }
 
-/* Form Inputs */
+/* --------------------------------------------------------------------------
+   Ô NHẬP LIỆU FORM / FORM INPUTS
+   Ô nhập liệu với icon bên trái và hiệu ứng focus
+   Input fields with left-side icons and focus effects
+   -------------------------------------------------------------------------- */
 .form-group { margin-bottom: 20px; position: relative; }
 
 .input-fancy, .auth-form input {
@@ -226,7 +277,7 @@
   outline: none;
 }
 
-/* Form Icons */
+/* Biểu tượng trong form / Form field icons */
 .form-group i, .auth-form i {
   position: absolute;
   left: 16px;
@@ -239,7 +290,7 @@
 }
 .form-group:focus-within i, .auth-form:focus-within i { color: #4f46e5; }
 
-/* Modal Form Icon Fixes */
+/* Sửa vị trí icon trong modal nâng cao / Icon position fix in fancy modal */
 .modal-body-fancy .form-group i {
   top: auto !important;
   bottom: 13px !important;
@@ -255,19 +306,23 @@
   bottom: auto !important;
 }
 
-/* Colorful Icons for Form */
-.modal-body-fancy .form-group i.fa-map-pin { color: #ef4444; }
-.modal-body-fancy .form-group i.fa-globe { color: #0ea5e9; }
-.modal-body-fancy .form-group i.fa-layer-group { color: #8b5cf6; }
-.modal-body-fancy .form-group i.fa-image { color: #10b981; }
-.modal-body-fancy .form-group i.fa-pen { color: #f59e0b; }
+/* Icon màu sắc cho form thêm địa điểm / Colorful icons for location form */
+.modal-body-fancy .form-group i.fa-map-pin { color: #ef4444; }     /* Vị trí / Location */
+.modal-body-fancy .form-group i.fa-globe { color: #0ea5e9; }       /* Tọa độ / Coordinates */
+.modal-body-fancy .form-group i.fa-layer-group { color: #8b5cf6; } /* Danh mục / Category */
+.modal-body-fancy .form-group i.fa-image { color: #10b981; }       /* Hình ảnh / Image */
+.modal-body-fancy .form-group i.fa-pen { color: #f59e0b; }         /* Mô tả / Description */
 
 .col .form-group { margin-bottom: 0; }
 
-/* Auth Form Animation */
+/* Hoạt hình form xác thực / Auth form animation */
 .auth-form { padding: 24px 0 0; animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 
-/* Review Section (in Detail) */
+/* --------------------------------------------------------------------------
+   PHẦN ĐÁNH GIÁ TRONG CHI TIẾT / REVIEW SECTION IN DETAIL
+   Hiển thị danh sách đánh giá và form viết đánh giá
+   Display review list and write review form
+   -------------------------------------------------------------------------- */
 .review-section { margin-top: 32px; padding-top: 24px; border-top: 1px dashed var(--border-light); }
 .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .review-header span {
@@ -281,6 +336,7 @@
   gap: 8px;
 }
 
+/* Form viết đánh giá / Review write form container */
 .review-form-container {
   margin-top: 0;
   margin-bottom: 20px;
@@ -290,6 +346,8 @@
   border-radius: var(--radius-lg);
 }
 .review-form-container h4 { margin: 0 0 12px; color: var(--text-main); font-size: 14px; }
+
+/* Ô nhập nội dung đánh giá / Review textarea */
 .review-textarea {
   width: 100%;
   border: 1px solid var(--border-light);
@@ -303,10 +361,12 @@
 }
 .review-textarea:focus { outline: none; border-color: var(--primary); }
 
+/* Danh sách đánh giá / Review list */
 .review-list { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
 .review-item { display: flex; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle); align-items: flex-start; }
 .review-item:last-child { border-bottom: none; }
 
+/* Ảnh đại diện người đánh giá / Reviewer avatar */
 .review-avatar {
   width: 40px;
   height: 40px;
@@ -328,7 +388,11 @@
 .review-stars { color: #f59e0b; letter-spacing: 1px; font-size: 12px; }
 .review-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
 
-/* Review Stats */
+/* --------------------------------------------------------------------------
+   THỐNG KÊ ĐÁNH GIÁ / REVIEW STATS BANNER
+   Banner tóm tắt điểm đánh giá trung bình
+   Summary banner for average rating score
+   -------------------------------------------------------------------------- */
 .review-stats {
   display: flex;
   align-items: center;
@@ -358,7 +422,11 @@
 
 .review-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #f1f5f9; font-weight: 600; }
 
-/* Similar Locations */
+/* --------------------------------------------------------------------------
+   ĐỊA ĐIỂM TƯƠNG TỰ / SIMILAR LOCATIONS
+   Lưới thẻ hiển thị các địa điểm liên quan
+   Grid cards showing related locations
+   -------------------------------------------------------------------------- */
 .similar-locations-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; padding-bottom: 20px; }
 .similar-card {
   background: white;
@@ -386,7 +454,9 @@
 .similar-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px; }
 
 /* --------------------------------------------------------------------------
-   NOTIFICATION MODAL
+   MODAL THÔNG BÁO / NOTIFICATION MODAL
+   Popup thông báo (thành công, lỗi, cảnh báo, xóa)
+   Notification popup (success, error, warning, delete)
    -------------------------------------------------------------------------- */
 .modal-content-notification {
   background: white;
@@ -403,17 +473,20 @@
 }
 .modal.active .modal-content-notification { transform: scale(1); opacity: 1; }
 
-.modal-content-notification.type-success .notif-icon-box { background: linear-gradient(135deg, #10b981, #059669); }
-.modal-content-notification.type-error .notif-icon-box { background: linear-gradient(135deg, #ef4444, #b91c1c); }
-.modal-content-notification.type-warning .notif-icon-box { background: linear-gradient(135deg, #f59e0b, #d97706); }
-.modal-content-notification.type-info .notif-icon-box { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-.modal-content-notification.type-delete .notif-icon-box { background: linear-gradient(135deg, #64748b, #475569); }
+/* Màu icon theo loại thông báo / Icon colors by notification type */
+.modal-content-notification.type-success .notif-icon-box { background: linear-gradient(135deg, #10b981, #059669); }  /* Thành công / Success */
+.modal-content-notification.type-error .notif-icon-box { background: linear-gradient(135deg, #ef4444, #b91c1c); }    /* Lỗi / Error */
+.modal-content-notification.type-warning .notif-icon-box { background: linear-gradient(135deg, #f59e0b, #d97706); }  /* Cảnh báo / Warning */
+.modal-content-notification.type-info .notif-icon-box { background: linear-gradient(135deg, #3b82f6, #2563eb); }     /* Thông tin / Info */
+.modal-content-notification.type-delete .notif-icon-box { background: linear-gradient(135deg, #64748b, #475569); }    /* Xóa / Delete */
 
+/* Màu nút theo loại thông báo / Button colors by notification type */
 .modal-content-notification.type-success .btn-notif { background: #d1fae5; color: #065f46; }
 .modal-content-notification.type-success .btn-notif:hover { background: #a7f3d0; }
 .modal-content-notification.type-error .btn-notif { background: #fee2e2; color: #991b1b; }
 .modal-content-notification.type-error .btn-notif:hover { background: #fecaca; }
 
+/* Biểu tượng thông báo / Notification icon box */
 .notif-icon-box {
   width: 70px;
   height: 70px;
@@ -429,9 +502,11 @@
   border: 4px solid white;
 }
 
+/* Tiêu đề và nội dung thông báo / Notification title and message */
 #notif-title { font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; }
 #notif-msg { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
 
+/* Nút hành động thông báo / Notification action buttons */
 .btn-notif {
   width: 100%;
   padding: 12px;
@@ -455,6 +530,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Nút hủy và xác nhận / Cancel and confirm buttons */
 .notif-actions { display: flex; gap: 12px; justify-content: center; }
 .btn-notif-cancel { background: #f1f5f9; color: #64748b; }
 .btn-notif-cancel:hover {
@@ -465,14 +541,18 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
 
+/* Z-index cao nhất cho thông báo / Highest z-index for notifications */
 #notificationModal { z-index: 9999 !important; }
 
 /* --------------------------------------------------------------------------
-   FORM LAYOUT & MAP PICKER
+   BỐ CỤC FORM & CHỌN ĐIỂM TRÊN BẢN ĐỒ / FORM LAYOUT & MAP PICKER
+   Bố cục hàng form và nút chọn vị trí trên bản đồ
+   Form row layout and map location picker button
    -------------------------------------------------------------------------- */
 .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
 .col { flex: 1; }
 
+/* Nút chọn vị trí trên bản đồ / Map picker button */
 .btn-map-picker {
   width: 100%;
   padding: 12px;
@@ -491,7 +571,9 @@
 }
 
 /* --------------------------------------------------------------------------
-   PROFILE MODAL
+   MODAL HỒ SƠ / PROFILE MODAL
+   Cấu hình riêng cho modal thông tin cá nhân
+   Specific config for user profile modal
    -------------------------------------------------------------------------- */
 #profileModal .modal-content { max-width: 400px; border-radius: 12px; padding: 0; }
 #profileModal .auth-header-wrapper {
@@ -531,7 +613,9 @@
 #profileModal .btn-full:hover { filter: brightness(1.1); }
 
 /* --------------------------------------------------------------------------
-   GENERIC TEAL MODAL STYLES
+   MODAL TEAL / TEAL-THEMED MODAL
+   Modal với header xanh ngọc, dùng cho lịch sử tìm kiếm và quản lý
+   Teal-header modal, used for search history and management
    -------------------------------------------------------------------------- */
 .modal-content-teal {
   background: #fff;
@@ -544,6 +628,8 @@
   display: flex;
   flex-direction: column;
 }
+
+/* Header xanh ngọc / Teal header */
 .modal-header-teal {
   background: #14b8a6;
   padding: 20px 25px;
@@ -556,6 +642,7 @@
 .modal-header-teal .header-title-box h3 { margin: 0; font-size: 20px; font-weight: 700; }
 .modal-header-teal .header-username-sub { font-size: 14px; opacity: 0.95; margin-top: 4px; display: block; font-weight: 500; }
 
+/* Nút đóng teal / Teal close button */
 .close-btn-teal {
   background: rgba(255, 255, 255, 0.15);
   border: none;
@@ -572,18 +659,27 @@
 }
 .close-btn-teal:hover { background: rgba(255, 255, 255, 0.3); }
 
+/* Thân và footer teal / Teal body and footer */
 .modal-body-teal { padding: 25px; flex: 1; overflow-y: auto; }
 .modal-footer-teal { padding: 15px 25px; border-top: 1px solid #f1f5f9; background: white; text-align: right; flex-shrink: 0; }
 
 .btn-primary-blue { background: #eff6ff; color: #3b82f6; border: none; }
 .btn-primary-blue:hover { background: #dbeafe; }
 
-/* Admin Actions in Detail */
+/* --------------------------------------------------------------------------
+   HÀNH ĐỘNG ADMIN TRONG CHI TIẾT / ADMIN ACTIONS IN DETAIL PANEL
+   Nút Sửa/Xóa cho admin khi xem chi tiết địa điểm
+   Edit/Delete buttons for admin when viewing location details
+   -------------------------------------------------------------------------- */
 .detail-actions-row.admin-row { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e2e8f0; }
 .btn-large-action.btn-danger-outline { color: #64748b; }
 .btn-large-action.btn-danger-outline:hover { background: #fef2f2; border-color: #ef4444; color: #ef4444; }
 
-/* AI Section in Detail */
+/* --------------------------------------------------------------------------
+   PHẦN GIẢI THÍCH AI / AI EXPLANATION SECTION
+   Vùng hiển thị lý do gợi ý của thuật toán AI
+   Area showing AI algorithm recommendation reasons
+   -------------------------------------------------------------------------- */
 .ai-explanation-section {
   margin: 20px 0;
   padding: 16px;
@@ -603,7 +699,11 @@
   letter-spacing: 1px;
 }
 
-/* --- NEW DETAIL PANEL UI --- */
+/* --------------------------------------------------------------------------
+   GIAO DIỆN CHI TIẾT KIỂU MỚI / NEW DETAIL PANEL UI
+   Bố cục chi tiết với thanh điều hướng dính trên cùng
+   Detail layout with sticky navigation bar on top
+   -------------------------------------------------------------------------- */
 .detail-header-nav {
   padding: 15px 20px;
   border-bottom: 1px solid #f1f5f9;
@@ -615,6 +715,8 @@
   top: 0;
   z-index: 10;
 }
+
+/* Nút quay lại / Back button */
 .detail-back-btn {
   background: none;
   border: none;
@@ -628,17 +730,24 @@
 }
 .detail-back-btn:hover { text-decoration: underline; }
 
+/* Ảnh bìa và nội dung chính / Hero image and main content */
 .detail-hero-frame { width: 100%; height: 220px; background: #e2e8f0; position: relative; overflow: hidden; }
 .detail-hero-img { width: 100%; height: 100%; object-fit: cover; }
 .detail-main-content { padding: 20px 25px; }
 .detail-title-large { font-size: 22px; font-weight: 800; color: #1e293b; margin-bottom: 10px; }
+
+/* Nhãn tag / Tag pills */
 .detail-tags-row { display: flex; gap: 8px; margin-bottom: 15px; }
 .tag-pill { padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
 .tag-green { background: #10b981; color: white; }
 .tag-gray { background: #f1f5f9; color: #475569; }
 .detail-desc-text { font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 25px; }
 
-/* AI Reason Card */
+/* --------------------------------------------------------------------------
+   THẺ LÝ DO AI / AI REASON CARD
+   Thẻ giải thích lý do gợi ý kèm thanh tiến trình
+   Recommendation reason card with progress bars
+   -------------------------------------------------------------------------- */
 .ai-reason-card { background: #eff6ff; border: 1px solid #dbeafe; border-radius: 16px; padding: 20px; margin-bottom: 25px; }
 .ai-reason-title {
   font-size: 12px;
@@ -650,6 +759,8 @@
   align-items: center;
   gap: 6px;
 }
+
+/* Hộp nổi bật lý do AI / AI highlight reason box */
 .ai-highlight-box {
   background: white;
   padding: 12px 15px;
@@ -664,18 +775,26 @@
   margin-bottom: 20px;
   border-left: 4px solid #3b82f6;
 }
+
+/* Thanh tiến trình AI / AI progress bars */
 .ai-progress-row { margin-bottom: 12px; }
 .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: #475569; margin-bottom: 5px; }
 .progress-track { height: 6px; background: #dbeafe; border-radius: 3px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 3px; }
 
-/* Explainable AI - Chart Row */
+/* --------------------------------------------------------------------------
+   BIỂU ĐỒ AI GIẢI THÍCH / EXPLAINABLE AI CHART
+   Biểu đồ donut và thanh hiển thị trọng số thuật toán
+   Donut chart and bars showing algorithm weights
+   -------------------------------------------------------------------------- */
 .explai-chart-row {
   display: flex;
   gap: 16px;
   align-items: flex-start;
   margin-bottom: 16px;
 }
+
+/* Biểu đồ donut / Donut chart */
 .explai-donut-wrap {
   display: flex;
   flex-direction: column;
@@ -714,6 +833,8 @@
   font-weight: 600;
   text-transform: uppercase;
 }
+
+/* Chú giải donut / Donut legend */
 .explai-donut-legend {
   display: flex;
   flex-direction: column;
@@ -727,6 +848,8 @@
   align-items: center;
   gap: 5px;
 }
+
+/* Thanh tiến trình / Progress bars */
 .explai-bars {
   flex: 1;
   min-width: 0;
@@ -738,7 +861,11 @@
   margin-bottom: 0;
 }
 
-/* Explainable AI - Section */
+/* --------------------------------------------------------------------------
+   PHẦN GIẢI THÍCH CHI TIẾT / EXPLAINABLE AI DETAIL SECTIONS
+   Người dùng tương tự, địa điểm đã thích khớp
+   Similar users, matched liked locations
+   -------------------------------------------------------------------------- */
 .explai-section {
   margin-top: 14px;
   padding-top: 14px;
@@ -756,7 +883,7 @@
   gap: 6px;
 }
 
-/* Similar Users */
+/* Chip người dùng tương tự / Similar user chips */
 .explai-users-list {
   display: flex;
   flex-wrap: wrap;
@@ -777,6 +904,8 @@
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
   transform: translateY(-1px);
 }
+
+/* Ảnh đại diện người dùng tương tự / Similar user avatar */
 .explai-user-avatar {
   width: 28px;
   height: 28px;
@@ -806,7 +935,7 @@
   font-weight: 600;
 }
 
-/* Matched Likes */
+/* Chip địa điểm đã thích khớp / Matched liked location chips */
 .explai-matched-list {
   display: flex;
   flex-wrap: wrap;
@@ -836,8 +965,11 @@
   font-size: 10px;
 }
 
-
-/* Mobile responsive */
+/* --------------------------------------------------------------------------
+   RESPONSIVE / MEDIA QUERIES
+   Điều chỉnh modal và bảng trên màn hình nhỏ
+   Adjust modals and tables on small screens
+   -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
   .modal-content-fancy { width: 95%; margin: 10px; max-height: 85vh; }
   .admin-table th:nth-child(3), .admin-table td:nth-child(3) { display: none; }

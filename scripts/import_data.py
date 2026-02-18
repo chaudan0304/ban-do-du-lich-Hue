@@ -1,8 +1,43 @@
+"""
+=============================================================================
+scripts/import_data.py - Nạp dữ liệu ban đầu vào Neo4j (Initial Data Import)
+scripts/import_data.py - Initial Data Import to Neo4j
+=============================================================================
+Mô tả / Description:
+    Script chạy MỘT LẦN để nạp toàn bộ dữ liệu vào database Neo4j.
+    Script runs ONCE to import all data into Neo4j database.
+
+    Quy trình / Process:
+    1. XÓA toàn bộ dữ liệu cũ (DETACH DELETE all nodes)
+       DELETE all old data (DETACH DELETE all nodes)
+    2. Nạp Locations từ Sheet 1 (tọa độ, mô tả, hình ảnh, category)
+       Import Locations from Sheet 1 (coordinates, description, image, category)
+    3. Nạp Users + Likes từ Sheet "Users" và "Likes"
+       Import Users + Likes from "Users" and "Likes" sheets
+       → Nếu không có sheet → dùng dữ liệu mẫu fallback
+         If sheets missing → use fallback sample data
+    4. Tạo tài khoản Admin mặc định (admin/admin)
+       Create default Admin account (admin/admin)
+
+Phụ thuộc / Dependencies:
+    - pandas (đọc Excel) / pandas (read Excel)
+    - db (run_query, close_driver)
+    - werkzeug.security (generate_password_hash)
+
+Cách chạy / How to run:
+    python scripts/import_data.py
+
+⚠️ CẢNH BÁO: Script này XÓA TOÀN BỘ dữ liệu hiện tại!
+⚠️ WARNING: This script DELETES ALL existing data!
+=============================================================================
+"""
+
 import pandas as pd
 import sys
 import os
 
 # Thêm thư mục gốc vào path để import được db
+# Add root directory to path for db imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from db import run_query, close_driver
@@ -14,20 +49,34 @@ import re
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Đường dẫn đến file data
+# Đường dẫn đến file data / Path to data file
 DATA_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "data", "data.xlsx")
 )
 
 
 def main():
+    """
+    Hàm chính — nạp dữ liệu từ Excel vào Neo4j.
+    Main function — imports data from Excel into Neo4j.
+    """
     logging.info(f"⏳ Đang đọc file Excel từ: {DATA_PATH}")
     try:
-        # 1. Xóa dữ liệu cũ (Reset Database)
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 1: XÓA DỮ LIỆU CŨ (Reset Database)
+        # STEP 1: DELETE OLD DATA (Reset Database)
+        # DETACH DELETE — xóa ALL nodes + ALL relationships
+        # ═══════════════════════════════════════════════════════
         logging.info("🧹 Đang dọn dẹp dữ liệu cũ...")
         run_query("MATCH (n) DETACH DELETE n")
 
-        # 2. Nạp Locations
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 2: NẠP LOCATIONS (Import Locations)
+        # Đọc Sheet đầu tiên (index=0) của file Excel
+        # Read first sheet (index=0) from Excel file
+        # Tạo: Location node + City node + Category node + relationships
+        # Creates: Location node + City node + Category node + relationships
+        # ═══════════════════════════════════════════════════════
         df_loc = pd.read_excel(DATA_PATH, sheet_name=0)
         logging.info(f"📥 Đang nạp {len(df_loc)} địa điểm...")
 
@@ -42,7 +91,7 @@ def main():
             MERGE (l)-[:LOCATED_IN]->(c)
             MERGE (l)-[:HAS_CATEGORY]->(cat)
             """
-            # Xử lý hình ảnh (tránh lỗi NaN)
+            # Xử lý hình ảnh (tránh lỗi NaN) / Handle image (avoid NaN errors)
             raw_image = row["image"]
             if pd.isna(raw_image):
                 corrected_image_path = ""
@@ -59,21 +108,28 @@ def main():
                     "cat": row["category"],
                     "lat": row["lat"],
                     "lng": row["lng"],
-                    "image": corrected_image_path,  # Sử dụng đường dẫn đã chuẩn hóa
+                    "image": corrected_image_path,  # Đường dẫn đã chuẩn hóa / Normalized path
                 },
             )
 
-        # 3. Nạp Users từ sheet Excel
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 3: NẠP USERS + LIKES (Import Users + Likes)
+        # Ưu tiên đọc từ sheet "Users" và "Likes" trong Excel
+        # Prioritizes reading from "Users" and "Likes" sheets in Excel
+        # Nếu không có → fallback sang dữ liệu mẫu
+        # If not available → fallback to sample data
+        # ═══════════════════════════════════════════════════════
         logging.info("👤 Đang nạp người dùng từ file Excel...")
 
         try:
             df_users = pd.read_excel(DATA_PATH, sheet_name="Users")
             df_likes = pd.read_excel(DATA_PATH, sheet_name="Likes")
 
+            # Mật khẩu mặc định "123" — đã hash / Default password "123" — hashed
             default_pass = generate_password_hash("123")
             row_count_users = 0
 
-            # Tạo users
+            # Tạo users / Create users
             for i, row in df_users.iterrows():
                 q_create_user = """
                 MERGE (u:User {name: $name})
@@ -85,7 +141,7 @@ def main():
             total_users = len(df_users)
             logging.info(f"   ✅ Đã tạo {total_users} người dùng")
 
-            # Tạo likes
+            # Tạo likes / Create likes
             like_count = 0
             for i, row in df_likes.iterrows():
                 q_like = """
@@ -102,10 +158,10 @@ def main():
             logging.info(f"   ✅ Đã tạo {like_count} lượt thích")
 
         except Exception as e:
+            # ─── FALLBACK: Dữ liệu mẫu (Sample Data) ───
             logging.warning(
                 f"⚠️ Không tìm thấy sheet Users/Likes, dùng dữ liệu mẫu: {e}"
             )
-            # Fallback: dữ liệu mẫu
             sample_users = [
                 ("user1", "Tung", ["Hoàng Thành Huế", "Lăng Tự Đức", "Chùa Thiên Mụ"]),
                 ("user2", "Lan", ["Chợ Đông Ba", "Cầu Trường Tiền", "Chè Hẻm"]),
@@ -143,7 +199,11 @@ def main():
             total_users = len(sample_users)
             like_count = row_count_users
 
-        # 4. Tự động tạo tài khoản Admin (Để bạn đăng nhập)
+        # ═══════════════════════════════════════════════════════
+        # BƯỚC 4: TẠO TÀI KHOẢN ADMIN (Create Admin Account)
+        # Tài khoản mặc định: admin / admin
+        # Default account: admin / admin
+        # ═══════════════════════════════════════════════════════
         logging.info("🔑 Đang tạo tài khoản Admin (Mã hóa)...")
 
         admin_pass = "admin"
@@ -158,6 +218,7 @@ def main():
             {"pass": admin_hass},
         )
 
+        # ─── TÓM TẮT KẾT QUẢ (Results Summary) ───
         logging.info("-" * 30)
         logging.info("✅ NẠP DỮ LIỆU THÀNH CÔNG!")
         logging.info(f"- Tổng địa điểm: {len(df_loc)}")
@@ -172,5 +233,8 @@ def main():
         close_driver()
 
 
+# ═══════════════════════════════════════════════════════
+# ENTRY POINT / Chạy trực tiếp: python scripts/import_data.py
+# ═══════════════════════════════════════════════════════
 if __name__ == "__main__":
     main()

@@ -1,6 +1,19 @@
-    <!-- Modal Edit Location -->
+<!-- ======================================================================
+     MODAL SỬA ĐỊA ĐIỂM / EDIT LOCATION MODAL
+     
+     Mô tả / Description:
+     Modal cho phép admin chỉnh sửa thông tin địa điểm đã có.
+     Gồm: Tên, tọa độ (Lat/Lng), danh mục, link hình ảnh, mô tả.
+     Modal allowing admin to edit existing location information.
+     Contains: Name, coordinates (Lat/Lng), category, image URL, description.
+     
+     Hàm JS liên quan / Related JS functions:
+     - openEditModal(), closeEditModal(), submitEditLocation() → admin.js
+     ====================================================================== -->
     <div class="modal" id="editModal">
       <div class="modal-content-fancy">
+
+        <!-- ── HEADER / TIÊU ĐỀ ── -->
         <div class="modal-header-gradient">
           <h3 class="modal-title-fancy">✏️ Chỉnh sửa thông tin</h3>
           <div class="close-btn-white" onclick="closeEditModal()">
@@ -9,8 +22,10 @@
         </div>
 
         <div class="modal-body-fancy">
+          <!-- Lưu tên cũ để so sánh khi cập nhật / Store old name for update comparison -->
           <input type="hidden" id="editOldName" />
 
+          <!-- Ô nhập tên địa điểm / Location name input -->
           <div class="form-group">
             <label class="label-fancy"
               ><i class="fas fa-signature"></i> Tên địa điểm
@@ -24,6 +39,7 @@
             />
           </div>
 
+          <!-- Hàng tọa độ: Vĩ độ + Kinh độ / Coordinate row: Latitude + Longitude -->
           <div class="form-row">
             <div class="col">
               <div class="form-group">
@@ -55,6 +71,7 @@
             </div>
           </div>
 
+          <!-- Dropdown danh mục / Category dropdown -->
           <div class="form-group">
             <label class="label-fancy"
               ><i class="fas fa-tags"></i> Danh mục</label
@@ -71,6 +88,7 @@
             </select>
           </div>
 
+          <!-- Ô nhập link hình ảnh / Image URL input -->
           <div class="form-group">
             <label class="label-fancy"
               ><i class="fas fa-image"></i> Link hình ảnh</label
@@ -83,6 +101,7 @@
             />
           </div>
 
+          <!-- Ô nhập mô tả chi tiết / Detailed description textarea -->
           <div class="form-group">
             <label class="label-fancy"
               ><i class="fas fa-align-left"></i> Mô tả chi tiết</label
@@ -94,6 +113,7 @@
             ></textarea>
           </div>
 
+          <!-- Nút lưu thay đổi / Save changes button -->
           <button onclick="submitEditLocation()" class="btn-save-gradient">
             <i class="fas fa-save"></i> Lưu thay đổi
           </button>

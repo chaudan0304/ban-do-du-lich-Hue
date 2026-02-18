@@ -1,6 +1,25 @@
-  <!-- MODAL: AI PLANNER RESULT (Teal History Version) -->
+<!-- ======================================================================
+     MODAL KẾT QUẢ LỊCH TRÌNH AI / AI PLANNER RESULT MODAL
+     
+     Mô tả / Description:
+     Modal hiển thị kết quả lịch trình do AI tạo ra.
+     Chứa: Tiêu đề hành trình, timeline dạng teal với các hoạt động,
+     nút lưu lộ trình.
+     Modal displaying the AI-generated itinerary results.
+     Contains: Journey title, teal-themed timeline with activities,
+     save itinerary button.
+     
+     Hàm JS liên quan / Related JS functions:
+     - closePlannerResultModal() → planner.js
+     - saveCurrentItinerary() → planner.js
+     - Timeline content rendered by renderItinerary() → planner.js
+     ====================================================================== -->
   <div id="plannerResultModal" class="modal">
     <div class="modal-content-fancy" style="max-width: 650px; height: auto; display: flex; flex-direction: column;">
+
+        <!-- ── HEADER TEAL / TEAL HEADER ──
+             Tiêu đề "Lộ trình gợi ý" + mô tả cá nhân hóa
+             "Suggested Itinerary" title + personalization subtitle -->
         <div class="modal-header-teal">
             <div class="header-top">
                 <div class="header-title-box">
@@ -12,18 +31,25 @@
             <span class="header-username-sub">Được cá nhân hóa dành riêng cho bạn</span>
         </div>
         
+        <!-- ── THÂN MODAL: TIMELINE / MODAL BODY: TIMELINE ──
+             Phần tóm tắt + Dòng thời gian hoạt động
+             Summary section + Activity timeline -->
         <div class="modal-body-teal" style="flex: 1; overflow-y: auto; padding: 0; background: #fff;">
-            <!-- Summary Section -->
+
+            <!-- Tiêu đề tóm tắt hành trình / Journey summary title -->
             <div id="itinerarySummary" style="text-align: center; padding: 15px 20px 5px 20px;">
                 <h2 id="itineraryTitle" style="color: #6366f1; font-size: 28px; margin-bottom: 8px;">Hành trình 1 ngày</h2>
                 <p style="color: #94a3b8; font-size: 14px;">Khám phá Huế trọn vẹn</p>
             </div>
 
+            <!-- Dòng thời gian hoạt động (render bằng JS)
+                 Activity timeline (rendered by JS) -->
             <div id="plannerTimeline" class="timeline-teal-container">
-                <!-- Nội dung được nạp qua JS -->
+                <!-- Nội dung được nạp qua JS / Content loaded via JS -->
             </div>
         </div>
         
+        <!-- ── FOOTER: NÚT LƯU LỘ TRÌNH / FOOTER: SAVE ITINERARY BUTTON ── -->
         <div class="modal-footer-teal" style="padding: 15px 25px; border-top: 1px solid #f1f5f9; background: white; text-align: right;">
             <button class="btn-save-teal" onclick="saveCurrentItinerary()" style="padding: 10px 25px; border-radius: 12px;">
                 <i class="fas fa-save"></i> Lưu lộ trình

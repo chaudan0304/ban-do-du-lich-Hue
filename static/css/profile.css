@@ -1,8 +1,19 @@
 /* ==========================================================================
-   PROFILE MODAL STYLES
-   Styles for User Profile Modal
+   MODAL HỒ SƠ NGƯỜI DÙNG
+   (User Profile Modal)
+   
+   Mô tả / Description:
+   File này chứa kiểu dáng cho modal hồ sơ cá nhân, bao gồm ảnh đại diện,
+   thống kê người dùng, form cập nhật thông tin và tab điều hướng.
+   This file contains styles for the profile modal, including avatar,
+   user statistics, info update form and navigation tabs.
    ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   CẤU HÌNH MODAL HỒ SƠ / PROFILE MODAL CONFIG
+   Cấu hình riêng cho modal hồ sơ người dùng
+   Specific configuration for user profile modal
+   -------------------------------------------------------------------------- */
 #profileModal .modal-content { max-width: 400px; border-radius: 12px; padding: 0; }
 #profileModal .auth-header-wrapper {
   padding: 15px 20px;
@@ -13,6 +24,8 @@
   align-items: center;
 }
 #profileModal .modal-body { padding: 20px; }
+
+/* Form nhập liệu hồ sơ / Profile form inputs */
 #profileModal .form-group { position: relative; margin-bottom: 15px; }
 #profileModal .form-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888; pointer-events: none; }
 #profileModal .form-group input {
@@ -27,6 +40,8 @@
   box-sizing: border-box;
 }
 #profileModal .form-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+
+/* Nút cập nhật hồ sơ / Profile update button */
 #profileModal .btn-full {
   width: 100%;
   padding: 12px;
@@ -40,7 +55,11 @@
 }
 #profileModal .btn-full:hover { filter: brightness(1.1); }
 
-/* Profile Header */
+/* --------------------------------------------------------------------------
+   HEADER HỒ SƠ / PROFILE HEADER
+   Ảnh đại diện, tên và vai trò người dùng
+   Avatar, name and user role display
+   -------------------------------------------------------------------------- */
 .profile-header {
   text-align: center;
   padding: 20px 0;
@@ -48,6 +67,7 @@
   margin-bottom: 20px;
 }
 
+/* Ảnh đại diện lớn / Large user avatar */
 .profile-avatar {
   width: 80px;
   height: 80px;
@@ -62,6 +82,7 @@
   box-shadow: var(--shadow-md);
 }
 
+/* Tên người dùng / User display name */
 .profile-name {
   font-size: 18px;
   font-weight: 700;
@@ -69,6 +90,7 @@
   margin-bottom: 4px;
 }
 
+/* Vai trò người dùng / User role badge */
 .profile-role {
   font-size: 12px;
   color: var(--text-muted);
@@ -76,7 +98,11 @@
   letter-spacing: 1px;
 }
 
-/* Profile Stats */
+/* --------------------------------------------------------------------------
+   THỐNG KÊ HỒ SƠ / PROFILE STATISTICS
+   Hiển thị số lượt thích, đánh giá... của người dùng
+   Display user's likes, reviews count etc.
+   -------------------------------------------------------------------------- */
 .profile-stats {
   display: flex;
   justify-content: center;
@@ -91,19 +117,25 @@
   text-align: center;
 }
 
+/* Giá trị thống kê / Stat value */
 .profile-stat-value {
   font-size: 20px;
   font-weight: 800;
   color: var(--primary);
 }
 
+/* Nhãn thống kê / Stat label */
 .profile-stat-label {
   font-size: 11px;
   color: var(--text-muted);
   text-transform: uppercase;
 }
 
-/* Profile Form */
+/* --------------------------------------------------------------------------
+   FORM CẬP NHẬT HỒ SƠ / PROFILE UPDATE FORM
+   Các phần thông tin cá nhân có thể chỉnh sửa
+   Editable personal information sections
+   -------------------------------------------------------------------------- */
 .profile-form-section {
   padding: 16px;
   background: var(--bg-body);
@@ -121,7 +153,11 @@
   gap: 8px;
 }
 
-/* Profile Tabs */
+/* --------------------------------------------------------------------------
+   TAB HỒ SƠ / PROFILE TABS
+   Tab chuyển đổi giữa Thông tin và Hoạt động
+   Toggle between Info and Activity tabs
+   -------------------------------------------------------------------------- */
 .profile-tabs {
   display: flex;
   border-bottom: 1px solid var(--border-light);
@@ -142,6 +178,8 @@
 }
 
 .profile-tab:hover { color: var(--text-main); }
+
+/* Tab đang chọn / Active tab */
 .profile-tab.active {
   color: var(--primary);
   border-bottom-color: var(--primary);

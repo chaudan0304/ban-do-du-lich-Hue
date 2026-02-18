@@ -1,7 +1,19 @@
 /* ==========================================================================
-   SIDEBAR TABS - NEW MINIMAL DESIGN
+   TAB CHUYỂN ĐỔI SIDEBAR
+   (Sidebar Tab Switching)
+   
+   Mô tả / Description:
+   File này chứa kiểu dáng cho thanh tab điều hướng trong sidebar,
+   bao gồm tab Gợi ý AI và tab Khám phá dữ liệu.
+   This file contains styles for the sidebar navigation tabs,
+   including the AI Suggestions tab and Data Explorer tab.
    ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   THANH TAB / TAB BAR
+   Thanh tab nằm ngang dưới header sidebar
+   Horizontal tab bar below sidebar header
+   -------------------------------------------------------------------------- */
 .sidebar-tabs {
   display: flex;
   gap: 24px;
@@ -11,6 +23,11 @@
   flex-shrink: 0;
 }
 
+/* --------------------------------------------------------------------------
+   NÚT TAB / TAB BUTTONS
+   Nút chuyển đổi giữa các tab với hiệu ứng gạch chân
+   Tab toggle buttons with underline indicator effect
+   -------------------------------------------------------------------------- */
 .sidebar-tab-btn {
   background: transparent;
   border: none;
@@ -30,12 +47,13 @@
   color: #6b7280;
 }
 
+/* Tab đang được chọn / Active tab state */
 .sidebar-tab-btn.active {
   color: #6366f1;
   font-weight: 700;
 }
 
-/* Active indicator underline */
+/* Đường gạch chân tab đang chọn / Active tab underline indicator */
 .sidebar-tab-btn.active::after {
   content: '';
   position: absolute;
@@ -51,12 +69,16 @@
   font-size: 14px;
 }
 
-/* Sparkle icon for AI tab */
+/* Biểu tượng AI sparkle / AI sparkle icon */
 .sidebar-tab-btn .fa-sparkles {
   color: inherit;
 }
 
-/* Tab Panes */
+/* --------------------------------------------------------------------------
+   NỘI DUNG TAB / TAB PANES
+   Vùng nội dung hiển thị khi chọn tab tương ứng
+   Content area displayed when corresponding tab is selected
+   -------------------------------------------------------------------------- */
 .tab-pane {
   display: none;
   flex-direction: column;
@@ -64,6 +86,7 @@
   min-height: 0;
 }
 
+/* Tab đang hiển thị / Currently visible tab */
 .tab-pane.active {
   display: flex;
 }

@@ -1,8 +1,29 @@
-  <!-- MODAL: AI PLANNER INPUT -->
+<!-- ======================================================================
+     MODAL NHẬP LIỆU LẬP LỊCH TRÌNH AI / AI PLANNER INPUT MODAL
+     
+     Mô tả / Description:
+     Modal cho người dùng cấu hình tham số trước khi AI tạo lịch trình.
+     Gồm: Chọn số ngày, tùy chọn dùng địa điểm đã thích, chọn sở thích.
+     Modal for users to configure parameters before AI generates itinerary.
+     Contains: Day count selector, use liked places option, preference selection.
+     
+     Logic loại trừ / Mutual exclusion logic:
+     - "Chỉ nơi đã thích" ↔ Checkbox sở thích: chọn một sẽ tắt cái kia
+     - "Use liked places" ↔ Preference checkboxes: selecting one disables the other
+     
+     Hàm JS liên quan / Related JS functions:
+     - openPlannerInputModal(), closePlannerInputModal() → planner.js
+     - changePlanDays(), submitPlanner() → planner.js
+     ====================================================================== -->
   <div id="plannerInputModal" class="modal">
     <div class="modal-content-fancy" style="max-width: 450px;">
+
+        <!-- Nút đóng / Close button -->
         <button class="close-btn-white" onclick="closePlannerInputModal()"><i class="fas fa-times"></i></button>
+
+        <!-- ── HEADER GRADIENT XANH-TÍM / BLUE-PURPLE GRADIENT HEADER ── -->
         <div class="modal-header-gradient" style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
+            <!-- Icon lộ trình / Route icon -->
             <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
                 <i class="fas fa-route" style="font-size: 24px; color: white;"></i>
             </div>
@@ -11,20 +32,25 @@
         </div>
         
         <div class="modal-body-fancy" style="padding: 15px 20px;">
-            <!-- Row: Days + Like Option -->
+
+            <!-- ── HÀNG: SỐ NGÀY + TÙY CHỌN ĐÃ THÍCH / ROW: DAYS + LIKED OPTION ── -->
             <div style="display: flex; gap: 15px; align-items: flex-end; justify-content: space-between; margin-bottom: 20px;">
-                <!-- 1. Số ngày -->
+
+                <!-- 1. Bộ chọn số ngày / Day counter selector -->
                 <div>
                     <label class="form-label" style="font-size:13px; margin-bottom:8px; display:block;">📅 Số ngày dự kiến</label>
                     <div class="counter-selector" style="display: flex; align-items: center; gap: 8px;">
+                        <!-- Nút giảm / Decrease button -->
                         <button class="btn-counter" onclick="changePlanDays(-1)" style="width: 36px; height: 36px; padding:0; border-radius: 8px; border: 1px solid #e2e8f0; background: white; cursor: pointer; color: var(--primary);"><i class="fas fa-minus" style="font-size:12px;"></i></button>
+                        <!-- Hiển thị số ngày / Day count display -->
                         <span id="dayDisplay" class="counter-value" style="font-size: 15px; font-weight: 700; width:65px; text-align: center;">1 Ngày</span>
+                        <!-- Nút tăng / Increase button -->
                         <button class="btn-counter" onclick="changePlanDays(1)" style="width: 36px; height: 36px; padding:0; border-radius: 8px; border: 1px solid #e2e8f0; background: white; cursor: pointer; color: var(--primary);"><i class="fas fa-plus" style="font-size:12px;"></i></button>
                         <input type="hidden" id="planDays" value="1">
                     </div>
                 </div>
 
-                <!-- 2. Option Like -->
+                <!-- 2. Tùy chọn dùng địa điểm đã thích / Use liked places option -->
                 <div style="padding-bottom: 2px;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; background: #f0fdf4; padding: 0 12px; border-radius: 8px; border: 1px solid #bbf7d0; height: 36px;">
                         <input type="checkbox" id="planUseLikes" style="width: 14px; height: 14px; accent-color: #16a34a;">
@@ -33,35 +59,44 @@
                 </div>
             </div>
             
-            <!-- 3. Chọn sở thích -->
+            <!-- ── 3. LƯỚI SỞ THÍCH / PREFERENCE GRID ──
+                 6 checkbox chọn loại trải nghiệm yêu thích
+                 6 checkboxes for preferred experience types -->
             <label class="form-label" style="font-size:13px; margin-bottom:10px; display:block;">❤️ Bạn thích trải nghiệm gì?</label>
             <div class="preference-grid" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                <!-- Di tích / Historical sites -->
                 <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Di tích">
                     <span>🏛️ Di tích</span>
                 </label>
+                <!-- Ẩm thực / Cuisine -->
                 <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Ẩm thực">
                     <span>🍜 Ẩm thực</span>
                 </label>
+                <!-- Thiên nhiên / Nature -->
                 <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Thiên nhiên">
                     <span>🌳 Thiên nhiên</span>
                 </label>
+                <!-- Tâm linh / Spiritual -->
                 <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Tâm linh">
                     <span>🛕 Tâm linh</span>
                 </label>
+                <!-- Check-in / Photo spots -->
                  <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Check-in">
                     <span>📸 Check-in</span>
                 </label>
+                <!-- Mua sắm / Shopping -->
                  <label class="pref-item" style="padding: 8px 4px; font-size: 12px; justify-content: center;">
                     <input type="checkbox" name="planPref" value="Mua sắm">
                     <span>🎁 Mua sắm</span>
                 </label>
             </div>
 
+            <!-- Nút xác nhận tạo lịch trình / Submit planner button -->
             <button class="btn-save-gradient" onclick="submitPlanner()" style="width: 100%; margin-top: 20px; padding: 12px; font-size: 15px;">
                 <i class="fas fa-magic"></i> Thiết kế Lộ trình ngay
             </button>
