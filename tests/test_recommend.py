@@ -41,10 +41,10 @@ from db import (
     toggle_like_location,
 )
 
-# Fix encoding cho Windows / Fix encoding for Windows
+# Fix encoding cho Windows
 try:
     sys.stdout.reconfigure(encoding="utf-8")
-except:
+except Exception:
     pass
 
 # User test tạm thời / Temporary test user

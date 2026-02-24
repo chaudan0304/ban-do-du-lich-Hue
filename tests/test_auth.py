@@ -45,7 +45,7 @@ from db import (
 # Fix encoding cho Windows / Fix encoding for Windows
 try:
     sys.stdout.reconfigure(encoding="utf-8")
-except:
+except Exception:
     pass
 
 # User test tạm thời — sẽ bị xóa sau khi test xong
