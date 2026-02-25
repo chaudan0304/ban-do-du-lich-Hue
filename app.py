@@ -27,6 +27,7 @@ from dotenv import load_dotenv
 import os
 import atexit
 import logging
+import signal
 from db import close_driver, get_user_info
 from models import User
 
@@ -97,8 +98,21 @@ def unauthorized_callback():
 # -----------------------------------------------------------
 # Đóng driver Neo4j khi ứng dụng kết thúc (cleanup)
 # Close Neo4j driver on application exit (cleanup)
+# Sử dụng cả atexit VÀ signal handler để đảm bảo driver
+# luôn được đóng — kể cả khi bị Ctrl+C hoặc tắt terminal đột ngột.
+# Uses both atexit AND signal handlers to ensure driver
+# is always closed — even on Ctrl+C or sudden terminal close.
 # -----------------------------------------------------------
 atexit.register(close_driver)
+
+def _cleanup_signal(signum, frame):
+    """Xử lý tín hiệu tắt: đóng Neo4j driver rồi thoát / Signal handler: close driver then exit"""
+    logger.info(f"⚠️ Nhận tín hiệu {signum}, đang đóng kết nối Neo4j...")
+    close_driver()
+    raise SystemExit(0)
+
+signal.signal(signal.SIGINT, _cleanup_signal)
+signal.signal(signal.SIGTERM, _cleanup_signal)
 
 
 # -----------------------------------------------------------
