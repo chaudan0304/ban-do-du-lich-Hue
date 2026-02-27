@@ -1,8 +1,23 @@
 /* ==========================================================================
-   SIDEBAR STYLES
+   THANH BÊN - KIỂU DÁNG & THÀNH PHẦN
+   (Sidebar - Styles & Components)
+   
+   Mô tả / Description:
+   File này chứa tất cả kiểu dáng liên quan đến sidebar, bao gồm:
+   khung sidebar, header, banner CTA khách, ô tìm kiếm, thẻ gợi ý AI,
+   huy hiệu thuật toán, lịch sử tìm kiếm, tab khám phá dữ liệu,
+   bảng chi tiết địa điểm và các nút hành động.
+   This file contains all sidebar-related styles, including:
+   sidebar frame, header, guest CTA banner, search box, AI suggestion cards,
+   algorithm badges, search history, data explorer tab,
+   location detail panel and action buttons.
    ========================================================================== */
 
-/* SIDEBAR FIXED */
+/* --------------------------------------------------------------------------
+   KHUNG SIDEBAR / SIDEBAR FRAME
+   Thanh bên trái cố định chứa toàn bộ nội dung điều hướng
+   Fixed left panel containing all navigation content
+   -------------------------------------------------------------------------- */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -21,14 +36,18 @@
   will-change: width;
 }
 
-/* When resizing - disable animation for smoothness */
+/* Trạng thái đang thay đổi kích thước / Resizing state - disable animation */
 .sidebar.resizing {
   transition: none !important;
   user-select: none;
   pointer-events: auto;
 }
 
-/* Custom Resizer */
+/* --------------------------------------------------------------------------
+   THANH KÉO THAY ĐỔI KÍCH THƯỚC / RESIZE HANDLE
+   Vùng kéo để thay đổi chiều rộng sidebar
+   Drag zone to resize sidebar width
+   -------------------------------------------------------------------------- */
 .sidebar-resizer {
   position: absolute;
   top: 0;
@@ -45,7 +64,11 @@
   background: rgba(79, 70, 229, 0.5);
 }
 
-/* Sidebar Header */
+/* --------------------------------------------------------------------------
+   HEADER SIDEBAR / SIDEBAR HEADER
+   Logo thương hiệu, tên ứng dụng và khu vực xác thực
+   Brand logo, app name and authentication area
+   -------------------------------------------------------------------------- */
 .sidebar-header {
   display: flex;
   justify-content: space-between;
@@ -57,6 +80,7 @@
   flex-shrink: 0;
 }
 
+/* Thương hiệu / Brand identity */
 .brand {
   display: flex;
   align-items: center;
@@ -76,13 +100,15 @@
   letter-spacing: 0.5px;
 }
 
+/* Khu vực xác thực trên header / Header auth area */
 .header-auth {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-/* Admin Action Button */
+/* Nút hành động admin trên header / Admin action button on header */
 .header-action-btn {
   display: flex;
   align-items: center;
@@ -104,7 +130,11 @@
   font-size: 14px;
 }
 
-/* Guest CTA Banner */
+/* --------------------------------------------------------------------------
+   BANNER KÊU GỌI ĐĂNG NHẬP / GUEST CTA BANNER
+   Banner khuyến khích khách đăng nhập để nhận gợi ý cá nhân hóa
+   Banner encouraging guests to login for personalized suggestions
+   -------------------------------------------------------------------------- */
 .guest-cta-banner {
   display: flex;
   align-items: center;
@@ -127,14 +157,8 @@
   box-shadow: 0 4px 14px rgba(99, 102, 241, 0.15);
 }
 @keyframes fadeInBanner {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .cta-content {
   display: flex;
@@ -156,21 +180,9 @@
   flex-shrink: 0;
   box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
 }
-.cta-text {
-  min-width: 0;
-}
-.cta-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #312e81;
-  margin: 0;
-}
-.cta-desc {
-  font-size: 11px;
-  color: #6366f1;
-  margin: 2px 0 0;
-  opacity: 0.85;
-}
+.cta-text { min-width: 0; }
+.cta-title { font-size: 13px; font-weight: 700; color: #312e81; margin: 0; }
+.cta-desc { font-size: 11px; color: #6366f1; margin: 2px 0 0; opacity: 0.85; }
 .cta-arrow {
   color: #818cf8;
   font-size: 14px;
@@ -182,7 +194,11 @@
   color: var(--primary);
 }
 
-/* Results Container */
+/* --------------------------------------------------------------------------
+   VÙNG KẾT QUẢ GỢI Ý / RESULTS CONTAINER
+   Vùng hiển thị danh sách kết quả gợi ý AI (tab đầu tiên)
+   Area displaying AI suggestion results list (first tab)
+   -------------------------------------------------------------------------- */
 .results-container {
   flex: 0 1 auto;
   max-height: 25%;
@@ -194,7 +210,7 @@
   border-bottom: 1px solid var(--border-light);
 }
 
-/* History Section */
+/* Phần lịch sử tìm kiếm / Search history section */
 .history-section {
   margin-top: 12px;
   padding-top: 0;
@@ -202,7 +218,11 @@
   flex-shrink: 0;
 }
 
-/* Data Explorer */
+/* --------------------------------------------------------------------------
+   VÙNG KHÁM PHÁ DỮ LIỆU / DATA EXPLORER AREA
+   Tab "Khám phá" hiển thị tất cả địa điểm dạng lưới
+   "Explore" tab displaying all locations in grid layout
+   -------------------------------------------------------------------------- */
 .data-explorer {
   flex: 1;
   display: flex;
@@ -214,7 +234,7 @@
   z-index: 10;
 }
 
-/* Updated Chip Design */
+/* Chip lọc danh mục / Category filter chips */
 .chip {
   padding: 8px 16px;
   background: white;
@@ -228,10 +248,7 @@
   transition: all 0.2s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
-.chip:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-}
+.chip:hover { background: #f9fafb; border-color: #d1d5db; }
 .chip.active {
   background: #111827;
   color: white;
@@ -239,7 +256,7 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Mini List - Grid Layout */
+/* Lưới danh sách thu nhỏ / Mini list grid layout */
 .mini-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -251,3 +268,481 @@
   padding-right: 4px;
   padding-bottom: 60px;
 }
+
+/* --------------------------------------------------------------------------
+   Ô TÌM KIẾM & NHẬP LIỆU / SEARCH BOX & INPUTS
+   Ô tìm kiếm người dùng/địa điểm và nút gửi
+   User/location search input and submit button
+   -------------------------------------------------------------------------- */
+#guest-search-box { display: flex; width: 100%; }
+
+#usernameInput {
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 48px;
+  background: white;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  color: var(--text-main);
+  transition: var(--trans-fast);
+  box-shadow: var(--shadow-sm);
+}
+#usernameInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-light);
+  outline: none;
+}
+
+/* Nút gửi tìm kiếm / Search submit button */
+.btn-submit {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+.btn-submit:hover {
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+.btn-submit:active {
+  transform: translateY(-50%) scale(0.98);
+}
+
+/* --------------------------------------------------------------------------
+   THẺ GỢI Ý AI / AI SUGGESTION CARDS
+   Thẻ hiển thị kết quả gợi ý từ thuật toán AI
+   Cards displaying AI algorithm suggestion results
+   -------------------------------------------------------------------------- */
+.cards-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 20px; }
+
+/* Thẻ AI thu gọn / Compact AI card */
+.ai-card {
+  display: flex;
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 10px;
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-sm);
+  transition: var(--trans-smooth);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.ai-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(79, 70, 229, 0.1);
+}
+
+/* Nội dung thẻ / Card content */
+.card-content {
+  flex: 1;
+  padding-left: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.3;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+/* Ảnh thu nhỏ / Card thumbnail */
+.card-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-body);
+}
+.card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.ai-card:hover .card-thumb img { transform: scale(1.1); }
+
+/* --------------------------------------------------------------------------
+   HUY HIỆU THUẬT TOÁN / ALGORITHM BADGES
+   Nhãn hiển thị loại thuật toán (PageRank, Collab, Content-Based...)
+   Labels showing algorithm type (PageRank, Collab, Content-Based...)
+   -------------------------------------------------------------------------- */
+.algo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-pr { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }       /* PageRank */
+.badge-collab { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }   /* Collaborative Filtering */
+.badge-content { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }  /* Content-Based */
+.badge-top1 { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border: 1px solid #fbbf24; }  /* Top 1 */
+.badge-top5 { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }     /* Top 5 */
+.badge-top10 { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }    /* Top 10 */
+.badge-pagerank { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; } /* PageRank */
+
+/* --------------------------------------------------------------------------
+   TRẠNG THÁI RỖNG / EMPTY STATE
+   Hiển thị khi chưa có kết quả gợi ý
+   Displayed when no suggestion results available
+   -------------------------------------------------------------------------- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+}
+.empty-state img { width: 40px; margin-bottom: 8px; opacity: 0.8; }
+.empty-state h3 { font-size: 14px; margin-bottom: 4px; }
+.empty-state p { font-size: 11px; margin: 0; }
+
+/* --------------------------------------------------------------------------
+   LỊCH SỬ TÌM KIẾM / SEARCH HISTORY
+   Danh sách chip hiển thị các lần tìm kiếm gần đây
+   Chip list displaying recent search entries
+   -------------------------------------------------------------------------- */
+.history-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 6px;
+}
+.history-chips {
+  display: flex;
+  flex-wrap: wrap !important;
+  overflow-x: hidden !important;
+  max-height: 90px !important;
+  overflow-y: auto !important;
+  gap: 8px;
+  padding-right: 4px;
+  border-bottom: 1px dashed var(--border-light);
+  scrollbar-width: thin;
+}
+.history-chips::-webkit-scrollbar { width: 4px; }
+.history-chips::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+/* Chip lịch sử / History chip item */
+.hist-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--trans-fast);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.hist-chip img {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* --------------------------------------------------------------------------
+   KHÁM PHÁ DỮ LIỆU - Ô TÌM KIẾM & BỘ LỌC / DATA EXPLORER - SEARCH & FILTERS
+   Ô tìm kiếm nhỏ và chip lọc danh mục trong tab Khám phá
+   Mini search box and category filter chips in Explorer tab
+   -------------------------------------------------------------------------- */
+.mini-search-box {
+  position: relative;
+  width: auto;
+  flex: 0 1 240px;
+  margin-left: auto;
+}
+.mini-search-box input {
+  width: 100%;
+  padding: 10px 40px 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 99px;
+  font-size: 13px;
+  background: #f3f4f6;
+  color: #1f2937;
+  transition: all 0.2s;
+}
+.mini-search-box input:focus {
+  background: white;
+  border-color: #e5e7eb;
+  box-shadow: 0 0 0 3px rgba(243, 244, 246, 0.5);
+  outline: none;
+}
+.mini-search-box i {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* Thanh chip lọc cuộn ngang / Horizontal scrollable filter chips */
+.filter-chips {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  padding-bottom: 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filter-chips::-webkit-scrollbar { display: none; }
+
+/* --------------------------------------------------------------------------
+   THẺ ĐỊA ĐIỂM THU NHỎ / MINI LOCATION CARDS
+   Thẻ hiển thị địa điểm dạng dọc trong lưới khám phá
+   Vertical location cards in the explorer grid
+   -------------------------------------------------------------------------- */
+.mini-item {
+  display: flex !important;
+  flex-direction: column;
+  padding: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  height: auto;
+  min-height: 160px;
+}
+.mini-item:hover {
+  border-color: #6366f1;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+}
+.mini-item::before { display: none; }
+
+/* Ảnh thu nhỏ địa điểm / Location thumbnail image */
+.mini-img {
+  width: 100%;
+  height: 84px;
+  object-fit: cover;
+  display: block;
+  background: #f3f4f6;
+  margin: 0 0 8px 0;
+  border-radius: 10px;
+}
+
+/* Nội dung thẻ / Card content area */
+.mini-content {
+  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+/* Tên địa điểm / Location name */
+.mini-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.35;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* Điểm số PageRank / PageRank score display */
+.mini-score {
+  font-size: 11px;
+  color: #059669;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.mini-score i { font-size: 11px; color: #9ca3af; }
+.score-val { color: #059669; font-weight: 700; }
+
+/* --------------------------------------------------------------------------
+   BẢNG CHI TIẾT ĐỊA ĐIỂM / LOCATION DETAIL PANEL
+   Panel hiển thị thông tin chi tiết khi click vào một địa điểm
+   Panel displaying detailed info when clicking a location
+   -------------------------------------------------------------------------- */
+
+/* Nút quay lại / Back button */
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 24px;
+  background: white;
+  border: none;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--trans-fast);
+}
+.btn-back:hover { background: #f8fafc; color: var(--primary-hover); }
+
+/* Ảnh bìa chi tiết / Detail hero image */
+.detail-hero { width: 100%; height: 220px; object-fit: cover; display: block; }
+/* Nội dung chi tiết / Detail body content */
+.detail-body { padding: 24px; }
+/* Tiêu đề địa điểm / Location title */
+.detail-title { margin-bottom: 12px; font-size: 22px; font-weight: 800; color: var(--text-main); line-height: 1.2; }
+/* Thông tin meta (danh mục, vị trí) / Meta info (category, location) */
+.detail-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; font-size: 13px; color: var(--text-secondary); }
+.meta-tag { display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--bg-body); border-radius: var(--radius-sm); font-weight: 500; }
+/* Mô tả địa điểm / Location description */
+.detail-desc { margin-bottom: 24px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+
+/* --------------------------------------------------------------------------
+   LÝ DO GỢI Ý AI / AI RECOMMENDATION REASON
+   Giải thích tại sao AI gợi ý địa điểm này
+   Explanation of why AI recommended this location
+   -------------------------------------------------------------------------- */
+.ai-reason-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: white;
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+.ai-reason-main.collab { border-color: var(--info); }     /* Lọc cộng tác / Collaborative */
+.ai-reason-main.content { border-color: var(--success); }  /* Dựa trên nội dung / Content-based */
+.ai-reason-main.pagerank { border-color: var(--warning); } /* Xếp hạng trang / PageRank */
+.ai-reason-main .reason-text { font-size: 13px; font-weight: 600; color: var(--text-main); line-height: 1.5; }
+
+/* --------------------------------------------------------------------------
+   THANH ĐIỂM SỐ AI / AI SCORE BARS
+   Thanh tiến trình hiển thị điểm từng thuật toán
+   Progress bars showing individual algorithm scores
+   -------------------------------------------------------------------------- */
+.ai-score-breakdown { display: flex; flex-direction: column; gap: 12px; }
+.score-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+.score-bar { height: 6px; background: var(--border-light); border-radius: var(--radius-full); overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: var(--radius-full); transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+.score-bar-fill.collab { background: var(--info); }
+.score-bar-fill.content { background: var(--success); }
+.score-bar-fill.pagerank { background: var(--warning); }
+
+/* --------------------------------------------------------------------------
+   NÚT HÀNH ĐỘNG CHI TIẾT / DETAIL ACTION BUTTONS
+   Nút Thích, Chỉ đường Google Maps, Chia sẻ
+   Like, Google Maps directions, Share buttons
+   -------------------------------------------------------------------------- */
+.detail-actions { display: flex; gap: 10px; margin-top: 24px; }
+.btn-action {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--trans-fast);
+  box-shadow: var(--shadow-sm);
+}
+.btn-action:hover { background: var(--bg-body); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+/* Trạng thái đã thích / Liked state */
+.btn-like.liked {
+  color: #dc2626;
+  border-color: #fca5a5;
+  background: #fef2f2;
+  font-weight: 700;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+/* Nút chỉ đường Google Maps / Google Maps directions button */
+.btn-maps { background: #eff6ff; color: #2563eb; border-color: #dbeafe; text-decoration: none; }
+.btn-maps:hover { background: #2563eb; color: white; border-color: #2563eb; }
+
+/* --------------------------------------------------------------------------
+   NÚT HÀNH ĐỘNG LỚN (GIAO DIỆN MỚI) / LARGE ACTION BUTTONS (NEW UI)
+   Phiên bản nút hành động lớn hơn cho giao diện mới
+   Larger action button version for new UI design
+   -------------------------------------------------------------------------- */
+.detail-actions-row { display: flex; gap: 15px; margin-bottom: 30px; }
+
+.btn-large-action {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* Nút viền / Outline button */
+.btn-outline { background: white; border: 1px solid #e2e8f0; color: #475569; }
+.btn-outline:hover { border-color: #cbd5e1; background: #f8fafc; }
+.btn-outline.liked { color: #ef4444; border-color: #fecaca; background: #fef2f2; }

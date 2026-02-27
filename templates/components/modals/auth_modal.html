@@ -1,6 +1,20 @@
-<!-- Modal Auth -->
+<!-- ======================================================================
+     MODAL XÁC THỰC / AUTH MODAL
+     
+     Mô tả / Description:
+     Modal đăng nhập và đăng ký tài khoản người dùng.
+     Chuyển đổi giữa 2 tab: Đăng nhập (login) và Đăng ký (register).
+     User login and registration modal.
+     Toggles between 2 tabs: Login and Register.
+     
+     Hàm JS liên quan / Related JS functions:
+     - openAuthModal(), closeAuthModal() → auth.js
+     - switchTab(), handleLogin(), handleRegister() → auth.js
+     ====================================================================== -->
 <div id="authModal" class="modal">
   <div class="modal-content">
+
+    <!-- ── HEADER: TAB CHUYỂN ĐỔI + NÚT ĐÓNG / TABS + CLOSE BUTTON ── -->
     <div class="auth-header-wrapper">
       <div class="auth-tabs">
         <button class="tab-btn active" onclick="switchTab('login')">
@@ -13,6 +27,9 @@
       </button>
     </div>
 
+    <!-- ── FORM ĐĂNG NHẬP / LOGIN FORM ──
+         Gồm: Tên đăng nhập + Mật khẩu + Nút đăng nhập + Link quên mật khẩu
+         Contains: Username + Password + Login button + Forgot password link -->
     <div id="loginForm" class="auth-form">
       <form
         onsubmit="
@@ -21,6 +38,7 @@
         "
         autocomplete="on"
       >
+        <!-- Ô nhập tên đăng nhập / Username input -->
         <div class="form-group">
           <i class="fas fa-user"></i
           ><input
@@ -31,6 +49,8 @@
             autocomplete="username"
           />
         </div>
+
+        <!-- Ô nhập mật khẩu / Password input -->
         <div class="form-group">
           <i class="fas fa-lock"></i
           ><input
@@ -41,7 +61,11 @@
             autocomplete="current-password"
           />
         </div>
+
+        <!-- Nút đăng nhập / Login button -->
         <button type="submit" class="btn-full">Đăng nhập</button>
+
+        <!-- Thông báo lỗi đăng nhập / Login error message -->
         <p
           id="loginMsg"
           style="
@@ -51,6 +75,8 @@
             text-align: center;
           "
         ></p>
+
+        <!-- Link quên mật khẩu / Forgot password link -->
         <div style="text-align: center; margin-top: 5px">
           <a
             href="#"
@@ -65,6 +91,9 @@
       </form>
     </div>
 
+    <!-- ── FORM ĐĂNG KÝ / REGISTER FORM ──
+         Ẩn mặc định, hiển thị khi chọn tab Đăng ký
+         Hidden by default, shown when Register tab is selected -->
     <div id="registerForm" class="auth-form" style="display: none">
       <form
         onsubmit="
@@ -73,6 +102,7 @@
         "
         autocomplete="on"
       >
+        <!-- Ô nhập tên đăng nhập mới / New username input -->
         <div class="form-group">
           <i class="fas fa-user"></i
           ><input
@@ -83,6 +113,8 @@
             autocomplete="username"
           />
         </div>
+
+        <!-- Ô nhập mật khẩu / Password input -->
         <div class="form-group">
           <i class="fas fa-lock"></i
           ><input
@@ -94,7 +126,7 @@
           />
         </div>
 
-        <!-- Hidden input for checkbox logic compatibility if needed -->
+        <!-- Checkbox ẩn cho tương thích logic / Hidden checkbox for logic compatibility -->
         <input
           type="checkbox"
           id="regCheck"
@@ -103,9 +135,12 @@
           value="Agree"
         />
 
+        <!-- Nút tạo tài khoản / Create account button -->
         <button type="submit" class="btn-full btn-outline">
           Tạo tài khoản
         </button>
+
+        <!-- Thông báo lỗi đăng ký / Register error message -->
         <p
           id="regMsg"
           style="

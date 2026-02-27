@@ -1,8 +1,19 @@
 /* ==========================================================================
-   REVIEWS & RATINGS
+   ĐÁNH GIÁ & XẾP HẠNG
+   (Reviews & Ratings)
+   
+   Mô tả / Description:
+   File này chứa kiểu dáng cho phần đánh giá địa điểm, bao gồm
+   input chấm sao, danh sách đánh giá, huy hiệu cảm xúc và form viết đánh giá.
+   This file contains styles for location reviews, including
+   star rating input, review list, sentiment badges and review form.
    ========================================================================== */
 
-/* RATING INPUT */
+/* --------------------------------------------------------------------------
+   NHẬP ĐÁNH GIÁ SAO / STAR RATING INPUT
+   Cho phép người dùng click chọn số sao (1-5)
+   Allows users to click and select star count (1-5)
+   -------------------------------------------------------------------------- */
 .rating-input {
   display: flex;
   flex-direction: row-reverse;
@@ -24,7 +35,11 @@
   color: #f59e0b;
 }
 
-/* WRITE REVIEW BUTTON */
+/* --------------------------------------------------------------------------
+   NÚT VIẾT ĐÁNH GIÁ / WRITE REVIEW BUTTON
+   Nút mở form viết đánh giá mới
+   Button to open new review form
+   -------------------------------------------------------------------------- */
 .btn-write-review {
   display: inline-flex;
   align-items: center;
@@ -47,7 +62,11 @@
   transform: translateY(-1px);
 }
 
-/* SENTIMENT BADGES */
+/* --------------------------------------------------------------------------
+   HUY HIỆU CẢM XÚC / SENTIMENT BADGES
+   Nhãn phân tích cảm xúc AI (tích cực/tiêu cực/trung lập)
+   AI sentiment analysis labels (positive/negative/neutral)
+   -------------------------------------------------------------------------- */
 .sentiment-badge {
   display: inline-flex;
   align-items: center;
@@ -75,6 +94,7 @@
   border: 1px solid #e2e8f0;
 }
 
+/* Huy hiệu cảm xúc dạng đơn giản / Simple sentiment badges */
 .badge-positive {
   background: #dcfce7;
   color: #166534;
@@ -88,7 +108,7 @@
   color: #991b1b;
 }
 
-/* Visited Tag Badge */
+/* Nhãn "Đã ghé thăm" / "Visited" tag badge */
 .visited-tag {
   background-color: #dbeafe;
   color: #1e40af;
@@ -96,7 +116,11 @@
   font-weight: 600;
 }
 
-/* --- NEW REVIEW ITEM STYLE (Modern) --- */
+/* --------------------------------------------------------------------------
+   MỤC ĐÁNH GIÁ HIỆN ĐẠI / MODERN REVIEW ITEM
+   Thiết kế mục đánh giá với avatar, tên, sao và nội dung
+   Review item design with avatar, name, stars and content
+   -------------------------------------------------------------------------- */
 .review-item-modern {
   display: flex;
   gap: 15px;
@@ -108,6 +132,7 @@
   border-bottom: none;
 }
 
+/* Ảnh đại diện người đánh giá / Reviewer avatar */
 .review-avatar-modern {
   width: 40px;
   height: 40px;
@@ -121,6 +146,7 @@
   flex-shrink: 0;
 }
 
+/* Nội dung đánh giá / Review content area */
 .review-content-modern {
   flex: 1;
   min-width: 0;
@@ -134,6 +160,7 @@
   margin-bottom: 4px;
 }
 
+/* Thông tin người đánh giá / Reviewer info */
 .review-user-info {
   display: flex;
   flex-direction: column;
@@ -146,12 +173,14 @@
   width: 100%;
 }
 
+/* Tên người đánh giá / Reviewer name */
 .review-user-name {
   font-weight: 700;
   color: #1e293b;
   font-size: 14px;
 }
 
+/* Hàng hiển thị sao / Star rating row */
 .review-rating-row {
   display: flex;
   align-items: center;
@@ -164,6 +193,7 @@
   letter-spacing: 1px;
 }
 
+/* Thông tin bên phải (ngày, hành động) / Right-side meta (date, actions) */
 .review-meta-right {
   text-align: right;
 }
@@ -174,6 +204,7 @@
   display: block;
 }
 
+/* Nút hành động (Sửa/Xóa) / Action buttons (Edit/Delete) */
 .review-actions {
   display: flex;
   gap: 8px;
@@ -198,6 +229,7 @@
   text-decoration: underline;
 }
 
+/* Văn bản đánh giá / Review text content */
 .review-text-modern {
   font-size: 14px;
   color: #334155;
@@ -212,6 +244,7 @@
   line-height: 1.4;
 }
 
+/* Bố cục hàng đánh giá / Review row layout */
 .review-row-top {
   margin-bottom: 4px;
   display: flex;
@@ -225,7 +258,11 @@
   margin-top: 0;
 }
 
-/* --- Review Summary Banner (Green Style) --- */
+/* --------------------------------------------------------------------------
+   BANNER TÓM TẮT ĐÁNH GIÁ / REVIEW SUMMARY BANNER
+   Banner tổng quan đánh giá với điểm trung bình
+   Review overview banner with average score
+   -------------------------------------------------------------------------- */
 .review-summary-banner {
   background: #f0fdf4;
   border: 1px solid #dcfce7;
@@ -236,6 +273,8 @@
   gap: 16px;
   margin-bottom: 20px;
 }
+
+/* Biểu tượng tóm tắt / Summary icon */
 .summary-icon {
   width: 48px;
   height: 48px;
@@ -265,7 +304,7 @@
   opacity: 0.8;
 }
 
-/* Section Headers */
+/* Tiêu đề phần với nút / Section headers with button */
 .section-header-modern {
   font-size: 14px;
   font-weight: 800;
@@ -288,7 +327,11 @@
   cursor: pointer;
 }
 
-/* --- REVIEW FORM ACTIONS --- */
+/* --------------------------------------------------------------------------
+   FORM VIẾT ĐÁNH GIÁ / REVIEW WRITE FORM
+   Nút Hủy và nút Gửi đánh giá
+   Cancel and Submit review buttons
+   -------------------------------------------------------------------------- */
 .review-form .form-actions {
   display: flex;
   gap: 10px;
@@ -296,6 +339,7 @@
   justify-content: flex-end;
 }
 
+/* Nút hủy / Cancel button */
 .review-form .btn-cancel {
   padding: 8px 20px;
   background: white;
@@ -313,6 +357,7 @@
   color: var(--text-main);
 }
 
+/* Nút gửi đánh giá / Submit review button */
 .review-form .btn-submit {
   position: static;
   transform: none;

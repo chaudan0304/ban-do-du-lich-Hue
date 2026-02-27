@@ -1,11 +1,32 @@
-    <!-- Modal Notification -->
+<!-- ======================================================================
+     MODAL THÔNG BÁO / NOTIFICATION MODAL
+     
+     Mô tả / Description:
+     Modal popup thông báo đa năng với các loại: thành công, lỗi,
+     cảnh báo, thông tin, xóa. Icon và màu sắc thay đổi theo loại.
+     Multi-purpose notification popup with types: success, error,
+     warning, info, delete. Icon and colors change by type.
+     
+     Hàm JS liên quan / Related JS functions:
+     - showNotification() → utils.js
+     - Z-index: 9999 để luôn ở trên cùng / Always on top
+     ====================================================================== -->
     <div id="notificationModal" class="modal">
       <div id="notif-content" class="modal-content-notification">
+
+        <!-- Biểu tượng thông báo (thay đổi theo loại) / Notification icon (changes by type) -->
         <div class="notif-icon-box">
             <i id="notif-icon" class="fas fa-check"></i>
         </div>
+
+        <!-- Tiêu đề thông báo / Notification title -->
         <h3 id="notif-title">Thông báo</h3>
+
+        <!-- Nội dung thông báo / Notification message -->
         <p id="notif-msg">Nội dung thông báo sẽ xuất hiện ở đây.</p>
+
+        <!-- Nút hành động: Hủy (tùy chọn) + Đóng/Xác nhận
+             Action buttons: Cancel (optional) + Close/Confirm -->
         <div class="notif-actions" style="display:flex; gap:10px; justify-content:center;">
             <button id="notif-cancel-btn" class="btn-notif btn-notif-cancel" style="display:none; background:#f1f5f9; color:#64748b;">Hủy</button>
             <button id="notif-btn" class="btn-notif">Đóng</button>

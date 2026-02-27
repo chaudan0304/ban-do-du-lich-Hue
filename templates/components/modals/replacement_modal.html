@@ -1,0 +1,48 @@
+<!-- ======================================================================
+     MODAL THAY THẾ HOẠT ĐỘNG / ACTIVITY REPLACEMENT MODAL
+     
+     Mô tả / Description:
+     Modal cho phép người dùng chọn địa điểm thay thế cho một hoạt động
+     trong lịch trình AI. Hiển thị danh sách địa điểm tương tự cùng danh mục.
+     Modal allowing users to pick a replacement location for an activity
+     in the AI itinerary. Shows a list of similar locations in the same category.
+     
+     Hàm JS liên quan / Related JS functions:
+     - openReplacementModal(), closeReplacementModal() → planner.js
+     - Danh sách render bằng JS / List rendered by JS
+     ====================================================================== -->
+<div class="modal-overlay" id="replacementModal">
+  <div class="modal-content-fancy">
+
+    <!-- ── HEADER / TIÊU ĐỀ ── -->
+    <div class="fancy-modal-header">
+      <h3><i class="fas fa-exchange-alt"></i> Chọn địa điểm thay thế</h3>
+      <span class="close-btn" onclick="closeReplacementModal()">&times;</span>
+    </div>
+
+    <!-- ── THÂN MODAL / MODAL BODY ── -->
+    <div class="planner-body">
+      <!-- Giới thiệu / Introduction text -->
+      <p class="replacement-intro">
+        Dưới đây là các địa điểm phù hợp để thay thế. Hãy chọn một nơi bạn
+        thích:
+      </p>
+
+      <!-- Danh sách địa điểm thay thế (render bằng JS)
+           Replacement location list (rendered by JS) -->
+      <div id="replacement-list" class="itinerary-list">
+        <!-- JS sẽ render danh sách vào đây / JS renders the list here -->
+        <div class="replacement-loading">
+          Đang tìm kiếm...
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FOOTER: NÚT HỦY / FOOTER: CANCEL BUTTON ── -->
+    <div class="fancy-modal-footer">
+      <button class="btn-cancel" onclick="closeReplacementModal()">
+        Hủy bỏ
+      </button>
+    </div>
+  </div>
+</div>

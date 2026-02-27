@@ -1,12 +1,32 @@
-<!-- TEMPLATE: REVIEW SECTION -->
+<!-- ======================================================================
+     TEMPLATE ĐÁNH GIÁ & BÌNH LUẬN / REVIEW & COMMENT TEMPLATE
+     
+     Mô tả / Description:
+     Template HTML được clone qua JavaScript khi hiển thị chi tiết địa điểm.
+     Chứa: header đánh giá, form viết đánh giá (sao + textarea), danh sách đánh giá.
+     HTML template cloned via JavaScript when showing location details.
+     Contains: review header, write review form (stars + textarea), review list.
+     ====================================================================== -->
 <template id="review-template">
+
+  <!-- ── HEADER PHẦN ĐÁNH GIÁ / REVIEW SECTION HEADER ──
+       Tiêu đề + Nút viết đánh giá
+       Title + Write review button -->
   <div class="section-header-modern">
       <span class="section-title"><i class="fas fa-comments"></i> ĐÁNH GIÁ & BÌNH LUẬN</span>
       <button class="btn-pill-small" id="btn-toggle-review"><i class="fas fa-pen"></i> Viết đánh giá</button>
   </div>
   
+  <!-- ── FORM VIẾT ĐÁNH GIÁ / REVIEW WRITE FORM ──
+       Ẩn mặc định, hiển thị khi nhấn nút "Viết đánh giá"
+       Hidden by default, shown when clicking "Write review" button
+       Gồm: 5 sao radio + ô nhập nội dung + nút Gửi/Hủy
+       Contains: 5-star radio + text area + Submit/Cancel buttons -->
   <div id="reviewFormContainer" class="review-form" style="display:none;">
        <div class="form-header">Chia sẻ trải nghiệm của bạn</div>
+
+       <!-- Chọn sao đánh giá (5→1, thứ tự ngược cho CSS trick)
+            Star rating input (5→1, reversed order for CSS trick) -->
        <div class="rating-input">
           <input type="radio" id="star5" name="rating" value="5" /><label for="star5">★</label>
           <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
@@ -14,14 +34,22 @@
           <input type="radio" id="star2" name="rating" value="2" /><label for="star2">★</label>
           <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
        </div>
+
+       <!-- Ô nhập nội dung đánh giá / Review content textarea -->
        <textarea id="reviewComment" class="review-textarea" placeholder="Bạn thấy địa điểm này thế nào? Không gian, phục vụ..." rows="3"></textarea>
+
+       <!-- Nút hành động: Hủy + Gửi đánh giá / Action buttons: Cancel + Submit -->
        <div class="form-actions">
           <button class="btn-cancel" onclick="document.getElementById('reviewFormContainer').style.display='none'">Hủy</button>
           <button class="btn-submit" id="btn-submit-review">Gửi đánh giá</button>
        </div>
   </div>
   
+  <!-- ── DANH SÁCH ĐÁNH GIÁ / REVIEW LIST ──
+       Nội dung được render bằng JavaScript (reviews.js)
+       Content rendered by JavaScript (reviews.js) -->
   <div id="reviewList" class="review-list">
       <div class="loading-reviews">Đang tải đánh giá...</div>
   </div>
+
 </template>

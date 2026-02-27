@@ -1,8 +1,21 @@
 /* ==========================================================================
-   AI PLANNER STYLES
+   LẬP LỊCH TRÌNH AI - KIỂU DÁNG
+   (AI Planner - Styles)
+   
+   Mô tả / Description:
+   File này chứa kiểu dáng cho modal lập lịch trình du lịch AI, bao gồm:
+   nút gradient, thanh trượt số ngày, lưới sở thích, dòng thời gian hoạt động,
+   thẻ hoạt động nâng cao và giao diện chỉnh sửa lịch trình.
+   This file contains styles for the AI travel planner modal, including:
+   gradient buttons, day slider, preference grid, activity timeline,
+   fancy activity cards and itinerary edit interface.
    ========================================================================== */
 
-/* --- GRADIENT BUTTONS (Vibrant) --- */
+/* --------------------------------------------------------------------------
+   NÚT GRADIENT / GRADIENT BUTTONS
+   Nút lưu và xác nhận với gradient tím
+   Save and confirm buttons with purple gradient
+   -------------------------------------------------------------------------- */
 .btn-save-gradient, .btn-full {
   width: 100%;
   padding: 14px;
@@ -24,7 +37,11 @@
   box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
 }
 
-/* Range Selector (Day Slider) */
+/* --------------------------------------------------------------------------
+   THANH TRƯỢT CHỌN SỐ NGÀY / DAY RANGE SELECTOR
+   Thanh trượt cho phép chọn số ngày du lịch (1-5)
+   Slider allowing selection of travel days (1-5)
+   -------------------------------------------------------------------------- */
 .range-selector {
   display: flex;
   align-items: center;
@@ -45,7 +62,11 @@
   text-align: right;
 }
 
-/* Preference Grid */
+/* --------------------------------------------------------------------------
+   LƯỚI SỞ THÍCH / PREFERENCE GRID
+   Checkbox chọn loại địa điểm yêu thích (lịch sử, thiên nhiên...)
+   Checkboxes for selecting preferred location types (history, nature...)
+   -------------------------------------------------------------------------- */
 .preference-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -66,6 +87,7 @@
   transition: all 0.2s;
   color: var(--text-secondary);
 }
+/* Trạng thái đã chọn / Selected state */
 .pref-item input:checked + span {
   background: #eff6ff;
   border-color: #3b82f6;
@@ -74,7 +96,11 @@
   box-shadow: 0 0 0 1px #3b82f6;
 }
 
-/* Day Block Timeline */
+/* --------------------------------------------------------------------------
+   KHỐI NGÀY & DÒNG THỜI GIAN / DAY BLOCK & TIMELINE
+   Header ngày với nhãn tròn và đường kẻ dọc timeline
+   Day header with pill label and vertical timeline dashed line
+   -------------------------------------------------------------------------- */
 .day-block { margin-bottom: 30px; position: relative; }
 .day-header {
   display: inline-block;
@@ -89,12 +115,16 @@
   z-index: 2;
   position: relative;
 }
+
+/* Đường kẻ dọc timeline / Vertical timeline line */
 .day-timeline {
   border-left: 2px dashed #cbd5e1;
   margin-left: 20px;
   padding-left: 20px;
   padding-bottom: 10px;
 }
+
+/* Ảnh hoạt động / Activity image */
 .act-img {
   width: 60px;
   height: 60px;
@@ -102,6 +132,8 @@
   object-fit: cover;
   margin-left: auto;
 }
+
+/* Nhãn thời gian / Time tag */
 .act-time-tag {
   position: absolute;
   top: 5px;
@@ -114,8 +146,14 @@
   font-weight: 600;
 }
 
-/* Timeline Result */
+/* --------------------------------------------------------------------------
+   TIMELINE KẾT QUẢ / TIMELINE RESULTS
+   Danh sách hoạt động theo thời gian với chấm tròn chỉ dấu
+   Time-ordered activity list with dot markers
+   -------------------------------------------------------------------------- */
 .timeline-container { padding: 20px; }
+
+/* Mục hoạt động / Activity item */
 .activity-item {
   display: flex;
   gap: 15px;
@@ -133,6 +171,7 @@
   transform: translateX(5px);
   border-color: var(--primary);
 }
+/* Chấm tròn trên timeline / Timeline dot marker */
 .activity-item::before {
   content: '';
   position: absolute;
@@ -146,6 +185,7 @@
   z-index: 1;
 }
 
+/* Khung thời gian / Time block */
 .activity-time {
   min-width: 60px;
   font-weight: 700;
@@ -160,6 +200,7 @@
 }
 .activity-icon { font-size: 18px; margin-bottom: 4px; color: var(--primary); }
 
+/* Nội dung hoạt động / Activity content */
 .activity-content h4 { font-size: 15px; margin-bottom: 4px; color: var(--text-main); }
 .activity-content p {
   font-size: 12px;
@@ -171,7 +212,11 @@
   overflow: hidden;
 }
 
-/* Profile Activity History */
+/* --------------------------------------------------------------------------
+   TAB LỊCH SỬ HOẠT ĐỘNG / ACTIVITY HISTORY TABS
+   Tab chuyển đổi trong phần lịch sử hồ sơ
+   Tab switching in profile history section
+   -------------------------------------------------------------------------- */
 .activity-tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #f1f5f9; padding: 4px; border-radius: 12px; }
 .activity-tabs .tab-btn {
   flex: 1;
@@ -185,12 +230,14 @@
   transition: all 0.2s;
   color: var(--text-secondary);
 }
+/* Tab hoạt động đang chọn / Active activity tab */
 .activity-tabs .tab-btn.active {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
 }
 
+/* Mục hoạt động thu gọn / Compact activity items */
 .activity-item-compact {
   display: flex;
   align-items: center;
@@ -204,7 +251,11 @@
 .activity-info h5 { font-size: 13px; margin-bottom: 2px; color: var(--text-main); }
 .activity-info p { font-size: 11px; color: var(--text-muted); }
 
-/* --- Plan / Itinerary UI --- */
+/* --------------------------------------------------------------------------
+   THẺ ĐỊA ĐIỂM TRONG LỊCH TRÌNH / PLAN LOCATION CARDS
+   Thẻ hiển thị địa điểm trong lịch trình đã lưu
+   Cards showing locations in saved itineraries
+   -------------------------------------------------------------------------- */
 .plan-loc-card {
   display: flex;
   align-items: center;
@@ -229,7 +280,11 @@
 .plan-loc-name { font-weight: 700; font-size: 14px; color: #1e293b; }
 .plan-loc-type { font-size: 11px; color: #64748b; margin-top: 2px; }
 
-/* --- NEW TEAL TIMELINE UI --- */
+/* --------------------------------------------------------------------------
+   TIMELINE TEAL NÂNG CAO / FANCY TEAL TIMELINE
+   Giao diện timeline kiểu mới với đường kẻ teal
+   New timeline design with teal-colored line
+   -------------------------------------------------------------------------- */
 .timeline-teal-container { padding: 20px 40px; position: relative; }
 .timeline-teal-container::before {
   content: '';
@@ -241,6 +296,7 @@
   border-left: 2px dashed #e2e8f0;
 }
 
+/* Nhãn ngày dạng viên / Day marker pill */
 .day-marker-pill {
   background: #6366f1;
   color: white;
@@ -255,7 +311,10 @@
   margin-left: -12px;
 }
 
+/* Nút hoạt động trên timeline / Activity node on timeline */
 .activity-node { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 30px; position: relative; }
+
+/* Chấm tròn timeline / Timeline circle dot */
 .activity-circle {
   width: 14px;
   height: 14px;
@@ -268,6 +327,11 @@
   flex-shrink: 0;
 }
 
+/* --------------------------------------------------------------------------
+   THẺ HOẠT ĐỘNG NÂNG CAO / FANCY ACTIVITY CARD
+   Thẻ hoạt động tích hợp ảnh, mô tả và thời gian
+   Activity card with integrated image, description and time
+   -------------------------------------------------------------------------- */
 .activity-card-fancy {
   flex: 1;
   background: white;
@@ -281,6 +345,7 @@
   align-items: center;
   height: auto;
   min-height: 80px;
+  position: relative;
 }
 .activity-card-fancy:hover {
   box-shadow: 0 8px 25px rgba(0,0,0,0.05);
@@ -288,6 +353,7 @@
   border-color: #e2e8f0;
 }
 
+/* Khung thời gian / Time box */
 .activity-time-box {
   width: 60px !important;
   height: 70px;
@@ -304,6 +370,7 @@
 }
 .activity-time-box i { font-size: 18px !important; margin-bottom: 2px; }
 
+/* Thông tin chính / Main info area */
 .activity-main-info {
   flex: 1;
   display: flex;
@@ -312,8 +379,13 @@
   height: 70px;
   overflow: hidden;
   padding-top: 2px;
+  cursor: pointer;
+}
+.activity-main-info:hover .activity-title-fancy {
+  color: var(--primary);
 }
 
+/* Tiêu đề hoạt động / Activity title */
 .activity-title-fancy {
   font-size: 15px !important;
   font-weight: 700;
@@ -324,6 +396,7 @@
   text-overflow: ellipsis;
 }
 
+/* Nhãn thể loại / Category tag */
 .activity-tag-fancy {
   background: #f1f5f9;
   color: #64748b;
@@ -337,6 +410,7 @@
   max-width: 100%;
 }
 
+/* Mô tả ngắn / Short description */
 .activity-desc-fancy {
   font-size: 11px !important;
   color: #64748b;
@@ -349,6 +423,7 @@
   margin-top: 0 !important;
 }
 
+/* Ảnh hoạt động nâng cao / Fancy activity image */
 .activity-img-fancy {
   width: 100px !important;
   height: 70px !important;
@@ -358,7 +433,11 @@
   margin: 0 !important;
 }
 
-/* Profile Activity Section */
+/* --------------------------------------------------------------------------
+   PHẦN HOẠT ĐỘNG HỒ SƠ / PROFILE ACTIVITY SECTION
+   Tab hoạt động trong modal hồ sơ người dùng
+   Activity tabs in user profile modal
+   -------------------------------------------------------------------------- */
 .profile-activity-section { margin-top: 24px; }
 
 .profile-activity-section .tab-btn {
@@ -377,6 +456,7 @@
 }
 .profile-activity-section .tab-btn:hover { color: #334155; background: rgba(255, 255, 255, 0.5); }
 
+/* Tab hoạt động đang chọn / Active profile tab */
 .profile-activity-section .tab-btn.active {
   background: white !important;
   color: #4f46e5 !important;
@@ -389,7 +469,7 @@
   background-color: white !important;
 }
 
-/* Activity List */
+/* Nội dung hoạt động / Activity content area */
 #activityContent {
   border: 1px solid #eee;
   background: #f9f9f9;
@@ -399,13 +479,11 @@
   color: #666;
 }
 
-/* ==========================================================================
-   ITINERARY EDIT BUTTONS
-   ========================================================================== */
-.activity-card-fancy {
-  position: relative;
-}
-
+/* --------------------------------------------------------------------------
+   NÚT CHỈNH SỬA LỊCH TRÌNH / ITINERARY EDIT BUTTONS
+   Nút Thay thế và Xóa hiển thị khi hover lên thẻ hoạt động
+   Replace and Remove buttons shown on activity card hover
+   -------------------------------------------------------------------------- */
 .activity-edit-btns {
   position: absolute;
   top: 8px;
@@ -416,10 +494,12 @@
   transition: opacity 0.2s ease;
 }
 
+/* Hiển thị khi hover / Show on hover */
 .activity-card-fancy:hover .activity-edit-btns {
   opacity: 1;
 }
 
+/* Nút thay thế và xóa hoạt động / Replace and remove activity buttons */
 .btn-activity-replace,
 .btn-activity-remove {
   width: 28px;
@@ -435,6 +515,7 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Nút thay thế (xanh dương) / Replace button (blue) */
 .btn-activity-replace {
   background: #eff6ff;
   color: #3b82f6;
@@ -445,6 +526,7 @@
   transform: rotate(180deg);
 }
 
+/* Nút xóa (đỏ) / Remove button (red) */
 .btn-activity-remove {
   background: #fef2f2;
   color: #ef4444;
@@ -453,12 +535,4 @@
   background: #ef4444;
   color: white;
   transform: scale(1.1);
-}
-
-/* Make activity card clickable area clearer */
-.activity-main-info {
-  cursor: pointer;
-}
-.activity-main-info:hover .activity-title-fancy {
-  color: var(--primary);
 }

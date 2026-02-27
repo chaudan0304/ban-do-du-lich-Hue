@@ -225,6 +225,17 @@ python tests/run_all_tests.py
 
 ## 📜 Nhật ký Cập nhật (Changelog)
 
+### v2.7 - Python Code Documentation (18/02/2026)
+
+- 📝 **Bilingual Comments:** Thêm comment song ngữ Việt-Anh chi tiết cho toàn bộ **26 file Python**, bao gồm:
+  - **Core:** `app.py`, `models.py`, `utils.py` — khởi tạo Flask, model User, phân tích cảm xúc.
+  - **Database (`db/`):** 8 files — Singleton pattern, CRUD User/Location, AI Planner (Nearest Neighbor), quản lý lộ trình, đồng bộ Excel.
+  - **Routes (`routes/`):** 5 files — Authentication, Admin CRUD, **Hybrid Recommendation v2.0** (3-layer strategy + Explainable AI), AI Planner API.
+  - **AI Engine:** `setup_algo.py` — 7-step algorithm: INTERACTED creation, RELATED_TO linking, dual PageRank, Jaccard Similarity (User + Location), score normalization.
+  - **Scripts (`scripts/`):** 4 files — Data import, user generation, rating analysis, review ID migration.
+  - **Tests (`tests/`):** 5 files — Authentication, Recommendation, Planner integration tests.
+- 🎯 **Mục tiêu:** Nâng cao khả năng đọc hiểu và bảo trì mã nguồn. Mỗi file đều có docstring mô tả mục đích, phụ thuộc, thuật toán, và ghi chú bảo mật.
+
 ### v2.6 - Security Hardening & Documentation Sync (15/02/2026)
 
 - 🔒 **Security Hardening:** Loại bỏ hoàn toàn `alert()`, `confirm()` và inline `onclick` trên toàn hệ thống. Thay thế bằng modal `showNotification` thống nhất và `addEventListener` an toàn để ngăn chặn XSS.

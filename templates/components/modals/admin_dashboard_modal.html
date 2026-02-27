@@ -1,6 +1,22 @@
-<!-- Modal Admin User Dashboard -->
+<!-- ======================================================================
+     MODAL BẢNG QUẢN TRỊ ADMIN / ADMIN DASHBOARD MODAL
+     
+     Mô tả / Description:
+     Modal quản trị hệ thống, chỉ admin mới truy cập được.
+     Chứa: Thống kê tổng quan, nút chạy AI, nút thêm địa điểm,
+     danh sách người dùng.
+     System admin modal, only accessible by admin users.
+     Contains: Overview stats, AI trigger, add location,
+     user list management.
+     
+     Hàm JS liên quan / Related JS functions:
+     - openAdminUserModal(), closeAdminModal() → admin.js
+     - triggerAI(), openAddModal(), loadAdminData() → admin.js
+     ====================================================================== -->
 <div id="adminModal" class="modal">
   <div class="modal-content-fancy">
+
+    <!-- ── HEADER GRADIENT / GRADIENT HEADER ── -->
     <div class="modal-header-gradient">
       <h3 class="modal-title-fancy">
         <i class="fas fa-user-shield"></i> Quản trị hệ thống
@@ -11,7 +27,12 @@
     </div>
 
     <div class="modal-body-fancy">
+
+      <!-- ── LƯỚI THỐNG KÊ / STATS GRID ──
+           4 thẻ thống kê: Người dùng, Địa điểm, Lượt thích, Liên kết
+           4 stat cards: Users, Locations, Likes, Links -->
       <div class="dashboard-stats-grid">
+        <!-- Thẻ: Số người dùng / Users count card -->
         <div class="stat-card">
           <div class="stat-icon i-users"><i class="fas fa-users"></i></div>
           <div class="stat-data">
@@ -19,6 +40,8 @@
             <b id="stat-user">0</b>
           </div>
         </div>
+
+        <!-- Thẻ: Số địa điểm / Locations count card -->
         <div class="stat-card">
           <div class="stat-icon i-locs">
             <i class="fas fa-map-marker-alt"></i>
@@ -28,6 +51,8 @@
             <b id="stat-loc">0</b>
           </div>
         </div>
+
+        <!-- Thẻ: Lượt thích / Likes count card -->
         <div class="stat-card">
           <div class="stat-icon i-likes"><i class="fas fa-heart"></i></div>
           <div class="stat-data">
@@ -35,6 +60,8 @@
             <b id="stat-like">0</b>
           </div>
         </div>
+
+        <!-- Thẻ: Liên kết đồ thị / Graph links count card -->
         <div class="stat-card">
           <div class="stat-icon i-links">
             <i class="fas fa-project-diagram"></i>
@@ -46,8 +73,11 @@
         </div>
       </div>
 
+      <!-- ── NÚT HÀNH ĐỘNG ADMIN / ADMIN ACTION BUTTONS ──
+           Chạy thuật toán AI (PageRank) + Thêm địa điểm mới
+           Run AI algorithm (PageRank) + Add new location -->
       <div class="dashboard-actions">
-        <!-- triggerAI function needs to be defined in admin.js or similar -->
+        <!-- Nút chạy thuật toán AI / Run AI algorithm button -->
         <button
           onclick="
             if (typeof triggerAI === 'function') triggerAI();
@@ -61,16 +91,23 @@
         >
           <i class="fas fa-brain"></i> Chạy thuật toán AI
         </button>
+
+        <!-- Nút thêm địa điểm / Add location button -->
         <button onclick="openAddModal()" class="btn-dash btn-add">
           <i class="fas fa-plus-circle"></i> Thêm địa điểm
         </button>
       </div>
+
+      <!-- Trạng thái thuật toán / Algorithm status message -->
       <p
         id="algo-status"
         class="admin-status-text"
         style="color: #333; margin-bottom: 20px"
       ></p>
 
+      <!-- ── BẢNG DANH SÁCH NGƯỜI DÙNG / USER LIST TABLE ──
+           Render bằng JavaScript, mỗi hàng chứa tên + vai trò + nút hành động
+           Rendered by JavaScript, each row has name + role + action buttons -->
       <h4
         style="
           margin: 0 0 15px;
@@ -85,7 +122,9 @@
 
       <div class="user-list-scroll">
         <table style="width: 100%; border-collapse: collapse">
-          <tbody id="adminUserList"></tbody>
+          <tbody id="adminUserList">
+            <!-- Nội dung được nạp qua JS / Content loaded via JS -->
+          </tbody>
         </table>
       </div>
     </div>

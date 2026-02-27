@@ -1,9 +1,19 @@
 /* ==========================================================================
-   ADMIN DASHBOARD STYLES
-   Styles for Admin Panel, Dashboard Stats, and Management UI
+   BẢNG ĐIỀU KHIỂN QUẢN TRỊ
+   (Admin Dashboard Styles)
+   
+   Mô tả / Description:
+   File này chứa kiểu dáng cho bảng quản trị, bao gồm thẻ thống kê,
+   bảng quản lý dữ liệu, nút hành động admin và giao diện quản lý.
+   This file contains styles for the admin panel, including stat cards,
+   data management tables, admin action buttons and management UI.
    ========================================================================== */
 
-/* Dashboard Stats Grid */
+/* --------------------------------------------------------------------------
+   LƯỚI THỐNG KÊ / DASHBOARD STATS GRID
+   Hiển thị các thẻ thống kê dạng lưới tự động
+   Auto-fit grid layout for statistics cards
+   -------------------------------------------------------------------------- */
 .dashboard-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -11,7 +21,11 @@
   margin-bottom: 20px;
 }
 
-/* Stat Cards */
+/* --------------------------------------------------------------------------
+   THẺ THỐNG KÊ / STAT CARDS
+   Thẻ hiển thị số liệu (người dùng, địa điểm, lượt thích...)
+   Cards displaying metrics (users, locations, likes...)
+   -------------------------------------------------------------------------- */
 .stat-card {
   padding: 12px;
   background: white;
@@ -28,6 +42,7 @@
   box-shadow: var(--shadow-md);
 }
 
+/* Biểu tượng thống kê với gradient / Gradient stat icons */
 .stat-icon {
   width: 40px;
   height: 40px;
@@ -39,17 +54,22 @@
   color: white;
   flex-shrink: 0;
 }
-.i-users { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-.i-locs { background: linear-gradient(135deg, #10b981, #059669); }
-.i-likes { background: linear-gradient(135deg, #f43f5e, #e11d48); }
-.i-links { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-.i-reviews { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.i-users { background: linear-gradient(135deg, #3b82f6, #2563eb); }    /* Người dùng / Users */
+.i-locs { background: linear-gradient(135deg, #10b981, #059669); }     /* Địa điểm / Locations */
+.i-likes { background: linear-gradient(135deg, #f43f5e, #e11d48); }    /* Lượt thích / Likes */
+.i-links { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }    /* Liên kết / Links */
+.i-reviews { background: linear-gradient(135deg, #f59e0b, #d97706); }  /* Đánh giá / Reviews */
 
+/* Dữ liệu thống kê / Stat data display */
 .stat-data { display: flex; flex-direction: column; }
 .stat-data span { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
 .stat-data b { font-size: 18px; font-weight: 800; color: var(--text-main); }
 
-/* Dashboard Actions */
+/* --------------------------------------------------------------------------
+   NÚT HÀNH ĐỘNG DASHBOARD / DASHBOARD ACTION BUTTONS
+   Nút AI, Thêm địa điểm, Đồng bộ dữ liệu
+   AI, Add location, Sync data buttons
+   -------------------------------------------------------------------------- */
 .dashboard-actions { display: flex; gap: 10px; margin-bottom: 10px; }
 .btn-dash {
   flex: 1;
@@ -71,11 +91,15 @@
   filter: brightness(1.1);
   box-shadow: var(--shadow-md);
 }
-.btn-ai { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-.btn-add { background: linear-gradient(135deg, #10b981, #059669); }
-.btn-sync { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.btn-ai { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }   /* Nút AI / AI button */
+.btn-add { background: linear-gradient(135deg, #10b981, #059669); }   /* Nút thêm / Add button */
+.btn-sync { background: linear-gradient(135deg, #3b82f6, #2563eb); }  /* Nút đồng bộ / Sync button */
 
-/* Admin Table */
+/* --------------------------------------------------------------------------
+   BẢNG QUẢN LÝ / ADMIN DATA TABLE
+   Bảng dữ liệu hiển thị danh sách địa điểm, người dùng
+   Data table displaying locations, users list
+   -------------------------------------------------------------------------- */
 .admin-table-wrapper {
   background: white;
   border: 1px solid var(--border-light);
@@ -90,6 +114,7 @@
   font-size: 13px;
 }
 
+/* Tiêu đề cột / Table header */
 .admin-table th {
   background: var(--bg-body);
   padding: 12px 16px;
@@ -102,6 +127,7 @@
   border-bottom: 1px solid var(--border-light);
 }
 
+/* Ô dữ liệu / Table data cells */
 .admin-table td {
   padding: 12px 16px;
   border-bottom: 1px solid var(--border-subtle);
@@ -111,7 +137,11 @@
 .admin-table tr:last-child td { border-bottom: none; }
 .admin-table tr:hover { background: #fafafa; }
 
-/* Admin Tool Buttons */
+/* --------------------------------------------------------------------------
+   NÚT CÔNG CỤ ADMIN / ADMIN TOOL BUTTONS
+   Nút Sửa, Xóa, Xem trong bảng quản lý
+   Edit, Delete, View buttons in management table
+   -------------------------------------------------------------------------- */
 .btn-admin-tool {
   padding: 6px 12px;
   border: none;
@@ -129,16 +159,18 @@
   box-shadow: var(--shadow-sm);
 }
 
-.btn-tool-edit { background: #fef3c7; color: #92400e; }
+.btn-tool-edit { background: #fef3c7; color: #92400e; }      /* Nút sửa / Edit button */
 .btn-tool-edit:hover { background: #fde68a; }
-
-.btn-tool-delete { background: #fee2e2; color: #991b1b; }
+.btn-tool-delete { background: #fee2e2; color: #991b1b; }    /* Nút xóa / Delete button */
 .btn-tool-delete:hover { background: #fecaca; }
-
-.btn-tool-view { background: #dbeafe; color: #1e40af; }
+.btn-tool-view { background: #dbeafe; color: #1e40af; }      /* Nút xem / View button */
 .btn-tool-view:hover { background: #bfdbfe; }
 
-/* User List Scroll */
+/* --------------------------------------------------------------------------
+   DANH SÁCH NGƯỜI DÙNG CUỘN / SCROLLABLE USER LIST
+   Danh sách người dùng có thể cuộn trong bảng quản lý
+   Scrollable user list within management panel
+   -------------------------------------------------------------------------- */
 .user-list-scroll {
   max-height: 250px;
   overflow-y: auto;
@@ -150,7 +182,11 @@
 .user-list-scroll td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
 .user-list-scroll tr:last-child td { border-bottom: none; }
 
-/* Admin Actions in Detail Panel */
+/* --------------------------------------------------------------------------
+   HÀNH ĐỘNG ADMIN TRONG CHI TIẾT / ADMIN ACTIONS IN DETAIL PANEL
+   Nút Sửa/Xóa hiển thị khi admin xem chi tiết địa điểm
+   Edit/Delete buttons shown when admin views location details
+   -------------------------------------------------------------------------- */
 .admin-actions-container {
   display: flex;
   gap: 10px;
@@ -159,7 +195,9 @@
   border-top: 1px dashed var(--border-light);
 }
 
-/* Admin Section Headers */
+/* --------------------------------------------------------------------------
+   TIÊU ĐỀ PHẦN ADMIN / ADMIN SECTION HEADERS
+   -------------------------------------------------------------------------- */
 .admin-section-header {
   display: flex;
   justify-content: space-between;
@@ -173,7 +211,11 @@
   color: var(--text-main);
 }
 
-/* Admin Empty State */
+/* --------------------------------------------------------------------------
+   TRẠNG THÁI RỖNG ADMIN / ADMIN EMPTY STATE
+   Hiển thị khi không có dữ liệu trong bảng quản lý
+   Displayed when no data in management table
+   -------------------------------------------------------------------------- */
 .admin-empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -188,7 +230,11 @@
   font-size: 14px;
 }
 
-/* Mobile Responsive */
+/* --------------------------------------------------------------------------
+   RESPONSIVE / MEDIA QUERIES
+   Ẩn cột thứ 4 và đổi lưới thống kê trên mobile
+   Hide 4th column and adjust stats grid on mobile
+   -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
   .admin-table th:nth-child(4),
   .admin-table td:nth-child(4) { display: none; }

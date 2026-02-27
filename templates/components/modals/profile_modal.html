@@ -1,7 +1,29 @@
+<!-- ======================================================================
+     MODAL HỒ SƠ CÁ NHÂN / USER PROFILE MODAL
+     
+     Mô tả / Description:
+     Modal hiển thị và chỉnh sửa hồ sơ người dùng.
+     Chứa: Form cập nhật thông tin (tên, email, mật khẩu), thông tin vai trò,
+     lịch sử hoạt động (đã thích, đánh giá, lộ trình).
+     Modal displaying and editing user profile.
+     Contains: Update form (name, email, password), role info,
+     activity history (liked, reviews, itineraries).
+     
+     Hàm JS liên quan / Related JS functions:
+     - openUserProfile(), closeUserProfile() → profile.js
+     - submitProfileUpdate(), switchActivityTab() → profile.js
+     ====================================================================== -->
+
+  <!-- ============================================================
+       CSS NỘI TUYẾN / INLINE CSS
+       Kiểu dáng riêng cho modal hồ sơ (nằm trong file component)
+       Profile-specific styles (embedded in component file)
+       ============================================================ -->
   <style>
 
+    /* Header teal / Teal header */
     .modal-header-teal {
-        background: #14b8a6; /* Màu Teal đặc trưng */
+        background: #14b8a6; /* Màu Teal đặc trưng / Signature Teal color */
         padding: 20px 25px;
         color: white;
         position: relative;
@@ -33,6 +55,7 @@
         font-weight: 500;
     }
 
+    /* Nút đóng teal / Teal close button */
     .close-btn-teal {
         background: rgba(255, 255, 255, 0.15);
         border: none;
@@ -52,11 +75,12 @@
         background: rgba(255, 255, 255, 0.3);
     }
 
+    /* Thân modal / Modal body */
     .modal-body-teal {
         padding: 25px;
     }
 
-    /* Form Fields */
+    /* Ô nhập liệu dạng viên / Pill-shaped form fields */
     .form-group-pill {
         position: relative;
         margin-bottom: 20px;
@@ -67,7 +91,7 @@
         left: 20px;
         top: 50%;
         transform: translateY(-50%);
-        color: #6366f1; /* Một chút ánh tím như trong ảnh */
+        color: #6366f1; /* Ánh tím / Purple tint */
         font-size: 18px;
     }
 
@@ -94,7 +118,7 @@
         box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.08);
     }
 
-    /* Info Bar (Vai trò & Tham gia) */
+    /* Thanh thông tin vai trò & ngày tham gia / Role & join date info bar */
     .profile-info-bar {
         display: flex;
         justify-content: space-between;
@@ -115,7 +139,7 @@
         margin-left: 2px;
     }
 
-    /* History Section */
+    /* Tiêu đề lịch sử hoạt động / Activity history title */
     .history-title {
         font-size: 17px;
         font-weight: 700;
@@ -126,6 +150,8 @@
         gap: 10px;
     }
 
+    /* Tab hoạt động (Đã thích / Đánh giá / Lộ trình)
+       Activity tabs (Liked / Reviews / Itineraries) */
     .activity-tabs-box {
         background: #f1f5f9;
         display: flex;
@@ -147,13 +173,15 @@
         transition: 0.2s;
     }
 
+    /* Tab đang chọn / Active tab */
     .activity-tab-btn.active {
         background: white;
         color: #6366f1;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
-    /* History List Container */
+    /* Container danh sách hoạt động (cuộn)
+       Activity list container (scrollable) */
     .activity-content-container {
         max-height: 250px;
         overflow-y: auto;
@@ -168,7 +196,7 @@
         border-radius: 10px;
     }
 
-    /* History Item Layout */
+    /* Mục lịch sử hoạt động / History item layout */
     .history-item {
         display: flex;
         align-items: center;
@@ -186,6 +214,7 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
 
+    /* Ảnh thu nhỏ / Thumbnail */
     .item-thumb {
         width: 50px;
         height: 50px;
@@ -210,6 +239,7 @@
         color: #94a3b8;
     }
 
+    /* Nút xóa lịch sử / Delete history button */
     .delete-btn {
         width: 38px;
         height: 38px;
@@ -231,7 +261,7 @@
         transform: scale(1.05);
     }
 
-    /* Save Button */
+    /* Nút lưu cập nhật / Save update button */
     .btn-save-wrap {
         margin-top: 10px;
     }
@@ -257,8 +287,15 @@
     }
   </style>
 
+  <!-- ============================================================
+       CẤU TRÚC MODAL / MODAL STRUCTURE
+       ============================================================ -->
   <div id="profileModal" class="modal">
     <div class="modal-content-fancy">
+
+        <!-- ── HEADER TEAL / TEAL HEADER ──
+             Hiển thị icon + tiêu đề "Hồ sơ" + tên người dùng
+             Shows icon + "Profile" title + username -->
         <div class="modal-header-teal">
             <div class="header-top">
                 <div class="header-title-box">
@@ -271,42 +308,57 @@
         </div>
 
         <div class="modal-body-teal">
-            <!-- Form Section -->
+
+            <!-- ── FORM CẬP NHẬT HỒ SƠ / PROFILE UPDATE FORM ── -->
             <form id="profileUpdateForm" onsubmit="submitProfileUpdate(); return false;" autocomplete="on">
+
+              <!-- Ô nhập họ tên / Full name input -->
               <div class="form-group-pill">
                   <i class="fas fa-user-tag"></i>
                   <input type="text" id="profileFullname" name="name" class="input-pill" placeholder="Họ và tên" autocomplete="name">
               </div>
+
+              <!-- Ô nhập email / Email input -->
               <div class="form-group-pill">
                   <i class="fas fa-envelope"></i>
                   <input type="email" id="profileEmail" name="email" class="input-pill" placeholder="Email liên hệ" autocomplete="email">
               </div>
+
+              <!-- Ô đổi mật khẩu / Change password input -->
               <div class="form-group-pill">
                   <i class="fas fa-lock"></i>
                   <input type="password" id="profilePassword" name="password" class="input-pill" placeholder="Đổi mật khẩu mới (nếu cần)" autocomplete="new-password">
               </div>
 
-              <!-- Role/Date Info -->
+              <!-- ── THANH THÔNG TIN VAI TRÒ / ROLE INFO BAR ──
+                   Hiển thị vai trò (Admin/Thành viên) + ngày tham gia
+                   Shows role (Admin/Member) + join date -->
               <div class="profile-info-bar">
                   <div class="info-item">VAI TRÒ: <b id="profileRole">Thành viên</b></div>
                   <div class="info-item">THAM GIA: <b id="profileJoinDate">30/01/2026</b></div>
               </div>
 
-              <!-- History Section -->
+              <!-- ── LỊCH SỬ HOẠT ĐỘNG / ACTIVITY HISTORY ──
+                   3 tab: Đã thích | Đánh giá | Lộ trình
+                   3 tabs: Liked | Reviews | Itineraries -->
               <div class="history-title">
                   <i class="fas fa-rotate-left"></i> Lịch sử hoạt động
               </div>
 
+              <!-- Tab chuyển đổi / Tab switcher -->
               <div class="activity-tabs-box">
                   <button type="button" class="activity-tab-btn active" data-subtab="liked" onclick="switchActivityTab('liked')">Đã thích</button>
                   <button type="button" class="activity-tab-btn" data-subtab="reviews" onclick="switchActivityTab('reviews')">Đánh giá</button>
                   <button type="button" class="activity-tab-btn" data-subtab="plans" onclick="switchActivityTab('plans')">Lộ trình</button>
               </div>
 
+              <!-- Danh sách hoạt động (nạp qua JS)
+                   Activity list (loaded via JS) -->
               <div id="activity-content-list" class="activity-content-container">
-                  <!-- Nội dung được nạp qua JS -->
+                  <!-- Nội dung được nạp qua JS / Content loaded via JS -->
               </div>
 
+              <!-- Nút lưu cập nhật / Save update button -->
               <div class="btn-save-wrap">
                   <button type="submit" class="btn-save-teal">Lưu cập nhật</button>
               </div>
