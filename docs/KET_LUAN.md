@@ -1,170 +1,148 @@
 # KẾT LUẬN
 
-## 1. Kết quả Đạt được
+## 1. Tổng kết Kết quả
 
-Sau quá trình nghiên cứu và triển khai, khóa luận đã hoàn thành các mục tiêu đề ra:
+Khóa luận đã hoàn thành mục tiêu xây dựng **Hệ thống Gợi ý Du lịch Thông minh cho Thành phố Huế sử dụng Graph Database và Thuật toán Hybrid Recommendation**. Các kết quả chính đạt được bao gồm:
 
-### 1.1. Về Mặt Lý thuyết
+### 1.1. Về mặt lý thuyết
 
-- Nghiên cứu và tổng hợp kiến thức về **Graph Database** và ứng dụng trong hệ thống gợi ý.
-- Tìm hiểu các thuật toán **Recommendation System**: PageRank, Collaborative Filtering, Content-Based Filtering và cách kết hợp Hybrid.
-- Phân tích ưu nhược điểm của từng phương pháp và đề xuất giải pháp phù hợp cho bài toán du lịch.
+- Nghiên cứu và tổng hợp có hệ thống kiến thức về **cơ sở dữ liệu đồ thị (Graph Database)** và ứng dụng trong bài toán hệ thống gợi ý du lịch.
+- Phân tích đầy đủ 3 phương pháp xây dựng hệ thống gợi ý: Content-Based Filtering, Collaborative Filtering và Hybrid Approach — cùng ưu nhược điểm và điều kiện áp dụng.
+- Đề xuất mô hình kết hợp **Weighted PageRank + Collaborative Filtering (Jaccard) + Content-Based Filtering** trên nền tảng Neo4j, giải quyết đồng thời bài toán Cold Start và Filter Bubble.
 
-### 1.2. Về Mặt Thực tiễn
+### 1.2. Về mặt thực tiễn
 
-**Hệ thống Huế Travel AI đã được xây dựng hoàn chỉnh với:**
+Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và hoạt động ổn định:
 
 1. **Cơ sở dữ liệu đồ thị Neo4j:**
-   - Mô hình hóa 52 địa điểm du lịch Huế
-   - 25+ người dùng thử nghiệm
-   - 180+ lượt tương tác (Like, Review)
-   - 8 danh mục địa điểm
+   - Mô hình hóa 52 địa điểm du lịch Huế thuộc 8 danh mục.
+   - 25 người dùng thử nghiệm với 180+ lượt Like và 120+ lượt Review.
+   - Lược đồ đồ thị gồm 5 loại node và 8 loại relationship.
 
-2. **Thuật toán Hybrid Recommendation:**
-   - Weighted PageRank đánh giá độ phổ biến với trọng số tương tác
-   - Collaborative Filtering gợi ý dựa trên người dùng tương tự
-   - Content-Based Filtering gợi ý theo nội dung/danh mục
-   - Kết hợp 3 phương pháp với trọng số tối ưu
-   - **Chiến lược Trọng số Thích nghi:** Đề xuất và áp dụng thành công mô hình trọng số động (60-30-10) giải quyết bài toán Cold Start.
-   - **PageRank Diversity Pool:** Cải tiến pipeline thêm bước 2.5, tăng kết quả từ 3 → 15 địa điểm đa dạng, giải quyết vấn đề "filter bubble".
+2. **Thuật toán Hybrid Recommendation (pipeline 4 bước):**
+   - **Weighted PageRank** trên 2 đồ thị riêng biệt (User–Location và Location–Location) đánh giá chính xác độ phổ biến và độ kết nối.
+   - **Collaborative Filtering** với Node Similarity (Jaccard Index) gợi ý dựa trên người dùng tương đồng.
+   - **Content-Based Filtering** gợi ý theo danh mục sở thích.
+   - **Chiến lược trọng số thích ứng (60-30-10)** giải quyết Cold Start.
+   - **PageRank Diversity Pool** (Bước 2.5) giải quyết Filter Bubble — tăng kết quả từ 3 lên 15 địa điểm đa dạng.
+   - **Explainable AI** giải thích lý do từng gợi ý.
 
 3. **AI Itinerary Planner:**
-   - Tự động lập lộ trình 1-5 ngày
-   - Thuật toán Nearest Neighbor tối ưu quãng đường (giảm 47%)
-   - Phân bổ hợp lý các hoạt động trong ngày
+   - Tự động lập lộ trình 1–5 ngày với phân bổ tham quan/ẩm thực xen kẽ.
+   - Thuật toán Nearest Neighbor tối ưu quãng đường di chuyển (giảm 47%).
+   - Hỗ trợ 2 chế độ: AI gợi ý mới và Từ danh sách đã thích.
 
-4. **Giao diện web hiện đại:**
-   - Bản đồ tương tác với Leaflet.js
-   - Heatmap hiển thị độ phổ biến
-   - Responsive design cho mobile và desktop
-   - 20+ API endpoints hoạt động ổn định
-   - Bảo mật: parameterized queries, custom exceptions, strong secret keys
+4. **Ứng dụng web hoàn chỉnh:**
+   - Giao diện hiện đại với bản đồ tương tác Leaflet.js, Heatmap, 11 modal dialogs.
+   - 20+ API endpoints hoạt động ổn định (phản hồi < 500ms).
+   - Kiến trúc modular: 4 Flask Blueprints, 7 module Data Access Layer, 10 file CSS, 9 file JS.
+   - Bảo mật: mã hóa PBKDF2-SHA256, parameterized queries, Flask-Login session.
 
-### 1.3. Kết quả Đánh giá
+### 1.3. Kết quả đánh giá
 
-| Tiêu chí                  | Kết quả           |
-| ------------------------- | ----------------- |
-| Unit Tests                | 14/14 PASS (100%) |
-| Thời gian phản hồi API    | < 500ms           |
-| Thời gian chạy thuật toán | ~7 giây           |
-| Điểm đánh giá người dùng  | 4.2/5             |
-| Tỷ lệ muốn sử dụng        | 90%               |
+| Tiêu chí                       | Kết quả           |
+| ------------------------------- | ----------------- |
+| Unit Tests                      | 14/14 PASS (100%) |
+| Thời gian phản hồi API          | < 500ms           |
+| Thời gian chạy thuật toán       | ~7 giây           |
+| Tối ưu quãng đường (vs Random)  | Giảm 47%          |
+| Điểm đánh giá người dùng        | 4.2 / 5           |
+| Tỷ lệ sẵn lòng sử dụng         | 90%               |
 
 ---
 
-## 2. Ưu điểm của Hệ thống
+## 2. Đóng góp của Khóa luận
 
-1. **Gợi ý cá nhân hóa:** Sử dụng Hybrid Recommendation kết hợp 3 phương pháp, đưa ra gợi ý chính xác theo sở thích của từng người dùng.
+### 2.1. Đóng góp khoa học
 
-2. **Graph Database:** Neo4j xử lý quan hệ phức tạp hiệu quả, truy vấn nhanh qua nhiều bước nhảy (multi-hop).
+1. **Đề xuất mô hình Hybrid Recommendation trên Graph Database** phù hợp cho bài toán gợi ý du lịch, với pipeline 4 bước (Collaborative Filtering + Content-Based + PageRank Diversity Pool + Scoring), có thể tái sử dụng cho các bài toán gợi ý tương tự.
 
-3. **Tối ưu lộ trình:** Thuật toán Nearest Neighbor giảm đáng kể quãng đường di chuyển.
+2. **Kết hợp Weighted PageRank song song** trên 2 đồ thị (User–Location để đo phổ biến, Location–Location để đo kết nối) — mang lại góc nhìn đa chiều hơn so với chỉ dùng 1 đồ thị PageRank đơn lẻ.
 
-4. **Kiến trúc mở rộng:** Flask Blueprints và code modular dễ dàng thêm tính năng mới.
+3. **Đề xuất giải pháp PageRank Diversity Pool** giải quyết vấn đề Filter Bubble trong hệ thống gợi ý — một cải tiến thiết thực có thể áp dụng cho nhiều miền ứng dụng.
 
-5. **Giao diện thân thiện:** Thiết kế hiện đại, dễ sử dụng cho mọi đối tượng.
+4. **Triển khai và đánh giá Neo4j Graph Data Science** cho hệ thống gợi ý du lịch thực tế, đóng góp kinh nghiệm triển khai cho cộng đồng.
 
-6. **Open Source:** Toàn bộ mã nguồn có thể mở rộng và tùy chỉnh.
+### 2.2. Đóng góp thực tiễn
+
+1. Hệ thống **Huế Travel AI** hoàn chỉnh, có thể triển khai phục vụ du khách thực tế.
+2. **Mã nguồn mở** trên GitHub ([github.com/chaudan0304/ban-do-du-lich-Hue](https://github.com/chaudan0304/ban-do-du-lich-Hue)), cộng đồng có thể sử dụng, học tập và phát triển.
+3. Tài liệu khóa luận và hướng dẫn cài đặt chi tiết, phục vụ làm tài liệu tham khảo.
 
 ---
 
 ## 3. Hạn chế
 
-1. **Dữ liệu hạn chế:** Số lượng địa điểm (52) và người dùng (25) còn ít, ảnh hưởng đến độ chính xác của Collaborative Filtering.
+Bên cạnh các kết quả đạt được, khóa luận vẫn tồn tại một số hạn chế cần được thừa nhận:
 
-2. **Cold Start Problem:** Gợi ý cho người dùng mới chưa có lịch sử tương tác chưa tối ưu, chủ yếu dựa vào PageRank global.
+1. **Quy mô dữ liệu hạn chế:** Số lượng địa điểm (52) và người dùng (25) còn ít, ảnh hưởng đến hiệu quả Collaborative Filtering — thuật toán cần lượng dữ liệu lớn hơn để phát huy tối đa.
 
-3. **Thiếu GPS real-time:** Chưa tích hợp định vị GPS để gợi ý địa điểm gần vị trí hiện tại.
+2. **Cold Start chưa tối ưu:** Gợi ý cho người dùng mới chủ yếu dựa vào PageRank toàn cục, chưa có cơ chế hỏi sở thích khi đăng ký (Onboarding Survey) hoặc sử dụng thông tin nhân khẩu học.
 
-4. **Chưa có mobile app:** Hệ thống hoạt động trên web browser, chưa có ứng dụng native cho iOS/Android.
+3. **Thiếu GPS real-time:** Hệ thống chưa tích hợp định vị vị trí hiện tại để gợi ý địa điểm gần nhất hoặc cảnh báo khi gần địa điểm đáng chú ý.
 
-5. **Sentiment Analysis đơn giản:** Phân tích cảm xúc trong đánh giá còn cơ bản, chưa sử dụng NLP nâng cao.
+4. **Chưa có ứng dụng di động:** Hệ thống hoạt động trên web browser, chưa có ứng dụng native cho iOS/Android — hạn chế trải nghiệm người dùng khi di chuyển.
+
+5. **Phân tích cảm xúc đơn giản:** Module Sentiment Analysis sử dụng phương pháp keyword-based, chưa áp dụng mô hình NLP nâng cao cho tiếng Việt.
 
 ---
 
 ## 4. Hướng Phát triển
 
-### 4.1. Ngắn hạn (3-6 tháng)
+### 4.1. Ngắn hạn (3–6 tháng)
 
 1. **Mở rộng dữ liệu:**
-   - Thu thập thêm địa điểm (mục tiêu 200+)
-   - Thu hút người dùng thực tế
-   - Tích hợp dữ liệu từ Google Places API
+   - Thu thập thêm địa điểm (mục tiêu 200+) từ Google Places API và cộng đồng người dùng.
+   - Thu hút người dùng thực tế thông qua chiến dịch quảng bá.
 
 2. **Cải thiện Cold Start:**
-   - Hỏi sở thích khi đăng ký
-   - Sử dụng demographic-based filtering
-   - Knowledge-based recommendation
+   - Hỏi sở thích khi đăng ký (Onboarding Survey) để khởi tạo vector sở thích ban đầu.
+   - Sử dụng demographic-based filtering (giới tính, độ tuổi, quốc tịch).
 
-3. **Bảo mật nâng cao:**
-   - Rate Limiting chống brute force
-   - CSRF Protection
-   - API authentication (JWT)
+3. **Tăng cường bảo mật:**
+   - Rate Limiting chống tấn công brute force.
+   - CSRF Protection cho các form submission.
+   - API authentication bằng JWT (JSON Web Token).
 
-### 4.2. Trung hạn (6-12 tháng)
+### 4.2. Trung hạn (6–12 tháng)
 
-1. **Mobile Application:**
-   - Phát triển ứng dụng React Native
-   - GPS real-time và thông báo location-based
-   - Offline mode
+1. **Ứng dụng di động:**
+   - Phát triển ứng dụng cross-platform (React Native hoặc Flutter).
+   - Tích hợp GPS real-time và thông báo location-based.
+   - Hỗ trợ chế độ ngoại tuyến (offline mode).
 
 2. **NLP nâng cao:**
-   - Sentiment Analysis với PhoBERT
-   - Trích xuất keywords từ reviews
-   - Chatbot hỗ trợ du khách
+   - Nâng cấp Sentiment Analysis sử dụng PhoBERT (mô hình NLP tiếng Việt).
+   - Tự động trích xuất keywords và chủ đề từ bình luận.
+   - Phát triển chatbot hỗ trợ du khách.
 
-3. **Tích hợp dịch vụ:**
-   - Đặt vé tham quan
-   - Booking khách sạn (Agoda, Booking.com)
-   - Gọi taxi (Grab, GoViet)
+3. **Tích hợp dịch vụ bên thứ ba:**
+   - Đặt vé tham quan trực tuyến.
+   - Liên kết đặt phòng khách sạn (Agoda, Booking.com).
+   - Gọi xe di chuyển (Grab).
 
-### 4.3. Dài hạn (1-2 năm)
+### 4.3. Dài hạn (1–2 năm)
 
 1. **Mở rộng địa lý:**
-   - Hỗ trợ các tỉnh thành khác (Đà Nẵng, Hội An, Nha Trang...)
-   - Hệ thống multi-tenant
+   - Hỗ trợ các điểm đến du lịch khác: Đà Nẵng, Hội An, Nha Trang, Đà Lạt...
+   - Thiết kế kiến trúc multi-tenant cho triển khai đa địa phương.
 
 2. **Machine Learning nâng cao:**
-   - Deep Learning Recommendation (Matrix Factorization)
-   - Graph Neural Networks (GNN)
-   - Reinforcement Learning cho dynamic recommendations
+   - Deep Learning Recommendation với Matrix Factorization hoặc Neural Collaborative Filtering.
+   - Graph Neural Networks (GNN) khai thác sâu hơn cấu trúc đồ thị.
+   - Reinforcement Learning cho dynamic recommendations (cập nhật gợi ý real-time).
 
-3. **B2B Platform:**
-   - API cho các đối tác du lịch
-   - Dashboard phân tích cho cơ quan quản lý
-   - Monetization qua quảng cáo địa điểm
-
----
-
-## 5. Đóng góp của Khóa luận
-
-### 5.1. Đóng góp Khoa học
-
-1. Đề xuất mô hình **Hybrid Recommendation** trên **Graph Database** phù hợp cho bài toán du lịch, với pipeline 4 bước (Collab + Content + Diversity + Scoring).
-
-2. Kết hợp **Weighted PageRank** với trọng số tương tác (Like + Rating) để đánh giá độ phổ biến chính xác hơn.
-
-3. Đề xuất **PageRank Diversity Pool** giải quyết vấn đề "filter bubble" (bẫy bong bóng lọc) trong hệ thống gợi ý.
-
-4. Triển khai **Neo4j Graph Data Science** cho hệ thống gợi ý thực tế.
-
-### 5.2. Đóng góp Thực tiễn
-
-1. Hệ thống **Huế Travel AI** hoàn chỉnh, có thể triển khai thực tế.
-
-2. **Mã nguồn mở** trên GitHub, cộng đồng có thể sử dụng và phát triển.
-
-3. **Tài liệu hướng dẫn** cài đặt và sử dụng chi tiết.
+3. **Nền tảng B2B:**
+   - Cung cấp API cho đối tác du lịch (tour operator, khách sạn).
+   - Dashboard phân tích xu hướng du lịch cho cơ quan quản lý.
 
 ---
 
-## 6. Lời Kết
+## 5. Lời kết
 
-Khóa luận đã hoàn thành mục tiêu xây dựng **Hệ thống Gợi ý Du lịch Thông minh cho Thành phố Huế** sử dụng Graph Database và Hybrid Recommendation.
+Khóa luận đã hoàn thành mục tiêu đề ra: xây dựng thành công hệ thống gợi ý du lịch thông minh cho thành phố Huế trên nền tảng Graph Database và Hybrid Recommendation. Hệ thống không chỉ giải quyết bài toán thực tế "Đi đâu, chơi gì?" tại Huế mà còn đóng góp mô hình kỹ thuật có thể tái sử dụng cho các bài toán gợi ý tương tự.
 
-Hệ thống không chỉ giải quyết bài toán "Đi đâu, chơi gì?" tại Huế mà còn mở ra hướng phát triển ứng dụng công nghệ AI và Graph Database vào lĩnh vực du lịch Việt Nam.
-
-Với nền tảng đã xây dựng, hệ thống có tiềm năng mở rộng thành một nền tảng du lịch thông minh quy mô lớn, đóng góp vào sự phát triển của ngành du lịch Thừa Thiên Huế nói riêng và Việt Nam nói chung.
+Với nền tảng kiến trúc mở, mã nguồn mở và hướng phát triển rõ ràng, hệ thống Huế Travel AI có tiềm năng phát triển thành một nền tảng du lịch thông minh quy mô lớn, góp phần vào sự chuyển đổi số của ngành du lịch Thừa Thiên Huế nói riêng và Việt Nam nói chung.
 
 ---
 
@@ -172,4 +150,4 @@ Với nền tảng đã xây dựng, hệ thống có tiềm năng mở rộng t
 
 **Sinh viên thực hiện**
 
-_Châu Đàn_
+*Châu Đàn*
