@@ -207,7 +207,7 @@ def recommend(user_name):
     // Sử dụng quan hệ SIMILAR_TO (Jaccard) thay vì chỉ đếm
     // Uses SIMILAR_TO relationship (Jaccard) instead of just counting
     // ═══════════════════════════════════════════════════════
-    OPTIONAL MATCH (me)-[sim:SIMILAR_TO]-(other:User)
+    OPTIONAL MATCH (me)-[sim:SIMILAR_TO]->(other:User)
     WHERE other <> me
     OPTIONAL MATCH (other)-[their_int:INTERACTED]->(l_collab:Location)
     WHERE NOT (me)-[:INTERACTED]->(l_collab) AND NOT (me)-[:LIKED]->(l_collab)
@@ -278,14 +278,17 @@ def recommend(user_name):
          avg(all_reviews.rating) AS avg_rating,
          count(all_reviews) AS review_count
 
-    // Áp trọng số cuối cùng / Apply final weights
-    WITH l, category, common_users, avg_rating, review_count,
-         score_collab_raw * 3.0 AS final_collab,
-         score_content_raw * 1.0 AS final_content,
+    // Áp trọng số cuối cùng (sử dụng log10 để tránh điểm quá cao lấn át PageRank)
+    // Apply final weights (using log10 to prevent overpowering PageRank)
+    WITH l, category, common_users, avg_rating, review_count, score_collab_raw, score_content_raw,
          (coalesce(l.pagerankNorm, 0) * 0.6 + 
           coalesce(l.pagerankConnectNorm, 0) * 0.3 + 
           (coalesce(avg_rating, l.avgRating, l.rating, 0) / 5.0) * 0.1) * 10.0 AS final_pagerank
     
+    WITH l, category, common_users, avg_rating, review_count, final_pagerank,
+         log10(1 + score_collab_raw) * 4.0 AS final_collab,
+         log10(1 + score_content_raw) * 3.0 AS final_content
+
     WITH l, category, common_users, avg_rating, review_count,
          final_collab, final_content, final_pagerank,
          (final_collab + final_content + final_pagerank) AS final_score
@@ -374,7 +377,7 @@ def recommend(user_name):
             if loc_names:
                 sim_query = run_query(
                     """
-                    MATCH (me:User {name: $name})-[sim:SIMILAR_TO]-(other:User)-[:INTERACTED|LIKED]->(l:Location)
+                    MATCH (me:User {name: $name})-[sim:SIMILAR_TO]->(other:User)-[:INTERACTED|LIKED]->(l:Location)
                     WHERE l.name IN $locations AND other <> me
                     RETURN l.name AS loc_name, other.name AS user_name, round(sim.score * 100) AS similarity
                     ORDER BY sim.score DESC
@@ -699,7 +702,7 @@ def get_similar_locations(location_name):
     
     // Tìm các địa điểm tương tự qua quan hệ LOC_SIMILAR
     // Find similar locations via LOC_SIMILAR relationship
-    OPTIONAL MATCH (current)-[sim:LOC_SIMILAR]-(similar:Location)
+    OPTIONAL MATCH (current)-[sim:LOC_SIMILAR]->(similar:Location)
     
     // Lấy category của địa điểm tương tự
     // Get category of similar locations
@@ -778,7 +781,7 @@ def get_similar_users(username):
         return jsonify({"error": "Không có quyền truy cập"}), 403
 
     query = """
-    MATCH (me:User {name: $name})-[sim:SIMILAR_TO]-(other:User)
+    MATCH (me:User {name: $name})-[sim:SIMILAR_TO]->(other:User)
     
     // Lấy thông tin về địa điểm chung / Get common locations info
     OPTIONAL MATCH (me)-[:INTERACTED]->(common:Location)<-[:INTERACTED]-(other)
