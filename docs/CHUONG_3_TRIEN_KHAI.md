@@ -451,41 +451,11 @@ Giao diện được xây dựng bằng HTML5, CSS3 và JavaScript thuần (Vani
 - **Hiển thị điểm AI:** Sử dụng thanh tiến trình (Progress Bar) để trực quan hóa điểm chất lượng tổng hợp theo tỷ lệ 60-30-10, giúp người dùng dễ so sánh.
 - **Bản đồ nhiệt (Heatmap):** Overlay trên bản đồ chính, hiển thị mật độ phổ biến dựa trên dữ liệu PageRank.
 
-### 3.5.3. Module AI Planner (Lập lộ trình thông minh)
+### 3.5.3. Tiện ích bổ trợ lập lộ trình
 
-Module AI Planner triển khai thuật toán **Nearest Neighbor** (đã trình bày lý thuyết ở mục 1.8) kết hợp với **Weighted Selection**, hỗ trợ 2 chế độ vận hành:
+Để gia tăng tính hữu dụng cho ứng dụng web, hệ thống được bổ sung một module tiện ích nhỏ phục vụ việc xắp xếp lịch trình. Tính năng này đóng vai trò như một bộ lọc sắp xếp lại danh sách các địa điểm đã được thuật toán AI gợi ý (hoặc theo danh sách đã thích của người dùng) từ trước. 
 
-- **Chế độ "Đã thích" (`use_liked=true`):** Chỉ sử dụng các địa điểm user đã thả tim ❤️. Nếu chưa thích nơi nào → thông báo lỗi.
-- **Chế độ "AI gợi ý" (`use_liked=false`):** AI tự chọn địa điểm chưa ghé dựa trên PageRank và mức độ phổ biến.
-
-**Quy trình thuật toán 4 bước:**
-
-**Bước 1 — Candidate Selection (Lọc ứng viên):**
-
-Lọc danh sách địa điểm theo sở thích (preferences) và chế độ vận hành. Ở chế độ AI, công thức điểm: `PageRank(50%) + log(Popularity)(30%)`.
-
-**Bước 2 — Category Splitting (Phân loại):**
-
-Tách ứng viên thành 2 pool riêng biệt:
-- `pool_sightseeing`: Địa điểm tham quan (di tích, thiên nhiên, chùa...).
-- `pool_food`: Quán ăn, cà phê, ẩm thực (nhận diện qua keyword matching).
-
-**Bước 3 — Nearest Neighbor (Greedy):**
-
-Chọn điểm xuất phát là địa điểm có điểm AI cao nhất. Lần lượt chọn các điểm tiếp theo dựa trên **khoảng cách Euclid bình phương** `(lat₁ − lat₂)² + (lng₁ − lng₂)²` để tối ưu di chuyển.
-
-**Bước 4 — Day Planning (Lập lịch theo ngày):**
-
-Sắp lịch **4 buổi mỗi ngày** theo mẫu xen kẽ:
-
-*Bảng 3.16. Chiến lược phân bổ hoạt động theo buổi*
-
-| Buổi | Loại hoạt động | Chiến lược lựa chọn |
-|---|---|---|
-| **Sáng** | Tham quan | Điểm Neo (Anchor) — nơi có điểm AI cao nhất còn lại |
-| **Trưa** | Ẩm thực | Quán gần nhất từ điểm tham quan sáng |
-| **Chiều** | Tham quan | Địa điểm gần nhất từ quán ăn trưa |
-| **Tối** | Ẩm thực/Dạo phố | Nơi gần nhất từ điểm chiều (ưu tiên ăn, fallback dạo) |
+Thay vì phát triển một engine thuật toán phức tạp như bài toán tối ưu lộ trình chuyên sâu định tuyến đa phương tiện, hệ thống được tinh gọn bằng việc áp dụng nguyên tắc khoảng cách gần nhất (Greedy) bằng công thức tính khoảng cách điểm Euclid cơ bản. Các địa điểm được phân bổ tuần tự theo các buổi trong ngày. Cách thiết kế này vừa giảm thiểu thời gian tính toán ở backend vừa đủ để tạo được một lộ trình tham khảo hợp lý, đóng góp vào việc kiểm chứng khả năng ứng dụng thực tế của kết quả gợi ý.
 
 ## 3.6. Tiểu kết chương 3
 
@@ -503,6 +473,6 @@ Chương này đã trình bày chi tiết quá trình triển khai hệ thống 
 
 6. **Ứng dụng web:** Backend Flask modular (4 Blueprint, 7 module DAL), Frontend Vanilla JS (9 module), tích hợp Leaflet.js cho bản đồ tương tác.
 
-7. **AI Planner:** Thuật toán Nearest Neighbor kết hợp phân bổ xen kẽ tham quan/ẩm thực, 2 chế độ vận hành (AI gợi ý / Từ đã thích), 4 buổi mỗi ngày.
+7. **Tiện ích xếp lộ trình:** Tích hợp tính năng phụ trợ giúp sắp xếp thứ tự tham quan theo ngày dựa trên nguyên tắc gần nhất nhằm hoàn thiện giao diện phục vụ thực nghiệm người dùng.
 
 Kết quả triển khai và đánh giá hiệu quả hệ thống sẽ được trình bày ở Chương 4.

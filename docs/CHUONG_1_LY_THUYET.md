@@ -384,7 +384,7 @@ Mặc dù trọng tâm của hệ thống là khả năng cá nhân hoá và g�
 - **Blueprints:** Cơ chế tổ chức code theo module, phù hợp cho ứng dụng quy mô vừa-lớn.
 - **WSGI Compliant:** Tuân thủ chuẩn WSGI, dễ dàng triển khai trên nhiều máy chủ (Gunicorn, uWSGI, Nginx).
 
-*Bảng 1.7. So sánh Flask và Django*
+*Bảng 1.6. So sánh Flask và Django*
 
 | Tiêu chí | Flask | Django |
 |---|---|---|

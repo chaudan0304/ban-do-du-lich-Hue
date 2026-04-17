@@ -64,19 +64,19 @@ Khi truy cập hệ thống, người dùng sẽ thấy giao diện chính gồm
 
 *Lưu ý:* Gợi ý sẽ chính xác hơn khi bạn thích và đánh giá nhiều địa điểm hơn.
 
-### B.2.7. Lập Lộ trình Thông minh (AI Planner)
+### B.2.7. Tiện ích Sắp xếp Lộ trình
 
 1. Đăng nhập vào hệ thống.
-2. Nhấn nút **✨ Lập Lộ Trình Thông Minh** trên sidebar.
-3. Trong modal hiện ra:
-   - Chọn **số ngày** (1–5 ngày).
-   - Chọn **sở thích** (danh mục muốn tham quan).
+2. Nhấn nút **Sắp xếp lộ trình** trên sidebar.
+3. Trong modal tiện ích hiện ra:
+   - Chọn **số ngày** bạn muốn phân bổ (1–5 ngày).
+   - Chọn **danh mục** mong muốn.
    - Chọn **chế độ**:
-     - *AI gợi ý mới:* AI tự chọn địa điểm phù hợp.
-     - *Từ danh sách đã thích:* Sử dụng các địa điểm bạn đã ❤️.
+     - *Từ gợi ý hệ thống:* Tiện ích tự lọc danh sách hệ thống đề xuất.
+     - *Từ danh sách đã thích:* Ưu tiên các điểm bạn đã thả cảm xúc ❤️.
 4. Nhấn **Tạo lộ trình**.
-5. Kết quả hiển thị dạng **timeline** với 4 buổi/ngày (Sáng, Trưa, Chiều, Tối).
-6. Có thể **thay thế** từng địa điểm nếu không ưng ý.
+5. Hệ thống sẽ áp dụng phép tính đơn giản để ghép nối các địa điểm gần nhau trên bản đồ thành **timeline** với 4 buổi/ngày.
+6. Nếu một điểm đến chưa vừa ý, người dùng có thể bấm **thay thế** bằng một điểm khác gần đó.
 7. Nhấn **Lưu lộ trình** để xem lại sau.
 
 ### B.2.8. Quản lý Hồ sơ
