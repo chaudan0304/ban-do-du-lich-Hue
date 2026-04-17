@@ -14,10 +14,10 @@ Sau quá trình phát triển dựa trên thiết kế ở Chương 2 và triể
 
 | Thông số                 | Giá trị                  |
 | ------------------------ | ------------------------ |
-| Tổng số dòng code Python | ~2.500 dòng              |
-| Tổng số dòng JavaScript  | ~3.200 dòng              |
-| Tổng số file CSS         | 10 files (~80 KB)        |
-| Số lượng API Endpoints   | 20+ endpoints            |
+| Tổng số dòng code Python | ~4.900 dòng              |
+| Tổng số dòng JavaScript  | ~3.800 dòng              |
+| Tổng số file CSS         | 10 files (~121 KB)       |
+| Số lượng API Endpoints   | 32 endpoints             |
 | Số lượng địa điểm        | 52 địa điểm du lịch Huế  |
 | Số lượng danh mục        | 8 categories             |
 | Số modal dialogs         | 11 modals                |
@@ -468,7 +468,7 @@ Chương này đã trình bày đầy đủ kết quả triển khai và đánh 
 
 **Về kết quả đạt được:**
 
-1. **Hệ thống hoàn chỉnh:** Giao diện hiện đại với bản đồ tương tác, 11 modal dialogs, 20+ API endpoints hoạt động ổn định, 14/14 unit tests PASS (100%).
+1. **Hệ thống hoàn chỉnh:** Giao diện hiện đại với bản đồ tương tác, 11 modal dialogs, 32 API endpoints hoạt động ổn định, 14/14 unit tests PASS (100%).
 
 2. **Thuật toán hiệu quả:**
    - Weighted PageRank phản ánh đúng mức độ phổ biến thực tế của địa điểm.

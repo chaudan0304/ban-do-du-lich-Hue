@@ -74,7 +74,7 @@ Xây dựng một hệ thống web gợi ý du lịch thông minh cho thành ph�
 
 - Nghiên cứu tài liệu, sách chuyên khảo và các bài báo khoa học về hệ thống gợi ý, Graph Database và các thuật toán liên quan [4]–[12].
 - Phân tích, so sánh ưu nhược điểm của các phương pháp gợi ý để lựa chọn hướng tiếp cận phù hợp.
-- Tham khảo tài liệu kỹ thuật chính thức của Neo4j [13], [14] và Flask [15].
+- Tham khảo tài liệu kỹ thuật chính thức của Neo4j [15], [16] và Flask [17].
 
 ### 4.2. Phương pháp Thu thập Dữ liệu
 
@@ -116,7 +116,7 @@ Xây dựng một hệ thống web gợi ý du lịch thông minh cho thành ph�
 
 ## 6. Bố cục Khóa luận
 
-Ngoài phần Mở đầu, Kết luận và Tài liệu tham khảo, khóa luận được trình bày trong 4 chương:
+Ngoài phần Mở đầu, Kết luận và Tài liệu tham khảo, khóa luận được trình bày trong 4 chương và 2 phụ lục:
 
 **Chương 1 — Cơ sở Lý thuyết:** Tổng quan tình hình nghiên cứu trong và ngoài nước. Trình bày lý thuyết về Hệ thống Gợi ý và các phương pháp (Content-Based, Collaborative Filtering, Hybrid). Giới thiệu Graph Database, Neo4j, Cypher Query Language. Phân tích các thuật toán: Weighted PageRank, Collaborative Filtering (Jaccard Similarity), Nearest Neighbor. Trình bày các công nghệ nền tảng (Flask, Leaflet.js, OpenStreetMap).
 
@@ -125,3 +125,8 @@ Ngoài phần Mở đầu, Kết luận và Tài liệu tham khảo, khóa luậ
 **Chương 3 — Triển khai Hệ thống:** Môi trường và công cụ phát triển. Cấu trúc tổ chức mã nguồn. Triển khai cơ sở dữ liệu đồ thị Neo4j. Triển khai chi tiết các thuật toán gợi ý lai (Weighted PageRank, Collaborative Filtering với Node Similarity, Content-Based Filtering, Adaptive Hybrid Weighting, Explainable AI). Triển khai ứng dụng web (Flask Blueprints, Leaflet.js). Triển khai module AI Planner (Nearest Neighbor).
 
 **Chương 4 — Kết quả và Đánh giá:** Kết quả triển khai giao diện. Kết quả thử nghiệm từng thuật toán (PageRank, Collaborative Filtering, Content-Based, Hybrid, Diversity Pool). Kết quả AI Planner. Đánh giá hiệu năng hệ thống. Kết quả kiểm thử đơn vị (Unit Tests). So sánh với các hệ thống tương tự. Đánh giá chấp nhận người dùng (User Acceptance Testing).
+
+**Phụ lục A — Hướng dẫn Cài đặt và Triển khai:** Chi tiết các bước cài đặt môi trường, cấu hình Neo4j, nạp dữ liệu và khởi chạy ứng dụng.
+
+**Phụ lục B — Hướng dẫn Sử dụng:** Hướng dẫn chi tiết các chức năng dành cho người dùng và quản trị viên.
+

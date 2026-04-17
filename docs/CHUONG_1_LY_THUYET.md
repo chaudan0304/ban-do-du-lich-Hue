@@ -16,17 +16,23 @@ Hệ thống gợi ý (Recommendation System) đã được nghiên cứu rộng
 
 - **Burke (2002)** [11] nghiên cứu chi tiết về hệ thống gợi ý lai (Hybrid Recommender Systems), phân loại 7 chiến lược kết hợp khác nhau và đánh giá hiệu quả trên các bộ dữ liệu thực tế.
 
-- **Page và Brin (1998)** [25] công bố thuật toán PageRank — nền tảng của công cụ tìm kiếm Google — cho phép đánh giá mức độ quan trọng của các node trong đồ thị dựa trên cấu trúc liên kết.
+- **Page và Brin (1998)** [27] công bố thuật toán PageRank — nền tảng của công cụ tìm kiếm Google — cho phép đánh giá mức độ quan trọng của các node trong đồ thị dựa trên cấu trúc liên kết.
 
-Trong lĩnh vực cơ sở dữ liệu đồ thị, **Robinson, Webber và Eifrem (2015)** [6] đã trình bày lý thuyết và ứng dụng thực tế của Graph Database, đặc biệt là Neo4j, trong việc mô hình hóa và truy vấn dữ liệu có quan hệ phức tạp.
+Trong lĩnh vực cơ sở dữ liệu đồ thị, **Robinson, Webber và Eifrem (2015)** [6] đã trình bày lý thuyết và ứng dụng thực tế của Graph Database, đặc biệt là Neo4j, trong việc mô hình hóa và truy vấn dữ liệu có quan hệ phức tạp. **Angles và Gutierrez (2008)** [13] đã công bố bài survey toàn diện về các mô hình cơ sở dữ liệu đồ thị trên _ACM Computing Surveys_, phân tích và so sánh các mô hình dữ liệu đồ thị khác nhau.
+
+Gần đây, xu hướng sử dụng Graph Database cho hệ thống gợi ý ngày càng được quan tâm:
+
+- **Giabelli và cộng sự (2021)** [31] đề xuất hệ thống gợi ý Skills2Job mã hóa embeddings trên cơ sở dữ liệu đồ thị, chứng minh lợi thế của graph database trong việc biểu diễn và truy vấn các mối quan hệ phức tạp cho bài toán gợi ý, đăng trên _Applied Soft Computing_ (Q1).
+
+- **Su, He, Ren và Peng (2022)** [32] xây dựng thuật toán gợi ý du lịch cá nhân hóa dựa trên đồ thị tri thức (Knowledge Graph) lưu trữ trên **Neo4j**, khai thác mối quan hệ User–Attraction để đề xuất điểm đến phù hợp, đăng trên _Applied Sciences_ (SCIE).
 
 ### 1.1.2. Tình hình nghiên cứu trong nước
 
 Tại Việt Nam, các nghiên cứu về hệ thống gợi ý du lịch đã bắt đầu nhận được sự quan tâm trong những năm gần đây:
 
-- **Nguyễn Văn A và Trần Thị B (2022)** [1] nghiên cứu ứng dụng Machine Learning trong hệ thống gợi ý sản phẩm, đề xuất mô hình kết hợp Collaborative Filtering và Content-Based Filtering cho thương mại điện tử Việt Nam.
+- **Lưu Hoài Sang, Trần Thanh Điện, Nguyễn Thanh Hải và Nguyễn Thái Nghe (2020)** [1] nghiên cứu ứng dụng kỹ thuật học sâu và các phương pháp hệ thống gợi ý (Collaborative Filtering, Matrix Factorization) trong dự báo kết quả học tập, đăng trên _Tạp chí Khoa học Trường Đại học Cần Thơ_. Nguyễn Thái Nghe và cộng sự (2020) [14] cũng nghiên cứu việc tích hợp mối quan hệ giữa các môn học vào hệ thống gợi ý sử dụng Collaborative Filtering, đăng trên _IJATCSE_.
 
-- **Lê Văn C (2021)** [3] trình bày cơ sở lý thuyết về các hệ cơ sở dữ liệu NoSQL và Graph Database, phân tích ưu nhược điểm và các trường hợp ứng dụng phù hợp.
+- **Trần Cao Đệ (2017)** [3] trình bày cơ sở lý thuyết về các hệ cơ sở dữ liệu nâng cao bao gồm các mô hình NoSQL và các kỹ thuật xử lý dữ liệu hiện đại, trong giáo trình giảng dạy tại Trường Đại học Cần Thơ.
 
 Tuy nhiên, còn rất ít nghiên cứu kết hợp đồng thời **Graph Database** với **Hybrid Recommendation** cho lĩnh vực du lịch, đặc biệt là ứng dụng cụ thể cho một thành phố di sản như Huế. Đây chính là khoảng trống mà đề tài hướng đến lấp đầy.
 
@@ -36,7 +42,7 @@ Từ phân tích tổng quan trên, có thể rút ra các nhận xét:
 
 1. **Hệ thống gợi ý** đã được nghiên cứu sâu rộng, nhưng phần lớn tập trung vào thương mại điện tử (Amazon, Netflix) và mạng xã hội. Ứng dụng chuyên biệt cho du lịch địa phương còn hạn chế.
 
-2. **Graph Database** có lợi thế tự nhiên trong việc mô hình hóa quan hệ người dùng — địa điểm — danh mục, nhưng chưa được khai thác nhiều trong các hệ thống gợi ý du lịch tại Việt Nam.
+2. **Graph Database** có lợi thế tự nhiên trong việc mô hình hóa quan hệ người dùng — địa điểm — danh mục. Một số nghiên cứu quốc tế đã bắt đầu ứng dụng graph database cho hệ thống gợi ý [31] và đặc biệt trong du lịch với Neo4j [32], nhưng ở Việt Nam hướng tiếp cận này vẫn chưa được khai thác.
 
 3. **Phương pháp lai (Hybrid)** được đánh giá hiệu quả hơn từng phương pháp đơn lẻ [11], [12], đặc biệt trong việc giải quyết vấn đề khởi động lạnh (Cold Start).
 
@@ -63,7 +69,7 @@ Theo Ricci và cộng sự (2015) [7], có 3 phương pháp chính trong xây d�
 
 #### a) Lọc theo Nội dung (Content-Based Filtering)
 
-**Nguyên lý:** Gợi ý các items có nội dung hoặc đặc điểm tương tự với những items mà người dùng đã thể hiện sự quan tâm trước đó [10], [28].
+**Nguyên lý:** Gợi ý các items có nội dung hoặc đặc điểm tương tự với những items mà người dùng đã thể hiện sự quan tâm trước đó [10], [30].
 
 *Ví dụ:* Nếu du khách thích "Chùa Thiên Mụ" (danh mục: Tâm linh), hệ thống sẽ gợi ý các địa điểm khác cũng thuộc danh mục "Tâm linh" như Chùa Từ Đàm, Điện Hòn Chén.
 
@@ -81,12 +87,12 @@ Theo Ricci và cộng sự (2015) [7], có 3 phương pháp chính trong xây d�
 
 #### b) Lọc Cộng tác (Collaborative Filtering)
 
-**Nguyên lý:** Gợi ý dựa trên sự tương đồng giữa các người dùng hoặc giữa các items [9], [27]. Nếu User A và User B có sở thích giống nhau, những items mà B đã thích nhưng A chưa biết sẽ được gợi ý cho A.
+**Nguyên lý:** Gợi ý dựa trên sự tương đồng giữa các người dùng hoặc giữa các items [9], [29]. Nếu User A và User B có sở thích giống nhau, những items mà B đã thích nhưng A chưa biết sẽ được gợi ý cho A.
 
 **Có 2 loại chính:**
 
 - **User-Based CF:** Tìm nhóm người dùng có sở thích tương tự, gợi ý từ hành vi của nhóm này [9].
-- **Item-Based CF:** Tìm các items được đánh giá tương tự bởi cùng nhóm người dùng, gợi ý items có hành vi tương đồng [27].
+- **Item-Based CF:** Tìm các items được đánh giá tương tự bởi cùng nhóm người dùng, gợi ý items có hành vi tương đồng [29].
 
 **Ưu điểm:**
 
@@ -166,10 +172,10 @@ Bảng 1.1 trình bày so sánh chi tiết giữa cơ sở dữ liệu đồ th�
 
 Graph Database phù hợp với bài toán gợi ý du lịch vì:
 
-1. **Mối quan hệ là trọng tâm:** Hệ thống cần quản lý quan hệ đa chiều giữa người dùng, địa điểm, danh mục, đánh giá và lộ trình.
+1. **Mối quan hệ là trọng tâm:** Hệ thống cần quản lý quan hệ đa chiều giữa người dùng, địa điểm, danh mục, đánh giá và lộ trình [6], [13].
 2. **Truy vấn nhiều bước nhảy (Multi-hop Queries):** Thuật toán Collaborative Filtering yêu cầu duyệt qua quan hệ: User → Location → User khác → Location mới (3 bước nhảy).
-3. **Cấu trúc mạng lưới:** Dữ liệu du lịch tự nhiên có dạng mạng lưới — nhiều người dùng tương tác với nhiều địa điểm, tạo thành đồ thị dày đặc.
-4. **Tích hợp thuật toán đồ thị:** Các hệ quản trị Graph Database như Neo4j cung cấp sẵn thư viện thuật toán (GraphData Science) hỗ trợ PageRank, Node Similarity mà không cần triển khai từ đầu.
+3. **Cấu trúc mạng lưới:** Dữ liệu du lịch tự nhiên có dạng mạng lưới — nhiều người dùng tương tác với nhiều địa điểm, tạo thành đồ thị dày đặc. Nhiều nghiên cứu gần đây đã chứng minh tính hiệu quả của graph database trong xây dựng hệ thống gợi ý [31] và đặc biệt trong lĩnh vực du lịch [32].
+4. **Tích hợp thuật toán đồ thị:** Các hệ quản trị Graph Database như Neo4j cung cấp sẵn thư viện thuật toán (Graph Data Science) hỗ trợ PageRank, Node Similarity mà không cần triển khai từ đầu [16].
 
 ---
 
@@ -177,7 +183,7 @@ Graph Database phù hợp với bài toán gợi ý du lịch vì:
 
 ### 1.4.1. Giới thiệu Neo4j
 
-**Neo4j** là hệ quản trị cơ sở dữ liệu đồ thị phổ biến nhất thế giới (theo DB-Engines Ranking), được phát triển bởi Neo4j Inc. và viết bằng Java [13]. Neo4j lưu trữ dữ liệu dưới dạng nodes và relationships theo mô hình **Labeled Property Graph**, cho phép truy vấn quan hệ với tốc độ cao.
+**Neo4j** là hệ quản trị cơ sở dữ liệu đồ thị phổ biến nhất thế giới (theo DB-Engines Ranking), được phát triển bởi Neo4j Inc. và viết bằng Java [15]. Neo4j lưu trữ dữ liệu dưới dạng nodes và relationships theo mô hình **Labeled Property Graph**, cho phép truy vấn quan hệ với tốc độ cao.
 
 **Các đặc điểm chính của Neo4j:**
 
@@ -188,7 +194,7 @@ Graph Database phù hợp với bài toán gợi ý du lịch vì:
 
 ### 1.4.2. Ngôn ngữ truy vấn Cypher
 
-**Cypher** là ngôn ngữ truy vấn khai báo của Neo4j, lấy cảm hứng từ SQL nhưng được tối ưu cho mô hình đồ thị [13]. Cypher sử dụng cú pháp trực quan mô phỏng hình dạng các node và relationship trong đồ thị:
+**Cypher** là ngôn ngữ truy vấn khai báo của Neo4j, lấy cảm hứng từ SQL nhưng được tối ưu cho mô hình đồ thị [15]. Cypher sử dụng cú pháp trực quan mô phỏng hình dạng các node và relationship trong đồ thị:
 
 - **Node** được biểu diễn bằng dấu ngoặc tròn: `(n:Label {property: value})`
 - **Relationship** được biểu diễn bằng dấu mũi tên: `-[:TYPE {property: value}]->`
@@ -208,7 +214,7 @@ Graph Database phù hợp với bài toán gợi ý du lịch vì:
 
 ### 1.4.3. Neo4j Graph Data Science (GDS)
 
-**Neo4j GDS** là thư viện mở rộng cung cấp hơn 60 thuật toán phân tích đồ thị và Machine Learning, được thiết kế để chạy hiệu quả trên dữ liệu lớn trong Neo4j [14].
+**Neo4j GDS** là thư viện mở rộng cung cấp hơn 60 thuật toán phân tích đồ thị và Machine Learning, được thiết kế để chạy hiệu quả trên dữ liệu lớn trong Neo4j [16].
 
 *Bảng 1.3. Các nhóm thuật toán trong Neo4j GDS*
 
@@ -227,7 +233,7 @@ Trong đề tài, hai thuật toán được sử dụng chính là **PageRank**
 
 ### 1.5.1. Lịch sử và Nguyên lý
 
-**PageRank** là thuật toán được phát triển bởi Larry Page và Sergey Brin tại Đại học Stanford năm 1996, là nền tảng toán học của công cụ tìm kiếm Google [4], [25].
+**PageRank** là thuật toán được phát triển bởi Larry Page và Sergey Brin tại Đại học Stanford năm 1996, là nền tảng toán học của công cụ tìm kiếm Google [4], [27].
 
 **Nguyên lý cốt lõi:** *"Một trang web (node) được coi là quan trọng nếu có nhiều trang web quan trọng khác liên kết đến nó."* Nói cách khác, PageRank đánh giá tầm quan trọng của mỗi node dựa trên **số lượng** và **chất lượng** các liên kết đến node đó.
 
@@ -315,11 +321,11 @@ Trong đó A, B là tập hợp các items mà mỗi user đã tương tác. Gi�
 - Hợp: {Đại Nội, Chùa Thiên Mụ, Lăng Khải Định, Lăng Tự Đức} → |A ∪ B| = 4
 - Jaccard(A, B) = 2/4 = **0.5** (50% tương đồng)
 
-**Lý do chọn Jaccard:** Đề tài sử dụng dữ liệu tương tác dạng nhị phân (đã/chưa tương tác) trên đồ thị Neo4j, và Neo4j GDS hỗ trợ sẵn thuật toán Node Similarity dựa trên Jaccard Index [14], phù hợp với đặc điểm dữ liệu.
+**Lý do chọn Jaccard:** Đề tài sử dụng dữ liệu tương tác dạng nhị phân (đã/chưa tương tác) trên đồ thị Neo4j, và Neo4j GDS hỗ trợ sẵn thuật toán Node Similarity dựa trên Jaccard Index [16], phù hợp với đặc điểm dữ liệu.
 
 ### 1.6.3. Item-Based Collaborative Filtering
 
-**Nguyên lý:** Thay vì so sánh người dùng, phương pháp này so sánh các items. Nếu người dùng thích item A, hệ thống sẽ tìm các items tương tự với A (dựa trên tập người dùng đã tương tác với chúng) để gợi ý [27].
+**Nguyên lý:** Thay vì so sánh người dùng, phương pháp này so sánh các items. Nếu người dùng thích item A, hệ thống sẽ tìm các items tương tự với A (dựa trên tập người dùng đã tương tác với chúng) để gợi ý [29].
 
 **Ưu điểm so với User-Based:**
 
@@ -352,7 +358,7 @@ Với cách tiếp cận này, việc tìm kiếm gợi ý trở thành bài to�
 
 ### 1.7.1. Nguyên lý Hoạt động
 
-**Content-Based Filtering** phân tích nội dung và đặc điểm (features) của items để tìm items tương tự với những gì người dùng đã thể hiện sự quan tâm [10], [28].
+**Content-Based Filtering** phân tích nội dung và đặc điểm (features) của items để tìm items tương tự với những gì người dùng đã thể hiện sự quan tâm [10], [30].
 
 Các đặc trưng thường được sử dụng:
 
@@ -378,7 +384,7 @@ Sự kết hợp cả hai đặc trưng giúp hệ thống vừa gợi ý dựa 
 
 ### 1.8.1. Định nghĩa
 
-**Nearest Neighbor** là thuật toán tìm kiếm và sắp xếp dựa trên khoảng cách. Trong bài toán lập lộ trình du lịch — tương tự bài toán **Người bán hàng (TSP — Traveling Salesman Problem)** — thuật toán Nearest Neighbor là phương pháp heuristic (xấp xỉ) đơn giản và hiệu quả để tìm đường đi ngắn qua tất cả các điểm [24].
+**Nearest Neighbor** là thuật toán tìm kiếm và sắp xếp dựa trên khoảng cách. Trong bài toán lập lộ trình du lịch — tương tự bài toán **Người bán hàng (TSP — Traveling Salesman Problem)** — thuật toán Nearest Neighbor là phương pháp heuristic (xấp xỉ) đơn giản và hiệu quả để tìm đường đi ngắn qua tất cả các điểm [26].
 
 ### 1.8.2. Thuật toán Greedy Nearest Neighbor
 
@@ -421,7 +427,7 @@ Trong module AI Planner của đề tài, thuật toán Nearest Neighbor đượ
 
 ### 1.9.1. Flask Framework
 
-**Flask** là một micro web framework cho ngôn ngữ Python, được phát triển bởi Armin Ronacher (Pallets Projects) [15]. Flask được thiết kế theo triết lý "tối giản nhưng linh hoạt", chỉ cung cấp các thành phần cốt lõi (routing, templating, request/response handling) và cho phép nhà phát triển tự do lựa chọn các extension bổ sung.
+**Flask** là một micro web framework cho ngôn ngữ Python, được phát triển bởi Armin Ronacher (Pallets Projects) [17]. Flask được thiết kế theo triết lý "tối giản nhưng linh hoạt", chỉ cung cấp các thành phần cốt lõi (routing, templating, request/response handling) và cho phép nhà phát triển tự do lựa chọn các extension bổ sung.
 
 **Đặc điểm chính:**
 
@@ -445,7 +451,7 @@ Trong module AI Planner của đề tài, thuật toán Nearest Neighbor đượ
 
 ### 1.9.2. Leaflet.js
 
-**Leaflet** là thư viện JavaScript mã nguồn mở hàng đầu dùng để tạo bản đồ tương tác trên nền web, được phát triển bởi Volodymyr Agafonkin [16].
+**Leaflet** là thư viện JavaScript mã nguồn mở hàng đầu dùng để tạo bản đồ tương tác trên nền web, được phát triển bởi Volodymyr Agafonkin [18].
 
 **Đặc điểm chính:**
 
@@ -458,7 +464,7 @@ Trong module AI Planner của đề tài, thuật toán Nearest Neighbor đượ
 
 ### 1.9.3. OpenStreetMap (OSM)
 
-**OpenStreetMap (OSM)** là dự án bản đồ mã nguồn mở lớn nhất thế giới, được xây dựng và duy trì bởi cộng đồng toàn cầu với hàng triệu người đóng góp [17].
+**OpenStreetMap (OSM)** là dự án bản đồ mã nguồn mở lớn nhất thế giới, được xây dựng và duy trì bởi cộng đồng toàn cầu với hàng triệu người đóng góp [19].
 
 **Vai trò trong đề tài:** OSM cung cấp **tile layer** (lớp ảnh bản đồ) miễn phí cho Leaflet.js, hiển thị nền bản đồ với đường xá, địa hình và các điểm mốc. So với Google Maps API (có giới hạn số lượt gọi và tính phí), OSM hoàn toàn miễn phí và phù hợp cho dự án nghiên cứu.
 
@@ -466,12 +472,12 @@ Trong module AI Planner của đề tài, thuật toán Nearest Neighbor đượ
 
 | Công nghệ | Vai trò trong đề tài |
 |---|---|
-| **Python 3.9+** | Ngôn ngữ lập trình chính cho backend [21] |
-| **JavaScript ES6+** | Ngôn ngữ lập trình frontend, xử lý tương tác người dùng [18] |
-| **HTML5 / CSS3** | Cấu trúc và giao diện ứng dụng web [19] |
-| **Neo4j Python Driver** | Kết nối và thực thi truy vấn Cypher từ Python [13] |
-| **Werkzeug** | Mã hóa mật khẩu an toàn (PBKDF2-SHA256) [15] |
-| **Flask-Login** | Quản lý phiên đăng nhập và xác thực người dùng [15] |
+| **Python 3.9+** | Ngôn ngữ lập trình chính cho backend [23] |
+| **JavaScript ES6+** | Ngôn ngữ lập trình frontend, xử lý tương tác người dùng [20] |
+| **HTML5 / CSS3** | Cấu trúc và giao diện ứng dụng web [21] |
+| **Neo4j Python Driver** | Kết nối và thực thi truy vấn Cypher từ Python [15] |
+| **Werkzeug** | Mã hóa mật khẩu an toàn (PBKDF2-SHA256) [17] |
+| **Flask-Login** | Quản lý phiên đăng nhập và xác thực người dùng [17] |
 | **Pandas** | Xử lý dữ liệu dạng bảng trước khi nạp vào đồ thị |
 | **openpyxl** | Đọc/ghi file Excel để import/export dữ liệu địa điểm |
 

@@ -32,8 +32,8 @@ Hệ thống sử dụng các thư viện mã nguồn mở phổ biến, đảm 
 
 | Thư viện | Phiên bản | Vai trò |
 |---|---|---|
-| Flask | ≥2.0.0 | Micro-framework web, xây dựng RESTful API [15] |
-| Neo4j Driver | ≥5.0.0 | Kết nối và thực thi truy vấn Cypher với Neo4j [13] |
+| Flask | ≥2.0.0 | Micro-framework web, xây dựng RESTful API [17] |
+| Neo4j Driver | ≥5.0.0 | Kết nối và thực thi truy vấn Cypher với Neo4j [15] |
 | Flask-Login | ≥0.6.0 | Quản lý phiên đăng nhập và xác thực người dùng |
 | Werkzeug | ≥2.0.0 | Mã hóa mật khẩu an toàn (PBKDF2-SHA256) |
 | Pandas | ≥1.3.0 | Xử lý và phân tích dữ liệu dạng bảng |
@@ -46,10 +46,10 @@ Hệ thống sử dụng các thư viện mã nguồn mở phổ biến, đảm 
 
 | Thư viện | Vai trò |
 |---|---|
-| Leaflet.js | Bản đồ tương tác mã nguồn mở [16] |
+| Leaflet.js | Bản đồ tương tác mã nguồn mở [18] |
 | Leaflet.markercluster | Gom nhóm markers khi zoom out |
 | Leaflet.heat | Tạo bản đồ nhiệt (Heatmap) |
-| OpenStreetMap Tile | Lớp ảnh nền bản đồ [17] |
+| OpenStreetMap Tile | Lớp ảnh nền bản đồ [19] |
 
 ---
 
@@ -128,7 +128,7 @@ Khác với các hệ thống truyền thống sử dụng RDBMS (MySQL, Postgre
 
 ### 3.3.1. Triển khai Lược đồ dữ liệu
 
-Dựa trên thiết kế ở mục 2.4, lược đồ đồ thị được triển khai với 5 loại node và 8 loại relationship.
+Dựa trên thiết kế ở mục 2.4, lược đồ đồ thị được triển khai với 5 loại node và 9 loại relationship (7 relationship cơ bản + 2 relationship SIMILAR_TO và LOC_SIMILAR được tạo bởi thuật toán).
 
 **a) Thuộc tính chi tiết Node `:Location`:**
 
@@ -507,7 +507,7 @@ Chương này đã trình bày chi tiết quá trình triển khai hệ thống 
 
 2. **Cấu trúc mã nguồn:** Tổ chức theo kiến trúc MVC mở rộng với nguyên tắc tách biệt trách nhiệm — 4 Blueprint (Controller), 7 module Data Access (Model), CSS/JS modular (View).
 
-3. **Cơ sở dữ liệu đồ thị:** Triển khai lược đồ 5 node, 8 relationship trên Neo4j với quy trình tiền xử lý tự động (INTERACTED, RELATED_TO).
+3. **Cơ sở dữ liệu đồ thị:** Triển khai lược đồ 5 node, 9 relationship trên Neo4j với quy trình tiền xử lý tự động (INTERACTED, RELATED_TO, SIMILAR_TO, LOC_SIMILAR).
 
 4. **Thuật toán gợi ý lai:** Triển khai thành công pipeline 4 bước kết hợp Weighted PageRank (dampingFactor=0.88), Collaborative Filtering (Jaccard, topK=10), Content-Based Filtering (topK=5), PageRank Diversity Pool (Top 20) và chiến lược trọng số thích ứng 60-30-10.
 

@@ -315,51 +315,66 @@ Hệ thống API được thiết kế theo kiến trúc REST (Representational 
 
 ### 2.5.2. Danh sách API Endpoints
 
-**a) API Xác thực (Authentication):**
+Hệ thống triển khai tổng cộng **32 endpoints**, chia thành 5 nhóm chức năng. Dưới đây trình bày các endpoints chính.
+
+**a) API Xác thực (Authentication — 8 endpoints):**
 
 *Bảng 2.9. API Xác thực*
 
-| Method | Endpoint        | Request Body                      | Response                   |
-| ------ | --------------- | --------------------------------- | -------------------------- |
-| POST   | /login          | `{username, password}`            | `{success, message, role}` |
-| POST   | /register       | `{username, password}`            | `{success, message}`       |
-| GET    | /logout         | —                                 | Redirect                   |
-| POST   | /reset-password | `{username, email, new_password}` | `{success, message}`       |
+| Method | Endpoint              | Request Body                      | Response                   |
+| ------ | --------------------- | --------------------------------- | -------------------------- |
+| POST   | /api/login            | `{username, password}`            | `{success, message, role}` |
+| POST   | /api/register         | `{username, password, email}`     | `{success, message}`       |
+| POST   | /api/logout           | —                                 | `{success}`                |
+| POST   | /api/verify-account   | `{username, email}`               | `{success, message}`       |
+| POST   | /api/reset-password   | `{username, email, new_password}` | `{success, message}`       |
+| GET    | /api/current_user     | —                                 | `{logged_in, username}`    |
+| GET,POST | /api/profile        | `{fullname, email}`               | `{success, data}`          |
 
-**b) API Địa điểm và Tương tác:**
+**b) API Địa điểm và Tương tác (8 endpoints):**
 
 *Bảng 2.10. API Địa điểm và Tương tác*
 
-| Method | Endpoint                | Request Body                  | Response                        |
-| ------ | ----------------------- | ----------------------------- | ------------------------------- |
-| GET    | /api/locations          | `?category=`                  | `[{name, lat, lng, ...}]`       |
-| GET    | /api/reviews/{location} | —                             | `[{username, rating, comment}]` |
-| POST   | /api/like               | `{location_name}`             | `{liked, message}`              |
-| POST   | /api/review             | `{location, rating, comment}` | `{success, stats}`              |
-| DELETE | /api/review             | `{location, review_id}`       | `{success}`                     |
+| Method | Endpoint                       | Request Body                  | Response                        |
+| ------ | ------------------------------ | ----------------------------- | ------------------------------- |
+| GET    | /api/locations                 | `?category=`                  | `[{name, lat, lng, ...}]`       |
+| GET    | /api/history/{user}            | —                             | `[{name, image, lat, lng}]`     |
+| GET    | /api/reviews/{location}        | —                             | `[{username, rating, comment}]` |
+| POST   | /api/like                      | `{location_name}`             | `{liked, message}`              |
+| POST   | /api/review                    | `{location, rating, comment}` | `{success, stats, sentiment}`   |
+| DELETE | /api/review                    | `{location, review_id}`       | `{success}`                     |
+| GET    | /api/similar/{location}        | —                             | `[{name, similarity, ...}]`     |
+| GET    | /api/similar-users/{username}  | —                             | `[{username, similarity}]`      |
 
-**c) API Trí tuệ Nhân tạo:**
+**c) API Trí tuệ Nhân tạo (7 endpoints):**
 
 *Bảng 2.11. API Trí tuệ Nhân tạo*
 
-| Method | Endpoint                  | Request Body                     | Response               |
-| ------ | ------------------------- | -------------------------------- | ---------------------- |
-| GET    | /api/recommend/{username} | —                                | `[{name, score, ...}]` |
-| POST   | /api/planner              | `{days, preferences, use_liked}` | `[{day, activities}]`  |
-| GET    | /api/itineraries          | —                                | `[{id, title, data}]`  |
-| POST   | /api/save-itinerary       | `{data}`                         | `{success}`            |
+| Method | Endpoint                         | Request Body                     | Response                      |
+| ------ | -------------------------------- | -------------------------------- | ----------------------------- |
+| GET    | /api/recommend/{username}        | —                                | `[{name, score, reason, ...}]`|
+| POST   | /api/planner/generate            | `{days, preferences, use_liked}` | `[{day, activities}]`         |
+| POST   | /api/planner/suggest-replacement | `{current, exclude_list}`        | `{replacement}`               |
+| GET    | /api/itineraries                 | —                                | `[{id, title, data}]`         |
+| POST   | /api/itineraries                 | `{title, data, days}`            | `{success, id}`               |
+| DELETE | /api/itineraries/{id}            | —                                | `{success}`                   |
+| GET    | /api/user/activity               | —                                | `{likes, reviews}`            |
 
-**d) API Quản trị:**
+**d) API Quản trị (9 endpoints):**
 
 *Bảng 2.12. API Quản trị*
 
-| Method | Endpoint               | Request Body                  | Response                      |
-| ------ | ---------------------- | ----------------------------- | ----------------------------- |
-| GET    | /admin/users           | —                             | `[{name, role, liked_count}]` |
-| DELETE | /admin/user/{name}     | —                             | `{success}`                   |
-| POST   | /admin/location        | `{name, desc, lat, lng, ...}` | `{success}`                   |
-| PUT    | /admin/location/{name} | `{desc, lat, lng, ...}`       | `{success}`                   |
-| POST   | /admin/run-algo        | —                             | `{success, message}`          |
+| Method | Endpoint                          | Request Body                  | Response                      |
+| ------ | --------------------------------- | ----------------------------- | ----------------------------- |
+| GET    | /api/admin/users                  | —                             | `[{name, role, liked_count}]` |
+| DELETE | /api/admin/users/{username}       | —                             | `{success}`                   |
+| GET    | /api/admin/user_comments/{user}   | —                             | `[{location, comment, ...}]`  |
+| GET    | /api/admin/user_profile/{user}    | —                             | `{name, email, stats}`        |
+| GET    | /api/admin/stats                  | —                             | `{users, locations, reviews}` |
+| POST   | /api/admin/run-algo               | —                             | `{success, message}`          |
+| POST   | /api/admin/location/add           | `{name, desc, lat, lng, ...}` | `{success}`                   |
+| PUT    | /api/admin/location/update        | `{name, desc, lat, lng, ...}` | `{success}`                   |
+| DELETE | /api/admin/location/delete/{name} | —                             | `{success}`                   |
 
 ### 2.5.3. Định dạng Response
 
@@ -642,9 +657,9 @@ Chương này đã trình bày đầy đủ quá trình phân tích và thiết 
 
 3. **Kiến trúc 3 tầng:** Thiết kế phân tách rõ ràng giữa Presentation (HTML/CSS/JS), Business (Flask/AI) và Data (Neo4j/GDS).
 
-4. **Lược đồ đồ thị:** Thiết kế 5 loại node và 7 loại relationship cho Neo4j, kèm ràng buộc và chỉ mục.
+4. **Lược đồ đồ thị:** Thiết kế 5 loại node và 7 loại relationship cơ bản cho Neo4j (bổ sung thêm 2 relationship do thuật toán tạo ra: SIMILAR_TO, LOC_SIMILAR), kèm ràng buộc và chỉ mục.
 
-5. **RESTful API:** Thiết kế 20+ endpoints theo chuẩn REST, phân nhóm theo chức năng với định dạng response thống nhất.
+5. **RESTful API:** Thiết kế 32 endpoints theo chuẩn REST, phân nhóm 5 nhóm chức năng (Xác thực, Địa điểm, AI, Lộ trình, Quản trị) với định dạng response thống nhất.
 
 6. **Giao diện:** Wireframe trang chủ và modal AI Planner, bảng màu Dark Mode và Typography thống nhất với font Inter.
 

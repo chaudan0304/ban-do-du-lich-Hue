@@ -17,7 +17,7 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
 1. **Cơ sở dữ liệu đồ thị Neo4j:**
    - Mô hình hóa 52 địa điểm du lịch Huế thuộc 8 danh mục.
    - 25 người dùng thử nghiệm với 180+ lượt Like và 120+ lượt Review.
-   - Lược đồ đồ thị gồm 5 loại node và 8 loại relationship.
+   - Lược đồ đồ thị gồm 5 loại node và 9 loại relationship (bao gồm SIMILAR_TO và LOC_SIMILAR do thuật toán tạo ra).
 
 2. **Thuật toán Hybrid Recommendation (pipeline 4 bước):**
    - **Weighted PageRank** trên 2 đồ thị riêng biệt (User–Location và Location–Location) đánh giá chính xác độ phổ biến và độ kết nối.
@@ -34,7 +34,7 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
 
 4. **Ứng dụng web hoàn chỉnh:**
    - Giao diện hiện đại với bản đồ tương tác Leaflet.js, Heatmap, 11 modal dialogs.
-   - 20+ API endpoints hoạt động ổn định (phản hồi < 500ms).
+   - 32 API endpoints hoạt động ổn định (phản hồi < 500ms).
    - Kiến trúc modular: 4 Flask Blueprints, 7 module Data Access Layer, 10 file CSS, 9 file JS.
    - Bảo mật: mã hóa PBKDF2-SHA256, parameterized queries, Flask-Login session.
 

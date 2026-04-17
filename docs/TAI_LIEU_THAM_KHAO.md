@@ -2,11 +2,11 @@
 
 ## Tài liệu Tiếng Việt
 
-[1] Nguyễn Văn A và Trần Thị B, "Ứng dụng Machine Learning trong hệ thống gợi ý sản phẩm," _Tạp chí Khoa học và Công nghệ_, tập 58, số 3, tr. 45-52, 2022.
+[1] L. H. Sang, T. T. Điện, N. T. Hải, và N. T. Nghe, "Dự báo kết quả học tập bằng kỹ thuật học sâu với mạng nơ-ron đa tầng," _Tạp chí Khoa học Trường Đại học Cần Thơ_, tập 56, số 3A, tr. 20-28, 2020.
 
 [2] Sở Du lịch Thừa Thiên Huế, "Báo cáo tình hình phát triển du lịch năm 2024," Thừa Thiên Huế, 2024.
 
-[3] Lê Văn C, "Cơ sở dữ liệu nâng cao: NoSQL và Graph Database," _NXB Đại học Quốc gia TP.HCM_, 2021.
+[3] T. C. Đệ, _Giáo trình Cơ sở dữ liệu nâng cao_, Trường Đại học Cần Thơ, 2017.
 
 ---
 
@@ -30,50 +30,59 @@
 
 [12] G. Adomavicius and A. Tuzhilin, "Toward the Next Generation of Recommender Systems: A Survey of the State-of-the-Art and Possible Extensions," _IEEE Transactions on Knowledge and Data Engineering_, vol. 17, no. 6, pp. 734-749, 2005.
 
+[13] R. Angles and C. Gutierrez, "Survey of Graph Database Models," _ACM Computing Surveys_, vol. 40, no. 1, Article 1, pp. 1-39, 2008.
+
+[14] H. T. Thanh-Nhan, L. Huy-Thap, and N. Thai-Nghe, "Integrating Courses' Relationship into Predicting Student Performance," _International Journal of Advanced Trends in Computer Science and Engineering (IJATCSE)_, vol. 9, no. 4, pp. 5246-5252, 2020.
+
 ---
 
 ## Tài liệu Trực tuyến
 
-[13] Neo4j, Inc., "Neo4j Graph Database Documentation," [Online]. Available: https://neo4j.com/docs/. [Accessed: 15-Jan-2026].
+[15] Neo4j, Inc., "Neo4j Graph Database Documentation," [Online]. Available: https://neo4j.com/docs/. [Accessed: 15-Jan-2026].
 
-[14] Neo4j, Inc., "Neo4j Graph Data Science Library," [Online]. Available: https://neo4j.com/docs/graph-data-science/current/. [Accessed: 15-Jan-2026].
+[16] Neo4j, Inc., "Neo4j Graph Data Science Library," [Online]. Available: https://neo4j.com/docs/graph-data-science/current/. [Accessed: 15-Jan-2026].
 
-[15] Pallets Projects, "Flask Documentation," [Online]. Available: https://flask.palletsprojects.com/. [Accessed: 20-Jan-2026].
+[17] Pallets Projects, "Flask Documentation," [Online]. Available: https://flask.palletsprojects.com/. [Accessed: 20-Jan-2026].
 
-[16] V. Agafonkin, "Leaflet - an open-source JavaScript library for interactive maps," [Online]. Available: https://leafletjs.com/. [Accessed: 22-Jan-2026].
+[18] V. Agafonkin, "Leaflet - an open-source JavaScript library for interactive maps," [Online]. Available: https://leafletjs.com/. [Accessed: 22-Jan-2026].
 
-[17] OpenStreetMap Foundation, "OpenStreetMap," [Online]. Available: https://www.openstreetmap.org/. [Accessed: 22-Jan-2026].
+[19] OpenStreetMap Foundation, "OpenStreetMap," [Online]. Available: https://www.openstreetmap.org/. [Accessed: 22-Jan-2026].
 
-[18] Mozilla Developer Network, "JavaScript Guide," [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide. [Accessed: 25-Jan-2026].
+[20] Mozilla Developer Network, "JavaScript Guide," [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide. [Accessed: 25-Jan-2026].
 
-[19] W3Schools, "CSS Tutorial," [Online]. Available: https://www.w3schools.com/css/. [Accessed: 25-Jan-2026].
+[21] W3Schools, "CSS Tutorial," [Online]. Available: https://www.w3schools.com/css/. [Accessed: 25-Jan-2026].
 
 ---
 
 ## Mã nguồn và Công cụ
 
-[20] GitHub Repository, "Huế Travel AI - Smart Travel Recommendation System," [Online]. Available: https://github.com/chaudan0304/ban-do-du-lich-Hue.
+[22] GitHub Repository, "Huế Travel AI - Smart Travel Recommendation System," [Online]. Available: https://github.com/chaudan0304/ban-do-du-lich-Hue.
 
-[21] Python Software Foundation, "Python 3.11 Documentation," [Online]. Available: https://docs.python.org/3.11/.
+[23] Python Software Foundation, "Python 3.11 Documentation," [Online]. Available: https://docs.python.org/3.11/.
 
-[22] Font Awesome, "Icon Library," [Online]. Available: https://fontawesome.com/.
+[24] Font Awesome, "Icon Library," [Online]. Available: https://fontawesome.com/.
 
-[23] Google Fonts, "Inter Font Family," [Online]. Available: https://fonts.google.com/specimen/Inter.
+[25] Google Fonts, "Inter Font Family," [Online]. Available: https://fonts.google.com/specimen/Inter.
 
 ---
 
 ## Các Thuật toán và Bài báo Khoa học
 
-[24] T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, _Introduction to Algorithms_, 3rd ed. MIT Press, 2009. (Chapter 35: Approximation Algorithms - Nearest Neighbor for TSP)
+[26] T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, _Introduction to Algorithms_, 3rd ed. MIT Press, 2009. (Chapter 35: Approximation Algorithms - Nearest Neighbor for TSP)
 
-[25] S. Brin and L. Page, "The Anatomy of a Large-Scale Hypertextual Web Search Engine," _Computer Networks and ISDN Systems_, vol. 30, no. 1-7, pp. 107-117, 1998.
+[27] S. Brin and L. Page, "The Anatomy of a Large-Scale Hypertextual Web Search Engine," _Computer Networks and ISDN Systems_, vol. 30, no. 1-7, pp. 107-117, 1998.
 
-[26] J. Bennett and S. Lanning, "The Netflix Prize," in _Proceedings of KDD Cup and Workshop_, 2007.
+[28] J. Bennett and S. Lanning, "The Netflix Prize," in _Proceedings of KDD Cup and Workshop_, 2007.
 
-[27] X. Su and T. M. Khoshgoftaar, "A Survey of Collaborative Filtering Techniques," _Advances in Artificial Intelligence_, vol. 2009, Article ID 421425, 2009.
+[29] X. Su and T. M. Khoshgoftaar, "A Survey of Collaborative Filtering Techniques," _Advances in Artificial Intelligence_, vol. 2009, Article ID 421425, 2009.
 
-[28] M. J. Pazzani and D. Billsus, "Content-Based Recommendation Systems," in _The Adaptive Web_, Springer, 2007, pp. 325-341.
+[30] M. J. Pazzani and D. Billsus, "Content-Based Recommendation Systems," in _The Adaptive Web_, Springer, 2007, pp. 325-341.
+
+[31] A. Giabelli, L. Malandri, F. Mercorio, M. Mezzanzanica, and A. Seveso, "Skills2Job: A Recommender System that Encodes Job Offer Embeddings on Graph Databases," _Applied Soft Computing_, vol. 101, Article 107049, 2021. DOI: 10.1016/j.asoc.2020.107049.
+
+[32] X. Su, J. He, J. Ren, and J. Peng, "Personalized Chinese Tourism Recommendation Algorithm Based on Knowledge Graph," _Applied Sciences_, vol. 12, no. 20, Article 10226, 2022. DOI: 10.3390/app122010226.
 
 ---
 
-**Tổng số tài liệu tham khảo: 28**
+**Tổng số tài liệu tham khảo: 32**
+
