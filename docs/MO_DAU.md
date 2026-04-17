@@ -34,15 +34,11 @@ Xây dựng một hệ thống web gợi ý du lịch thông minh cho thành ph�
    - Content-Based Filtering để gợi ý theo danh mục sở thích.
    - Kết hợp 3 phương pháp trên với chiến lược trọng số thích ứng (Adaptive Weighting).
 
-3. **Xây dựng tính năng AI Planner (Lập lộ trình thông minh):**
-   - Tự động lập lộ trình du lịch theo số ngày (1–5 ngày), phân bổ hoạt động tham quan và ẩm thực xen kẽ.
-   - Tối ưu hóa quãng đường di chuyển bằng thuật toán Nearest Neighbor (Greedy TSP).
-
-4. **Phát triển giao diện web hiện đại và trực quan:**
-   - Bản đồ tương tác với Leaflet.js hiển thị vị trí địa điểm.
-   - Hệ thống đánh giá, bình luận và yêu thích.
-   - Bản đồ nhiệt (Heatmap) hiển thị mật độ phổ biến địa điểm.
-   - Dashboard quản trị cho phép quản lý nội dung và chạy thuật toán.
+3. **Phát triển ứng dụng web thực nghiệm:**
+   - Xây dựng giao diện web trực quan hiển thị bản đồ tương tác với Leaflet.js.
+   - Tích hợp các thuật toán gợi ý đã xây dựng để phục vụ trực tiếp người dùng cuối cùng với hệ thống đánh giá, bình luận.
+   - Bổ sung tính năng tiện ích (AI Planner) giúp người dùng sắp xếp lộ trình tham quan cơ bản sau khi đã có danh sách các địa điểm được gợi ý (đây là tính năng phụ trợ thêm).
+   - Thiết kế Dashboard quản trị cho phép theo dõi ứng dụng.
 
 ## 3. Nội dung nghiên cứu
 
@@ -50,9 +46,9 @@ Nội dung nghiên cứu chính của đề tài bao gồm:
 - Khảo sát và phân tích các nền tảng lý thuyết về hệ thống gợi ý (Recommendation System) và cơ sở dữ liệu đồ thị (Graph Database).
 - Phân tích yêu cầu, thiết kế kiến trúc và mô hình dữ liệu cho hệ thống gợi ý du lịch thông minh tại thành phố Huế.
 - Xây dựng cơ sở dữ liệu đồ thị, ứng dụng Neo4j để lưu trữ, tổ chức dữ liệu các địa điểm du lịch và lịch sử tương tác của người dùng.
-- Cài đặt và tích hợp các thuật toán lõi của hệ thống: thuật toán lọc cộng tác (Collaborative Filtering), lọc theo nội dung (Content-Based Filtering), thuật toán lai (Hybrid Recommendation) và PageRank.
-- Xây dựng tính năng lập lộ trình tự động bằng thuật toán Nearest Neighbor.
-- Phát triển ứng dụng web, tích hợp các mô hình đã cài đặt, tiến hành kiểm thử và đánh giá hiệu năng của hệ thống và thuật toán.
+- Cài đặt và tích hợp các thuật toán lõi của hệ thống: thuật toán lọc cộng tác (Collaborative Filtering), lọc theo nội dung (Content-Based Filtering), thuật toán lai (Hybrid Recommendation) và PageRank. Đây là nhóm đối tượng trung tâm của khóa luận.
+- Phát triển ứng dụng web thực nghiệm, tích hợp các mô hình đã cài đặt, đồng thời bổ sung tính năng tiện ích hỗ trợ sắp xếp lộ trình cơ bản.
+- Tiến hành kiểm thử và đánh giá hiệu năng của hệ thống cũng như tính chính xác, đa dạng của các thuật toán gợi ý.
 
 ## 4. Đối tượng nghiên cứu
 
@@ -93,7 +89,7 @@ Nội dung nghiên cứu chính của đề tài bao gồm:
 
 - **Phạm vi không gian:** Các địa điểm du lịch thuộc địa bàn thành phố Huế và vùng phụ cận (bao gồm lăng tẩm, bãi biển, làng nghề truyền thống...).
 - **Phạm vi thời gian:** Thực hiện từ tháng 10/2025 đến tháng 02/2026.
-- Việc xây dựng hệ thống tập trung vào gợi ý địa điểm tham quan và lập lộ trình, **không bao gồm** các tính năng giao dịch như đặt phòng khách sạn, vé máy bay hay thanh toán trực tuyến.
+- Việc xây dựng hệ thống tập trung hoàn toàn vào các thuật toán AI gợi ý điểm tham quan, cùng một tính năng phụ trợ nhỏ là sắp xếp lộ trình. **Không bao gồm** các tính năng kinh doanh giao dịch như đặt phòng khách sạn, vé máy bay hay thanh toán trực tuyến.
 
 ## 7. Ý nghĩa khoa học và thực tiễn
 
@@ -113,13 +109,13 @@ Nội dung nghiên cứu chính của đề tài bao gồm:
 
 Ngoài phần Mở đầu, Kết luận và Tài liệu tham khảo, khóa luận được trình bày trong 4 chương và 2 phụ lục:
 
-**Chương 1 — Cơ sở Lý thuyết:** Tổng quan tình hình nghiên cứu trong và ngoài nước. Trình bày lý thuyết về Hệ thống Gợi ý và các phương pháp (Content-Based, Collaborative Filtering, Hybrid). Giới thiệu Graph Database, Neo4j, Cypher Query Language. Phân tích các thuật toán: Weighted PageRank, Collaborative Filtering (Jaccard Similarity), Nearest Neighbor. Trình bày các công nghệ nền tảng (Flask, Leaflet.js, OpenStreetMap).
+**Chương 1 — Cơ sở Lý thuyết:** Tổng quan tình hình nghiên cứu. Trình bày lý thuyết về Hệ thống Gợi ý và các phương pháp (Content-Based, Collaborative Filtering, Hybrid). Giới thiệu Graph Database, Neo4j, thuật toán đồ thị. Phân tích các thuật toán lõi hệ thống: Weighted PageRank, Collaborative Filtering (Jaccard Similarity) và cơ sở lý thuyết tổng quan cho tính năng lập lộ trình bổ sung. Trình bày các công nghệ nền tảng.
 
-**Chương 2 — Phân tích và Thiết kế Hệ thống:** Phân tích yêu cầu chức năng và phi chức năng. Biểu đồ Use Case. Thiết kế kiến trúc hệ thống 3 tầng (Presentation – Business – Data). Thiết kế lược đồ cơ sở dữ liệu đồ thị (Graph Schema). Thiết kế RESTful API. Wireframe giao diện. Flowchart thuật toán Hybrid Recommendation và AI Planner.
+**Chương 2 — Phân tích và Thiết kế Hệ thống:** Phân tích sơ bộ yêu cầu chức năng. Thiết kế kiến trúc hệ thống 3 tầng, lược đồ cơ sở dữ liệu đồ thị (Graph Schema) và RESTful API. Thiết kế giao diện và mô hình kết hợp các thuật toán Hybrid Recommendation.
 
-**Chương 3 — Triển khai Hệ thống:** Môi trường và công cụ phát triển. Cấu trúc tổ chức mã nguồn. Triển khai cơ sở dữ liệu đồ thị Neo4j. Triển khai chi tiết các thuật toán gợi ý lai (Weighted PageRank, Collaborative Filtering với Node Similarity, Content-Based Filtering, Adaptive Hybrid Weighting, Explainable AI). Triển khai ứng dụng web (Flask Blueprints, Leaflet.js). Triển khai module AI Planner (Nearest Neighbor).
+**Chương 3 — Triển khai Hệ thống:** Môi trường và công cụ phát triển. Triển khai cơ sở dữ liệu đồ thị Neo4j. Triển khai cấu trúc mã nguồn các thuật toán gợi ý trọng tâm (Weighted PageRank, Collaborative Filtering, Content-Based Filtering, Adaptive Hybrid). Triển khai ứng dụng web trực quan và bổ sung tính năng phụ trợ xếp lộ trình.
 
-**Chương 4 — Kết quả và Đánh giá:** Kết quả triển khai giao diện. Kết quả thử nghiệm từng thuật toán (PageRank, Collaborative Filtering, Content-Based, Hybrid, Diversity Pool). Kết quả AI Planner. Đánh giá hiệu năng hệ thống. Kết quả kiểm thử đơn vị (Unit Tests). So sánh với các hệ thống tương tự. Đánh giá chấp nhận người dùng (User Acceptance Testing).
+**Chương 4 — Kết quả và Đánh giá:** Kết quả triển khai giao diện. Kết quả thử nghiệm tập trung vào tính hiệu quả của từng thuật toán (PageRank, Collaborative Filtering, Content-Based, Hybrid, Diversity Pool). Đánh giá hiệu năng và phân tích mức độ chấp nhận của người dùng.
 
 **Phụ lục A — Hướng dẫn Cài đặt và Triển khai:** Chi tiết các bước cài đặt môi trường, cấu hình Neo4j, nạp dữ liệu và khởi chạy ứng dụng.
 

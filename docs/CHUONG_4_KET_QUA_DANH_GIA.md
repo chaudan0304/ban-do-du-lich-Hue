@@ -2,8 +2,6 @@
 
 Chương này trình bày kết quả triển khai và đánh giá toàn diện hệ thống Huế Travel AI, bao gồm: kết quả triển khai giao diện; kết quả thử nghiệm từng thuật toán; kết quả module AI Planner; đánh giá hiệu năng hệ thống; kết quả kiểm thử đơn vị; so sánh với các hệ thống tương tự; và đánh giá chấp nhận người dùng (User Acceptance Testing).
 
----
-
 ## 4.1. Kết quả Triển khai Hệ thống
 
 ### 4.1.1. Tổng quan quy mô hệ thống
@@ -63,8 +61,6 @@ Hệ thống triển khai 11 modal dialogs phục vụ các chức năng:
 | Modal Thêm/Sửa địa điểm | Form nhập thông tin địa điểm mới hoặc chỉnh sửa |
 | Modal Đánh giá chi tiết | Xem tất cả bình luận của user hoặc địa điểm |
 | Modal Thông báo | Hiển thị thông báo hệ thống |
-
----
 
 ## 4.2. Kết quả Thử nghiệm Thuật toán
 
@@ -197,8 +193,6 @@ User đã thích địa điểm thuộc danh mục "Tâm linh": Chùa Thiên M�
 
 **Nhận xét:** Top 3 vẫn là địa điểm cùng danh mục "Mua sắm" — đúng với sở thích đã biểu đạt của user. Từ vị trí 4 trở đi là các địa điểm nổi tiếng thuộc danh mục khác — giúp user khám phá đa dạng hơn mà không mất đi tính cá nhân hóa. Cải tiến này tăng số kết quả từ 3 lên 15, giải quyết hiệu quả vấn đề Filter Bubble.
 
----
-
 ## 4.3. Kết quả AI Planner
 
 ### 4.3.1. Thử nghiệm lập lộ trình 2 ngày
@@ -249,8 +243,6 @@ User đã thích địa điểm thuộc danh mục "Tâm linh": Chùa Thiên M�
 - Việc phân bổ xen kẽ (Sáng/Chiều tham quan, Trưa/Tối ăn uống) tạo lộ trình hợp lý, phù hợp thói quen du lịch thực tế.
 - Điểm neo (Anchor) mỗi ngày là địa điểm có điểm AI cao nhất còn lại, đảm bảo mỗi ngày đều bắt đầu từ nơi đáng tham quan nhất.
 
----
-
 ## 4.4. Đánh giá Hiệu năng Hệ thống
 
 ### 4.4.1. Thời gian phản hồi API
@@ -296,8 +288,6 @@ Thời gian phản hồi được đo trên máy local với Neo4j Community Edi
 | Disk I/O     | Thấp            | Trung bình          |
 
 **Nhận xét:** Hệ thống tiêu tốn tài nguyên ở mức hợp lý, phù hợp triển khai trên máy chủ cấu hình trung bình. Neo4j chiếm phần lớn RAM (~500–800 MB) do cơ chế caching đồ thị trong bộ nhớ.
-
----
 
 ## 4.5. Kết quả Kiểm thử Đơn vị (Unit Tests)
 
@@ -351,8 +341,6 @@ Hệ thống được kiểm thử tự động với 14 test cases chia thành 
 
 **Tỷ lệ thành công: 14/14 = 100%.**
 
----
-
 ## 4.6. So sánh với Các Hệ thống Tương tự
 
 ### 4.6.1. So sánh tính năng
@@ -391,8 +379,6 @@ Bảng 4.20 trình bày so sánh các tính năng chính của Huế Travel AI v
 2. **Cold Start chưa tối ưu:** Gợi ý cho user mới chủ yếu dựa PageRank toàn cục, chưa hỏi sở thích khi đăng ký.
 3. **Thiếu GPS real-time:** Chưa tích hợp định vị vị trí hiện tại để gợi ý địa điểm gần nhất.
 4. **Chưa có mobile app:** Hệ thống chỉ hoạt động trên web browser, chưa có ứng dụng native cho iOS/Android.
-
----
 
 ## 4.7. Đánh giá Người dùng (User Acceptance Testing)
 
@@ -460,9 +446,7 @@ Hệ thống được đánh giá bởi 10 người dùng thử nghiệm trong t
 
 **Nhận xét:** Hệ thống nhận được phản hồi tích cực từ người dùng thử nghiệm với điểm trung bình 4.2/5. Tốc độ phản hồi được đánh giá cao nhất (4.5) — chứng tỏ lợi thế hiệu năng của Graph Database. 90% người dùng (9/10) sẵn lòng sử dụng hệ thống khi du lịch Huế, và 0% chọn "Không" ở bất kỳ câu hỏi nào.
 
----
-
-## 4.8. Kết luận Chương
+## 4.8. Tiểu kết chương 4
 
 Chương này đã trình bày đầy đủ kết quả triển khai và đánh giá hệ thống Huế Travel AI. Tổng kết các kết quả chính:
 

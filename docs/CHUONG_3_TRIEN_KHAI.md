@@ -2,8 +2,6 @@
 
 Chương này trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI dựa trên bản thiết kế ở Chương 2, bao gồm: môi trường và công nghệ phát triển; cấu trúc tổ chức mã nguồn; triển khai cơ sở dữ liệu đồ thị; triển khai các thuật toán gợi ý lai (Hybrid Recommendation); và triển khai ứng dụng web cùng module AI Planner.
 
----
-
 ## 3.1. Môi trường và Công nghệ Phát triển
 
 ### 3.1.1. Môi trường phần cứng và phần mềm
@@ -50,8 +48,6 @@ Hệ thống sử dụng các thư viện mã nguồn mở phổ biến, đảm 
 | Leaflet.markercluster | Gom nhóm markers khi zoom out |
 | Leaflet.heat | Tạo bản đồ nhiệt (Heatmap) |
 | OpenStreetMap Tile | Lớp ảnh nền bản đồ [19] |
-
----
 
 ## 3.2. Cấu trúc Tổ chức Mã nguồn
 
@@ -120,8 +116,6 @@ ban_do_du_lich_hue/
 - **Template Components:** Giao diện HTML sử dụng Jinja2 `{% include %}` để tái sử dụng các thành phần modal, tránh lặp code.
 - **Data Access Layer:** Tầng `db/` đóng vai trò trung gian duy nhất giữa Flask routes và Neo4j, đảm bảo tất cả truy vấn Cypher đều đi qua một điểm kiểm soát.
 
----
-
 ## 3.3. Triển khai Cơ sở dữ liệu Đồ thị
 
 Khác với các hệ thống truyền thống sử dụng RDBMS (MySQL, PostgreSQL), đề tài sử dụng Neo4j để mô hình hóa dữ liệu dưới dạng đồ thị, tận dụng lợi thế trong truy vấn quan hệ phức tạp cho bài toán gợi ý (đã phân tích ở mục 1.3.3).
@@ -183,8 +177,6 @@ Kết hợp 2 nguồn tín hiệu để xây dựng mạng liên kết giữa c�
 | **Same Category** (Cùng danh mục) | `+0.8` | Nếu A và B cùng "Di tích" → weight += 0.8 |
 
 *Ví dụ:* Đại Nội và Lăng Tự Đức có 3 users chung và cùng danh mục "Di tích lịch sử" → `RELATED_TO.weight = (3 × 1.2) + 0.8 = 4.4`.
-
----
 
 ## 3.4. Triển khai Thuật toán Gợi ý (Core AI)
 
@@ -394,8 +386,6 @@ Mỗi địa điểm trong danh sách gợi ý đều kèm theo thông tin giả
 | `reason_type` | Phân loại lý do | `collab`, `content`, `pagerank`, `default` |
 | `reason_details` | Dữ liệu chi tiết cho biểu đồ UI | Điểm và % đóng góp từng thành phần, danh sách users tương đồng, biểu đồ tròn |
 
----
-
 ## 3.5. Triển khai Ứng dụng Web
 
 ### 3.5.1. Kiến trúc Backend (Flask Blueprints)
@@ -497,9 +487,7 @@ Sắp lịch **4 buổi mỗi ngày** theo mẫu xen kẽ:
 | **Chiều** | Tham quan | Địa điểm gần nhất từ quán ăn trưa |
 | **Tối** | Ẩm thực/Dạo phố | Nơi gần nhất từ điểm chiều (ưu tiên ăn, fallback dạo) |
 
----
-
-## 3.6. Kết luận Chương
+## 3.6. Tiểu kết chương 3
 
 Chương này đã trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI, từ thiết kế đến hiện thực hóa. Cụ thể:
 

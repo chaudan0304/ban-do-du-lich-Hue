@@ -2,8 +2,6 @@
 
 Chương này trình bày quá trình phân tích yêu cầu và thiết kế hệ thống Huế Travel AI, bao gồm: phân tích các yêu cầu chức năng và phi chức năng; mô hình hóa hệ thống bằng biểu đồ Use Case; thiết kế kiến trúc phân lớp; thiết kế lược đồ cơ sở dữ liệu đồ thị; thiết kế RESTful API; wireframe giao diện; và flowchart các thuật toán chính.
 
----
-
 ## 2.1. Phân tích Yêu cầu Hệ thống
 
 ### 2.1.1. Yêu cầu Chức năng
@@ -59,8 +57,6 @@ Ngoài các yêu cầu chức năng, hệ thống cần đảm bảo các yêu c
 | **Khả năng mở rộng** | Dữ liệu            | Hỗ trợ mở rộng lên 1.000+ địa điểm                     |
 | **Tương thích**      | Trình duyệt        | Tương thích Chrome, Firefox, Edge, Safari                |
 | **Giao diện**        | Responsive         | Hiển thị tốt trên cả desktop và thiết bị di động        |
-
----
 
 ## 2.2. Biểu đồ Use Case
 
@@ -143,8 +139,6 @@ Dưới đây là đặc tả chi tiết hai Use Case quan trọng nhất của 
 | **Luồng ngoại lệ** | Nếu số lượng ứng viên không đủ cho số ngày yêu cầu → Giảm số hoạt động mỗi ngày                                         |
 | **Hậu điều kiện**  | Lộ trình được hiển thị, người dùng có thể lưu hoặc thay thế địa điểm                                                    |
 
----
-
 ## 2.3. Thiết kế Kiến trúc Hệ thống
 
 ### 2.3.1. Mô hình kiến trúc tổng quan
@@ -223,8 +217,6 @@ User Request → Flask Routes → Business Logic → Neo4j Cypher Query →
     → Result Processing → JSON Response → JavaScript → UI Update
 ```
 
----
-
 ## 2.4. Thiết kế Cơ sở dữ liệu Đồ thị
 
 ### 2.4.1. Lược đồ dữ liệu (Graph Schema)
@@ -299,8 +291,6 @@ Lược đồ cơ sở dữ liệu đồ thị của hệ thống được thi�
 | Unique Constraint | `:Category` | `name` | Đảm bảo tên danh mục duy nhất |
 | Index | `:User` | `email` | Tăng tốc truy vấn theo email |
 | Index | `:Location` | `pagerankScore` | Tăng tốc sắp xếp theo độ phổ biến |
-
----
 
 ## 2.5. Thiết kế API
 
@@ -399,8 +389,6 @@ Tất cả API trả về response theo định dạng JSON thống nhất:
     "code": 400
 }
 ```
-
----
 
 ## 2.6. Thiết kế Giao diện
 
@@ -506,8 +494,6 @@ Giao diện sử dụng thiết kế Dark Mode hiện đại với bảng màu v
 | Body     | Inter | 14px       | 400    |
 | Small    | Inter | 12px       | 400    |
 | Button   | Inter | 14px       | 600    |
-
----
 
 ## 2.7. Thiết kế Thuật toán
 
@@ -645,9 +631,7 @@ Hình 2.8 mô tả luồng xử lý của thuật toán AI Planner — tự đ�
                     └──────────┘
 ```
 
----
-
-## 2.8. Kết luận Chương
+## 2.8. Tiểu kết chương 2
 
 Chương này đã trình bày đầy đủ quá trình phân tích và thiết kế hệ thống Huế Travel AI, bao gồm:
 
