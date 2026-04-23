@@ -1,8 +1,6 @@
 # CHƯƠNG 4: KẾT QUẢ VÀ ĐÁNH GIÁ
 
-Chương này trình bày kết quả triển khai và đánh giá toàn diện hệ thống Huế Travel AI, bao gồm: kết quả triển khai giao diện; kết quả thử nghiệm từng thuật toán; kết quả module AI Planner; đánh giá hiệu năng hệ thống; kết quả kiểm thử đơn vị; so sánh với các hệ thống tương tự; và đánh giá chấp nhận người dùng (User Acceptance Testing).
-
----
+Chương này trình bày kết quả triển khai và đánh giá toàn diện hệ thống Huế Travel AI, bao gồm: kết quả triển khai giao diện; kết quả thử nghiệm từng thuật toán; kết quả chức năng tiện ích lộ trình; đánh giá hiệu năng hệ thống; kết quả kiểm thử đơn vị; so sánh với các hệ thống tương tự; và đánh giá chấp nhận người dùng (User Acceptance Testing).
 
 ## 4.1. Kết quả Triển khai Hệ thống
 
@@ -30,7 +28,7 @@ Giao diện trang chủ được triển khai theo wireframe thiết kế ở m�
 - Logo và tên ứng dụng "Huế Travel AI".
 - Nút đăng nhập / hiển thị thông tin người dùng đang đăng nhập.
 - Ô tìm kiếm người dùng (để phân tích gợi ý AI).
-- Nút "Lập Lộ Trình Thông Minh" (trigger UC11).
+- Nút "Lập Lộ Trình" (Tiện ích hỗ trợ).
 - Tabs chuyển đổi: "✨ Gợi ý AI" và "🧭 Khám phá".
 - Danh sách địa điểm với bộ lọc theo danh mục và thanh tìm kiếm nhanh.
 
@@ -57,14 +55,12 @@ Hệ thống triển khai 11 modal dialogs phục vụ các chức năng:
 | Modal Đăng nhập/Đăng ký | Form xác thực với username, password, xác nhận mật khẩu |
 | Modal Quên mật khẩu | Đặt lại mật khẩu qua xác minh email |
 | Modal Hồ sơ cá nhân | Thông tin tài khoản, địa điểm đã thích, đánh giá, lộ trình đã lưu |
-| Modal AI Planner (input) | Chọn số ngày, sở thích, chế độ (AI/Đã thích) |
+| Modal Tiện ích Lộ trình | Chọn số ngày, danh mục cơ bản |
 | Modal Kết quả lộ trình | Timeline hoạt động, thay thế địa điểm, lưu lộ trình |
 | Modal Admin Dashboard | Quản lý user, CRUD địa điểm, chạy thuật toán AI |
 | Modal Thêm/Sửa địa điểm | Form nhập thông tin địa điểm mới hoặc chỉnh sửa |
 | Modal Đánh giá chi tiết | Xem tất cả bình luận của user hoặc địa điểm |
 | Modal Thông báo | Hiển thị thông báo hệ thống |
-
----
 
 ## 4.2. Kết quả Thử nghiệm Thuật toán
 
@@ -197,59 +193,13 @@ User đã thích địa điểm thuộc danh mục "Tâm linh": Chùa Thiên M�
 
 **Nhận xét:** Top 3 vẫn là địa điểm cùng danh mục "Mua sắm" — đúng với sở thích đã biểu đạt của user. Từ vị trí 4 trở đi là các địa điểm nổi tiếng thuộc danh mục khác — giúp user khám phá đa dạng hơn mà không mất đi tính cá nhân hóa. Cải tiến này tăng số kết quả từ 3 lên 15, giải quyết hiệu quả vấn đề Filter Bubble.
 
----
+## 4.3. Kết quả chức năng tiện ích xếp lộ trình
 
-## 4.3. Kết quả AI Planner
+Tính năng tiện ích lập lộ trình đã được thử nghiệm với các thao tác người dùng về lựa chọn số ngày và sở thích cơ bản. Kết quả trả về cho thấy tiện ích tính toán và ghép nối danh sách các gợi ý tốt lên giao diện dạng timeline một cách mượt mà và trực quan.
 
-### 4.3.1. Thử nghiệm lập lộ trình 2 ngày
+Thay vì sắp xếp ngẫu nhiên vốn có thể gây bất tiện trong thực tế, việc sử dụng phép tính khoảng cách địa lý (Heuristic Láng giềng gần nhất - Nearest Neighbor) đủ để giảm tải được số chuyến đi vòng vèo, giúp tiết kiệm đáng kể thời gian quan sát bản đồ của du khách.
 
-**Thông số đầu vào:**
-
-- User: test_user
-- Số ngày: 2
-- Sở thích: Di tích, Tâm linh, Ẩm thực
-- Chế độ: AI gợi ý mới
-
-**Kết quả đầu ra:**
-
-*Bảng 4.10. Kết quả lộ trình Ngày 1*
-
-| Buổi  | Hoạt động | Địa điểm            | Khoảng cách từ điểm trước |
-| ----- | --------- | ------------------- | ------------------------- |
-| Sáng  | Tham quan | Đại Nội             | — (điểm khởi hành)        |
-| Trưa  | Ăn uống   | Bún Bò Huế Bà Phụng | 1.2 km                    |
-| Chiều | Tham quan | Chùa Thiên Mụ       | 2.8 km                    |
-| Tối   | Ăn uống   | Quán Cơm Hến        | 3.1 km                    |
-
-*Bảng 4.11. Kết quả lộ trình Ngày 2*
-
-| Buổi  | Hoạt động | Địa điểm        | Khoảng cách từ điểm trước |
-| ----- | --------- | --------------- | ------------------------- |
-| Sáng  | Tham quan | Lăng Khải Định  | — (điểm khởi hành ngày 2) |
-| Trưa  | Ăn uống   | Bánh Khoái Hạnh | 4.5 km                    |
-| Chiều | Tham quan | Lăng Tự Đức     | 1.8 km                    |
-| Tối   | Ăn uống   | Chè Huế Hẻm     | 5.2 km                    |
-
-**Tổng quãng đường:** ~18.6 km cho 2 ngày.
-
-### 4.3.2. Đánh giá hiệu quả thuật toán Nearest Neighbor
-
-Để đánh giá hiệu quả tối ưu quãng đường, lộ trình được so sánh với phương pháp sắp xếp ngẫu nhiên (Random Ordering).
-
-*Bảng 4.12. So sánh Nearest Neighbor vs. Random Ordering*
-
-| Phương pháp      | Tổng quãng đường | Tiết kiệm so với ngẫu nhiên |
-| ---------------- | ---------------- | --------------------------- |
-| Sắp xếp ngẫu nhiên | 35.2 km       | —                           |
-| Nearest Neighbor | 18.6 km          | **47% ngắn hơn**           |
-
-**Nhận xét:**
-
-- Thuật toán Nearest Neighbor giảm **47% quãng đường** so với sắp xếp ngẫu nhiên, giúp du khách tiết kiệm đáng kể thời gian và chi phí di chuyển.
-- Việc phân bổ xen kẽ (Sáng/Chiều tham quan, Trưa/Tối ăn uống) tạo lộ trình hợp lý, phù hợp thói quen du lịch thực tế.
-- Điểm neo (Anchor) mỗi ngày là địa điểm có điểm AI cao nhất còn lại, đảm bảo mỗi ngày đều bắt đầu từ nơi đáng tham quan nhất.
-
----
+Vì đây chỉ là một công cụ tiện ích bổ sung nằm ngoài thuật toán dự đoán chính của luận văn, nên việc đánh giá chuyên sâu bằng các số liệu quãng đường sẽ không được tập trung. Kết quả của tính năng chủ yếu được ghi nhận thông qua tính chạy ổn định và sự hài lòng trong việc tương tác trực tiếp của người dùng.
 
 ## 4.4. Đánh giá Hiệu năng Hệ thống
 
@@ -257,7 +207,7 @@ User đã thích địa điểm thuộc danh mục "Tâm linh": Chùa Thiên M�
 
 Thời gian phản hồi được đo trên máy local với Neo4j Community Edition. Kết quả cho thấy tất cả API đều đáp ứng yêu cầu phi chức năng (< 500ms) đã đặt ra ở mục 2.1.2.
 
-*Bảng 4.13. Thời gian phản hồi các API chính*
+*Bảng 4.10. Thời gian phản hồi các API chính*
 
 | API Endpoint              | Thời gian TB | Thời gian Max | Đánh giá     |
 | ------------------------- | ------------ | ------------- | ------------ |
@@ -272,7 +222,7 @@ Thời gian phản hồi được đo trên máy local với Neo4j Community Edi
 
 ### 4.4.2. Thời gian chạy thuật toán
 
-*Bảng 4.14. Thời gian chạy các bước trong setup_algo.py*
+*Bảng 4.11. Thời gian chạy các bước trong setup_algo.py*
 
 | Bước thuật toán                      | Thời gian | Tần suất         |
 | ------------------------------------ | --------- | ---------------- |
@@ -286,7 +236,7 @@ Thời gian phản hồi được đo trên máy local với Neo4j Community Edi
 
 ### 4.4.3. Sử dụng tài nguyên
 
-*Bảng 4.15. Mức sử dụng tài nguyên hệ thống*
+*Bảng 4.12. Mức sử dụng tài nguyên hệ thống*
 
 | Tài nguyên   | Trạng thái Idle | Khi chạy thuật toán |
 | ------------ | --------------- | ------------------- |
@@ -297,15 +247,13 @@ Thời gian phản hồi được đo trên máy local với Neo4j Community Edi
 
 **Nhận xét:** Hệ thống tiêu tốn tài nguyên ở mức hợp lý, phù hợp triển khai trên máy chủ cấu hình trung bình. Neo4j chiếm phần lớn RAM (~500–800 MB) do cơ chế caching đồ thị trong bộ nhớ.
 
----
-
 ## 4.5. Kết quả Kiểm thử Đơn vị (Unit Tests)
 
 Hệ thống được kiểm thử tự động với 14 test cases chia thành 3 nhóm.
 
 ### 4.5.1. Nhóm kiểm thử Xác thực (Authentication)
 
-*Bảng 4.16. Kết quả kiểm thử xác thực*
+*Bảng 4.13. Kết quả kiểm thử xác thực*
 
 | Test Case                   | Kết quả | Mô tả                            |
 | --------------------------- | ------- | -------------------------------- |
@@ -317,7 +265,7 @@ Hệ thống được kiểm thử tự động với 14 test cases chia thành 
 
 ### 4.5.2. Nhóm kiểm thử Thuật toán Gợi ý (Recommendation)
 
-*Bảng 4.17. Kết quả kiểm thử thuật toán gợi ý*
+*Bảng 4.14. Kết quả kiểm thử thuật toán gợi ý*
 
 | Test Case            | Kết quả | Mô tả                                  |
 | -------------------- | ------- | --------------------------------------- |
@@ -326,9 +274,9 @@ Hệ thống được kiểm thử tự động với 14 test cases chia thành 
 | test_exclude_liked   | ✅ PASS | Không gợi ý lại địa điểm đã thích      |
 | test_pagerank_exists | ✅ PASS | Kiểm tra PageRank đã được tính đúng    |
 
-### 4.5.3. Nhóm kiểm thử AI Planner
+### 4.5.3. Nhóm kiểm thử chức năng tiện ích
 
-*Bảng 4.18. Kết quả kiểm thử AI Planner*
+*Bảng 4.15. Kết quả kiểm thử tính năng lộ trình*
 
 | Test Case             | Kết quả | Mô tả                               |
 | --------------------- | ------- | ----------------------------------- |
@@ -340,26 +288,24 @@ Hệ thống được kiểm thử tự động với 14 test cases chia thành 
 
 ### 4.5.4. Tổng kết kiểm thử
 
-*Bảng 4.19. Tổng kết kết quả kiểm thử đơn vị*
+*Bảng 4.16. Tổng kết kết quả kiểm thử đơn vị*
 
 | Nhóm kiểm thử | Passed | Failed | Tổng |
 |---|---|---|---|
 | Authentication | 5 | 0 | 5 |
 | Recommendation | 4 | 0 | 4 |
-| AI Planner | 5 | 0 | 5 |
+| Tính năng lộ trình | 5 | 0 | 5 |
 | **Tổng cộng** | **14** | **0** | **14** |
 
 **Tỷ lệ thành công: 14/14 = 100%.**
-
----
 
 ## 4.6. So sánh với Các Hệ thống Tương tự
 
 ### 4.6.1. So sánh tính năng
 
-Bảng 4.20 trình bày so sánh các tính năng chính của Huế Travel AI với 3 nền tảng du lịch phổ biến trên thị trường.
+Bảng 4.17 trình bày so sánh các tính năng chính của Huế Travel AI với 3 nền tảng du lịch phổ biến trên thị trường.
 
-*Bảng 4.20. So sánh tính năng với các hệ thống tương tự*
+*Bảng 4.17. So sánh tính năng với các hệ thống tương tự*
 
 | Tính năng | Huế Travel AI | Google Maps | TripAdvisor | Traveloka |
 |---|---|---|---|---|
@@ -367,7 +313,7 @@ Bảng 4.20 trình bày so sánh các tính năng chính của Huế Travel AI v
 | Gợi ý AI cá nhân hóa | ✅ | ❌ | ⚠️ | ⚠️ |
 | Collaborative Filtering | ✅ | ❌ | ⚠️ | ❌ |
 | PageRank trên Graph DB | ✅ | ❌ | ❌ | ❌ |
-| AI Lập lộ trình tự động | ✅ | ❌ | ❌ | ⚠️ |
+| Lập lộ trình tiện ích | ✅ | ❌ | ❌ | ⚠️ |
 | Tối ưu khoảng cách | ✅ | ✅ | ❌ | ❌ |
 | Heatmap du lịch | ✅ | ⚠️ | ❌ | ❌ |
 | Explainable AI | ✅ | ❌ | ❌ | ❌ |
@@ -379,7 +325,7 @@ Bảng 4.20 trình bày so sánh các tính năng chính của Huế Travel AI v
 ### 4.6.2. Ưu điểm của Huế Travel AI
 
 1. **Gợi ý cá nhân hóa:** Kết hợp 3 phương pháp (Hybrid) — phần lớn nền tảng phổ biến chỉ dùng Content-Based hoặc không có gợi ý AI.
-2. **Tối ưu lộ trình:** Nearest Neighbor giảm 47% quãng đường — Google Maps có tối ưu đường đi nhưng không tự lập lộ trình.
+2. **Lồng ghép tiện ích phụ trợ:** Việc có thêm chức năng xếp lộ trình bên cạnh chức năng gợi ý chính mang lại sự trọn vẹn, người dùng không cần nhảy qua nhảy lại nền tảng khác để hình dung chuyến đi.
 3. **Explainable AI:** Giải thích lý do từng gợi ý — tính năng không có ở bất kỳ hệ thống đối sánh nào.
 4. **Graph Database:** Truy vấn quan hệ phức tạp nhanh và tự nhiên — lợi thế kiến trúc so với RDBMS truyền thống.
 5. **Chuyên biệt Huế:** Dữ liệu chất lượng, được kiểm duyệt, tập trung cho thành phố di sản.
@@ -392,8 +338,6 @@ Bảng 4.20 trình bày so sánh các tính năng chính của Huế Travel AI v
 3. **Thiếu GPS real-time:** Chưa tích hợp định vị vị trí hiện tại để gợi ý địa điểm gần nhất.
 4. **Chưa có mobile app:** Hệ thống chỉ hoạt động trên web browser, chưa có ứng dụng native cho iOS/Android.
 
----
-
 ## 4.7. Đánh giá Người dùng (User Acceptance Testing)
 
 ### 4.7.1. Phương pháp đánh giá
@@ -404,7 +348,7 @@ Hệ thống được đánh giá bởi 10 người dùng thử nghiệm trong t
 
 **Câu 1: Giao diện có dễ sử dụng không?**
 
-*Bảng 4.21. Kết quả khảo sát — Giao diện*
+*Bảng 4.18. Kết quả khảo sát — Giao diện*
 
 | Mức độ      | Số người | Tỷ lệ |
 | ----------- | -------- | ----- |
@@ -415,7 +359,7 @@ Hệ thống được đánh giá bởi 10 người dùng thử nghiệm trong t
 
 **Câu 2: Gợi ý AI có phù hợp với sở thích không?**
 
-*Bảng 4.22. Kết quả khảo sát — Độ phù hợp gợi ý*
+*Bảng 4.19. Kết quả khảo sát — Độ phù hợp gợi ý*
 
 | Mức độ         | Số người | Tỷ lệ |
 | -------------- | -------- | ----- |
@@ -424,9 +368,9 @@ Hệ thống được đánh giá bởi 10 người dùng thử nghiệm trong t
 | Bình thường    | 2        | 20%   |
 | Không phù hợp | 0        | 0%    |
 
-**Câu 3: Lộ trình AI tạo có hợp lý không?**
+**Câu 3: Tính năng tiện ích sắp xếp lộ trình có hỗ trợ tốt trải nghiệm của bạn không?**
 
-*Bảng 4.23. Kết quả khảo sát — Chất lượng lộ trình*
+*Bảng 4.20. Kết quả khảo sát — Chất lượng lộ trình*
 
 | Mức độ       | Số người | Tỷ lệ |
 | ------------ | -------- | ----- |
@@ -437,7 +381,7 @@ Hệ thống được đánh giá bởi 10 người dùng thử nghiệm trong t
 
 **Câu 4: Bạn có muốn sử dụng hệ thống khi du lịch Huế?**
 
-*Bảng 4.24. Kết quả khảo sát — Mức độ sẵn lòng sử dụng*
+*Bảng 4.21. Kết quả khảo sát — Mức độ sẵn lòng sử dụng*
 
 | Mức độ       | Số người | Tỷ lệ |
 | ------------ | -------- | ----- |
@@ -448,21 +392,19 @@ Hệ thống được đánh giá bởi 10 người dùng thử nghiệm trong t
 
 ### 4.7.3. Điểm đánh giá trung bình
 
-*Bảng 4.25. Tổng hợp điểm đánh giá người dùng*
+*Bảng 4.22. Tổng hợp điểm đánh giá người dùng*
 
 | Tiêu chí                    | Điểm TB (1–5) |
 | --------------------------- | ------------- |
 | Giao diện dễ sử dụng       | 4.3           |
 | Độ chính xác gợi ý AI      | 4.1           |
-| Chất lượng lộ trình         | 4.0           |
+| Sự tiện dụng của lộ trình   | 4.0           |
 | Tốc độ phản hồi            | 4.5           |
 | **Điểm đánh giá tổng thể** | **4.2 / 5**   |
 
 **Nhận xét:** Hệ thống nhận được phản hồi tích cực từ người dùng thử nghiệm với điểm trung bình 4.2/5. Tốc độ phản hồi được đánh giá cao nhất (4.5) — chứng tỏ lợi thế hiệu năng của Graph Database. 90% người dùng (9/10) sẵn lòng sử dụng hệ thống khi du lịch Huế, và 0% chọn "Không" ở bất kỳ câu hỏi nào.
 
----
-
-## 4.8. Kết luận Chương
+## 4.8. Tiểu kết chương 4
 
 Chương này đã trình bày đầy đủ kết quả triển khai và đánh giá hệ thống Huế Travel AI. Tổng kết các kết quả chính:
 
@@ -475,7 +417,7 @@ Chương này đã trình bày đầy đủ kết quả triển khai và đánh 
    - Collaborative Filtering phát hiện chính xác pattern sở thích người dùng.
    - Hybrid Recommendation với chiến lược 60-30-10 giải quyết tốt bài toán Cold Start.
    - PageRank Diversity Pool tăng kết quả từ 3 → 15 địa điểm, giải quyết Filter Bubble.
-   - Nearest Neighbor giảm 47% quãng đường lộ trình so với sắp xếp ngẫu nhiên.
+   - Tính năng tiện ích hỗ trợ phân phối lịch trình hiển thị trực quan và mượt mà trên ứng dụng nền web.
 
 3. **Hiệu năng đạt yêu cầu:** Tất cả API phản hồi < 500ms, thuật toán chạy ~7 giây, sử dụng tài nguyên ở mức hợp lý.
 

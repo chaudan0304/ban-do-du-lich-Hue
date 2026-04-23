@@ -8,14 +8,13 @@
 | Bảng 1.3 | Các nhóm thuật toán trong Neo4j GDS | |
 | Bảng 1.4 | Trọng số tương tác trong đề tài | |
 | Bảng 1.5 | Các tham số PageRank và ý nghĩa | |
-| Bảng 1.6 | Phân tích độ phức tạp thuật toán Nearest Neighbor | |
-| Bảng 1.7 | So sánh Flask và Django | |
+| Bảng 1.6 | So sánh Flask và Django | |
 | **Chương 2** | | |
 | Bảng 2.1 | Danh sách yêu cầu chức năng — Nhóm Người dùng | |
 | Bảng 2.2 | Danh sách yêu cầu chức năng — Nhóm Quản trị viên | |
 | Bảng 2.3 | Yêu cầu phi chức năng của hệ thống | |
 | Bảng 2.4 | Đặc tả Use Case UC10 — Xem gợi ý AI | |
-| Bảng 2.5 | Đặc tả Use Case UC11 — Tạo lộ trình AI | |
+| Bảng 2.5 | Đặc tả Use Case UC11 — Sắp xếp lộ trình | |
 | Bảng 2.6 | Thiết kế các node trong lược đồ đồ thị | |
 | Bảng 2.7 | Thiết kế các relationship trong lược đồ đồ thị | |
 | Bảng 2.8 | Ràng buộc và chỉ mục cơ sở dữ liệu | |
@@ -41,35 +40,31 @@
 | Bảng 3.13 | Các Flask Blueprints | |
 | Bảng 3.14 | Các module Data Access Layer | |
 | Bảng 3.15 | Các module JavaScript | |
-| Bảng 3.16 | Chiến lược phân bổ hoạt động theo buổi | |
 | **Chương 4** | | |
 | Bảng 4.1 | Thông số quy mô hệ thống | |
 | Bảng 4.2 | Danh sách modal dialogs | |
 | Bảng 4.3 | Bộ dữ liệu thử nghiệm | |
-| Bảng 4.4 | Kết quả xếp hạng Top 10 theo Weighted PageRank | |
-| Bảng 4.5 | Kết quả gợi ý Collaborative Filtering | |
+| Bảng 4.4 | Kết quả xếp hạng Top 10 địa điểm theo Weighted PageRank | |
+| Bảng 4.5 | Kết quả gợi ý Collaborative Filtering cho User A | |
 | Bảng 4.6 | Kết quả gợi ý Content-Based Filtering | |
-| Bảng 4.7 | Kết quả Hybrid Recommendation — Cold Start | |
-| Bảng 4.8 | So sánh trước và sau cải tiến Diversity Pool | |
-| Bảng 4.9 | Chi tiết kết quả gợi ý sau Diversity Pool | |
-| Bảng 4.10 | Kết quả lộ trình Ngày 1 | |
-| Bảng 4.11 | Kết quả lộ trình Ngày 2 | |
-| Bảng 4.12 | So sánh Nearest Neighbor vs. Random Ordering | |
-| Bảng 4.13 | Thời gian phản hồi các API chính | |
-| Bảng 4.14 | Thời gian chạy các bước trong setup_algo.py | |
-| Bảng 4.15 | Mức sử dụng tài nguyên hệ thống | |
-| Bảng 4.16 | Kết quả kiểm thử xác thực | |
-| Bảng 4.17 | Kết quả kiểm thử thuật toán gợi ý | |
-| Bảng 4.18 | Kết quả kiểm thử AI Planner | |
-| Bảng 4.19 | Tổng kết kết quả kiểm thử đơn vị | |
-| Bảng 4.20 | So sánh tính năng với các hệ thống tương tự | |
-| Bảng 4.21 | Kết quả khảo sát — Giao diện | |
-| Bảng 4.22 | Kết quả khảo sát — Độ phù hợp gợi ý | |
-| Bảng 4.23 | Kết quả khảo sát — Chất lượng lộ trình | |
-| Bảng 4.24 | Kết quả khảo sát — Mức độ sẵn lòng sử dụng | |
-| Bảng 4.25 | Tổng hợp điểm đánh giá người dùng | |
+| Bảng 4.7 | Kết quả Hybrid Recommendation — trường hợp Cold Start | |
+| Bảng 4.8 | So sánh kết quả trước và sau cải tiến Diversity Pool | |
+| Bảng 4.9 | Chi tiết kết quả gợi ý cho user "admin" sau Diversity Pool | |
+| Bảng 4.10 | Thời gian phản hồi các API chính | |
+| Bảng 4.11 | Thời gian chạy các bước trong setup_algo.py | |
+| Bảng 4.12 | Mức sử dụng tài nguyên hệ thống | |
+| Bảng 4.13 | Kết quả kiểm thử xác thực | |
+| Bảng 4.14 | Kết quả kiểm thử thuật toán gợi ý | |
+| Bảng 4.15 | Kết quả kiểm thử tính năng lộ trình | |
+| Bảng 4.16 | Tổng kết kết quả kiểm thử đơn vị | |
+| Bảng 4.17 | So sánh tính năng với các hệ thống tương tự | |
+| Bảng 4.18 | Kết quả khảo sát — Giao diện | |
+| Bảng 4.19 | Kết quả khảo sát — Độ phù hợp gợi ý | |
+| Bảng 4.20 | Kết quả khảo sát — Chất lượng lộ trình | |
+| Bảng 4.21 | Kết quả khảo sát — Mức độ sẵn lòng sử dụng | |
+| Bảng 4.22 | Tổng hợp điểm đánh giá người dùng | |
 
-**Tổng số: 62 bảng**
+**Tổng số: 57 bảng**
 
 ---
 
@@ -83,10 +78,9 @@
 | Hình 2.3 | Luồng dữ liệu tổng quát trong hệ thống | |
 | Hình 2.4 | Sơ đồ quan hệ tổng thể của lược đồ đồ thị | |
 | Hình 2.5 | Wireframe trang chủ | |
-| Hình 2.6 | Wireframe modal AI Planner | |
+| Hình 2.6 | Wireframe modal tạo lộ trình | |
 | Hình 2.7 | Flowchart thuật toán Hybrid Recommendation | |
-| Hình 2.8 | Flowchart thuật toán AI Planner | |
 | **Chương 3** | | |
 | Hình 3.1 | Cấu trúc thư mục dự án | |
 
-**Tổng số: 9 hình**
+**Tổng số: 8 hình**

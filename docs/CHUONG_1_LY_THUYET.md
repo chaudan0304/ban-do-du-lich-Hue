@@ -2,8 +2,6 @@
 
 Chương này trình bày các cơ sở lý thuyết liên quan đến đề tài, bao gồm: tổng quan tình hình nghiên cứu trong và ngoài nước về hệ thống gợi ý du lịch; lý thuyết về Hệ thống Gợi ý (Recommendation System) và các phương pháp chính; cơ sở dữ liệu đồ thị (Graph Database) với hệ quản trị Neo4j; các thuật toán trọng tâm của đề tài gồm PageRank, Collaborative Filtering, Content-Based Filtering và Nearest Neighbor; cùng các công nghệ nền tảng được sử dụng để xây dựng hệ thống.
 
----
-
 ## 1.1. Tổng quan Tình hình Nghiên cứu
 
 ### 1.1.1. Tình hình nghiên cứu ngoài nước
@@ -47,8 +45,6 @@ Từ phân tích tổng quan trên, có thể rút ra các nhận xét:
 3. **Phương pháp lai (Hybrid)** được đánh giá hiệu quả hơn từng phương pháp đơn lẻ [11], [12], đặc biệt trong việc giải quyết vấn đề khởi động lạnh (Cold Start).
 
 Trên cơ sở đó, đề tài lựa chọn hướng tiếp cận **kết hợp Graph Database (Neo4j) với Hybrid Recommendation (PageRank + Collaborative Filtering + Content-Based Filtering)** để xây dựng hệ thống gợi ý du lịch thông minh cho thành phố Huế.
-
----
 
 ## 1.2. Hệ thống Gợi ý (Recommendation System)
 
@@ -127,8 +123,6 @@ Theo Burke (2002) [11], có nhiều chiến lược kết hợp:
 
 **Giải pháp — Diversity Pool:** Bổ sung một nhóm ứng viên đa dạng (Diversity Pool) — gồm các địa điểm phổ biến nhất không phân biệt danh mục — vào tập ứng viên gợi ý. Các ứng viên này được xếp hạng bởi thuật toán PageRank và xuất hiện ở cuối danh sách gợi ý (sau các gợi ý cá nhân hóa), đảm bảo cân bằng giữa tính cá nhân hóa và tính đa dạng.
 
----
-
 ## 1.3. Cơ sở dữ liệu Đồ thị (Graph Database)
 
 ### 1.3.1. Định nghĩa và Mô hình dữ liệu
@@ -177,8 +171,6 @@ Graph Database phù hợp với bài toán gợi ý du lịch vì:
 3. **Cấu trúc mạng lưới:** Dữ liệu du lịch tự nhiên có dạng mạng lưới — nhiều người dùng tương tác với nhiều địa điểm, tạo thành đồ thị dày đặc. Nhiều nghiên cứu gần đây đã chứng minh tính hiệu quả của graph database trong xây dựng hệ thống gợi ý [31] và đặc biệt trong lĩnh vực du lịch [32].
 4. **Tích hợp thuật toán đồ thị:** Các hệ quản trị Graph Database như Neo4j cung cấp sẵn thư viện thuật toán (Graph Data Science) hỗ trợ PageRank, Node Similarity mà không cần triển khai từ đầu [16].
 
----
-
 ## 1.4. Neo4j và Ngôn ngữ Truy vấn Cypher
 
 ### 1.4.1. Giới thiệu Neo4j
@@ -226,8 +218,6 @@ Graph Database phù hợp với bài toán gợi ý du lịch vì:
 | **Path Finding** (Tìm đường) | Dijkstra, A* | Tối ưu lộ trình (tiềm năng) |
 
 Trong đề tài, hai thuật toán được sử dụng chính là **PageRank** (nhóm Centrality) và **Node Similarity** (nhóm Similarity).
-
----
 
 ## 1.5. Thuật toán PageRank
 
@@ -282,8 +272,6 @@ Như vậy, một địa điểm nhận được đánh giá 5 sao sẽ có tr�
 | **dampingFactor (d)** | 0.85 – 0.90 | Xác suất tiếp tục duyệt. Giá trị cao ưu tiên tín hiệu cục bộ (local), giá trị thấp ưu tiên toàn cục (global). |
 | **maxIterations** | 10 – 20 | Số vòng lặp tối đa. Đủ lớn để đảm bảo hội tụ trên đồ thị nhỏ-vừa. |
 | **tolerance** | 0.0001 | Ngưỡng hội tụ — thuật toán dừng khi sai số giữa 2 vòng lặp nhỏ hơn giá trị này. |
-
----
 
 ## 1.6. Thuật toán Lọc Cộng tác (Collaborative Filtering)
 
@@ -352,8 +340,6 @@ User hiện tại ──[:INTERACTED]──→ Location chung ←──[:INTERAC
 
 Với cách tiếp cận này, việc tìm kiếm gợi ý trở thành bài toán duyệt đường đi trên đồ thị (3 bước nhảy), tận dụng lợi thế tốc độ truy vấn quan hệ của Neo4j.
 
----
-
 ## 1.7. Thuật toán Lọc theo Nội dung (Content-Based Filtering)
 
 ### 1.7.1. Nguyên lý Hoạt động
@@ -378,50 +364,11 @@ Trong hệ thống gợi ý du lịch Huế, Content-Based Filtering dựa trên
 
 Sự kết hợp cả hai đặc trưng giúp hệ thống vừa gợi ý dựa trên nội dung (Category) vừa dựa trên hành vi tập thể (Co-occurrence), tăng độ chính xác và đa dạng.
 
----
+## 1.8. Cơ sở lý thuyết cho tính năng hỗ trợ lập lộ trình
 
-## 1.8. Thuật toán Láng giềng Gần nhất (Nearest Neighbor)
+Mặc dù trọng tâm của hệ thống là khả năng cá nhân hoá và gợi ý các địa điểm chất lượng, nhằm hoàn thiện tính khả dụng của ứng dụng (usability), hệ thống có tích hợp thêm một tính năng phụ trợ là sắp xếp lộ trình cơ bản. 
 
-### 1.8.1. Định nghĩa
-
-**Nearest Neighbor** là thuật toán tìm kiếm và sắp xếp dựa trên khoảng cách. Trong bài toán lập lộ trình du lịch — tương tự bài toán **Người bán hàng (TSP — Traveling Salesman Problem)** — thuật toán Nearest Neighbor là phương pháp heuristic (xấp xỉ) đơn giản và hiệu quả để tìm đường đi ngắn qua tất cả các điểm [26].
-
-### 1.8.2. Thuật toán Greedy Nearest Neighbor
-
-Ý tưởng của thuật toán Greedy Nearest Neighbor là **tham lam cục bộ**: tại mỗi bước, luôn chọn điểm chưa đi **gần nhất** với vị trí hiện tại.
-
-**Mô tả thuật toán:**
-
-```
-Đầu vào: Tập hợp N địa điểm với tọa độ (lat, lng)
-Đầu ra:  Lộ trình thăm tất cả các điểm
-
-1. Chọn điểm xuất phát (địa điểm có điểm AI cao nhất)
-2. Đánh dấu điểm xuất phát là "đã thăm"
-3. WHILE (còn điểm chưa thăm):
-     a. Từ vị trí hiện tại, tìm điểm CHƯA THĂM có khoảng cách nhỏ nhất
-     b. Di chuyển đến điểm đó
-     c. Đánh dấu "đã thăm"
-4. Trả về lộ trình theo thứ tự đã thăm
-```
-
-### 1.8.3. Độ phức tạp và Đánh giá
-
-*Bảng 1.6. Phân tích độ phức tạp thuật toán Nearest Neighbor*
-
-| Chỉ số | Giá trị | Giải thích |
-|---|---|---|
-| **Độ phức tạp thời gian** | O(n²) | Với mỗi điểm (n), duyệt tất cả các điểm còn lại (n-1) để tìm gần nhất |
-| **Độ phức tạp không gian** | O(n) | Lưu trữ trạng thái "đã thăm" của n điểm |
-| **Tỷ lệ xấp xỉ tối ưu** | 75% – 95% | So với lời giải tối ưu toàn cục (cho bài toán kích thước nhỏ, n < 100) |
-
-**Lý do chọn thuật toán này:** Với số lượng địa điểm du lịch trong phạm vi thành phố Huế (~50-100 địa điểm), thuật toán Nearest Neighbor cho kết quả gần tối ưu trong thời gian tính toán rất nhanh (< 1ms). Các thuật toán tối ưu hơn (Branch and Bound, Dynamic Programming) có độ phức tạp cao hơn nhiều và không cần thiết cho bài toán quy mô nhỏ này.
-
-### 1.8.4. Ứng dụng trong AI Planner
-
-Trong module AI Planner của đề tài, thuật toán Nearest Neighbor được kết hợp với chiến lược **phân bổ xen kẽ** (Interleaving): mỗi ngày du lịch được chia thành 4 buổi, xen kẽ giữa tham quan (Sáng, Chiều) và ẩm thực (Trưa, Tối). Tại mỗi buổi, thuật toán Nearest Neighbor chọn địa điểm phù hợp gần nhất từ vị trí kết thúc buổi trước, đảm bảo quãng đường di chuyển được tối ưu.
-
----
+Để giải quyết bài toán sắp xếp vị trí địa lý cho danh sách các điểm đã được người dùng chọn (tương tự bài toán Heuristic kinh điển Travelling Salesman Problem - TSP), hệ thống sử dụng thuật toán xấp xỉ Láng giềng gần nhất (Greedy Nearest Neighbor). Nguyên lý tham lam cục bộ — luôn ưu tiên di chuyển đến địa điểm chưa đi có khoảng cách không gian ngắn nhất so với điểm hiện tại — giúp tính toán trả về kết quả cấu trúc chuyến đi trong thời gian vô cùng ngắn, đáp ứng được tính nhanh nhẹn của một công cụ hỗ trợ trải nghiệm. Phần triển khai này chỉ được xem như tiện ích mở rộng bổ sung để tăng tính hữu dụng, chứ không phải trung tâm nghiên cứu thuật toán của hệ thống.
 
 ## 1.9. Các Công nghệ Nền tảng
 
@@ -437,7 +384,7 @@ Trong module AI Planner của đề tài, thuật toán Nearest Neighbor đượ
 - **Blueprints:** Cơ chế tổ chức code theo module, phù hợp cho ứng dụng quy mô vừa-lớn.
 - **WSGI Compliant:** Tuân thủ chuẩn WSGI, dễ dàng triển khai trên nhiều máy chủ (Gunicorn, uWSGI, Nginx).
 
-*Bảng 1.7. So sánh Flask và Django*
+*Bảng 1.6. So sánh Flask và Django*
 
 | Tiêu chí | Flask | Django |
 |---|---|---|
@@ -481,9 +428,7 @@ Trong module AI Planner của đề tài, thuật toán Nearest Neighbor đượ
 | **Pandas** | Xử lý dữ liệu dạng bảng trước khi nạp vào đồ thị |
 | **openpyxl** | Đọc/ghi file Excel để import/export dữ liệu địa điểm |
 
----
-
-## 1.10. Kết luận Chương
+## 1.10. Tiểu kết chương 1
 
 Chương này đã trình bày đầy đủ các cơ sở lý thuyết và công nghệ nền tảng phục vụ cho việc xây dựng hệ thống gợi ý du lịch thông minh. Cụ thể:
 

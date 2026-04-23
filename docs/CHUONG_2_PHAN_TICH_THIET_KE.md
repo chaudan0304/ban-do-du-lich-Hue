@@ -2,8 +2,6 @@
 
 Chương này trình bày quá trình phân tích yêu cầu và thiết kế hệ thống Huế Travel AI, bao gồm: phân tích các yêu cầu chức năng và phi chức năng; mô hình hóa hệ thống bằng biểu đồ Use Case; thiết kế kiến trúc phân lớp; thiết kế lược đồ cơ sở dữ liệu đồ thị; thiết kế RESTful API; wireframe giao diện; và flowchart các thuật toán chính.
 
----
-
 ## 2.1. Phân tích Yêu cầu Hệ thống
 
 ### 2.1.1. Yêu cầu Chức năng
@@ -26,7 +24,7 @@ Dựa trên phân tích bài toán đặt ra ở phần Mở đầu, hệ thốn
 | 8    | UC08  | Like địa điểm         | Thêm/bỏ địa điểm vào danh sách yêu thích                 |
 | 9    | UC09  | Viết đánh giá         | Chấm điểm (1–5 sao) và viết bình luận cho địa điểm       |
 | 10   | UC10  | Xem gợi ý AI          | Xem danh sách địa điểm được hệ thống gợi ý cá nhân hóa   |
-| 11   | UC11  | Tạo lộ trình AI       | Tự động lập kế hoạch du lịch theo số ngày và sở thích     |
+| 11   | UC11  | Sắp xếp lộ trình      | Tiện ích tự động xếp lịch trình tham quan cơ bản theo ngày|
 | 12   | UC12  | Lưu lộ trình          | Lưu lộ trình đã tạo để xem lại sau                        |
 | 13   | UC13  | Xem lịch sử           | Xem danh sách địa điểm đã thích, đánh giá và lộ trình đã lưu |
 
@@ -59,8 +57,6 @@ Ngoài các yêu cầu chức năng, hệ thống cần đảm bảo các yêu c
 | **Khả năng mở rộng** | Dữ liệu            | Hỗ trợ mở rộng lên 1.000+ địa điểm                     |
 | **Tương thích**      | Trình duyệt        | Tương thích Chrome, Firefox, Edge, Safari                |
 | **Giao diện**        | Responsive         | Hiển thị tốt trên cả desktop và thiết bị di động        |
-
----
 
 ## 2.2. Biểu đồ Use Case
 
@@ -128,22 +124,20 @@ Dưới đây là đặc tả chi tiết hai Use Case quan trọng nhất của 
 | **Luồng ngoại lệ** | Nếu hệ thống gặp lỗi kết nối Neo4j → Hiển thị thông báo lỗi                                             |
 | **Hậu điều kiện**  | Danh sách gợi ý được hiển thị thành công, markers tương ứng được đánh dấu trên bản đồ                     |
 
-**b) Use Case UC11 — Tạo lộ trình AI:**
+**b) Use Case UC11 — Sắp xếp lộ trình:**
 
-*Bảng 2.5. Đặc tả Use Case UC11 — Tạo lộ trình AI*
+*Bảng 2.5. Đặc tả Use Case UC11 — Sắp xếp lộ trình*
 
 | Thành phần         | Mô tả                                                                                                                   |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| **Tên UC**         | UC11 — Tạo lộ trình AI                                                                                                  |
+| **Tên UC**         | UC11 — Sắp xếp lộ trình                                                                                                 |
 | **Tác nhân**       | User (đã đăng nhập)                                                                                                      |
-| **Mô tả**          | Người dùng tạo lộ trình du lịch tự động dựa trên AI                                                                     |
+| **Mô tả**          | Người dùng sử dụng tiện ích sắp xếp lộ trình du lịch cơ bản từ danh sách địa điểm có sẵn                                |
 | **Tiền điều kiện** | Người dùng đã đăng nhập thành công                                                                                       |
-| **Luồng chính**    | 1. User chọn "Lập Lộ Trình Thông Minh". 2. Modal hiển thị các tùy chọn. 3. User chọn số ngày (1–5). 4. User chọn sở thích (danh mục). 5. User chọn chế độ (AI gợi ý mới / Từ danh sách đã thích). 6. Nhấn "Tạo lộ trình". 7. Hệ thống chạy thuật toán Nearest Neighbor. 8. Hiển thị lộ trình dạng timeline kèm bản đồ. |
-| **Luồng phụ**      | Nếu chọn "Từ đã thích" nhưng chưa like địa điểm nào → Hiển thị thông báo yêu cầu like trước                             |
-| **Luồng ngoại lệ** | Nếu số lượng ứng viên không đủ cho số ngày yêu cầu → Giảm số hoạt động mỗi ngày                                         |
-| **Hậu điều kiện**  | Lộ trình được hiển thị, người dùng có thể lưu hoặc thay thế địa điểm                                                    |
-
----
+| **Luồng chính**    | 1. User chọn "Lập Lộ Trình". 2. Nhập thông số số ngày và sở thích. 3. Hệ thống sắp xếp các điểm thành lịch trình dựa trên cự ly gần nhất. 4. Hiển thị lộ trình dạng timeline trên giao diện. |
+| **Luồng phụ**      | Nếu chọn "Từ danh sách đã thích" nhưng chưa có dữ liệu → Yêu cầu tương tác thêm.                                       |
+| **Luồng ngoại lệ** | Nếu số lượng ứng viên không đủ → Giảm số hoạt động mỗi ngày hoặc hiển thị thông báo.                                     |
+| **Hậu điều kiện**  | Lộ trình tiện ích được hiển thị, người dùng xem hoặc lưu trữ.                                                           |
 
 ## 2.3. Thiết kế Kiến trúc Hệ thống
 
@@ -179,7 +173,7 @@ Hệ thống được thiết kế theo mô hình **kiến trúc 3 tầng (3-Lay
 │  └─────────────────────────────────────────────────────────┘   │
 │                              │                                  │
 │  ┌───────────────────────────┴───────────────────────────┐     │
-│  │    Thuật toán AI (PageRank, CF, CB, Planner)          │     │
+│  │    Thuật toán phân tích (PageRank, CF, Content-Based) │     │
 │  └───────────────────────────────────────────────────────┘     │
 └─────────────────────────────────────────────────────────────────┘
                               │ Cypher Query
@@ -208,7 +202,7 @@ Chịu trách nhiệm hiển thị giao diện và tương tác với người d
 
 **b) Tầng Nghiệp vụ (Business Layer):**
 
-Chịu trách nhiệm xử lý logic nghiệp vụ của hệ thống. Flask framework đóng vai trò trung tâm, tiếp nhận HTTP requests và điều phối đến các Blueprint tương ứng: `auth.py` (xác thực), `api.py` (API cốt lõi), `admin.py` (quản trị), `main.py` (serve trang chủ). Các thuật toán AI (PageRank, Collaborative Filtering, Content-Based Filtering, Nearest Neighbor) được triển khai tại tầng này.
+Chịu trách nhiệm xử lý logic nghiệp vụ của hệ thống. Flask framework đóng vai trò trung tâm, tiếp nhận HTTP requests và điều phối đến các Blueprint tương ứng. Các thuật toán AI trọng tâm (PageRank, Collaborative Filtering, Content-Based Filtering) được triển khai tại tầng này, bên cạnh tiện ích nhỏ hỗ trợ sắp xếp lộ trình cơ bản.
 
 **c) Tầng Dữ liệu (Data Layer):**
 
@@ -222,8 +216,6 @@ Chịu trách nhiệm lưu trữ và truy vấn dữ liệu. Neo4j Graph Databas
 User Request → Flask Routes → Business Logic → Neo4j Cypher Query →
     → Result Processing → JSON Response → JavaScript → UI Update
 ```
-
----
 
 ## 2.4. Thiết kế Cơ sở dữ liệu Đồ thị
 
@@ -299,8 +291,6 @@ Lược đồ cơ sở dữ liệu đồ thị của hệ thống được thi�
 | Unique Constraint | `:Category` | `name` | Đảm bảo tên danh mục duy nhất |
 | Index | `:User` | `email` | Tăng tốc truy vấn theo email |
 | Index | `:Location` | `pagerankScore` | Tăng tốc sắp xếp theo độ phổ biến |
-
----
 
 ## 2.5. Thiết kế API
 
@@ -399,8 +389,6 @@ Tất cả API trả về response theo định dạng JSON thống nhất:
     "code": 400
 }
 ```
-
----
 
 ## 2.6. Thiết kế Giao diện
 
@@ -507,8 +495,6 @@ Giao diện sử dụng thiết kế Dark Mode hiện đại với bảng màu v
 | Small    | Inter | 12px       | 400    |
 | Button   | Inter | 14px       | 600    |
 
----
-
 ## 2.7. Thiết kế Thuật toán
 
 ### 2.7.1. Flowchart thuật toán Hybrid Recommendation
@@ -577,77 +563,11 @@ Hình 2.7 mô tả luồng xử lý tổng quát của thuật toán Hybrid Reco
                        └──────────┘
 ```
 
-### 2.7.2. Flowchart thuật toán AI Planner
+### 2.7.2. Luồng xử lý tiện ích sắp xếp lộ trình (Tính năng bổ trợ)
 
-Hình 2.8 mô tả luồng xử lý của thuật toán AI Planner — tự động lập lộ trình du lịch theo ngày.
+Để bổ sung thêm sự tiện dụng cho hệ thống gợi ý, tiện ích sắp xếp lộ trình đóng vai trò là một module phụ trợ phía sau. Dựa trên danh sách các địa điểm đã được thuật toán AI chọn lọc (hoặc do người dùng đã thích), tiện ích này sẽ sử dụng một cơ chế tham lam (Greedy) đơn giản dựa theo cự ly gần nhất để xâu chuỗi chúng thành một lịch trình cơ bản theo ngày. Do đây không phải đối tượng nghiên cứu cốt lõi về thuật toán học máy, chi tiết tính toán không được khắc họa sâu trong lược đồ thuật toán thiết kế chung.
 
-*Hình 2.8. Flowchart thuật toán AI Planner*
-
-```
-                    ┌─────────────┐
-                    │   START     │
-                    └──────┬──────┘
-                           │
-                           ▼
-              ┌────────────────────────┐
-              │ Input: days, preferences│
-              │        use_liked        │
-              └───────────┬────────────┘
-                          │
-                          ▼
-              ┌────────────────────────┐
-              │ Lấy danh sách ứng viên │
-              │ (Query Neo4j)          │
-              └───────────┬────────────┘
-                          │
-                          ▼
-              ┌────────────────────────┐
-              │ Phân loại:             │
-              │ - pool_sightseeing     │
-              │ - pool_food            │
-              └───────────┬────────────┘
-                          │
-                          ▼
-              ┌────────────────────────┐
-              │    FOR day = 1 to N    │◄────┐
-              └───────────┬────────────┘     │
-                          │                  │
-      ┌───────────────────┼───────────────┐  │
-      ▼                   ▼               ▼  │
-┌──────────┐       ┌──────────┐    ┌──────────┐
-│  SÁNG    │       │  TRƯA    │    │  CHIỀU   │
-│ Nearest  │       │ Nearest  │    │ Nearest  │
-│ Neighbor │       │ Neighbor │    │ Neighbor │
-│ (sight)  │       │ (food)   │    │ (sight)  │
-└────┬─────┘       └────┬─────┘    └────┬─────┘
-     │                  │               │
-     └──────────────────┴───────────────┘
-                        │
-                        ▼
-              ┌────────────────────────┐
-              │  TỐI: Nearest Neighbor │
-              │  (food/dạo phố)        │
-              └───────────┬────────────┘
-                          │
-                          ▼
-              ┌────────────────────────┐
-              │        day++           │────┘
-              └───────────┬────────────┘
-                          │
-                          ▼
-              ┌────────────────────────┐
-              │    Trả về itinerary    │
-              └───────────┬────────────┘
-                          │
-                          ▼
-                    ┌──────────┐
-                    │   END    │
-                    └──────────┘
-```
-
----
-
-## 2.8. Kết luận Chương
+## 2.8. Tiểu kết chương 2
 
 Chương này đã trình bày đầy đủ quá trình phân tích và thiết kế hệ thống Huế Travel AI, bao gồm:
 
@@ -661,8 +581,8 @@ Chương này đã trình bày đầy đủ quá trình phân tích và thiết 
 
 5. **RESTful API:** Thiết kế 32 endpoints theo chuẩn REST, phân nhóm 5 nhóm chức năng (Xác thực, Địa điểm, AI, Lộ trình, Quản trị) với định dạng response thống nhất.
 
-6. **Giao diện:** Wireframe trang chủ và modal AI Planner, bảng màu Dark Mode và Typography thống nhất với font Inter.
+6. **Giao diện:** Wireframe trang chủ và modal tạo lộ trình, bảng màu Dark Mode và Typography.
 
-7. **Flowchart thuật toán:** Mô tả luồng xử lý Hybrid Recommendation (4 bước) và AI Planner (Nearest Neighbor + Interleaving).
+7. **Flowchart thuật toán:** Mô tả luồng xử lý chi tiết cho hệ thống thuật toán Hybrid Recommendation. Lược bỏ chi tiết xử lý của các tiện ích phụ trợ (như tính năng lộ trình) để tập trung vào logic lõi.
 
 Các thiết kế trên tạo nền tảng vững chắc cho việc triển khai hệ thống ở Chương 3.

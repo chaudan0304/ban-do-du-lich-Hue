@@ -49,8 +49,6 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
 | Điểm đánh giá người dùng        | 4.2 / 5           |
 | Tỷ lệ sẵn lòng sử dụng         | 90%               |
 
----
-
 ## 2. Đóng góp của Khóa luận
 
 ### 2.1. Đóng góp khoa học
@@ -69,8 +67,6 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
 2. **Mã nguồn mở** trên GitHub ([github.com/chaudan0304/ban-do-du-lich-Hue](https://github.com/chaudan0304/ban-do-du-lich-Hue)), cộng đồng có thể sử dụng, học tập và phát triển.
 3. Tài liệu khóa luận và hướng dẫn cài đặt chi tiết, phục vụ làm tài liệu tham khảo.
 
----
-
 ## 3. Hạn chế
 
 Bên cạnh các kết quả đạt được, khóa luận vẫn tồn tại một số hạn chế cần được thừa nhận:
@@ -84,8 +80,6 @@ Bên cạnh các kết quả đạt được, khóa luận vẫn tồn tại m�
 4. **Chưa có ứng dụng di động:** Hệ thống hoạt động trên web browser, chưa có ứng dụng native cho iOS/Android — hạn chế trải nghiệm người dùng khi di chuyển.
 
 5. **Phân tích cảm xúc đơn giản:** Module Sentiment Analysis sử dụng phương pháp keyword-based, chưa áp dụng mô hình NLP nâng cao cho tiếng Việt.
-
----
 
 ## 4. Hướng Phát triển
 
@@ -136,15 +130,11 @@ Bên cạnh các kết quả đạt được, khóa luận vẫn tồn tại m�
    - Cung cấp API cho đối tác du lịch (tour operator, khách sạn).
    - Dashboard phân tích xu hướng du lịch cho cơ quan quản lý.
 
----
-
 ## 5. Lời kết
 
 Khóa luận đã hoàn thành mục tiêu đề ra: xây dựng thành công hệ thống gợi ý du lịch thông minh cho thành phố Huế trên nền tảng Graph Database và Hybrid Recommendation. Hệ thống không chỉ giải quyết bài toán thực tế "Đi đâu, chơi gì?" tại Huế mà còn đóng góp mô hình kỹ thuật có thể tái sử dụng cho các bài toán gợi ý tương tự.
 
 Với nền tảng kiến trúc mở, mã nguồn mở và hướng phát triển rõ ràng, hệ thống Huế Travel AI có tiềm năng phát triển thành một nền tảng du lịch thông minh quy mô lớn, góp phần vào sự chuyển đổi số của ngành du lịch Thừa Thiên Huế nói riêng và Việt Nam nói chung.
-
----
 
 **Huế, tháng 02 năm 2026**
 
