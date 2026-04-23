@@ -112,8 +112,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.2. Use Case UC02 — Đăng nhập
 
-![Biểu đồ Use Case UC01 - Đăng ký tài khoản](images/UC01_Đang_ky_tai_khoan.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC01 - Đăng ký tài khoản</i></p>
+![Biểu đồ Use Case UC02 - Đăng nhập](images/UC02_Đang_nhap.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC02 - Đăng nhập</i></p>
 
 
 *Bảng 2.5. Đặc tả Use Case UC02 — Đăng nhập*
@@ -132,8 +132,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.3. Use Case UC03 — Đăng xuất
 
-![Biểu đồ Use Case UC02 - Đăng nhập](images/UC02_Đang_nhap.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC02 - Đăng nhập</i></p>
+![Biểu đồ Use Case UC03 - Đăng xuất](images/UC03_Đang_xuat.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC03 - Đăng xuất</i></p>
 
 
 *Bảng 2.6. Đặc tả Use Case UC03 — Đăng xuất*
@@ -152,8 +152,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.4. Use Case UC04 — Quên mật khẩu
 
-![Biểu đồ Use Case UC03 - Đăng xuất](images/UC03_Đang_xuat.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC03 - Đăng xuất</i></p>
+![Biểu đồ Use Case UC04 - Quên mật khẩu](images/UC04_Quen_mat_khau.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC04 - Quên mật khẩu</i></p>
 
 
 *Bảng 2.7. Đặc tả Use Case UC04 — Quên mật khẩu*
@@ -172,8 +172,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.5. Use Case UC05 — Cập nhật hồ sơ
 
-![Biểu đồ Use Case UC04 - Quên mật khẩu](images/UC04_Quen_mat_khau.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC04 - Quên mật khẩu</i></p>
+![Biểu đồ Use Case UC05 - Cập nhật hồ sơ](images/UC05_Cap_nhat_ho_so.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC05 - Cập nhật hồ sơ</i></p>
 
 
 *Bảng 2.8. Đặc tả Use Case UC05 — Cập nhật hồ sơ*
@@ -192,8 +192,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.6. Use Case UC06 — Xem bản đồ
 
-![Biểu đồ Use Case UC05 - Cập nhật hồ sơ](images/UC05_Cap_nhat_ho_so.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC05 - Cập nhật hồ sơ</i></p>
+![Biểu đồ Use Case UC06 - Xem bản đồ](images/UC06_Xem_ban_đo.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC06 - Xem bản đồ</i></p>
 
 
 *Bảng 2.9. Đặc tả Use Case UC06 — Xem bản đồ*
@@ -212,8 +212,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.7. Use Case UC07 — Xem chi tiết địa điểm
 
-![Biểu đồ Use Case UC06 - Xem bản đồ](images/UC06_Xem_ban_đo.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC06 - Xem bản đồ</i></p>
+![Biểu đồ Use Case UC07 - Xem chi tiết địa điểm](images/UC07_Xem_chi_tiet_đia_điem.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC07 - Xem chi tiết địa điểm</i></p>
 
 
 *Bảng 2.10. Đặc tả Use Case UC07 — Xem chi tiết địa điểm*
@@ -232,8 +232,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.8. Use Case UC08 — Like địa điểm
 
-![Biểu đồ Use Case UC07 - Xem chi tiết địa điểm](images/UC07_Xem_chi_tiet_đia_điem.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC07 - Xem chi tiết địa điểm</i></p>
+![Biểu đồ Use Case UC08 - Like địa điểm](images/UC08_Like_đia_điem.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC08 - Like địa điểm</i></p>
 
 
 *Bảng 2.11. Đặc tả Use Case UC08 — Like địa điểm*
@@ -252,8 +252,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.9. Use Case UC09 — Viết đánh giá
 
-![Biểu đồ Use Case UC08 - Like địa điểm](images/UC08_Like_đia_điem.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC08 - Like địa điểm</i></p>
+![Biểu đồ Use Case UC09 - Viết đánh giá](images/UC09_Viet_đanh_gia.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC09 - Viết đánh giá</i></p>
 
 
 *Bảng 2.12. Đặc tả Use Case UC09 — Viết đánh giá*
@@ -272,8 +272,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.10. Use Case UC10 — Xem gợi ý AI
 
-![Biểu đồ Use Case UC09 - Viết đánh giá](images/UC09_Viet_đanh_gia.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC09 - Viết đánh giá</i></p>
+![Biểu đồ Use Case UC10 - Xem gợi ý AI](images/UC10_Xem_goi_y_AI.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC10 - Xem gợi ý AI</i></p>
 
 
 *Bảng 2.13. Đặc tả Use Case UC10 — Xem gợi ý AI*
@@ -292,8 +292,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.11. Use Case UC11 — Sắp xếp lộ trình
 
-![Biểu đồ Use Case UC10 - Xem gợi ý AI](images/UC10_Xem_goi_y_AI.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC10 - Xem gợi ý AI</i></p>
+![Biểu đồ Use Case UC11 - Sắp xếp lộ trình](images/UC11_Sap_xep_lo_trinh.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC11 - Sắp xếp lộ trình</i></p>
 
 
 *Bảng 2.14. Đặc tả Use Case UC11 — Sắp xếp lộ trình*
@@ -312,8 +312,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.12. Use Case UC12 — Lưu lộ trình
 
-![Biểu đồ Use Case UC11 - Sắp xếp lộ trình](images/UC11_Sap_xep_lo_trinh.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC11 - Sắp xếp lộ trình</i></p>
+![Biểu đồ Use Case UC12 - Lưu lộ trình](images/UC12_Luu_lo_trinh.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC12 - Lưu lộ trình</i></p>
 
 
 *Bảng 2.15. Đặc tả Use Case UC12 — Lưu lộ trình*
@@ -332,8 +332,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.13. Use Case UC13 — Xem lịch sử
 
-![Biểu đồ Use Case UC12 - Lưu lộ trình](images/UC12_Luu_lo_trinh.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC12 - Lưu lộ trình</i></p>
+![Biểu đồ Use Case UC13 - Xem lịch sử](images/UC13_Xem_lich_su.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC13 - Xem lịch sử</i></p>
 
 
 *Bảng 2.16. Đặc tả Use Case UC13 — Xem lịch sử*
@@ -352,8 +352,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.14. Use Case UC14 — Quản lý người dùng
 
-![Biểu đồ Use Case UC13 - Xem lịch sử](images/UC13_Xem_lich_su.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC13 - Xem lịch sử</i></p>
+![Biểu đồ Use Case UC14 - Quản lý người dùng](images/UC14_Quan_ly_nguoi_dung.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC14 - Quản lý người dùng</i></p>
 
 
 *Bảng 2.17. Đặc tả Use Case UC14 — Quản lý người dùng*
@@ -372,8 +372,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.15. Use Case UC15 — Thêm địa điểm
 
-![Biểu đồ Use Case UC14 - Quản lý người dùng](images/UC14_Quan_ly_nguoi_dung.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC14 - Quản lý người dùng</i></p>
+![Biểu đồ Use Case UC15 - Thêm địa điểm](images/UC15_Them_đia_điem.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC15 - Thêm địa điểm</i></p>
 
 
 *Bảng 2.18. Đặc tả Use Case UC15 — Thêm địa điểm*
@@ -392,8 +392,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.16. Use Case UC16 — Sửa địa điểm
 
-![Biểu đồ Use Case UC15 - Thêm địa điểm](images/UC15_Them_đia_điem.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC15 - Thêm địa điểm</i></p>
+![Biểu đồ Use Case UC16 - Sửa địa điểm](images/UC16_Sua_đia_điem.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC16 - Sửa địa điểm</i></p>
 
 
 *Bảng 2.19. Đặc tả Use Case UC16 — Sửa địa điểm*
@@ -412,8 +412,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.17. Use Case UC17 — Xóa địa điểm
 
-![Biểu đồ Use Case UC16 - Sửa địa điểm](images/UC16_Sua_đia_điem.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC16 - Sửa địa điểm</i></p>
+![Biểu đồ Use Case UC17 - Xóa địa điểm](images/UC17_Xoa_đia_điem.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC17 - Xóa địa điểm</i></p>
 
 
 *Bảng 2.20. Đặc tả Use Case UC17 — Xóa địa điểm*
@@ -432,8 +432,8 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.18. Use Case UC18 — Chạy thuật toán AI
 
-![Biểu đồ Use Case UC17 - Xóa địa điểm](images/UC17_Xoa_đia_điem.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC17 - Xóa địa điểm</i></p>
+![Biểu đồ Use Case UC18 - Chạy thuật toán AI](images/UC18_Chay_thuat_toan_AI.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC18 - Chạy thuật toán AI</i></p>
 
 
 *Bảng 2.21. Đặc tả Use Case UC18 — Chạy thuật toán AI*
@@ -477,33 +477,6 @@ Modal lập lộ trình thông minh cho phép người dùng tùy chỉnh các t
 
 *Hình 2.6. Wireframe modal AI Planner*
 
-```
-┌─────────────────────────────────────────┐
-│  ✨ Lập Lộ Trình Thông Minh       [X]  │
-├─────────────────────────────────────────┤
-│                                         │
-│  📅 Số ngày:                            │
-│  ┌───────────────────────────────────┐  │
-│  │  [1] [2] [3] [4] [5]  ngày        │  │
-│  └───────────────────────────────────┘  │
-│                                         │
-│  🎯 Sở thích (chọn nhiều):              │
-│  ┌───────────────────────────────────┐  │
-│  │ [x] Di tích    [ ] Ẩm thực       │  │
-│  │ [x] Tâm linh   [ ] Thiên nhiên   │  │
-│  │ [ ] Bãi biển   [ ] Mua sắm       │  │
-│  └───────────────────────────────────┘  │
-│                                         │
-│  🤖 Chế độ:                             │
-│  ○ AI gợi ý mới                        │
-│  ● Từ danh sách đã thích               │
-│                                         │
-│  ┌───────────────────────────────────┐  │
-│  │     🚀 TẠO LỘ TRÌNH              │  │
-│  └───────────────────────────────────┘  │
-│                                         │
-└─────────────────────────────────────────┘
-```
 
 ### 2.8.3. Bảng màu và Typography
 
@@ -542,65 +515,6 @@ Hình 2.7 mô tả luồng xử lý tổng quát của thuật toán Hybrid Reco
 
 *Hình 2.7. Flowchart thuật toán Hybrid Recommendation*
 
-```
-                    ┌─────────────┐
-                    │   START     │
-                    └──────┬──────┘
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │ Nhận input  │
-                    │ username    │
-                    └──────┬──────┘
-                           │
-              ┌────────────┼────────────┐
-              │            │            │
-              ▼            ▼            ▼
-    ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-    │ Bước 1:      │ │ Bước 2:      │ │ Bước 2.5:    │
-    │ Collaborative│ │Content-Based │ │  PageRank    │
-    │  Filtering   │ │  Filtering   │ │Diversity Pool│
-    │  (collab)    │ │  (content)   │ │ (Top 20)     │
-    └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
-           │                │                │
-           │ weight ×3      │ weight ×1      │ weight ×10
-           │                │                │
-           └────────────────┼────────────────┘
-                            │
-                            ▼
-                  ┌───────────────────┐
-                  │ Bước 3: GỘP TẤT  │
-                  │ CẢ ứng viên      │
-                  │ collab + content  │
-                  │ + pagerank        │
-                  └────────┬──────────┘
-                           │
-                           ▼
-                    ┌─────────────────┐
-                    │ Bước 4: Tính    │
-                    │ Final Score     │
-                    │ = CF + CB + PR  │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │  Sắp xếp theo   │
-                    │  Final Score    │
-                    │  giảm dần       │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │   Trả về        │
-                    │   Top 12        │
-                    │ kèm lý do       │
-                    └────────┬────────┘
-                             │
-                             ▼
-                       ┌──────────┐
-                       │   END    │
-                       └──────────┘
-```
 
 ### 2.9.2. Luồng xử lý tiện ích sắp xếp lộ trình (Tính năng bổ trợ)
 
