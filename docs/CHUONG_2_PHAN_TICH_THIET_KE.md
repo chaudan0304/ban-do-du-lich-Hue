@@ -2,9 +2,24 @@
 
 Chương này trình bày quá trình phân tích yêu cầu và thiết kế hệ thống Huế Travel AI, bao gồm: phân tích các yêu cầu chức năng và phi chức năng; mô hình hóa hệ thống bằng biểu đồ Use Case; thiết kế kiến trúc phân lớp; thiết kế lược đồ cơ sở dữ liệu đồ thị; thiết kế RESTful API; wireframe giao diện; và flowchart các thuật toán chính.
 
-## 2.1. Phân tích Yêu cầu Hệ thống
 
-### 2.1.1. Yêu cầu Chức năng
+## 2.1. Giới thiệu về phân tích và thiết kế hệ thống
+
+Phát triển một hệ thống phần mềm là một quá trình phức tạp, đòi hỏi sự phối hợp chặt chẽ giữa nhiều giai đoạn khác nhau. Trong thực tế, hầu hết các mô hình phát triển phần mềm hiện đại đều chia quy trình thành các giai đoạn cơ bản:
+
+(1) Khảo sát và xác định yêu cầu - thu thập và làm rõ yêu cầu từ phía người dùng và các bên liên quan;
+
+(2) Phân tích hệ thống - làm rõ bài toán cần giải quyết, xác định hệ thống cần làm gì, ai sẽ sử dụng và các quy trình nghiệp vụ nào cần được hỗ trợ;
+
+(3) Thiết kế hệ thống - xác định cách thức đáp ứng các yêu cầu, bao gồm thiết kế kiến trúc tổng thể, cơ sở dữ liệu, giao diện và các module chức năng;
+
+## 2.2. Phân tích và thiết kế hệ thống Huế Travel AI
+
+Trong đề tài này, em lựa chọn hướng tiếp cận phân tích và thiết kế hướng đối tượng (Object-Oriented Analysis and Design - OOAD) sử dụng ngôn ngữ mô hình hóa thống nhất UML (Unified Modeling Language). Đây là phương pháp phổ biến và được chuẩn hóa rộng rãi trong ngành công nghệ phần mềm, cho phép mô tả hệ thống một cách trực quan và nhất quán. Lựa chọn này đặc biệt phù hợp bởi hệ thống được xây dựng là một ứng dụng web phục vụ tương tác giữa người dùng và quản trị viên — hai tác nhân có vai trò và hành vi rõ ràng, dễ mô hình hóa bằng đối tượng.
+
+## 2.3. Phân tích Yêu cầu Hệ thống
+
+### 2.3.1. Yêu cầu Chức năng
 
 Dựa trên phân tích bài toán đặt ra ở phần Mở đầu, hệ thống Huế Travel AI cần đáp ứng hai nhóm yêu cầu chức năng chính: nhóm chức năng dành cho Người dùng (User) và nhóm chức năng dành cho Quản trị viên (Admin).
 
@@ -40,7 +55,7 @@ Dựa trên phân tích bài toán đặt ra ở phần Mở đầu, hệ thốn
 | 17   | UC17  | Xóa địa điểm       | Loại bỏ địa điểm khỏi hệ thống                |
 | 18   | UC18  | Chạy thuật toán AI | Cập nhật lại điểm PageRank và các chỉ số AI   |
 
-### 2.1.2. Yêu cầu Phi chức năng
+### 2.3.2. Yêu cầu Phi chức năng
 
 Ngoài các yêu cầu chức năng, hệ thống cần đảm bảo các yêu cầu phi chức năng được trình bày trong Bảng 2.3.
 
@@ -58,9 +73,9 @@ Ngoài các yêu cầu chức năng, hệ thống cần đảm bảo các yêu c
 | **Tương thích**      | Trình duyệt        | Tương thích Chrome, Firefox, Edge, Safari                |
 | **Giao diện**        | Responsive         | Hiển thị tốt trên cả desktop và thiết bị di động        |
 
-## 2.2. Biểu đồ Use Case
+## 2.4. Biểu đồ Use Case
 
-### 2.2.1. Biểu đồ Use Case tổng quan
+### 2.4.1. Biểu đồ Use Case tổng quan
 
 Hình 2.1 mô tả biểu đồ Use Case tổng quan của hệ thống với 2 tác nhân chính: Người dùng (User) và Quản trị viên (Admin).
 
@@ -105,11 +120,11 @@ Hình 2.1 mô tả biểu đồ Use Case tổng quan của hệ thống với 2 
 
 *Ghi chú:* Admin kế thừa toàn bộ chức năng của User, đồng thời có thêm các chức năng quản trị (UC14–UC18).
 
-### 2.2.2. Đặc tả Use Case chi tiết
+### 2.4.2. Đặc tả Use Case chi tiết
 
 Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thống, chia theo nhóm chức năng. Mỗi Use Case được mô tả bằng biểu đồ Use Case riêng lẻ và bảng đặc tả chi tiết.
 
-#### 2.2.2.1. Use Case UC01 — Đăng ký tài khoản
+#### 2.4.2.1. Use Case UC01 — Đăng ký tài khoản
 
 ```
                         ┌────────────────────────┐
@@ -135,7 +150,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User chọn "Đăng ký" trên giao diện. 2. Hệ thống hiển thị form đăng ký (username, email, password, xác nhận password). 3. User nhập thông tin và nhấn "Đăng ký". 4. Hệ thống kiểm tra: username chưa tồn tại, email hợp lệ, password ≥ 6 ký tự, hai mật khẩu khớp. 5. Mã hóa password bằng PBKDF2-SHA256 (Werkzeug). 6. Tạo node `:User` trong Neo4j. 7. Hiển thị thông báo đăng ký thành công. |
 | **Luồng ngoại lệ** | • Nếu username đã tồn tại → Hiển thị lỗi "Tên đăng nhập đã được sử dụng". • Nếu username < 3 ký tự → Hiển thị lỗi "Tên tài khoản phải có ít nhất 3 ký tự". • Nếu password < 6 ký tự → Hiển thị lỗi "Mật khẩu phải có ít nhất 6 ký tự". |
 
-#### 2.2.2.2. Use Case UC02 — Đăng nhập
+#### 2.4.2.2. Use Case UC02 — Đăng nhập
 
 ```
                         ┌────────────────────────┐
@@ -161,7 +176,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User nhập username và password vào form đăng nhập. 2. Hệ thống truy vấn node `:User` theo username. 3. So sánh password với hash trong DB (`check_password_hash`). 4. Nếu khớp → Tạo phiên làm việc (`login_user`). 5. Lưu username, role vào session. 6. Chuyển hướng đến trang chủ bản đồ (role=user) hoặc dashboard quản trị (role=admin). |
 | **Luồng ngoại lệ** | • Nếu username không tồn tại hoặc password sai → Hiển thị "Sai tên đăng nhập hoặc mật khẩu". • Nếu để trống username hoặc password → Hiển thị lỗi validation. |
 
-#### 2.2.2.3. Use Case UC03 — Đăng xuất
+#### 2.4.2.3. Use Case UC03 — Đăng xuất
 
 ```
                         ┌────────────────────────┐
@@ -187,7 +202,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User nhấn nút "Đăng xuất". 2. Gọi API `POST /api/logout`. 3. Hệ thống xóa session hiện tại (`logout_user`). 4. Trả về thông báo "Đã đăng xuất". 5. Giao diện ẩn các nút chức năng cá nhân, hiển thị lại nút "Đăng nhập". |
 | **Luồng ngoại lệ** | • Nếu session đã hết hạn → Hệ thống tự động chuyển về trạng thái chưa đăng nhập. |
 
-#### 2.2.2.4. Use Case UC04 — Quên mật khẩu
+#### 2.4.2.4. Use Case UC04 — Quên mật khẩu
 
 ```
                         ┌────────────────────────┐
@@ -213,7 +228,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User nhấn "Quên mật khẩu?". 2. Hệ thống hiển thị form xác minh (username, email). 3. User nhập username và email, nhấn "Xác minh". 4. Gọi API `POST /api/verify-account`. 5. Hệ thống kiểm tra username + email có khớp trong DB. 6. Nếu khớp → Hiển thị form nhập mật khẩu mới. 7. User nhập mật khẩu mới (≥ 6 ký tự). 8. Gọi API `POST /api/reset-password`. 9. Hệ thống mã hóa và cập nhật mật khẩu. 10. Hiển thị thông báo thành công. |
 | **Luồng ngoại lệ** | • Nếu username + email không khớp → Hiển thị "Thông tin tài khoản không chính xác". • Nếu mật khẩu mới < 6 ký tự → Hiển thị "Mật khẩu mới quá ngắn". |
 
-#### 2.2.2.5. Use Case UC05 — Cập nhật hồ sơ
+#### 2.4.2.5. Use Case UC05 — Cập nhật hồ sơ
 
 ```
                         ┌────────────────────────┐
@@ -239,7 +254,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User mở trang hồ sơ. 2. Gọi API `GET /api/profile` lấy thông tin hiện tại. 3. Hiển thị form với dữ liệu hiện tại (fullname, email). 4. User chỉnh sửa thông tin và nhấn "Lưu". 5. Gọi API `POST /api/profile` với `{fullname, email, password?}`. 6. Hệ thống cập nhật node `:User`. 7. Hiển thị thông báo "Cập nhật thành công". |
 | **Luồng ngoại lệ** | • Nếu email không hợp lệ → Hiển thị lỗi validation. • Nếu mật khẩu mới < 6 ký tự → Hiển thị lỗi. |
 
-#### 2.2.2.6. Use Case UC06 — Xem bản đồ
+#### 2.4.2.6. Use Case UC06 — Xem bản đồ
 
 ```
                         ┌────────────────────────┐
@@ -265,7 +280,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User truy cập trang chủ. 2. Hệ thống gọi API `GET /api/locations` lấy danh sách địa điểm. 3. Khởi tạo Leaflet.js map với tile OpenStreetMap, center (16.4637, 107.5909). 4. Tạo markers cho từng địa điểm với icon phân loại theo category. 5. Hiển thị popup thông tin khi click marker. 6. Hiển thị danh sách địa điểm trên sidebar với bộ lọc theo category. |
 | **Luồng ngoại lệ** | • Nếu không tải được tile bản đồ → Hiển thị lớp nền thay thế. • Nếu API lỗi → Hiển thị thông báo lỗi kết nối. |
 
-#### 2.2.2.7. Use Case UC07 — Xem chi tiết địa điểm
+#### 2.4.2.7. Use Case UC07 — Xem chi tiết địa điểm
 
 ```
                         ┌────────────────────────┐
@@ -292,7 +307,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User click vào marker hoặc card địa điểm. 2. Hệ thống hiển thị popup/panel chi tiết: tên, mô tả, hình ảnh, tọa độ GPS. 3. Gọi API `GET /api/reviews/{location}` lấy danh sách đánh giá. 4. Gọi API `GET /api/similar/{location}` lấy địa điểm tương tự. 5. Hiển thị rating trung bình, số lượt đánh giá, bình luận kèm sentiment. 6. Hiển thị danh sách "Địa điểm tương tự" dựa trên Content-Based similarity. |
 | **Luồng ngoại lệ** | • Nếu địa điểm chưa có đánh giá → Hiển thị "Chưa có đánh giá nào". • Nếu đã đăng nhập → Hiển thị thêm nút "Like" và form viết đánh giá. |
 
-#### 2.2.2.8. Use Case UC08 — Like địa điểm
+#### 2.4.2.8. Use Case UC08 — Like địa điểm
 
 ```
                         ┌────────────────────────┐
@@ -318,7 +333,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User nhấn nút "❤️ Thích". 2. Gọi API `POST /api/like` với `{location_name}`. 3. Hệ thống kiểm tra relationship `:LIKED`. 4a. Nếu chưa liked → Tạo `:LIKED` + cập nhật `:INTERACTED`. 4b. Nếu đã liked → Xóa `:LIKED` + cập nhật `:INTERACTED`. 5. Cập nhật icon trái tim trên giao diện. |
 | **Luồng ngoại lệ** | • Nếu chưa đăng nhập → Hiển thị thông báo yêu cầu đăng nhập. • Nếu địa điểm không tồn tại → Trả về lỗi 404. |
 
-#### 2.2.2.9. Use Case UC09 — Viết đánh giá
+#### 2.4.2.9. Use Case UC09 — Viết đánh giá
 
 ```
                         ┌────────────────────────┐
@@ -344,7 +359,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User chọn số sao (1–5) và nhập bình luận. 2. Nhấn "Gửi đánh giá". 3. Gọi API `POST /api/review`. 4. Hệ thống phân tích sentiment (TextBlob) và phân loại chủ đề. 5. Tạo relationship `:REVIEWED`. 6. Tự động tạo `:LIKED` nếu chưa có. 7. Cập nhật `:INTERACTED`. 8. Tính lại rating trung bình. 9. Hiển thị đánh giá mới kèm nhãn sentiment. |
 | **Luồng ngoại lệ** | • Nếu rating không hợp lệ (ngoài 0-5) → Hiển thị lỗi. • User có thể xóa đánh giá qua `DELETE /api/review`. |
 
-#### 2.2.2.10. Use Case UC10 — Xem gợi ý AI
+#### 2.4.2.10. Use Case UC10 — Xem gợi ý AI
 
 ```
                         ┌────────────────────────┐
@@ -370,7 +385,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User chọn tab "Gợi ý AI". 2. Hệ thống lấy username từ session. 3. Gọi API `GET /api/recommend/{username}`. 4. Thuật toán Hybrid thực hiện 3 bước song song: (a) Collaborative Filtering — tìm user tương tự, (b) Content-Based Filtering — tìm địa điểm cùng category, (c) PageRank Diversity Pool — Top 20 phổ biến. 5. Gộp ứng viên và tính Final Score. 6. Sắp xếp giảm dần, trả về Top 12 kèm lý do gợi ý (Explainable AI). 7. Hiển thị danh sách cards với biểu đồ thành phần điểm. |
 | **Luồng ngoại lệ** | • Nếu user chưa có tương tác (Cold Start) → Fallback sử dụng PageRank score. • Nếu lỗi kết nối Neo4j → Hiển thị thông báo lỗi. |
 
-#### 2.2.2.11. Use Case UC11 — Sắp xếp lộ trình
+#### 2.4.2.11. Use Case UC11 — Sắp xếp lộ trình
 
 ```
                         ┌────────────────────────┐
@@ -396,7 +411,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User chọn "Lập Lộ Trình". 2. Nhập thông số: số ngày (1–5), sở thích (categories), chế độ (AI gợi ý / từ danh sách đã thích). 3. Gọi API `POST /api/planner/generate`. 4. Hệ thống lọc ứng viên theo preferences. 5. Sắp xếp bằng thuật toán Greedy Nearest Neighbor (Haversine). 6. Phân bổ ~3 hoạt động/ngày. 7. Hiển thị lộ trình dạng timeline. |
 | **Luồng ngoại lệ** | • Nếu chọn "Từ danh sách đã thích" nhưng chưa like → Yêu cầu tương tác thêm. • Nếu ứng viên không đủ → Giảm hoạt động hoặc hiển thị thông báo. • User có thể thay thế địa điểm qua `POST /api/planner/suggest-replacement`. |
 
-#### 2.2.2.12. Use Case UC12 — Lưu lộ trình
+#### 2.4.2.12. Use Case UC12 — Lưu lộ trình
 
 ```
                         ┌────────────────────────┐
@@ -422,7 +437,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User nhấn "Lưu lộ trình" sau khi xem kết quả. 2. Gọi API `POST /api/itineraries` với `{title, data, days}`. 3. Hệ thống tạo node `:Itinerary` với id duy nhất (UUID). 4. Tạo relationship `:CREATED` từ User → Itinerary. 5. Trả về thông báo lưu thành công. |
 | **Luồng ngoại lệ** | • Nếu dữ liệu lộ trình rỗng → Hiển thị lỗi "Dữ liệu trống". • Nếu lỗi kết nối DB → Hiển thị thông báo lỗi. |
 
-#### 2.2.2.13. Use Case UC13 — Xem lịch sử
+#### 2.4.2.13. Use Case UC13 — Xem lịch sử
 
 ```
                         ┌────────────────────────┐
@@ -448,7 +463,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. User chọn "Xem lịch sử". 2. Gọi API `GET /api/history/{username}` lấy địa điểm đã thích. 3. Gọi API `GET /api/user/activity` lấy tổng hợp likes và reviews. 4. Gọi API `GET /api/itineraries` lấy lộ trình đã lưu. 5. Hiển thị danh sách theo 3 tab: Đã thích, Đánh giá, Lộ trình. 6. User có thể xóa lộ trình qua `DELETE /api/itineraries/{id}`. |
 | **Luồng ngoại lệ** | • Nếu chưa có hoạt động nào → Hiển thị thông báo "Chưa có dữ liệu". • Chỉ cho phép xem lịch sử của chính mình (trả về 403 nếu truy cập user khác). |
 
-#### 2.2.2.14. Use Case UC14 — Quản lý người dùng
+#### 2.4.2.14. Use Case UC14 — Quản lý người dùng
 
 ```
                         ┌────────────────────────┐
@@ -474,7 +489,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. Admin truy cập trang quản trị. 2. Gọi API `GET /api/admin/users` lấy danh sách. 3. Hiển thị bảng: username, email, role, số lượt thích, số đánh giá. 4. Click xem hồ sơ chi tiết (`GET /api/admin/user_profile/{user}`). 5. Xem bình luận (`GET /api/admin/user_comments/{user}`). 6. Xóa tài khoản (`DELETE /api/admin/users/{username}`). |
 | **Luồng ngoại lệ** | • Nếu không phải admin → Trả về 403 Forbidden. • Xóa user → DETACH DELETE xóa toàn bộ relationships liên quan. |
 
-#### 2.2.2.15. Use Case UC15 — Thêm địa điểm
+#### 2.4.2.15. Use Case UC15 — Thêm địa điểm
 
 ```
                         ┌────────────────────────┐
@@ -500,7 +515,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. Admin nhấn "Thêm địa điểm". 2. Hệ thống hiển thị form nhập: tên, danh mục, mô tả, hình ảnh, tọa độ (lat, lng). 3. Admin nhập thông tin và nhấn "Lưu". 4. Gọi API `POST /api/admin/location/add`. 5. Hệ thống tạo node `:Location` + liên kết `:HAS_CATEGORY` và `:LOCATED_IN` (Huế). 6. Đồng bộ vào file Excel. 7. Hiển thị thông báo thành công. |
 | **Luồng ngoại lệ** | • Nếu tên địa điểm đã tồn tại → Lỗi Unique Constraint. • Nếu tọa độ không hợp lệ → Hiển thị lỗi validation. |
 
-#### 2.2.2.16. Use Case UC16 — Sửa địa điểm
+#### 2.4.2.16. Use Case UC16 — Sửa địa điểm
 
 ```
                         ┌────────────────────────┐
@@ -526,7 +541,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. Admin nhấn "Sửa" trên một địa điểm. 2. Hệ thống hiển thị form với dữ liệu hiện tại. 3. Admin chỉnh sửa và nhấn "Cập nhật". 4. Gọi API `PUT /api/admin/location/update`. 5. Hệ thống cập nhật node `:Location`, xóa category cũ và tạo liên kết mới nếu đổi danh mục. 6. Đồng bộ vào Excel. 7. Hiển thị thông báo thành công. |
 | **Luồng ngoại lệ** | • Nếu địa điểm không tồn tại → Trả về lỗi. • Nếu tọa độ không hợp lệ → Hiển thị lỗi validation. |
 
-#### 2.2.2.17. Use Case UC17 — Xóa địa điểm
+#### 2.4.2.17. Use Case UC17 — Xóa địa điểm
 
 ```
                         ┌────────────────────────┐
@@ -552,7 +567,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. Admin nhấn "Xóa" trên một địa điểm. 2. Hệ thống hiển thị hộp thoại xác nhận. 3. Admin xác nhận xóa. 4. Gọi API `DELETE /api/admin/location/delete/{name}`. 5. Hệ thống thực thi `DETACH DELETE` xóa node và tất cả relationships. 6. Đồng bộ vào Excel. 7. Hiển thị thông báo thành công. |
 | **Luồng ngoại lệ** | • Nếu địa điểm không tồn tại → Trả về lỗi. • Nếu admin hủy xác nhận → Không thực hiện xóa. |
 
-#### 2.2.2.18. Use Case UC18 — Chạy thuật toán AI
+#### 2.4.2.18. Use Case UC18 — Chạy thuật toán AI
 
 ```
                         ┌────────────────────────┐
@@ -579,9 +594,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng ngoại lệ** | • Nếu GDS chưa cài → Hiển thị hướng dẫn cài đặt. • Nếu timeout → Hiển thị lỗi và log chi tiết. |
 
 
-## 2.3. Thiết kế Kiến trúc Hệ thống
+## 2.5. Thiết kế Kiến trúc Hệ thống
 
-### 2.3.1. Mô hình kiến trúc tổng quan
+### 2.5.1. Mô hình kiến trúc tổng quan
 
 Hệ thống được thiết kế theo mô hình **kiến trúc 3 tầng (3-Layer Architecture)**, tách biệt rõ ràng giữa giao diện, xử lý nghiệp vụ và truy cập dữ liệu. Mô hình này đảm bảo tính module hóa, dễ bảo trì và mở rộng.
 
@@ -634,7 +649,7 @@ Hệ thống được thiết kế theo mô hình **kiến trúc 3 tầng (3-Lay
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.3.2. Mô tả chi tiết các tầng
+### 2.5.2. Mô tả chi tiết các tầng
 
 **a) Tầng Trình bày (Presentation Layer):**
 
@@ -648,7 +663,7 @@ Chịu trách nhiệm xử lý logic nghiệp vụ của hệ thống. Flask fra
 
 Chịu trách nhiệm lưu trữ và truy vấn dữ liệu. Neo4j Graph Database lưu trữ toàn bộ dữ liệu dưới dạng nodes và relationships. Thư viện Neo4j GDS cung cấp các thuật toán phân tích đồ thị (PageRank, Node Similarity). Python neo4j driver kết nối và thực thi truy vấn Cypher từ tầng nghiệp vụ.
 
-### 2.3.3. Luồng dữ liệu tổng quát
+### 2.5.3. Luồng dữ liệu tổng quát
 
 *Hình 2.3. Luồng dữ liệu tổng quát trong hệ thống*
 
@@ -657,9 +672,9 @@ User Request → Flask Routes → Business Logic → Neo4j Cypher Query →
     → Result Processing → JSON Response → JavaScript → UI Update
 ```
 
-## 2.4. Thiết kế Cơ sở dữ liệu Đồ thị
+## 2.6. Thiết kế Cơ sở dữ liệu Đồ thị
 
-### 2.4.1. Lược đồ dữ liệu (Graph Schema)
+### 2.6.1. Lược đồ dữ liệu (Graph Schema)
 
 Lược đồ cơ sở dữ liệu đồ thị của hệ thống được thiết kế với 5 loại node (label) và 7 loại quan hệ (relationship), đảm bảo mô hình hóa đầy đủ các thực thể và mối quan hệ trong bài toán gợi ý du lịch.
 
@@ -718,7 +733,7 @@ Lược đồ cơ sở dữ liệu đồ thị của hệ thống được thi�
 └─────────────────┘
 ```
 
-### 2.4.2. Ràng buộc và Chỉ mục (Constraints & Indexes)
+### 2.6.2. Ràng buộc và Chỉ mục (Constraints & Indexes)
 
 Để đảm bảo tính toàn vẹn dữ liệu và hiệu suất truy vấn, hệ thống thiết kế các ràng buộc duy nhất (Unique Constraints) và chỉ mục (Indexes) sau:
 
@@ -732,9 +747,9 @@ Lược đồ cơ sở dữ liệu đồ thị của hệ thống được thi�
 | Index | `:User` | `email` | Tăng tốc truy vấn theo email |
 | Index | `:Location` | `pagerankScore` | Tăng tốc sắp xếp theo độ phổ biến |
 
-## 2.5. Thiết kế API
+## 2.7. Thiết kế API
 
-### 2.5.1. Nguyên tắc thiết kế RESTful API
+### 2.7.1. Nguyên tắc thiết kế RESTful API
 
 Hệ thống API được thiết kế theo kiến trúc REST (Representational State Transfer), tuân thủ các nguyên tắc:
 
@@ -743,7 +758,7 @@ Hệ thống API được thiết kế theo kiến trúc REST (Representational 
 - Dữ liệu trả về theo định dạng **JSON** thống nhất.
 - Mỗi response bao gồm trường `success` (boolean) để phân biệt thành công/thất bại.
 
-### 2.5.2. Danh sách API Endpoints
+### 2.7.2. Danh sách API Endpoints
 
 Hệ thống triển khai tổng cộng **32 endpoints**, chia thành 5 nhóm chức năng. Dưới đây trình bày các endpoints chính.
 
@@ -806,7 +821,7 @@ Hệ thống triển khai tổng cộng **32 endpoints**, chia thành 5 nhóm ch
 | PUT    | /api/admin/location/update        | `{name, desc, lat, lng, ...}` | `{success}`                   |
 | DELETE | /api/admin/location/delete/{name} | —                             | `{success}`                   |
 
-### 2.5.3. Định dạng Response
+### 2.7.3. Định dạng Response
 
 Tất cả API trả về response theo định dạng JSON thống nhất:
 
@@ -830,9 +845,9 @@ Tất cả API trả về response theo định dạng JSON thống nhất:
 }
 ```
 
-## 2.6. Thiết kế Giao diện
+## 2.8. Thiết kế Giao diện
 
-### 2.6.1. Wireframe Trang chủ
+### 2.8.1. Wireframe Trang chủ
 
 Giao diện trang chủ được thiết kế theo bố cục 2 cột: sidebar bên trái chứa các chức năng tương tác, bản đồ chiếm phần lớn diện tích bên phải.
 
@@ -872,7 +887,7 @@ Giao diện trang chủ được thiết kế theo bố cục 2 cột: sidebar b
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.6.2. Wireframe Modal AI Planner
+### 2.8.2. Wireframe Modal AI Planner
 
 Modal lập lộ trình thông minh cho phép người dùng tùy chỉnh các thông số đầu vào trước khi hệ thống tạo lộ trình.
 
@@ -906,7 +921,7 @@ Modal lập lộ trình thông minh cho phép người dùng tùy chỉnh các t
 └─────────────────────────────────────────┘
 ```
 
-### 2.6.3. Bảng màu và Typography
+### 2.8.3. Bảng màu và Typography
 
 Giao diện sử dụng thiết kế Dark Mode hiện đại với bảng màu và kiểu chữ được quy hoạch thống nhất.
 
@@ -935,9 +950,9 @@ Giao diện sử dụng thiết kế Dark Mode hiện đại với bảng màu v
 | Small    | Inter | 12px       | 400    |
 | Button   | Inter | 14px       | 600    |
 
-## 2.7. Thiết kế Thuật toán
+## 2.9. Thiết kế Thuật toán
 
-### 2.7.1. Flowchart thuật toán Hybrid Recommendation
+### 2.9.1. Flowchart thuật toán Hybrid Recommendation
 
 Hình 2.7 mô tả luồng xử lý tổng quát của thuật toán Hybrid Recommendation — thuật toán chính của hệ thống gợi ý.
 
@@ -1003,11 +1018,11 @@ Hình 2.7 mô tả luồng xử lý tổng quát của thuật toán Hybrid Reco
                        └──────────┘
 ```
 
-### 2.7.2. Luồng xử lý tiện ích sắp xếp lộ trình (Tính năng bổ trợ)
+### 2.9.2. Luồng xử lý tiện ích sắp xếp lộ trình (Tính năng bổ trợ)
 
 Để bổ sung thêm sự tiện dụng cho hệ thống gợi ý, tiện ích sắp xếp lộ trình đóng vai trò là một module phụ trợ phía sau. Dựa trên danh sách các địa điểm đã được thuật toán AI chọn lọc (hoặc do người dùng đã thích), tiện ích này sẽ sử dụng một cơ chế tham lam (Greedy) đơn giản dựa theo cự ly gần nhất để xâu chuỗi chúng thành một lịch trình cơ bản theo ngày. Do đây không phải đối tượng nghiên cứu cốt lõi về thuật toán học máy, chi tiết tính toán không được khắc họa sâu trong lược đồ thuật toán thiết kế chung.
 
-## 2.8. Tiểu kết chương 2
+## 2.10. Tiểu kết chương 2
 
 Chương này đã trình bày đầy đủ quá trình phân tích và thiết kế hệ thống Huế Travel AI, bao gồm:
 
