@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đặc tả Use Case</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 40px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      border-bottom: 2px solid #0056b3;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: #0056b3;
+      margin-top: 40px;
+      border-left: 4px solid #0056b3;
+      padding-left: 10px;
+    }
+
+    .diagram {
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    th,
+    td {
+      border: 1px solid #000;
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #d9e1f2;
+      color: #000;
+      font-weight: bold;
+      text-align: left;
+      width: 25%;
+    }
+
+    td {
+      width: 75%;
+    }
+
+    /* Specific row styling */
+    tr:nth-child(even) {
+      background-color: #fbfbfb;
+    }
+
+    .caption {
+      font-style: italic;
+      text-align: center;
+      margin-bottom: 10px;
+      color: #555;
+      font-weight: bold;
+    }
+  
+    .btn-download {
+      background-color: #1a73e8;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .btn-download:hover {
+      background-color: #1557b0;
+    }
+</style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Đặc tả Use Case chi tiết</h1>
+
+    <h2>Biểu đồ Use Case tổng quan</h2>
+    <div style="text-align: center;">
+        <canvas id="canvas-overall" width="800" height="1000" style="border: 1px dashed #ccc; margin-bottom: 15px; background-color: #fff;"></canvas>
+        <br>
+        <button class="btn-download" onclick="downloadCanvas('canvas-overall', 'UC_Tong_Quan')">⬇ Tải ảnh Use Case Tổng Quan</button>
+    </div>
+
+
+    
+
+
+    
+
+    <h2>Use Case UC01 — Đăng ký tài khoản</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC01" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC01', 'UC01')">⬇ Tải ảnh UC01</button></div>
+    <div class="caption">Bảng 2.4. Đặc tả Use Case UC01 — Đăng ký tài khoản</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Đăng ký tài khoản</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC01</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng mới (chưa có tài khoản), tôi muốn đăng ký tài khoản trên hệ thống với thông tin username,
+          password và email để có thể sử dụng các chức năng cá nhân hóa.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (chưa đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng nhấn nút "Đăng ký" trên giao diện đăng nhập.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Thiết bị đã kết nối internet và trình duyệt hoạt động bình thường. <br>• Người dùng chưa có tài khoản
+          trong hệ thống.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Node <code>:User</code> mới được tạo trong cơ sở dữ liệu Neo4j. <br>• Người dùng có thể đăng nhập bằng tài
+          khoản vừa tạo.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User chọn "Đăng ký" trên giao diện. 2. Hệ thống hiển thị form đăng ký (username, email, password, xác
+          nhận password). 3. User nhập thông tin và nhấn "Đăng ký". 4. Hệ thống kiểm tra: username chưa tồn tại, email
+          hợp lệ, password ≥ 6 ký tự, hai mật khẩu khớp. 5. Mã hóa password bằng PBKDF2-SHA256 (Werkzeug). 6. Tạo node
+          <code>:User</code> trong Neo4j. 7. Hiển thị thông báo đăng ký thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu username đã tồn tại → Hiển thị lỗi "Tên đăng nhập đã được sử dụng". <br>• Nếu username < 3 ký tự →
+            Hiển thị lỗi "Tên tài khoản phải có ít nhất 3 ký tự" . <br>• Nếu password < 6 ký tự → Hiển thị
+              lỗi "Mật khẩu phải có ít nhất 6 ký tự" .</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC02 — Đăng nhập</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC02" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC02', 'UC02')">⬇ Tải ảnh UC02</button></div>
+    <div class="caption">Bảng 2.5. Đặc tả Use Case UC02 — Đăng nhập</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Đăng nhập</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC02</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng đã có tài khoản, tôi muốn đăng nhập vào hệ thống để truy cập các chức năng cá nhân hóa như
+          thích địa điểm, viết đánh giá và xem gợi ý AI.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (chưa đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng nhấn nút "Đăng nhập" trên giao diện hoặc truy cập chức năng yêu cầu xác thực.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Thiết bị đã kết nối internet và trình duyệt hoạt động bình thường. <br>• Người dùng đã có tài khoản hợp lệ
+          trong hệ thống.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Phiên làm việc (session) được thiết lập qua Flask-Login. <br>• Người dùng được chuyển hướng đến trang chủ
+          (User) hoặc dashboard quản trị (Admin).</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User nhập username và password vào form đăng nhập. 2. Hệ thống truy vấn node <code>:User</code> theo
+          username. 3. So sánh password với hash trong DB (<code>check_password_hash</code>). 4. Nếu khớp → Tạo phiên
+          làm việc (<code>login_user</code>). 5. Lưu username, role vào session. 6. Chuyển hướng đến trang chủ bản đồ
+          (role=user) hoặc dashboard quản trị (role=admin).</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu username không tồn tại hoặc password sai → Hiển thị "Sai tên đăng nhập hoặc mật khẩu". <br>• Nếu để
+          trống username hoặc password → Hiển thị lỗi validation.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC03 — Đăng xuất</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC03" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC03', 'UC03')">⬇ Tải ảnh UC03</button></div>
+    <div class="caption">Bảng 2.6. Đặc tả Use Case UC03 — Đăng xuất</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Đăng xuất</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC03</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng đã đăng nhập, tôi muốn đăng xuất khỏi hệ thống để bảo mật tài khoản khi không sử dụng.
+        </td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (đã đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng nhấn nút "Đăng xuất" trên thanh điều hướng.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Người dùng đã đăng nhập thành công (session đang hoạt động).</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Session bị hủy qua Flask-Login (<code>logout_user</code>). <br>• Giao diện trở về trạng thái chưa đăng
+          nhập, ẩn các chức năng cá nhân hóa.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User nhấn nút "Đăng xuất". 2. Gọi API <code>POST /api/logout</code>. 3. Hệ thống xóa session hiện tại
+          (<code>logout_user</code>). 4. Trả về thông báo "Đã đăng xuất". 5. Giao diện ẩn các nút chức năng cá nhân,
+          hiển thị lại nút "Đăng nhập".</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu session đã hết hạn → Hệ thống tự động chuyển về trạng thái chưa đăng nhập.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC04 — Quên mật khẩu</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC04" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC04', 'UC04')">⬇ Tải ảnh UC04</button></div>
+    <div class="caption">Bảng 2.7. Đặc tả Use Case UC04 — Quên mật khẩu</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Quên mật khẩu</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC04</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng đã quên mật khẩu, tôi muốn đặt lại mật khẩu bằng cách xác minh tài khoản qua username và
+          email đã đăng ký.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (chưa đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng nhấn liên kết "Quên mật khẩu?" trên form đăng nhập.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Người dùng đã có tài khoản trong hệ thống với email đã đăng ký.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Mật khẩu mới được mã hóa và cập nhật trong cơ sở dữ liệu. <br>• Người dùng có thể đăng nhập bằng mật khẩu
+          mới.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User nhấn "Quên mật khẩu?". 2. Hệ thống hiển thị form xác minh (username, email). 3. User nhập username
+          và email, nhấn "Xác minh". 4. Gọi API <code>POST /api/verify-account</code>. 5. Hệ thống kiểm tra username +
+          email có khớp trong DB. 6. Nếu khớp → Hiển thị form nhập mật khẩu mới. 7. User nhập mật khẩu mới (≥ 6 ký tự).
+          8. Gọi API <code>POST /api/reset-password</code>. 9. Hệ thống mã hóa và cập nhật mật khẩu. 10. Hiển thị thông
+          báo thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu username + email không khớp → Hiển thị "Thông tin tài khoản không chính xác". <br>• Nếu mật khẩu mới <
+            6 ký tự → Hiển thị "Mật khẩu mới quá ngắn" .</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC05 — Cập nhật hồ sơ</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC05" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC05', 'UC05')">⬇ Tải ảnh UC05</button></div>
+    <div class="caption">Bảng 2.8. Đặc tả Use Case UC05 — Cập nhật hồ sơ</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Cập nhật hồ sơ</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC05</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng đã đăng nhập, tôi muốn cập nhật thông tin cá nhân (họ tên, email, mật khẩu) để hồ sơ luôn
+          chính xác.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (đã đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng nhấn vào biểu tượng hồ sơ hoặc chọn "Cập nhật hồ sơ" trên menu.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Người dùng đã đăng nhập thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Thông tin cá nhân trên node <code>:User</code> được cập nhật trong Neo4j. <br>• Giao diện hiển thị
+          tên/email mới.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User mở trang hồ sơ. 2. Gọi API <code>GET /api/profile</code> lấy thông tin hiện tại. 3. Hiển thị form
+          với dữ liệu hiện tại (fullname, email). 4. User chỉnh sửa thông tin và nhấn "Lưu". 5. Gọi API
+          <code>POST /api/profile</code> với <code>{fullname, email, password?}</code>. 6. Hệ thống cập nhật node
+          <code>:User</code>. 7. Hiển thị thông báo "Cập nhật thành công".</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu email không hợp lệ → Hiển thị lỗi validation. <br>• Nếu mật khẩu mới < 6 ký tự → Hiển thị lỗi.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC06 — Xem bản đồ</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC06" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC06', 'UC06')">⬇ Tải ảnh UC06</button></div>
+    <div class="caption">Bảng 2.9. Đặc tả Use Case UC06 — Xem bản đồ</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Xem bản đồ</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC06</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng (hoặc khách chưa đăng nhập), tôi muốn xem bản đồ tương tác hiển thị tất cả địa điểm du
+          lịch tại Huế để nắm bắt tổng quan các điểm tham quan.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (đã hoặc chưa đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng truy cập trang chủ của hệ thống hoặc click vào logo trên thanh điều hướng.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Thiết bị đã kết nối internet và trình duyệt hoạt động bình thường.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Hệ thống hiển thị giao diện bản đồ tương tác. <br>• Người dùng có thể xem danh mục các địa điểm du lịch
+          công khai.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User truy cập trang chủ. 2. Hệ thống gọi API <code>GET /api/locations</code> lấy danh sách địa điểm. 3.
+          Khởi tạo Leaflet.js map với tile OpenStreetMap, center (16.4637, 107.5909). 4. Tạo markers cho từng địa điểm
+          với icon phân loại theo category. 5. Hiển thị popup thông tin khi click marker. 6. Hiển thị danh sách địa điểm
+          trên sidebar với bộ lọc theo category.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu không tải được tile bản đồ → Hiển thị lớp nền thay thế. <br>• Nếu API lỗi → Hiển thị thông báo lỗi kết
+          nối.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC07 — Xem chi tiết địa điểm</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC07" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC07', 'UC07')">⬇ Tải ảnh UC07</button></div>
+    <div class="caption">Bảng 2.10. Đặc tả Use Case UC07 — Xem chi tiết địa điểm</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Xem chi tiết địa điểm</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC07</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng, tôi muốn xem thông tin chi tiết, hình ảnh, đánh giá và các địa điểm tương tự của một địa
+          điểm du lịch để quyết định có nên ghé thăm hay không.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (đã hoặc chưa đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng click vào marker trên bản đồ hoặc card địa điểm trên sidebar.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Bản đồ đã tải xong, các markers đã hiển thị.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Thông tin chi tiết địa điểm được hiển thị đầy đủ. <br>• Bản đồ zoom đến vị trí tương ứng.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User click vào marker hoặc card địa điểm. 2. Hệ thống hiển thị popup/panel chi tiết: tên, mô tả, hình
+          ảnh, tọa độ GPS. 3. Gọi API <code>GET /api/reviews/{location}</code> lấy danh sách đánh giá. 4. Gọi API
+          <code>GET /api/similar/{location}</code> lấy địa điểm tương tự. 5. Hiển thị rating trung bình, số lượt đánh
+          giá, bình luận kèm sentiment. 6. Hiển thị danh sách "Địa điểm tương tự" dựa trên Content-Based similarity.
+        </td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu địa điểm chưa có đánh giá → Hiển thị "Chưa có đánh giá nào". <br>• Nếu đã đăng nhập → Hiển thị thêm
+          nút "Like" và form viết đánh giá.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC08 — Like địa điểm</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC08" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC08', 'UC08')">⬇ Tải ảnh UC08</button></div>
+    <div class="caption">Bảng 2.11. Đặc tả Use Case UC08 — Like địa điểm</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Like địa điểm</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC08</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng đã đăng nhập, tôi muốn thêm hoặc bỏ địa điểm khỏi danh sách yêu thích để hệ thống AI có
+          thể phân tích sở thích và đưa ra gợi ý phù hợp.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (đã đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng nhấn nút "❤️ Thích" trên popup hoặc card địa điểm.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Người dùng đã đăng nhập. <br>• Đang xem chi tiết một địa điểm.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Relationship <code>:LIKED</code> được tạo/xóa trong Neo4j. <br>• Dữ liệu <code>:INTERACTED</code> được cập
+          nhật cho thuật toán Collaborative Filtering.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User nhấn nút "❤️ Thích". 2. Gọi API <code>POST /api/like</code> với <code>{location_name}</code>. 3. Hệ
+          thống kiểm tra relationship <code>:LIKED</code>. 4a. Nếu chưa liked → Tạo <code>:LIKED</code> + cập nhật
+          <code>:INTERACTED</code>. 4b. Nếu đã liked → Xóa <code>:LIKED</code> + cập nhật <code>:INTERACTED</code>. 5.
+          Cập nhật icon trái tim trên giao diện.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu chưa đăng nhập → Hiển thị thông báo yêu cầu đăng nhập. <br>• Nếu địa điểm không tồn tại → Trả về lỗi
+          404.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC09 — Viết đánh giá</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC09" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC09', 'UC09')">⬇ Tải ảnh UC09</button></div>
+    <div class="caption">Bảng 2.12. Đặc tả Use Case UC09 — Viết đánh giá</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Viết đánh giá</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC09</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng đã đăng nhập, tôi muốn chấm điểm (1–5 sao) và viết bình luận cho địa điểm du lịch để chia
+          sẻ trải nghiệm với cộng đồng.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (đã đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng chọn số sao và nhập bình luận trong form đánh giá tại trang chi tiết địa điểm.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Người dùng đã đăng nhập. <br>• Đang xem chi tiết một địa điểm.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Relationship <code>:REVIEWED</code> được tạo với các thuộc tính: rating, comment, sentiment, topics,
+          timestamp. <br>• Rating trung bình của địa điểm được cập nhật. <br>• Dữ liệu <code>:INTERACTED</code> được làm
+          mới.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User chọn số sao (1–5) và nhập bình luận. 2. Nhấn "Gửi đánh giá". 3. Gọi API
+          <code>POST /api/review</code>. 4. Hệ thống phân tích sentiment (TextBlob) và phân loại chủ đề. 5. Tạo
+          relationship <code>:REVIEWED</code>. 6. Tự động tạo <code>:LIKED</code> nếu chưa có. 7. Cập nhật
+          <code>:INTERACTED</code>. 8. Tính lại rating trung bình. 9. Hiển thị đánh giá mới kèm nhãn sentiment.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu rating không hợp lệ (ngoài 0-5) → Hiển thị lỗi. <br>• User có thể xóa đánh giá qua
+          <code>DELETE /api/review</code>.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC10 — Xem gợi ý AI</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC10" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC10', 'UC10')">⬇ Tải ảnh UC10</button></div>
+    <div class="caption">Bảng 2.13. Đặc tả Use Case UC10 — Xem gợi ý AI</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Xem gợi ý AI</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC10</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng đã đăng nhập, tôi muốn xem danh sách các địa điểm được hệ thống AI gợi ý dựa trên sở thích
+          cá nhân để khám phá những nơi phù hợp nhất.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (đã đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng nhấn tab "✨ Gợi ý AI" trên sidebar.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Người dùng đã đăng nhập thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Danh sách Top 12 gợi ý được hiển thị kèm biểu đồ phân tích. <br>• Markers tương ứng được đánh dấu trên bản
+          đồ.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User chọn tab "Gợi ý AI". 2. Hệ thống lấy username từ session. 3. Gọi API
+          <code>GET /api/recommend/{username}</code>. 4. Thuật toán Hybrid thực hiện 3 bước song song: (a) Collaborative
+          Filtering — tìm user tương tự, (b) Content-Based Filtering — tìm địa điểm cùng category, (c) PageRank
+          Diversity Pool — Top 20 phổ biến. 5. Gộp ứng viên và tính Final Score. 6. Sắp xếp giảm dần, trả về Top 12 kèm
+          lý do gợi ý (Explainable AI). 7. Hiển thị danh sách cards với biểu đồ thành phần điểm.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu user chưa có tương tác (Cold Start) → Fallback sử dụng PageRank score. <br>• Nếu lỗi kết nối Neo4j →
+          Hiển thị thông báo lỗi.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC11 — Sắp xếp lộ trình</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC11" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC11', 'UC11')">⬇ Tải ảnh UC11</button></div>
+    <div class="caption">Bảng 2.14. Đặc tả Use Case UC11 — Sắp xếp lộ trình</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Sắp xếp lộ trình</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC11</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng đã đăng nhập, tôi muốn sử dụng tiện ích sắp xếp lộ trình du lịch cơ bản để tổ chức chuyến
+          tham quan theo ngày một cách hợp lý.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (đã đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng nhấn nút "Lập Lộ Trình" trên sidebar.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Người dùng đã đăng nhập thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Lộ trình được hiển thị dạng timeline kèm thời gian và khoảng cách. <br>• Người dùng có thể lưu lộ trình.
+        </td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User chọn "Lập Lộ Trình". 2. Nhập thông số: số ngày (1–5), sở thích (categories), chế độ (AI gợi ý / từ
+          danh sách đã thích). 3. Gọi API <code>POST /api/planner/generate</code>. 4. Hệ thống lọc ứng viên theo
+          preferences. 5. Sắp xếp bằng thuật toán Greedy Nearest Neighbor (Haversine). 6. Phân bổ ~3 hoạt động/ngày. 7.
+          Hiển thị lộ trình dạng timeline.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu chọn "Từ danh sách đã thích" nhưng chưa like → Yêu cầu tương tác thêm. <br>• Nếu ứng viên không đủ →
+          Giảm hoạt động hoặc hiển thị thông báo. <br>• User có thể thay thế địa điểm qua
+          <code>POST /api/planner/suggest-replacement</code>.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC12 — Lưu lộ trình</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC12" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC12', 'UC12')">⬇ Tải ảnh UC12</button></div>
+    <div class="caption">Bảng 2.15. Đặc tả Use Case UC12 — Lưu lộ trình</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Lưu lộ trình</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC12</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng đã tạo lộ trình, tôi muốn lưu lộ trình đó để có thể xem lại và sử dụng trong chuyến du
+          lịch thực tế.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (đã đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng nhấn nút "💾 Lưu lộ trình" sau khi tạo lộ trình thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Người dùng đã đăng nhập. <br>• Đã tạo lộ trình thành công (UC11).</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Node <code>:Itinerary</code> được tạo trong Neo4j với dữ liệu JSON. <br>• Relationship
+          <code>:CREATED</code> liên kết User → Itinerary. <br>• Người dùng có thể xem lại trong lịch sử.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User nhấn "Lưu lộ trình" sau khi xem kết quả. 2. Gọi API <code>POST /api/itineraries</code> với
+          <code>{title, data, days}</code>. 3. Hệ thống tạo node <code>:Itinerary</code> với id duy nhất (UUID). 4. Tạo
+          relationship <code>:CREATED</code> từ User → Itinerary. 5. Trả về thông báo lưu thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu dữ liệu lộ trình rỗng → Hiển thị lỗi "Dữ liệu trống". <br>• Nếu lỗi kết nối DB → Hiển thị thông báo
+          lỗi.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC13 — Xem lịch sử</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC13" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC13', 'UC13')">⬇ Tải ảnh UC13</button></div>
+    <div class="caption">Bảng 2.16. Đặc tả Use Case UC13 — Xem lịch sử</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Xem lịch sử</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC13</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là một người dùng đã đăng nhập, tôi muốn xem lại danh sách các địa điểm đã thích, đánh giá đã viết và lộ
+          trình đã lưu để theo dõi hoạt động của mình.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>User (đã đăng nhập)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Người dùng nhấn tab "Lịch sử" trên sidebar hoặc biểu tượng hoạt động.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Người dùng đã đăng nhập thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Danh sách lịch sử hoạt động được hiển thị đầy đủ.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. User chọn "Xem lịch sử". 2. Gọi API <code>GET /api/history/{username}</code> lấy địa điểm đã thích. 3.
+          Gọi API <code>GET /api/user/activity</code> lấy tổng hợp likes và reviews. 4. Gọi API
+          <code>GET /api/itineraries</code> lấy lộ trình đã lưu. 5. Hiển thị danh sách theo 3 tab: Đã thích, Đánh giá,
+          Lộ trình. 6. User có thể xóa lộ trình qua <code>DELETE /api/itineraries/{id}</code>.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu chưa có hoạt động nào → Hiển thị thông báo "Chưa có dữ liệu". <br>• Chỉ cho phép xem lịch sử của chính
+          mình (trả về 403 nếu truy cập user khác).</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC14 — Quản lý người dùng</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC14" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC14', 'UC14')">⬇ Tải ảnh UC14</button></div>
+    <div class="caption">Bảng 2.17. Đặc tả Use Case UC14 — Quản lý người dùng</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Quản lý người dùng</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC14</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là quản trị viên, tôi muốn xem danh sách tất cả người dùng, xem hồ sơ chi tiết và xóa tài khoản vi phạm để
+          quản lý hệ thống hiệu quả.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>Admin (đã đăng nhập với role = admin)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Admin truy cập trang quản trị hoặc chọn tab "Quản lý người dùng".</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Admin đã đăng nhập với quyền admin (role = "admin").</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Danh sách user được hiển thị/cập nhật. <br>• Các node và relationship liên quan được xóa (nếu xóa user).
+        </td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. Admin truy cập trang quản trị. 2. Gọi API <code>GET /api/admin/users</code> lấy danh sách. 3. Hiển thị
+          bảng: username, email, role, số lượt thích, số đánh giá. 4. Click xem hồ sơ chi tiết
+          (<code>GET /api/admin/user_profile/{user}</code>). 5. Xem bình luận
+          (<code>GET /api/admin/user_comments/{user}</code>). 6. Xóa tài khoản
+          (<code>DELETE /api/admin/users/{username}</code>).</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu không phải admin → Trả về 403 Forbidden. <br>• Xóa user → DETACH DELETE xóa toàn bộ relationships liên
+          quan.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC15 — Thêm địa điểm</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC15" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC15', 'UC15')">⬇ Tải ảnh UC15</button></div>
+    <div class="caption">Bảng 2.18. Đặc tả Use Case UC15 — Thêm địa điểm</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Thêm địa điểm</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC15</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là quản trị viên, tôi muốn thêm địa điểm du lịch mới vào hệ thống với đầy đủ thông tin (tên, mô tả, tọa độ,
+          hình ảnh, danh mục) để mở rộng cơ sở dữ liệu.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>Admin (đã đăng nhập với role = admin)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Admin nhấn nút "Thêm địa điểm" trên trang quản trị.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Admin đã đăng nhập với quyền admin.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Node <code>:Location</code> mới được tạo trong Neo4j. <br>• Relationship <code>:HAS_CATEGORY</code> và
+          <code>:LOCATED_IN</code> được thiết lập. <br>• File Excel dữ liệu được đồng bộ tự động.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. Admin nhấn "Thêm địa điểm". 2. Hệ thống hiển thị form nhập: tên, danh mục, mô tả, hình ảnh, tọa độ (lat,
+          lng). 3. Admin nhập thông tin và nhấn "Lưu". 4. Gọi API <code>POST /api/admin/location/add</code>. 5. Hệ thống
+          tạo node <code>:Location</code> + liên kết <code>:HAS_CATEGORY</code> và <code>:LOCATED_IN</code> (Huế). 6.
+          Đồng bộ vào file Excel. 7. Hiển thị thông báo thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu tên địa điểm đã tồn tại → Lỗi Unique Constraint. <br>• Nếu tọa độ không hợp lệ → Hiển thị lỗi
+          validation.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC16 — Sửa địa điểm</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC16" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC16', 'UC16')">⬇ Tải ảnh UC16</button></div>
+    <div class="caption">Bảng 2.19. Đặc tả Use Case UC16 — Sửa địa điểm</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Sửa địa điểm</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC16</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là quản trị viên, tôi muốn cập nhật thông tin của một địa điểm hiện có (tên, mô tả, tọa độ, hình ảnh, danh
+          mục) để đảm bảo dữ liệu luôn chính xác.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>Admin (đã đăng nhập với role = admin)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Admin nhấn nút "Sửa" bên cạnh một địa điểm trong danh sách quản trị.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Admin đã đăng nhập với quyền admin. <br>• Địa điểm cần sửa tồn tại trong hệ thống.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Thuộc tính của node <code>:Location</code> được cập nhật. <br>• Relationship <code>:HAS_CATEGORY</code>
+          được cập nhật nếu đổi danh mục. <br>• File Excel được đồng bộ.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. Admin nhấn "Sửa" trên một địa điểm. 2. Hệ thống hiển thị form với dữ liệu hiện tại. 3. Admin chỉnh sửa và
+          nhấn "Cập nhật". 4. Gọi API <code>PUT /api/admin/location/update</code>. 5. Hệ thống cập nhật node
+          <code>:Location</code>, xóa category cũ và tạo liên kết mới nếu đổi danh mục. 6. Đồng bộ vào Excel. 7. Hiển
+          thị thông báo thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu địa điểm không tồn tại → Trả về lỗi. <br>• Nếu tọa độ không hợp lệ → Hiển thị lỗi validation.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC17 — Xóa địa điểm</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC17" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC17', 'UC17')">⬇ Tải ảnh UC17</button></div>
+    <div class="caption">Bảng 2.20. Đặc tả Use Case UC17 — Xóa địa điểm</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Xóa địa điểm</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC17</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là quản trị viên, tôi muốn xóa một địa điểm không còn phù hợp khỏi hệ thống để đảm bảo chất lượng dữ liệu.
+        </td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>Admin (đã đăng nhập với role = admin)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Admin nhấn nút "Xóa" bên cạnh một địa điểm và xác nhận hành động.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Admin đã đăng nhập với quyền admin. <br>• Địa điểm cần xóa tồn tại trong hệ thống.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Node <code>:Location</code> và TẤT CẢ relationships liên quan bị xóa (DETACH DELETE). <br>• File Excel
+          được đồng bộ.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. Admin nhấn "Xóa" trên một địa điểm. 2. Hệ thống hiển thị hộp thoại xác nhận. 3. Admin xác nhận xóa. 4.
+          Gọi API <code>DELETE /api/admin/location/delete/{name}</code>. 5. Hệ thống thực thi <code>DETACH DELETE</code>
+          xóa node và tất cả relationships. 6. Đồng bộ vào Excel. 7. Hiển thị thông báo thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu địa điểm không tồn tại → Trả về lỗi. <br>• Nếu admin hủy xác nhận → Không thực hiện xóa.</td>
+      </tr>
+    </table>
+
+    <h2>Use Case UC18 — Chạy thuật toán AI</h2>
+    <div style="text-align: center;"><canvas id="canvas-UC18" width="400" height="220" style="border: 1px dashed #ccc; margin-bottom: 15px;"></canvas><br><button class="btn-download" onclick="downloadCanvas('canvas-UC18', 'UC18')">⬇ Tải ảnh UC18</button></div>
+    <div class="caption">Bảng 2.21. Đặc tả Use Case UC18 — Chạy thuật toán AI</div>
+    <table>
+      <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+      </tr>
+      <tr>
+        <th><strong>Use Case Name</strong></th>
+        <td>Chạy thuật toán AI</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case ID</strong></th>
+        <td>UC18</td>
+      </tr>
+      <tr>
+        <th><strong>Use Case Description</strong></th>
+        <td>Là quản trị viên, tôi muốn kích hoạt chạy lại toàn bộ thuật toán AI (PageRank, Node Similarity) để cập nhật
+          các chỉ số phân tích cho hệ thống gợi ý.</td>
+      </tr>
+      <tr>
+        <th><strong>Actor</strong></th>
+        <td>Admin (đã đăng nhập với role = admin)</td>
+      </tr>
+      <tr>
+        <th><strong>Trigger</strong></th>
+        <td>Admin nhấn nút "Chạy thuật toán AI" trên dashboard quản trị.</td>
+      </tr>
+      <tr>
+        <th><strong>Pre-Condition</strong></th>
+        <td>• Admin đã đăng nhập với quyền admin. <br>• Neo4j GDS (Graph Data Science) đã được cài đặt.</td>
+      </tr>
+      <tr>
+        <th><strong>Post-Condition</strong></th>
+        <td>• Thuộc tính <code>pagerankScore</code>, <code>pagerankNorm</code> được cập nhật trên tất cả nodes. <br>•
+          Relationships <code>:SIMILAR_TO</code> (User-User) và <code>:LOC_SIMILAR</code> (Location-Location) được tạo
+          mới.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng chính</strong></th>
+        <td>1. Admin nhấn "Chạy thuật toán AI". 2. Gọi API <code>POST /api/admin/run-algo</code>. 3. Hệ thống thực hiện
+          tuần tự: (a) Xây dựng đồ thị projection, (b) Chạy PageRank, ghi <code>pagerankScore</code> vào node, (c) Tính
+          Node Similarity cho User-User và Location-Location, (d) Cập nhật <code>:INTERACTED</code>. 4. Trả về kết quả
+          (số nodes/rels cập nhật). 5. Hiển thị thông báo thành công.</td>
+      </tr>
+      <tr>
+        <th><strong>Luồng ngoại lệ</strong></th>
+        <td>• Nếu GDS chưa cài → Hiển thị hướng dẫn cài đặt. <br>• Nếu timeout → Hiển thị lỗi và log chi tiết.</td>
+      </tr>
+    </table>
+
+  </div>
+
+    
+
+    <script>
+        const useCases = [
+            { id: "UC01", name: "Đăng ký tài khoản", actor: "User", filename: "UC01_Đang_ky_tai_khoan" },
+            { id: "UC02", name: "Đăng nhập", actor: "User", filename: "UC02_Đang_nhap" },
+            { id: "UC03", name: "Đăng xuất", actor: "User", filename: "UC03_Đang_xuat" },
+            { id: "UC04", name: "Quên mật khẩu", actor: "User", filename: "UC04_Quen_mat_khau" },
+            { id: "UC05", name: "Cập nhật hồ sơ", actor: "User", filename: "UC05_Cap_nhat_ho_so" },
+            { id: "UC06", name: "Xem bản đồ", actor: "User", filename: "UC06_Xem_ban_đo" },
+            { id: "UC07", name: "Xem chi tiết địa điểm", actor: "User", filename: "UC07_Xem_chi_tiet_đia_điem" },
+            { id: "UC08", name: "Like địa điểm", actor: "User", filename: "UC08_Like_đia_điem" },
+            { id: "UC09", name: "Viết đánh giá", actor: "User", filename: "UC09_Viet_đanh_gia" },
+            { id: "UC10", name: "Xem gợi ý AI", actor: "User", filename: "UC10_Xem_goi_y_AI" },
+            { id: "UC11", name: "Sắp xếp lộ trình", actor: "User", filename: "UC11_Sap_xep_lo_trinh" },
+            { id: "UC12", name: "Lưu lộ trình", actor: "User", filename: "UC12_Luu_lo_trinh" },
+            { id: "UC13", name: "Xem lịch sử", actor: "User", filename: "UC13_Xem_lich_su" },
+            { id: "UC14", name: "Quản lý người dùng", actor: "Admin", filename: "UC14_Quan_ly_nguoi_dung" },
+            { id: "UC15", name: "Thêm địa điểm", actor: "Admin", filename: "UC15_Them_đia_điem" },
+            { id: "UC16", name: "Sửa địa điểm", actor: "Admin", filename: "UC16_Sua_đia_điem" },
+            { id: "UC17", name: "Xóa địa điểm", actor: "Admin", filename: "UC17_Xoa_đia_điem" },
+            { id: "UC18", name: "Chạy thuật toán AI", actor: "Admin", filename: "UC18_Chay_thuat_toan_AI" },
+        ];
+
+        function drawActor(ctx, x, y, name) {
+            ctx.strokeStyle = '#1a5b9e';
+            ctx.lineWidth = 2.5;
+            ctx.fillStyle = '#1a5b9e';
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 12px Arial';
+            
+            ctx.beginPath();
+            ctx.arc(x, y - 40, 12, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y - 28);
+            ctx.lineTo(x, y + 10);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x - 15, y - 10);
+            ctx.lineTo(x + 15, y - 10);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y + 10);
+            ctx.lineTo(x - 15, y + 35);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y + 10);
+            ctx.lineTo(x + 15, y + 35);
+            ctx.stroke();
+            
+            ctx.fillText(name, x, y + 55);
+        }
+
+        function drawUseCase(ctx, id, name, actor) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 400, 220);
+            
+            // Draw title at top
+            ctx.fillStyle = '#333333';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(id + ' - ' + name, 15, 25);
+            
+            ctx.strokeStyle = '#6495ed';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(150, 40, 230, 160);
+            
+            ctx.fillStyle = '#1a5b9e';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Hệ thống', 265, 60);
+            
+            drawActor(ctx, 60, 120, actor);
+            
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(75, 110);
+            ctx.lineTo(190, 120);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#3498db';
+            ctx.beginPath();
+            ctx.ellipse(265, 120, 75, 30, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const words = name.split(' ');
+            if (words.length > 3) {
+                const half = Math.ceil(words.length / 2);
+                ctx.fillText(words.slice(0, half).join(' '), 265, 113);
+                ctx.fillText(words.slice(half).join(' '), 265, 127);
+            } else {
+                ctx.fillText(name, 265, 120);
+            }
+        }
+
+        function drawOverallUseCase() {
+            const canvas = document.getElementById('canvas-overall');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 800, 1000);
+            
+            // Title
+            ctx.fillStyle = '#333333';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Biểu đồ Use Case Tổng Quan - Huế Travel AI', 400, 30);
+            
+            ctx.strokeStyle = '#6495ed';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(200, 60, 400, 920);
+            
+            ctx.fillStyle = '#1a5b9e';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('Hệ thống Huế Travel AI', 400, 90);
+            
+            drawActor(ctx, 100, 500, 'User');
+            drawActor(ctx, 700, 500, 'Admin');
+            
+            function drawOval(x, y, text) {
+                ctx.fillStyle = '#3498db';
+                ctx.beginPath();
+                ctx.ellipse(x, y, 95, 25, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, x, y);
+            }
+            
+            let startY = 130;
+            for(let i=0; i<13; i++) {
+                const uc = useCases[i];
+                ctx.strokeStyle = '#888';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(120, 500);
+                ctx.lineTo(205, startY);
+                ctx.stroke();
+                
+                drawOval(300, startY, uc.id + ' - ' + uc.name);
+                startY += 65;
+            }
+            
+            let startYAdmin = 350;
+            for(let i=13; i<18; i++) {
+                const uc = useCases[i];
+                ctx.strokeStyle = '#888';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(680, 500);
+                ctx.lineTo(595, startYAdmin);
+                ctx.stroke();
+                
+                drawOval(500, startYAdmin, uc.id + ' - ' + uc.name);
+                startYAdmin += 80;
+            }
+        }
+
+        function downloadCanvas(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        window.onload = function() {
+            drawOverallUseCase();
+            useCases.forEach(uc => {
+                const canvas = document.getElementById('canvas-' + uc.id);
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    drawUseCase(ctx, uc.id, uc.name, uc.actor);
+                    
+                    // Update button text to include full name if not already
+                    const btn = canvas.nextElementSibling.nextElementSibling;
+                    if(btn && btn.tagName === 'BUTTON') {
+                        btn.innerHTML = '⬇ Tải ảnh ' + uc.id + ' - ' + uc.name;
+                        btn.setAttribute('onclick', `downloadCanvas('canvas-${uc.id}', '${uc.filename}')`);
+                    }
+                }
+            });
+        };
+    </script>
+</body>
+
+
+</html>

@@ -79,44 +79,10 @@ Ngoài các yêu cầu chức năng, hệ thống cần đảm bảo các yêu c
 
 Hình 2.1 mô tả biểu đồ Use Case tổng quan của hệ thống với 2 tác nhân chính: Người dùng (User) và Quản trị viên (Admin).
 
-*Hình 2.1. Biểu đồ Use Case tổng quan hệ thống Huế Travel AI*
 
-```
-                    ┌──────────────────────────────────────────────────────┐
-                    │             HUẾ TRAVEL AI SYSTEM                     │
-                    │                                                      │
-                    │  ┌──────────────┐    ┌──────────────┐               │
-         ┌──────┐   │  │  UC01: Đăng  │    │  UC02: Đăng  │               │
-         │      │───┼──│  ký tài khoản│    │  nhập        │               │
-         │      │   │  └──────────────┘    └──────────────┘               │
-         │      │   │                                                      │
-         │ User │   │  ┌──────────────┐    ┌──────────────┐               │
-         │      │───┼──│  UC06: Xem   │    │  UC08: Like  │               │
-         │      │   │  │  bản đồ      │    │  địa điểm    │               │
-         │      │   │  └──────────────┘    └──────────────┘               │
-         │      │   │                                                      │
-         │      │   │  ┌──────────────┐    ┌──────────────┐               │
-         │      │───┼──│  UC09: Viết  │    │  UC10: Xem   │               │
-         │      │   │  │  đánh giá    │    │  gợi ý AI    │               │
-         └──────┘   │  └──────────────┘    └──────────────┘               │
-                    │                                                      │
-                    │  ┌──────────────┐    ┌──────────────┐               │
-         ┌──────┐   │  │  UC11: Tạo   │    │  UC12: Lưu   │               │
-         │      │───┼──│  lộ trình AI │    │  lộ trình     │               │
-         │      │   │  └──────────────┘    └──────────────┘               │
-         │      │   │                                                      │
-         │Admin │   │  ┌──────────────┐    ┌──────────────┐               │
-         │      │───┼──│  UC14: Quản  │    │  UC15-17:    │               │
-         │      │   │  │  lý user     │    │  CRUD địa    │               │
-         │      │   │  └──────────────┘    │  điểm        │               │
-         │      │   │                      └──────────────┘               │
-         │      │   │  ┌──────────────┐                                   │
-         │      │───┼──│  UC18: Chạy  │                                   │
-         └──────┘   │  │  thuật toán  │                                   │
-                    │  └──────────────┘                                   │
-                    │                                                      │
-                    └──────────────────────────────────────────────────────┘
-```
+
+![Biểu đồ Use Case Tổng Quan - Huế Travel AI](images/UC_Tong_Quan.png)
+<p align="center"><i>Hình 2.1. Biểu đồ Use Case tổng quan hệ thống Huế Travel AI</i></p>
 
 *Ghi chú:* Admin kế thừa toàn bộ chức năng của User, đồng thời có thêm các chức năng quản trị (UC14–UC18).
 
@@ -126,15 +92,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.1. Use Case UC01 — Đăng ký tài khoản
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │ Đăng ký tài khoản│  │
-        User             │  ╰──────────────────╯  │
-   (chưa đăng nhập)     └────────────────────────┘
-```
+![Biểu đồ Use Case UC01 - Đăng ký tài khoản](images/UC01_Đang_ky_tai_khoan.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC01 - Đăng ký tài khoản</i></p>
+
 
 *Bảng 2.4. Đặc tả Use Case UC01 — Đăng ký tài khoản*
 
@@ -152,15 +112,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.2. Use Case UC02 — Đăng nhập
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │    Đăng nhập      │  │
-        User             │  ╰──────────────────╯  │
-   (chưa đăng nhập)     └────────────────────────┘
-```
+![Biểu đồ Use Case UC01 - Đăng ký tài khoản](images/UC01_Đang_ky_tai_khoan.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC01 - Đăng ký tài khoản</i></p>
+
 
 *Bảng 2.5. Đặc tả Use Case UC02 — Đăng nhập*
 
@@ -178,15 +132,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.3. Use Case UC03 — Đăng xuất
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │    Đăng xuất      │  │
-        User             │  ╰──────────────────╯  │
-   (đã đăng nhập)       └────────────────────────┘
-```
+![Biểu đồ Use Case UC02 - Đăng nhập](images/UC02_Đang_nhap.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC02 - Đăng nhập</i></p>
+
 
 *Bảng 2.6. Đặc tả Use Case UC03 — Đăng xuất*
 
@@ -204,15 +152,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.4. Use Case UC04 — Quên mật khẩu
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │  Quên mật khẩu   │  │
-        User             │  ╰──────────────────╯  │
-   (chưa đăng nhập)     └────────────────────────┘
-```
+![Biểu đồ Use Case UC03 - Đăng xuất](images/UC03_Đang_xuat.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC03 - Đăng xuất</i></p>
+
 
 *Bảng 2.7. Đặc tả Use Case UC04 — Quên mật khẩu*
 
@@ -230,15 +172,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.5. Use Case UC05 — Cập nhật hồ sơ
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │ Cập nhật hồ sơ   │  │
-        User             │  ╰──────────────────╯  │
-   (đã đăng nhập)       └────────────────────────┘
-```
+![Biểu đồ Use Case UC04 - Quên mật khẩu](images/UC04_Quen_mat_khau.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC04 - Quên mật khẩu</i></p>
+
 
 *Bảng 2.8. Đặc tả Use Case UC05 — Cập nhật hồ sơ*
 
@@ -256,15 +192,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.6. Use Case UC06 — Xem bản đồ
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │   Xem bản đồ     │  │
-        User             │  ╰──────────────────╯  │
-  (đã/chưa đăng nhập)   └────────────────────────┘
-```
+![Biểu đồ Use Case UC05 - Cập nhật hồ sơ](images/UC05_Cap_nhat_ho_so.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC05 - Cập nhật hồ sơ</i></p>
+
 
 *Bảng 2.9. Đặc tả Use Case UC06 — Xem bản đồ*
 
@@ -282,16 +212,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.7. Use Case UC07 — Xem chi tiết địa điểm
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │ Xem chi tiết     │  │
-        User             │  │ địa điểm         │  │
-  (đã/chưa đăng nhập)   │  ╰──────────────────╯  │
-                        └────────────────────────┘
-```
+![Biểu đồ Use Case UC06 - Xem bản đồ](images/UC06_Xem_ban_đo.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC06 - Xem bản đồ</i></p>
+
 
 *Bảng 2.10. Đặc tả Use Case UC07 — Xem chi tiết địa điểm*
 
@@ -309,15 +232,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.8. Use Case UC08 — Like địa điểm
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │  Like địa điểm   │  │
-        User             │  ╰──────────────────╯  │
-   (đã đăng nhập)       └────────────────────────┘
-```
+![Biểu đồ Use Case UC07 - Xem chi tiết địa điểm](images/UC07_Xem_chi_tiet_đia_điem.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC07 - Xem chi tiết địa điểm</i></p>
+
 
 *Bảng 2.11. Đặc tả Use Case UC08 — Like địa điểm*
 
@@ -335,15 +252,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.9. Use Case UC09 — Viết đánh giá
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │  Viết đánh giá   │  │
-        User             │  ╰──────────────────╯  │
-   (đã đăng nhập)       └────────────────────────┘
-```
+![Biểu đồ Use Case UC08 - Like địa điểm](images/UC08_Like_đia_điem.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC08 - Like địa điểm</i></p>
+
 
 *Bảng 2.12. Đặc tả Use Case UC09 — Viết đánh giá*
 
@@ -361,15 +272,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.10. Use Case UC10 — Xem gợi ý AI
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │   Xem gợi ý AI   │  │
-        User             │  ╰──────────────────╯  │
-   (đã đăng nhập)       └────────────────────────┘
-```
+![Biểu đồ Use Case UC09 - Viết đánh giá](images/UC09_Viet_đanh_gia.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC09 - Viết đánh giá</i></p>
+
 
 *Bảng 2.13. Đặc tả Use Case UC10 — Xem gợi ý AI*
 
@@ -387,15 +292,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.11. Use Case UC11 — Sắp xếp lộ trình
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │ Sắp xếp lộ trình│  │
-        User             │  ╰──────────────────╯  │
-   (đã đăng nhập)       └────────────────────────┘
-```
+![Biểu đồ Use Case UC10 - Xem gợi ý AI](images/UC10_Xem_goi_y_AI.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC10 - Xem gợi ý AI</i></p>
+
 
 *Bảng 2.14. Đặc tả Use Case UC11 — Sắp xếp lộ trình*
 
@@ -413,15 +312,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.12. Use Case UC12 — Lưu lộ trình
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │  Lưu lộ trình    │  │
-        User             │  ╰──────────────────╯  │
-   (đã đăng nhập)       └────────────────────────┘
-```
+![Biểu đồ Use Case UC11 - Sắp xếp lộ trình](images/UC11_Sap_xep_lo_trinh.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC11 - Sắp xếp lộ trình</i></p>
+
 
 *Bảng 2.15. Đặc tả Use Case UC12 — Lưu lộ trình*
 
@@ -439,15 +332,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.13. Use Case UC13 — Xem lịch sử
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │  Xem lịch sử     │  │
-        User             │  ╰──────────────────╯  │
-   (đã đăng nhập)       └────────────────────────┘
-```
+![Biểu đồ Use Case UC12 - Lưu lộ trình](images/UC12_Luu_lo_trinh.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC12 - Lưu lộ trình</i></p>
+
 
 *Bảng 2.16. Đặc tả Use Case UC13 — Xem lịch sử*
 
@@ -465,15 +352,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.14. Use Case UC14 — Quản lý người dùng
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │ Quản lý người dùng│  │
-        Admin            │  ╰──────────────────╯  │
-   (role = admin)        └────────────────────────┘
-```
+![Biểu đồ Use Case UC13 - Xem lịch sử](images/UC13_Xem_lich_su.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC13 - Xem lịch sử</i></p>
+
 
 *Bảng 2.17. Đặc tả Use Case UC14 — Quản lý người dùng*
 
@@ -491,15 +372,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.15. Use Case UC15 — Thêm địa điểm
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │  Thêm địa điểm   │  │
-        Admin            │  ╰──────────────────╯  │
-   (role = admin)        └────────────────────────┘
-```
+![Biểu đồ Use Case UC14 - Quản lý người dùng](images/UC14_Quan_ly_nguoi_dung.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC14 - Quản lý người dùng</i></p>
+
 
 *Bảng 2.18. Đặc tả Use Case UC15 — Thêm địa điểm*
 
@@ -517,15 +392,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.16. Use Case UC16 — Sửa địa điểm
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │  Sửa địa điểm    │  │
-        Admin            │  ╰──────────────────╯  │
-   (role = admin)        └────────────────────────┘
-```
+![Biểu đồ Use Case UC15 - Thêm địa điểm](images/UC15_Them_đia_điem.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC15 - Thêm địa điểm</i></p>
+
 
 *Bảng 2.19. Đặc tả Use Case UC16 — Sửa địa điểm*
 
@@ -543,15 +412,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.17. Use Case UC17 — Xóa địa điểm
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │  Xóa địa điểm    │  │
-        Admin            │  ╰──────────────────╯  │
-   (role = admin)        └────────────────────────┘
-```
+![Biểu đồ Use Case UC16 - Sửa địa điểm](images/UC16_Sua_đia_điem.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC16 - Sửa địa điểm</i></p>
+
 
 *Bảng 2.20. Đặc tả Use Case UC17 — Xóa địa điểm*
 
@@ -569,15 +432,9 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 #### 2.4.2.18. Use Case UC18 — Chạy thuật toán AI
 
-```
-                        ┌────────────────────────┐
-                        │       Hệ thống         │
-           ○            │                        │
-          /|\    ────►   │  ╭──────────────────╮  │
-          / \            │  │Chạy thuật toán AI│  │
-        Admin            │  ╰──────────────────╯  │
-   (role = admin)        └────────────────────────┘
-```
+![Biểu đồ Use Case UC17 - Xóa địa điểm](images/UC17_Xoa_đia_điem.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC17 - Xóa địa điểm</i></p>
+
 
 *Bảng 2.21. Đặc tả Use Case UC18 — Chạy thuật toán AI*
 
@@ -602,282 +459,9 @@ Hệ thống được thiết kế theo mô hình **kiến trúc 3 tầng (3-Lay
 
 *Hình 2.2. Kiến trúc 3 tầng của hệ thống Huế Travel AI*
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    TẦNG TRÌNH BÀY (Presentation Layer)          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
-│  │   HTML5      │  │   CSS3      │  │ JavaScript  │            │
-│  │  (Jinja2)   │  │ (Modular)   │  │ (Vanilla)   │            │
-│  └─────────────┘  └─────────────┘  └─────────────┘            │
-│                         │                                      │
-│  ┌─────────────────────┴──────────────────────┐                │
-│  │           Leaflet.js (Bản đồ tương tác)    │                │
-│  └────────────────────────────────────────────┘                │
-└─────────────────────────────────────────────────────────────────┘
-                              │ HTTP/JSON
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                 TẦNG NGHIỆP VỤ (Business Layer)                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │                  Flask Application                       │   │
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐   │   │
-│  │  │ auth.py  │ │ api.py   │ │ admin.py │ │ main.py  │   │   │
-│  │  │ (Xác     │ │ (API     │ │ (Quản    │ │ (Trang   │   │   │
-│  │  │  thực)   │ │  cốt lõi)│ │  trị)    │ │  chủ)    │   │   │
-│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘   │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                              │                                  │
-│  ┌───────────────────────────┴───────────────────────────┐     │
-│  │    Thuật toán phân tích (PageRank, CF, Content-Based) │     │
-│  └───────────────────────────────────────────────────────┘     │
-└─────────────────────────────────────────────────────────────────┘
-                              │ Cypher Query
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  TẦNG DỮ LIỆU (Data Layer)                      │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │              Neo4j Graph Database                        │   │
-│  │                                                          │   │
-│  │   (User)──[:LIKED]──→(Location)──[:HAS_CATEGORY]──→(Cat)│   │
-│  │      │                   │                               │   │
-│  │      └──[:REVIEWED]──────┘                               │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
-│  ┌─────────────┐                                                │
-│  │ Neo4j GDS   │ (PageRank, Node Similarity)                    │
-│  └─────────────┘                                                │
-└─────────────────────────────────────────────────────────────────┘
-```
+![Biểu đồ Use Case UC18 - Chạy thuật toán AI](images/UC18_Chay_thuat_toan_AI.png)
+<p align="center"><i>Hình: Biểu đồ Use Case UC18 - Chạy thuật toán AI</i></p>
 
-### 2.5.2. Mô tả chi tiết các tầng
-
-**a) Tầng Trình bày (Presentation Layer):**
-
-Chịu trách nhiệm hiển thị giao diện và tương tác với người dùng. Sử dụng HTML5 kết hợp Jinja2 templating engine để tạo trang động, CSS3 modular (chia thành 10 file theo chức năng) để định dạng giao diện, và JavaScript ES6+ (Vanilla JS) để xử lý tương tác phía client. Thư viện Leaflet.js được tích hợp để hiển thị bản đồ tương tác với markers, popup và heatmap.
-
-**b) Tầng Nghiệp vụ (Business Layer):**
-
-Chịu trách nhiệm xử lý logic nghiệp vụ của hệ thống. Flask framework đóng vai trò trung tâm, tiếp nhận HTTP requests và điều phối đến các Blueprint tương ứng. Các thuật toán AI trọng tâm (PageRank, Collaborative Filtering, Content-Based Filtering) được triển khai tại tầng này, bên cạnh tiện ích nhỏ hỗ trợ sắp xếp lộ trình cơ bản.
-
-**c) Tầng Dữ liệu (Data Layer):**
-
-Chịu trách nhiệm lưu trữ và truy vấn dữ liệu. Neo4j Graph Database lưu trữ toàn bộ dữ liệu dưới dạng nodes và relationships. Thư viện Neo4j GDS cung cấp các thuật toán phân tích đồ thị (PageRank, Node Similarity). Python neo4j driver kết nối và thực thi truy vấn Cypher từ tầng nghiệp vụ.
-
-### 2.5.3. Luồng dữ liệu tổng quát
-
-*Hình 2.3. Luồng dữ liệu tổng quát trong hệ thống*
-
-```
-User Request → Flask Routes → Business Logic → Neo4j Cypher Query →
-    → Result Processing → JSON Response → JavaScript → UI Update
-```
-
-## 2.6. Thiết kế Cơ sở dữ liệu Đồ thị
-
-### 2.6.1. Lược đồ dữ liệu (Graph Schema)
-
-Lược đồ cơ sở dữ liệu đồ thị của hệ thống được thiết kế với 5 loại node (label) và 7 loại quan hệ (relationship), đảm bảo mô hình hóa đầy đủ các thực thể và mối quan hệ trong bài toán gợi ý du lịch.
-
-**a) Các Node (Đỉnh):**
-
-*Bảng 2.6. Thiết kế các node trong lược đồ đồ thị*
-
-| Label | Mô tả | Thuộc tính chính |
-|---|---|---|
-| `:User` | Người dùng | `name` (PK), `password`, `email`, `fullname`, `role`, `created_at` |
-| `:Location` | Địa điểm du lịch | `name` (PK), `desc`, `lat`, `lng`, `image`, `rating`, `reviewCount`, `pagerankScore`, `pagerankNorm` |
-| `:Category` | Danh mục | `name` (PK) |
-| `:City` | Thành phố | `name` (PK) |
-| `:Itinerary` | Lộ trình đã lưu | `id` (PK), `title`, `data` (JSON), `days`, `created_at` |
-
-**b) Các Relationship (Cạnh):**
-
-*Bảng 2.7. Thiết kế các relationship trong lược đồ đồ thị*
-
-| Quan hệ | Mô tả | Thuộc tính | Hướng |
-|---|---|---|---|
-| `:LIKED` | User thích Location | `timestamp`, `auto_from_review` | User → Location |
-| `:REVIEWED` | User đánh giá Location | `id`, `rating`, `comment`, `sentiment`, `topics`, `timestamp` | User → Location |
-| `:INTERACTED` | Tương tác tổng hợp (tạo tự động) | `weight`, `liked_score`, `review_score`, `created_at` | User → Location |
-| `:HAS_CATEGORY` | Phân loại địa điểm | — | Location → Category |
-| `:LOCATED_IN` | Vị trí địa lý | — | Location → City |
-| `:RELATED_TO` | Liên kết giữa các địa điểm | `weight` | Location ↔ Location |
-| `:CREATED` | User tạo lộ trình | — | User → Itinerary |
-
-**c) Sơ đồ quan hệ tổng thể:**
-
-*Hình 2.4. Sơ đồ quan hệ tổng thể của lược đồ đồ thị*
-
-```
-┌─────────────────┐          ┌─────────────────┐
-│      USER       │          │    LOCATION     │
-├─────────────────┤          ├─────────────────┤
-│ name (PK)       │──LIKED──→│ name (PK)       │
-│ password        │          │ desc            │
-│ email           │─REVIEWED→│ lat, lng        │
-│ fullname        │          │ image           │
-│ role            │─INTERACT→│ rating          │
-│ created_at      │          │ pagerankScore   │
-└────────┬────────┘          └───┬────────┬────┘
-         │                      │        │
-         │ CREATED          HAS_│   LOCATED
-         ▼                 CATEG│        │_IN
-┌─────────────────┐          │        ▼
-│   ITINERARY     │          ▼   ┌─────────┐
-├─────────────────┤   ┌─────────┐│  CITY   │
-│ id (PK)         │   │CATEGORY ││─────────│
-│ title           │   │─────────││ name(PK)│
-│ data (JSON)     │   │ name(PK)│└─────────┘
-│ days            │   └─────────┘
-│ created_at      │
-└─────────────────┘
-```
-
-### 2.6.2. Ràng buộc và Chỉ mục (Constraints & Indexes)
-
-Để đảm bảo tính toàn vẹn dữ liệu và hiệu suất truy vấn, hệ thống thiết kế các ràng buộc duy nhất (Unique Constraints) và chỉ mục (Indexes) sau:
-
-*Bảng 2.8. Ràng buộc và chỉ mục cơ sở dữ liệu*
-
-| Loại | Đối tượng | Thuộc tính | Mục đích |
-|---|---|---|---|
-| Unique Constraint | `:User` | `name` | Đảm bảo username không trùng lặp |
-| Unique Constraint | `:Location` | `name` | Đảm bảo tên địa điểm duy nhất |
-| Unique Constraint | `:Category` | `name` | Đảm bảo tên danh mục duy nhất |
-| Index | `:User` | `email` | Tăng tốc truy vấn theo email |
-| Index | `:Location` | `pagerankScore` | Tăng tốc sắp xếp theo độ phổ biến |
-
-## 2.7. Thiết kế API
-
-### 2.7.1. Nguyên tắc thiết kế RESTful API
-
-Hệ thống API được thiết kế theo kiến trúc REST (Representational State Transfer), tuân thủ các nguyên tắc:
-
-- Sử dụng **HTTP methods** phù hợp: GET (đọc), POST (tạo mới), PUT (cập nhật), DELETE (xóa).
-- URL được thiết kế theo dạng **tài nguyên** (resource-based): `/api/locations`, `/api/reviews/{location}`.
-- Dữ liệu trả về theo định dạng **JSON** thống nhất.
-- Mỗi response bao gồm trường `success` (boolean) để phân biệt thành công/thất bại.
-
-### 2.7.2. Danh sách API Endpoints
-
-Hệ thống triển khai tổng cộng **32 endpoints**, chia thành 5 nhóm chức năng. Dưới đây trình bày các endpoints chính.
-
-**a) API Xác thực (Authentication — 8 endpoints):**
-
-*Bảng 2.9. API Xác thực*
-
-| Method | Endpoint              | Request Body                      | Response                   |
-| ------ | --------------------- | --------------------------------- | -------------------------- |
-| POST   | /api/login            | `{username, password}`            | `{success, message, role}` |
-| POST   | /api/register         | `{username, password, email}`     | `{success, message}`       |
-| POST   | /api/logout           | —                                 | `{success}`                |
-| POST   | /api/verify-account   | `{username, email}`               | `{success, message}`       |
-| POST   | /api/reset-password   | `{username, email, new_password}` | `{success, message}`       |
-| GET    | /api/current_user     | —                                 | `{logged_in, username}`    |
-| GET,POST | /api/profile        | `{fullname, email}`               | `{success, data}`          |
-
-**b) API Địa điểm và Tương tác (8 endpoints):**
-
-*Bảng 2.10. API Địa điểm và Tương tác*
-
-| Method | Endpoint                       | Request Body                  | Response                        |
-| ------ | ------------------------------ | ----------------------------- | ------------------------------- |
-| GET    | /api/locations                 | `?category=`                  | `[{name, lat, lng, ...}]`       |
-| GET    | /api/history/{user}            | —                             | `[{name, image, lat, lng}]`     |
-| GET    | /api/reviews/{location}        | —                             | `[{username, rating, comment}]` |
-| POST   | /api/like                      | `{location_name}`             | `{liked, message}`              |
-| POST   | /api/review                    | `{location, rating, comment}` | `{success, stats, sentiment}`   |
-| DELETE | /api/review                    | `{location, review_id}`       | `{success}`                     |
-| GET    | /api/similar/{location}        | —                             | `[{name, similarity, ...}]`     |
-| GET    | /api/similar-users/{username}  | —                             | `[{username, similarity}]`      |
-
-**c) API Trí tuệ Nhân tạo (7 endpoints):**
-
-*Bảng 2.11. API Trí tuệ Nhân tạo*
-
-| Method | Endpoint                         | Request Body                     | Response                      |
-| ------ | -------------------------------- | -------------------------------- | ----------------------------- |
-| GET    | /api/recommend/{username}        | —                                | `[{name, score, reason, ...}]`|
-| POST   | /api/planner/generate            | `{days, preferences, use_liked}` | `[{day, activities}]`         |
-| POST   | /api/planner/suggest-replacement | `{current, exclude_list}`        | `{replacement}`               |
-| GET    | /api/itineraries                 | —                                | `[{id, title, data}]`         |
-| POST   | /api/itineraries                 | `{title, data, days}`            | `{success, id}`               |
-| DELETE | /api/itineraries/{id}            | —                                | `{success}`                   |
-| GET    | /api/user/activity               | —                                | `{likes, reviews}`            |
-
-**d) API Quản trị (9 endpoints):**
-
-*Bảng 2.12. API Quản trị*
-
-| Method | Endpoint                          | Request Body                  | Response                      |
-| ------ | --------------------------------- | ----------------------------- | ----------------------------- |
-| GET    | /api/admin/users                  | —                             | `[{name, role, liked_count}]` |
-| DELETE | /api/admin/users/{username}       | —                             | `{success}`                   |
-| GET    | /api/admin/user_comments/{user}   | —                             | `[{location, comment, ...}]`  |
-| GET    | /api/admin/user_profile/{user}    | —                             | `{name, email, stats}`        |
-| GET    | /api/admin/stats                  | —                             | `{users, locations, reviews}` |
-| POST   | /api/admin/run-algo               | —                             | `{success, message}`          |
-| POST   | /api/admin/location/add           | `{name, desc, lat, lng, ...}` | `{success}`                   |
-| PUT    | /api/admin/location/update        | `{name, desc, lat, lng, ...}` | `{success}`                   |
-| DELETE | /api/admin/location/delete/{name} | —                             | `{success}`                   |
-
-### 2.7.3. Định dạng Response
-
-Tất cả API trả về response theo định dạng JSON thống nhất:
-
-**Trường hợp thành công:**
-
-```json
-{
-    "success": true,
-    "data": [...],
-    "message": "Thành công"
-}
-```
-
-**Trường hợp lỗi:**
-
-```json
-{
-    "success": false,
-    "error": "Mô tả lỗi chi tiết",
-    "code": 400
-}
-```
-
-## 2.8. Thiết kế Giao diện
-
-### 2.8.1. Wireframe Trang chủ
-
-Giao diện trang chủ được thiết kế theo bố cục 2 cột: sidebar bên trái chứa các chức năng tương tác, bản đồ chiếm phần lớn diện tích bên phải.
-
-*Hình 2.5. Wireframe trang chủ*
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│  ┌──────────────────────────┐  ┌───────────────────────────────────┐│
-│  │ 🗺️ Huế Travel AI        │  │                                   ││
-│  │    Hệ gợi ý du lịch      │  │                                   ││
-│  │                          │  │                                   ││
-│  │  [👤 Đăng nhập]          │  │          BẢN ĐỒ LEAFLET           ││
-│  ├──────────────────────────┤  │                                   ││
-│  │  🔍 [Tìm kiếm user...]   │  │     📍 Markers địa điểm          ││
-│  ├──────────────────────────┤  │                                   ││
-│  │                          │  │                                   ││
-│  │  [✨ Gợi ý AI] [🧭 Khám  │  │     🔥 Heatmap overlay            ││
-│  │      phá]                │  │                                   ││
-│  ├──────────────────────────┤  │                                   ││
-│  │                          │  ├───────────────────────────────────┤│
-│  │  📍 Địa điểm nổi bật     │  │  [🔥 Bản đồ nhiệt]               ││
-│  │  [🔍 Tìm nhanh...]       │  │                                   ││
-│  │                          │  │  ● PageRank   ● Gợi ý AI         ││
-│  │  [Tất cả] [Di tích]      │  │                                   ││
-│  │  [Ẩm thực] [Tâm linh]    │  │                                   ││
-│  │                          │  │                                   ││
-│  │  ┌────────────────────┐  │  │                                   ││
-│  │  │ 🏯 Đại Nội        │  │  │                                   ││
-│  │  │ ⭐ 4.7  📍 1.2km   │  │  │                                   ││
-│  │  └────────────────────┘  │  │                                   ││
 │  │  ┌────────────────────┐  │  │                                   ││
 │  │  │ 🛕 Chùa Thiên Mụ  │  │  │                                   ││
 │  │  │ ⭐ 4.8  📍 2.5km   │  │  │                                   ││
