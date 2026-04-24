@@ -1,4 +1,4 @@
-# CHƯƠNG 2: PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG
+﻿# CHƯƠNG 2: PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG
 
 Chương này trình bày quá trình phân tích yêu cầu và thiết kế hệ thống Huế Travel AI, bao gồm: phân tích các yêu cầu chức năng và phi chức năng; mô hình hóa hệ thống bằng biểu đồ Use Case; thiết kế kiến trúc phân lớp; thiết kế lược đồ cơ sở dữ liệu đồ thị; thiết kế RESTful API; wireframe giao diện; và flowchart các thuật toán chính.
 
@@ -451,38 +451,177 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng ngoại lệ** | • Nếu GDS chưa cài → Hiển thị hướng dẫn cài đặt. • Nếu timeout → Hiển thị lỗi và log chi tiết. |
 
 
+
 ## 2.5. Thiết kế Kiến trúc Hệ thống
 
 ### 2.5.1. Mô hình kiến trúc tổng quan
 
 Hệ thống được thiết kế theo mô hình **kiến trúc 3 tầng (3-Layer Architecture)**, tách biệt rõ ràng giữa giao diện, xử lý nghiệp vụ và truy cập dữ liệu. Mô hình này đảm bảo tính module hóa, dễ bảo trì và mở rộng.
 
-*Hình 2.2. Kiến trúc 3 tầng của hệ thống Huế Travel AI*
+*Bảng 2.22. Kiến trúc 3 tầng của hệ thống Huế Travel AI*
 
-![Biểu đồ Use Case UC18 - Chạy thuật toán AI](images/UC18_Chay_thuat_toan_AI.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC18 - Chạy thuật toán AI</i></p>
+| Tầng | Tên gọi | Công nghệ | Vai trò |
+|------|---------|-----------|---------|
+| **Presentation Layer** | Tầng trình bày | HTML5, CSS3, JavaScript, Leaflet.js, Chart.js | Hiển thị giao diện bản đồ tương tác, sidebar, modal, biểu đồ phân tích AI |
+| **Business Logic Layer** | Tầng xử lý nghiệp vụ | Flask (Python), Flask-Login, Blueprint | Xử lý logic nghiệp vụ: xác thực, gợi ý AI, phân tích cảm xúc, tạo lộ trình |
+| **Data Access Layer** | Tầng truy cập dữ liệu | Neo4j (Cypher), Neo4j GDS, neo4j-python-driver | Lưu trữ dữ liệu đồ thị, thực thi thuật toán PageRank, Jaccard Similarity |
 
-│  │  ┌────────────────────┐  │  │                                   ││
-│  │  │ 🛕 Chùa Thiên Mụ  │  │  │                                   ││
-│  │  │ ⭐ 4.8  📍 2.5km   │  │  │                                   ││
-│  │  └────────────────────┘  │  │                                   ││
-│  │                          │  │                                   ││
-│  └──────────────────────────┘  └───────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────────────┘
-```
+### 2.5.2. Tổ chức module hệ thống
+
+Tầng Business Logic được tổ chức theo mô hình **Blueprint** của Flask, chia thành các module độc lập:
+
+*Bảng 2.23. Tổ chức module Backend*
+
+| Module | File | Chức năng chính |
+|--------|------|----------------|
+| **Main** | `routes/main.py` | Phục vụ trang chủ (serve `index.html`) |
+| **Auth** | `routes/auth.py` | Đăng ký, đăng nhập, đăng xuất, quên mật khẩu, hồ sơ |
+| **API** | `routes/api.py` | API dữ liệu chính: địa điểm, gợi ý AI, đánh giá, lộ trình, like |
+| **Admin** | `routes/admin.py` | Quản trị: CRUD địa điểm, quản lý user, thống kê, trigger thuật toán |
+| **DB Package** | `db/` | Tầng truy cập dữ liệu: connection, user, location, planner, itinerary, sync |
+| **AI Engine** | `setup_algo.py` | Thuật toán Hybrid: PageRank, User/Location Similarity |
+| **Utils** | `utils.py` | Phân tích cảm xúc (Sentiment), phân loại chủ đề (Topic Classification) |
+
+## 2.6. Thiết kế Cơ sở dữ liệu Đồ thị
+
+### 2.6.1. Lược đồ Node
+
+Hệ thống sử dụng Neo4j — cơ sở dữ liệu đồ thị — với 5 loại node chính:
+
+*Bảng 2.24. Danh sách các loại Node trong Neo4j*
+
+| Node Label | Mô tả | Thuộc tính chính |
+|------------|--------|-----------------|
+| `:User` | Người dùng hệ thống | `name` (unique), `password_hash`, `email`, `fullname`, `role`, `created_at` |
+| `:Location` | Địa điểm du lịch | `id` (UUID), `name` (unique), `desc`, `lat`, `lng`, `image`, `pagerankScore`, `pagerankNorm`, `pagerankConnect`, `pagerankConnectNorm`, `avgRating`, `reviewCount` |
+| `:Category` | Danh mục phân loại | `name` (unique) — VD: "Di tích lịch sử", "Ẩm thực", "Chùa chiền" |
+| `:City` | Thành phố | `name` — VD: "Huế" |
+| `:Itinerary` | Lộ trình đã lưu | `id` (UUID), `title`, `data` (JSON), `days`, `created_at` |
+
+### 2.6.2. Lược đồ Relationship
+
+*Bảng 2.25. Danh sách các loại Relationship*
+
+| Relationship | Hướng | Mô tả | Thuộc tính |
+|-------------|-------|-------|-----------|
+| `:LIKED` | User → Location | Người dùng thích địa điểm | `timestamp` |
+| `:REVIEWED` | User → Location | Người dùng đánh giá địa điểm | `rating` (0-5), `comment`, `sentiment`, `topics`, `timestamp`, `review_id` |
+| `:HAS_CATEGORY` | Location → Category | Địa điểm thuộc danh mục | — |
+| `:LOCATED_IN` | Location → City | Địa điểm nằm trong thành phố | — |
+| `:CREATED` | User → Itinerary | Người dùng tạo lộ trình | — |
+| `:INTERACTED` | User → Location | Tổng hợp tương tác (tự động tạo bởi AI Engine) | `weight` (0-6), `liked_score`, `review_score`, `created_at` |
+| `:RELATED_TO` | Location ↔ Location | Liên kết giữa các địa điểm (co-occurrence + category) | `weight` |
+| `:SIMILAR_TO` | User → User | Độ tương đồng giữa users (Jaccard, GDS) | `score` (0-1) |
+| `:LOC_SIMILAR` | Location → Location | Độ tương đồng giữa địa điểm (Jaccard, GDS) | `score` (0-1) |
+
+*Ghi chú:* Các relationship `:INTERACTED`, `:RELATED_TO`, `:SIMILAR_TO`, `:LOC_SIMILAR` được tạo tự động bởi thuật toán AI (file `setup_algo.py`) khi Admin kích hoạt "Chạy thuật toán AI" (UC18).
+
+### 2.6.3. Ràng buộc và Chỉ mục
+
+*Bảng 2.26. Ràng buộc (Constraints) trong Neo4j*
+
+| Loại | Áp dụng | Mục đích |
+|------|---------|----------|
+| UNIQUE | `User.name` | Đảm bảo username không trùng |
+| UNIQUE | `Location.name` | Đảm bảo tên địa điểm không trùng |
+| UNIQUE | `Category.name` | Đảm bảo tên danh mục không trùng |
+| INDEX | `Location.lat`, `Location.lng` | Tăng tốc truy vấn theo tọa độ |
+
+## 2.7. Thiết kế RESTful API
+
+Hệ thống cung cấp 32 endpoints RESTful API, chia thành 5 nhóm chức năng chính. Tất cả API sử dụng prefix `/api/` và trả về dữ liệu JSON.
+
+### 2.7.1. Nhóm Xác thực (Authentication)
+
+*Bảng 2.27. API nhóm Xác thực*
+
+| Method | Endpoint | Mô tả | Auth |
+|--------|----------|-------|------|
+| POST | `/api/register` | Đăng ký tài khoản mới | Không |
+| POST | `/api/login` | Đăng nhập | Không |
+| POST | `/api/logout` | Đăng xuất | Có |
+| POST | `/api/verify-account` | Xác minh tài khoản (quên MK - bước 1) | Không |
+| POST | `/api/reset-password` | Đặt lại mật khẩu (quên MK - bước 2) | Không |
+| GET | `/api/current_user` | Lấy thông tin user hiện tại | Không |
+| GET/POST | `/api/profile` | Lấy/cập nhật hồ sơ cá nhân | Có |
+
+### 2.7.2. Nhóm Địa điểm và Tương tác
+
+*Bảng 2.28. API nhóm Địa điểm*
+
+| Method | Endpoint | Mô tả | Auth |
+|--------|----------|-------|------|
+| GET | `/api/locations` | Lấy danh sách địa điểm (hỗ trợ lọc category) | Không |
+| GET | `/api/history/{username}` | Lấy lịch sử tương tác | Có |
+| POST | `/api/like` | Thích/bỏ thích địa điểm (toggle) | Có |
+| POST | `/api/review` | Thêm/sửa đánh giá | Có |
+| DELETE | `/api/review` | Xóa đánh giá | Có |
+| GET | `/api/reviews/{location}` | Lấy danh sách đánh giá của địa điểm | Không |
+| GET | `/api/similar/{location}` | Tìm địa điểm tương tự | Không |
+| GET | `/api/similar-users/{username}` | Tìm user tương tự (Jaccard) | Có |
+| GET | `/api/user/activity` | Tổng hợp hoạt động (likes, reviews) | Có |
+
+### 2.7.3. Nhóm AI Recommendation
+
+*Bảng 2.29. API nhóm AI*
+
+| Method | Endpoint | Mô tả | Auth |
+|--------|----------|-------|------|
+| GET | `/api/recommend/{username}` | Gợi ý AI Hybrid (Collab + Content + PageRank) | Có |
+
+### 2.7.4. Nhóm Lộ trình
+
+*Bảng 2.30. API nhóm Lộ trình*
+
+| Method | Endpoint | Mô tả | Auth |
+|--------|----------|-------|------|
+| POST | `/api/planner/generate` | Tạo lộ trình thông minh | Có |
+| POST | `/api/planner/suggest-replacement` | Gợi ý hoạt động thay thế | Có |
+| GET | `/api/itineraries` | Lấy danh sách lộ trình đã lưu | Có |
+| POST | `/api/itineraries` | Lưu lộ trình mới | Có |
+| DELETE | `/api/itineraries/{id}` | Xóa lộ trình đã lưu | Có |
+
+### 2.7.5. Nhóm Quản trị (Admin)
+
+*Bảng 2.31. API nhóm Quản trị*
+
+| Method | Endpoint | Mô tả | Auth |
+|--------|----------|-------|------|
+| GET | `/api/admin/users` | Lấy danh sách người dùng | Admin |
+| DELETE | `/api/admin/users/{username}` | Xóa tài khoản người dùng | Admin |
+| GET | `/api/admin/user_profile/{username}` | Xem hồ sơ chi tiết user | Admin |
+| GET | `/api/admin/user_comments/{username}` | Xem đánh giá của user | Admin |
+| GET | `/api/admin/stats` | Thống kê hệ thống | Admin |
+| POST | `/api/admin/run-algo` | Chạy lại thuật toán AI | Admin |
+| POST | `/api/admin/location/add` | Thêm địa điểm mới | Admin |
+| PUT | `/api/admin/location/update` | Sửa thông tin địa điểm | Admin |
+| DELETE | `/api/admin/location/delete/{name}` | Xóa địa điểm | Admin |
+
+### 2.7.6. Định dạng Response
+
+Tất cả API trả về JSON với cấu trúc thống nhất:
+
+- **Thành công:** `{"success": true, "data": {...}, "message": "..."}`
+- **Lỗi client (4xx):** `{"error": "Mô tả lỗi"}` hoặc `{"success": false, "error": "..."}`
+- **Lỗi server (5xx):** `{"error": "Mô tả lỗi kỹ thuật"}`
+- **Chưa xác thực (401):** `{"error": "Unauthorized - Vui lòng đăng nhập"}`
+- **Không có quyền (403):** `{"error": "Không có quyền truy cập"}`
+
+## 2.8. Thiết kế Giao diện (Wireframe)
+
+### 2.8.1. Wireframe trang chủ — Bản đồ tương tác
+
+Giao diện chính của hệ thống chia làm 2 phần: **Sidebar** bên trái (danh sách địa điểm, bộ lọc, gợi ý AI) và **Bản đồ Leaflet.js** bên phải chiếm phần lớn diện tích. Thiết kế theo phong cách Dark Mode hiện đại, tối ưu cho trải nghiệm xem bản đồ ban đêm.
 
 ### 2.8.2. Wireframe Modal AI Planner
 
 Modal lập lộ trình thông minh cho phép người dùng tùy chỉnh các thông số đầu vào trước khi hệ thống tạo lộ trình.
 
-*Hình 2.6. Wireframe modal AI Planner*
-
-
 ### 2.8.3. Bảng màu và Typography
 
 Giao diện sử dụng thiết kế Dark Mode hiện đại với bảng màu và kiểu chữ được quy hoạch thống nhất.
 
-*Bảng 2.13. Bảng màu chính của hệ thống*
+*Bảng 2.32. Bảng màu chính của hệ thống*
 
 | Vai trò         | Mã màu (Hex)           | Mô tả sử dụng                   |
 | --------------- | ---------------------- | -------------------------------- |
@@ -496,7 +635,7 @@ Giao diện sử dụng thiết kế Dark Mode hiện đại với bảng màu v
 | Error           | #ef4444                | Trạng thái lỗi                   |
 | Warning         | #f59e0b                | Cảnh báo                         |
 
-*Bảng 2.14. Quy chuẩn Typography*
+*Bảng 2.33. Quy chuẩn Typography*
 
 | Phần tử  | Font  | Kích thước | Độ đậm |
 | -------- | ----- | ---------- | ------ |
@@ -511,10 +650,32 @@ Giao diện sử dụng thiết kế Dark Mode hiện đại với bảng màu v
 
 ### 2.9.1. Flowchart thuật toán Hybrid Recommendation
 
-Hình 2.7 mô tả luồng xử lý tổng quát của thuật toán Hybrid Recommendation — thuật toán chính của hệ thống gợi ý.
+Thuật toán Hybrid Recommendation là thuật toán cốt lõi của hệ thống gợi ý, kết hợp 3 thành phần chính: Collaborative Filtering, Content-Based Filtering và PageRank Diversity Pool.
 
-*Hình 2.7. Flowchart thuật toán Hybrid Recommendation*
+**Luồng xử lý tổng quát:**
 
+1. **Kiểm tra tương tác (Cold Start Check):** Hệ thống kiểm tra user có relationship `:LIKED` hoặc `:INTERACTED` không. Nếu không → Fallback dùng PageRank score.
+
+2. **Collaborative Filtering (trọng số ×3):**
+   - Truy vấn relationship `:SIMILAR_TO` (Jaccard) tìm users tương đồng.
+   - Lấy địa điểm mà users tương đồng đã tương tác nhưng user hiện tại chưa ghé.
+   - Công thức: `score = num_similar_users × avg_weight × (1 + avg_similarity)`.
+
+3. **Content-Based Filtering (trọng số ×1):**
+   - Lấy category của các địa điểm user đã tương tác.
+   - Tìm địa điểm cùng category mà user chưa ghé.
+   - Cộng thêm trọng số từ `:RELATED_TO` (co-occurrence).
+
+4. **PageRank Diversity Pool (trọng số ×10):**
+   - Lấy Top 20 địa điểm có `pagerankNorm` cao nhất mà user chưa ghé.
+   - Đảm bảo đa dạng kết quả, tránh kẹt trong 1 category.
+
+5. **Gộp ứng viên & Tính Final Score:**
+   - Merge 3 danh sách, loại bỏ trùng lặp.
+   - Áp dụng `log10` cho Collab và Content để tránh lấn át PageRank.
+   - `final_score = log10(1 + collab) × 4.0 + log10(1 + content) × 3.0 + pagerank_combined × 10.0`
+
+6. **Explainable AI:** Mỗi gợi ý kèm theo lý do (reason), icon, loại reason (collab/content/pagerank) và dữ liệu chi tiết để hiển thị biểu đồ phân tích trên giao diện.
 
 ### 2.9.2. Luồng xử lý tiện ích sắp xếp lộ trình (Tính năng bổ trợ)
 
@@ -528,14 +689,14 @@ Chương này đã trình bày đầy đủ quá trình phân tích và thiết 
 
 2. **Biểu đồ Use Case:** Mô hình hóa hệ thống với 2 tác nhân (User, Admin), đặc tả chi tiết toàn bộ 18 Use Case với biểu đồ riêng lẻ và bảng đặc tả đầy đủ (UC01–UC18).
 
-3. **Kiến trúc 3 tầng:** Thiết kế phân tách rõ ràng giữa Presentation (HTML/CSS/JS), Business (Flask/AI) và Data (Neo4j/GDS).
+3. **Kiến trúc 3 tầng:** Thiết kế phân tách rõ ràng giữa Presentation (HTML/CSS/JS + Leaflet.js), Business Logic (Flask/Blueprint + AI Engine) và Data Access (Neo4j/GDS + Cypher), tổ chức theo 7 module Backend độc lập.
 
-4. **Lược đồ đồ thị:** Thiết kế 5 loại node và 7 loại relationship cơ bản cho Neo4j (bổ sung thêm 2 relationship do thuật toán tạo ra: SIMILAR_TO, LOC_SIMILAR), kèm ràng buộc và chỉ mục.
+4. **Lược đồ đồ thị:** Thiết kế 5 loại node (User, Location, Category, City, Itinerary) và 9 loại relationship (5 cơ bản + 4 do thuật toán AI tạo tự động: INTERACTED, RELATED_TO, SIMILAR_TO, LOC_SIMILAR), kèm ràng buộc UNIQUE và chỉ mục.
 
-5. **RESTful API:** Thiết kế 32 endpoints theo chuẩn REST, phân nhóm 5 nhóm chức năng (Xác thực, Địa điểm, AI, Lộ trình, Quản trị) với định dạng response thống nhất.
+5. **RESTful API:** Thiết kế 32 endpoints theo chuẩn REST, phân nhóm 5 nhóm chức năng (Xác thực, Địa điểm, AI, Lộ trình, Quản trị) với định dạng response thống nhất JSON.
 
-6. **Giao diện:** Wireframe trang chủ và modal tạo lộ trình, bảng màu Dark Mode và Typography.
+6. **Giao diện:** Wireframe trang chủ bản đồ tương tác và modal tạo lộ trình, bảng màu Dark Mode và quy chuẩn Typography với font Inter.
 
-7. **Flowchart thuật toán:** Mô tả luồng xử lý chi tiết cho hệ thống thuật toán Hybrid Recommendation. Lược bỏ chi tiết xử lý của các tiện ích phụ trợ (như tính năng lộ trình) để tập trung vào logic lõi.
+7. **Flowchart thuật toán:** Mô tả luồng xử lý chi tiết 6 bước cho thuật toán Hybrid Recommendation (Cold Start Check → Collaborative Filtering → Content-Based → PageRank Pool → Merge & Score → Explainable AI). Lược bỏ chi tiết xử lý của tiện ích phụ trợ lộ trình để tập trung vào logic lõi.
 
 Các thiết kế trên tạo nền tảng vững chắc cho việc triển khai hệ thống ở Chương 3.
