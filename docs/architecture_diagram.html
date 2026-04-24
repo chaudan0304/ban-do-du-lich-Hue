@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sơ đồ Kiến trúc 3 Tầng - Huế Travel AI</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 40px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      border-bottom: 2px solid #0056b3;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+    }
+
+    .btn-download {
+      background-color: #1a73e8;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      margin-top: 15px;
+    }
+
+    .btn-download:hover {
+      background-color: #1557b0;
+    }
+
+    canvas {
+      border: 1px dashed #ccc;
+      background-color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Hình 2.20. Sơ đồ Kiến trúc 3 Tầng</h1>
+    <canvas id="canvas-arch" width="800" height="700"></canvas>
+    <br>
+    <button class="btn-download" onclick="downloadCanvas()">⬇ Tải ảnh Sơ đồ Kiến trúc 3 Tầng</button>
+  </div>
+
+  <script>
+    function drawArchitecture() {
+      const canvas = document.getElementById('canvas-arch');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Clear
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
+
+      // Title
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = 'bold 20px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Kiến trúc 3 Tầng — Huế Travel AI', W / 2, 35);
+
+      // ===== DRAWING PARAMS =====
+      const layerW = 660;
+      const layerH = 130;
+      const startX = (W - layerW) / 2;
+      const gap = 30;
+      const cornerR = 12;
+
+      const layers = [
+        {
+          y: 70,
+          color: '#2196F3',
+          headerColor: '#1565C0',
+          title: 'TẦNG TRÌNH BÀY (Presentation Tier)',
+          tech: 'HTML5  •  CSS3  •  JavaScript ES6+',
+          items: [
+            { name: 'Leaflet.js', desc: 'Bản đồ tương tác' },
+            { name: 'Chart.js', desc: 'Biểu đồ AI' },
+            { name: 'Vanilla JS', desc: '9 modules' },
+            { name: 'CSS Modular', desc: '10 files' },
+          ]
+        },
+        {
+          y: 70 + layerH + gap + 40,
+          color: '#4CAF50',
+          headerColor: '#2E7D32',
+          title: 'TẦNG XỬ LÝ NGHIỆP VỤ (Business Logic Tier)',
+          tech: 'Python 3.9+  •  Flask  •  Flask-Login',
+          items: [
+            { name: 'Auth BP', desc: 'Xác thực' },
+            { name: 'API BP', desc: 'Gợi ý, Review' },
+            { name: 'Admin BP', desc: 'Quản trị' },
+            { name: 'AI Engine', desc: 'Hybrid Rec.' },
+          ]
+        },
+        {
+          y: 70 + (layerH + gap + 40) * 2,
+          color: '#FF9800',
+          headerColor: '#E65100',
+          title: 'TẦNG DỮ LIỆU (Data Tier)',
+          tech: 'Neo4j 5.x  •  Cypher  •  Neo4j GDS 2.x',
+          items: [
+            { name: 'Graph DB', desc: '5 Node Labels' },
+            { name: 'Relationships', desc: '9 loại' },
+            { name: 'PageRank', desc: 'GDS Algorithm' },
+            { name: 'Jaccard Sim', desc: 'Node Similarity' },
+          ]
+        }
+      ];
+
+      // Draw each layer
+      layers.forEach((layer, idx) => {
+        const x = startX;
+        const y = layer.y;
+
+        // Shadow
+        ctx.shadowColor = 'rgba(0,0,0,0.15)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 3;
+
+        // Layer background
+        ctx.fillStyle = layer.color;
+        ctx.beginPath();
+        ctx.roundRect(x, y, layerW, layerH, cornerR);
+        ctx.fill();
+
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Header bar
+        ctx.fillStyle = layer.headerColor;
+        ctx.beginPath();
+        ctx.roundRect(x, y, layerW, 35, [cornerR, cornerR, 0, 0]);
+        ctx.fill();
+
+        // Title text
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(layer.title, W / 2, y + 23);
+
+        // Technology subtitle
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.font = '12px Arial';
+        ctx.fillText(layer.tech, W / 2, y + 52);
+
+        // Item boxes
+        const boxW = 140;
+        const boxH = 45;
+        const totalBoxW = layer.items.length * boxW + (layer.items.length - 1) * 10;
+        let boxStartX = x + (layerW - totalBoxW) / 2;
+        const boxY = y + 65;
+
+        layer.items.forEach((item, i) => {
+          const bx = boxStartX + i * (boxW + 10);
+
+          // Box background
+          ctx.fillStyle = 'rgba(255,255,255,0.25)';
+          ctx.beginPath();
+          ctx.roundRect(bx, boxY, boxW, boxH, 6);
+          ctx.fill();
+
+          // Box border
+          ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(bx, boxY, boxW, boxH, 6);
+          ctx.stroke();
+
+          // Item name
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 12px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText(item.name, bx + boxW / 2, boxY + 18);
+
+          // Item desc
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
+          ctx.font = '11px Arial';
+          ctx.fillText(item.desc, bx + boxW / 2, boxY + 35);
+        });
+      });
+
+      // ===== ARROWS BETWEEN LAYERS =====
+      function drawArrow(fromY, toY, labelLeft, labelRight) {
+        const midX = W / 2;
+        const arrowGap = 60;
+
+        // Down arrow (left side)
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([]);
+
+        const x1 = midX - arrowGap;
+        ctx.beginPath();
+        ctx.moveTo(x1, fromY);
+        ctx.lineTo(x1, toY);
+        ctx.stroke();
+
+        // Arrowhead down
+        ctx.fillStyle = '#555';
+        ctx.beginPath();
+        ctx.moveTo(x1 - 6, toY - 10);
+        ctx.lineTo(x1, toY);
+        ctx.lineTo(x1 + 6, toY - 10);
+        ctx.closePath();
+        ctx.fill();
+
+        // Up arrow (right side)
+        const x2 = midX + arrowGap;
+        ctx.beginPath();
+        ctx.moveTo(x2, toY);
+        ctx.lineTo(x2, fromY);
+        ctx.stroke();
+
+        // Arrowhead up
+        ctx.beginPath();
+        ctx.moveTo(x2 - 6, fromY + 10);
+        ctx.lineTo(x2, fromY);
+        ctx.lineTo(x2 + 6, fromY + 10);
+        ctx.closePath();
+        ctx.fill();
+
+        // Labels
+        ctx.fillStyle = '#333';
+        ctx.font = '11px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(labelLeft, x1 - 10, (fromY + toY) / 2 + 4);
+        ctx.textAlign = 'left';
+        ctx.fillText(labelRight, x2 + 10, (fromY + toY) / 2 + 4);
+      }
+
+      const layer1Bottom = layers[0].y + layerH;
+      const layer2Top = layers[1].y;
+      const layer2Bottom = layers[1].y + layerH;
+      const layer3Top = layers[2].y;
+
+      drawArrow(layer1Bottom + 5, layer2Top - 5, 'HTTP Request', 'JSON Response');
+      drawArrow(layer2Bottom + 5, layer3Top - 5, 'Cypher Query', 'Records / Results');
+
+
+
+      // ===== LEGEND =====
+      const legendY = H - 40;
+      ctx.fillStyle = '#999';
+      ctx.font = '11px Arial';
+      ctx.textAlign = 'center';
+    }
+
+    function downloadCanvas() {
+      const canvas = document.getElementById('canvas-arch');
+      const link = document.createElement('a');
+      link.download = 'Kien_truc_3_tang.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    window.onload = drawArchitecture;
+  </script>
+</body>
+
+</html>

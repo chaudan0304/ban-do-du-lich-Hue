@@ -1,4 +1,4 @@
-﻿# CHƯƠNG 2: PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG
+# CHƯƠNG 2: PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG
 
 Chương này trình bày quá trình phân tích yêu cầu và thiết kế hệ thống Huế Travel AI, bao gồm: phân tích các yêu cầu chức năng và phi chức năng; mô hình hóa hệ thống bằng biểu đồ Use Case; thiết kế kiến trúc phân lớp; thiết kế lược đồ cơ sở dữ liệu đồ thị; thiết kế RESTful API; wireframe giao diện; và flowchart các thuật toán chính.
 
@@ -93,7 +93,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.1. Use Case UC01 — Đăng ký tài khoản
 
 ![Biểu đồ Use Case UC01 - Đăng ký tài khoản](images/UC01_Đang_ky_tai_khoan.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC01 - Đăng ký tài khoản</i></p>
+<p align="center"><i>Hình 2.2. Biểu đồ Use Case UC01 - Đăng ký tài khoản</i></p>
 
 
 *Bảng 2.4. Đặc tả Use Case UC01 — Đăng ký tài khoản*
@@ -113,7 +113,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.2. Use Case UC02 — Đăng nhập
 
 ![Biểu đồ Use Case UC02 - Đăng nhập](images/UC02_Đang_nhap.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC02 - Đăng nhập</i></p>
+<p align="center"><i>Hình 2.3. Biểu đồ Use Case UC02 - Đăng nhập</i></p>
 
 
 *Bảng 2.5. Đặc tả Use Case UC02 — Đăng nhập*
@@ -133,7 +133,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.3. Use Case UC03 — Đăng xuất
 
 ![Biểu đồ Use Case UC03 - Đăng xuất](images/UC03_Đang_xuat.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC03 - Đăng xuất</i></p>
+<p align="center"><i>Hình 2.4. Biểu đồ Use Case UC03 - Đăng xuất</i></p>
 
 
 *Bảng 2.6. Đặc tả Use Case UC03 — Đăng xuất*
@@ -153,7 +153,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.4. Use Case UC04 — Quên mật khẩu
 
 ![Biểu đồ Use Case UC04 - Quên mật khẩu](images/UC04_Quen_mat_khau.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC04 - Quên mật khẩu</i></p>
+<p align="center"><i>Hình 2.5. Biểu đồ Use Case UC04 - Quên mật khẩu</i></p>
 
 
 *Bảng 2.7. Đặc tả Use Case UC04 — Quên mật khẩu*
@@ -173,7 +173,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.5. Use Case UC05 — Cập nhật hồ sơ
 
 ![Biểu đồ Use Case UC05 - Cập nhật hồ sơ](images/UC05_Cap_nhat_ho_so.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC05 - Cập nhật hồ sơ</i></p>
+<p align="center"><i>Hình 2.6. Biểu đồ Use Case UC05 - Cập nhật hồ sơ</i></p>
 
 
 *Bảng 2.8. Đặc tả Use Case UC05 — Cập nhật hồ sơ*
@@ -193,7 +193,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.6. Use Case UC06 — Xem bản đồ
 
 ![Biểu đồ Use Case UC06 - Xem bản đồ](images/UC06_Xem_ban_đo.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC06 - Xem bản đồ</i></p>
+<p align="center"><i>Hình 2.7. Biểu đồ Use Case UC06 - Xem bản đồ</i></p>
 
 
 *Bảng 2.9. Đặc tả Use Case UC06 — Xem bản đồ*
@@ -213,7 +213,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.7. Use Case UC07 — Xem chi tiết địa điểm
 
 ![Biểu đồ Use Case UC07 - Xem chi tiết địa điểm](images/UC07_Xem_chi_tiet_đia_điem.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC07 - Xem chi tiết địa điểm</i></p>
+<p align="center"><i>Hình 2.8. Biểu đồ Use Case UC07 - Xem chi tiết địa điểm</i></p>
 
 
 *Bảng 2.10. Đặc tả Use Case UC07 — Xem chi tiết địa điểm*
@@ -233,7 +233,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.8. Use Case UC08 — Like địa điểm
 
 ![Biểu đồ Use Case UC08 - Like địa điểm](images/UC08_Like_đia_điem.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC08 - Like địa điểm</i></p>
+<p align="center"><i>Hình 2.9. Biểu đồ Use Case UC08 - Like địa điểm</i></p>
 
 
 *Bảng 2.11. Đặc tả Use Case UC08 — Like địa điểm*
@@ -253,7 +253,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.9. Use Case UC09 — Viết đánh giá
 
 ![Biểu đồ Use Case UC09 - Viết đánh giá](images/UC09_Viet_đanh_gia.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC09 - Viết đánh giá</i></p>
+<p align="center"><i>Hình 2.10. Biểu đồ Use Case UC09 - Viết đánh giá</i></p>
 
 
 *Bảng 2.12. Đặc tả Use Case UC09 — Viết đánh giá*
@@ -273,7 +273,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.10. Use Case UC10 — Xem gợi ý AI
 
 ![Biểu đồ Use Case UC10 - Xem gợi ý AI](images/UC10_Xem_goi_y_AI.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC10 - Xem gợi ý AI</i></p>
+<p align="center"><i>Hình 2.11. Biểu đồ Use Case UC10 - Xem gợi ý AI</i></p>
 
 
 *Bảng 2.13. Đặc tả Use Case UC10 — Xem gợi ý AI*
@@ -293,7 +293,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.11. Use Case UC11 — Sắp xếp lộ trình
 
 ![Biểu đồ Use Case UC11 - Sắp xếp lộ trình](images/UC11_Sap_xep_lo_trinh.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC11 - Sắp xếp lộ trình</i></p>
+<p align="center"><i>Hình 2.12. Biểu đồ Use Case UC11 - Sắp xếp lộ trình</i></p>
 
 
 *Bảng 2.14. Đặc tả Use Case UC11 — Sắp xếp lộ trình*
@@ -313,7 +313,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.12. Use Case UC12 — Lưu lộ trình
 
 ![Biểu đồ Use Case UC12 - Lưu lộ trình](images/UC12_Luu_lo_trinh.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC12 - Lưu lộ trình</i></p>
+<p align="center"><i>Hình 2.13. Biểu đồ Use Case UC12 - Lưu lộ trình</i></p>
 
 
 *Bảng 2.15. Đặc tả Use Case UC12 — Lưu lộ trình*
@@ -333,7 +333,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.13. Use Case UC13 — Xem lịch sử
 
 ![Biểu đồ Use Case UC13 - Xem lịch sử](images/UC13_Xem_lich_su.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC13 - Xem lịch sử</i></p>
+<p align="center"><i>Hình 2.14. Biểu đồ Use Case UC13 - Xem lịch sử</i></p>
 
 
 *Bảng 2.16. Đặc tả Use Case UC13 — Xem lịch sử*
@@ -353,7 +353,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.14. Use Case UC14 — Quản lý người dùng
 
 ![Biểu đồ Use Case UC14 - Quản lý người dùng](images/UC14_Quan_ly_nguoi_dung.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC14 - Quản lý người dùng</i></p>
+<p align="center"><i>Hình 2.15. Biểu đồ Use Case UC14 - Quản lý người dùng</i></p>
 
 
 *Bảng 2.17. Đặc tả Use Case UC14 — Quản lý người dùng*
@@ -373,7 +373,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.15. Use Case UC15 — Thêm địa điểm
 
 ![Biểu đồ Use Case UC15 - Thêm địa điểm](images/UC15_Them_đia_điem.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC15 - Thêm địa điểm</i></p>
+<p align="center"><i>Hình 2.16. Biểu đồ Use Case UC15 - Thêm địa điểm</i></p>
 
 
 *Bảng 2.18. Đặc tả Use Case UC15 — Thêm địa điểm*
@@ -393,7 +393,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.16. Use Case UC16 — Sửa địa điểm
 
 ![Biểu đồ Use Case UC16 - Sửa địa điểm](images/UC16_Sua_đia_điem.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC16 - Sửa địa điểm</i></p>
+<p align="center"><i>Hình 2.17. Biểu đồ Use Case UC16 - Sửa địa điểm</i></p>
 
 
 *Bảng 2.19. Đặc tả Use Case UC16 — Sửa địa điểm*
@@ -413,7 +413,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.17. Use Case UC17 — Xóa địa điểm
 
 ![Biểu đồ Use Case UC17 - Xóa địa điểm](images/UC17_Xoa_đia_điem.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC17 - Xóa địa điểm</i></p>
+<p align="center"><i>Hình 2.18. Biểu đồ Use Case UC17 - Xóa địa điểm</i></p>
 
 
 *Bảng 2.20. Đặc tả Use Case UC17 — Xóa địa điểm*
@@ -433,7 +433,7 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 #### 2.4.2.18. Use Case UC18 — Chạy thuật toán AI
 
 ![Biểu đồ Use Case UC18 - Chạy thuật toán AI](images/UC18_Chay_thuat_toan_AI.png)
-<p align="center"><i>Hình: Biểu đồ Use Case UC18 - Chạy thuật toán AI</i></p>
+<p align="center"><i>Hình 2.19. Biểu đồ Use Case UC18 - Chạy thuật toán AI</i></p>
 
 
 *Bảng 2.21. Đặc tả Use Case UC18 — Chạy thuật toán AI*
@@ -456,15 +456,19 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 
 ### 2.5.1. Mô hình kiến trúc tổng quan
 
-Hệ thống được thiết kế theo mô hình **kiến trúc 3 tầng (3-Layer Architecture)**, tách biệt rõ ràng giữa giao diện, xử lý nghiệp vụ và truy cập dữ liệu. Mô hình này đảm bảo tính module hóa, dễ bảo trì và mở rộng.
+Hệ thống được thiết kế theo mô hình **kiến trúc 3 tầng (3-Tier Architecture)**, tách biệt rõ ràng giữa giao diện, xử lý nghiệp vụ và dữ liệu. Mô hình này đảm bảo tính module hóa, dễ bảo trì và mở rộng.
+
+*Hình 2.20. Sơ đồ kiến trúc 3 tầng của hệ thống Huế Travel AI*
+
+<!-- TODO: Chèn ảnh sơ đồ kiến trúc 3 tầng tại đây -->
 
 *Bảng 2.22. Kiến trúc 3 tầng của hệ thống Huế Travel AI*
 
 | Tầng | Tên gọi | Công nghệ | Vai trò |
 |------|---------|-----------|---------|
-| **Presentation Layer** | Tầng trình bày | HTML5, CSS3, JavaScript, Leaflet.js, Chart.js | Hiển thị giao diện bản đồ tương tác, sidebar, modal, biểu đồ phân tích AI |
-| **Business Logic Layer** | Tầng xử lý nghiệp vụ | Flask (Python), Flask-Login, Blueprint | Xử lý logic nghiệp vụ: xác thực, gợi ý AI, phân tích cảm xúc, tạo lộ trình |
-| **Data Access Layer** | Tầng truy cập dữ liệu | Neo4j (Cypher), Neo4j GDS, neo4j-python-driver | Lưu trữ dữ liệu đồ thị, thực thi thuật toán PageRank, Jaccard Similarity |
+| **Presentation Tier** | Tầng trình bày | HTML5, CSS3, JavaScript, Leaflet.js, Chart.js | Hiển thị giao diện bản đồ tương tác, sidebar, modal, biểu đồ phân tích AI |
+| **Business Logic Tier** | Tầng xử lý nghiệp vụ | Flask (Python), Flask-Login, Blueprint | Xử lý logic nghiệp vụ: xác thực, gợi ý AI, phân tích cảm xúc, tạo lộ trình |
+| **Data Tier** | Tầng dữ liệu | Neo4j (Cypher), Neo4j GDS, neo4j-python-driver | Lưu trữ dữ liệu đồ thị, thực thi thuật toán PageRank, Jaccard Similarity |
 
 ### 2.5.2. Tổ chức module hệ thống
 
@@ -487,6 +491,10 @@ Tầng Business Logic được tổ chức theo mô hình **Blueprint** của Fl
 ### 2.6.1. Lược đồ Node
 
 Hệ thống sử dụng Neo4j — cơ sở dữ liệu đồ thị — với 5 loại node chính:
+
+*Hình 2.21. Lược đồ cơ sở dữ liệu đồ thị Neo4j*
+
+<!-- TODO: Chèn ảnh lược đồ đồ thị (Node + Relationship) tại đây -->
 
 *Bảng 2.24. Danh sách các loại Node trong Neo4j*
 
@@ -613,44 +621,34 @@ Tất cả API trả về JSON với cấu trúc thống nhất:
 
 Giao diện chính của hệ thống chia làm 2 phần: **Sidebar** bên trái (danh sách địa điểm, bộ lọc, gợi ý AI) và **Bản đồ Leaflet.js** bên phải chiếm phần lớn diện tích. Thiết kế theo phong cách Dark Mode hiện đại, tối ưu cho trải nghiệm xem bản đồ ban đêm.
 
+*Hình 2.22. Wireframe trang chủ — Bản đồ tương tác*
+
+<!-- TODO: Chèn ảnh wireframe trang chủ tại đây -->
+
 ### 2.8.2. Wireframe Modal AI Planner
 
 Modal lập lộ trình thông minh cho phép người dùng tùy chỉnh các thông số đầu vào trước khi hệ thống tạo lộ trình.
 
-### 2.8.3. Bảng màu và Typography
+*Hình 2.23. Wireframe modal AI Planner*
 
-Giao diện sử dụng thiết kế Dark Mode hiện đại với bảng màu và kiểu chữ được quy hoạch thống nhất.
+<!-- TODO: Chèn ảnh wireframe modal AI Planner tại đây -->
 
-*Bảng 2.32. Bảng màu chính của hệ thống*
+### 2.8.3. Phong cách thiết kế tổng quan
 
-| Vai trò         | Mã màu (Hex)           | Mô tả sử dụng                   |
-| --------------- | ---------------------- | -------------------------------- |
-| Primary         | #6366f1                | Nút bấm, liên kết, điểm nhấn    |
-| Secondary       | #8b5cf6                | Accent, hiệu ứng hover          |
-| Background      | #0f172a                | Nền chính (Dark Mode)            |
-| Surface         | rgba(255,255,255,0.05) | Nền card, modal                  |
-| Text Primary    | #f1f5f9                | Chữ chính                        |
-| Text Secondary  | #94a3b8                | Chữ phụ, mô tả                  |
-| Success         | #22c55e                | Trạng thái thành công            |
-| Error           | #ef4444                | Trạng thái lỗi                   |
-| Warning         | #f59e0b                | Cảnh báo                         |
-
-*Bảng 2.33. Quy chuẩn Typography*
-
-| Phần tử  | Font  | Kích thước | Độ đậm |
-| -------- | ----- | ---------- | ------ |
-| Heading 1| Inter | 28px       | 700    |
-| Heading 2| Inter | 22px       | 600    |
-| Heading 3| Inter | 18px       | 600    |
-| Body     | Inter | 14px       | 400    |
-| Small    | Inter | 12px       | 400    |
-| Button   | Inter | 14px       | 600    |
+Giao diện hệ thống được thiết kế theo phong cách hiện đại, tối ưu cho trải nghiệm người dùng với các đặc điểm chính:
+- **Chế độ hiển thị (Theme):** Sử dụng Dark Mode làm chủ đạo với tone màu nền tối, giúp làm nổi bật bản đồ và giảm mỏi mắt cho người dùng khi tra cứu thông tin.
+- **Màu nhấn (Accent Color):** Sử dụng các dải màu nổi bật (như sắc tím/xanh) cho các nút tương tác và điểm nhấn, tạo cảm giác công nghệ và hiện đại.
+- **Kiểu chữ (Typography):** Đồng bộ sử dụng hệ font chữ sans-serif hiện đại (tiêu biểu như font Inter) trên toàn bộ ứng dụng để đảm bảo độ đọc rõ ràng và sự chuyên nghiệp.
 
 ## 2.9. Thiết kế Thuật toán
 
 ### 2.9.1. Flowchart thuật toán Hybrid Recommendation
 
 Thuật toán Hybrid Recommendation là thuật toán cốt lõi của hệ thống gợi ý, kết hợp 3 thành phần chính: Collaborative Filtering, Content-Based Filtering và PageRank Diversity Pool.
+
+*Hình 2.24. Flowchart thuật toán Hybrid Recommendation*
+
+<!-- TODO: Chèn ảnh flowchart thuật toán Hybrid Recommendation tại đây -->
 
 **Luồng xử lý tổng quát:**
 
@@ -689,7 +687,7 @@ Chương này đã trình bày đầy đủ quá trình phân tích và thiết 
 
 2. **Biểu đồ Use Case:** Mô hình hóa hệ thống với 2 tác nhân (User, Admin), đặc tả chi tiết toàn bộ 18 Use Case với biểu đồ riêng lẻ và bảng đặc tả đầy đủ (UC01–UC18).
 
-3. **Kiến trúc 3 tầng:** Thiết kế phân tách rõ ràng giữa Presentation (HTML/CSS/JS + Leaflet.js), Business Logic (Flask/Blueprint + AI Engine) và Data Access (Neo4j/GDS + Cypher), tổ chức theo 7 module Backend độc lập.
+3. **Kiến trúc 3 tầng:** Thiết kế phân tách rõ ràng giữa Presentation (HTML/CSS/JS + Leaflet.js), Business Logic (Flask/Blueprint + AI Engine) và Data Tier (Neo4j/GDS + Cypher), tổ chức theo 7 module Backend độc lập.
 
 4. **Lược đồ đồ thị:** Thiết kế 5 loại node (User, Location, Category, City, Itinerary) và 9 loại relationship (5 cơ bản + 4 do thuật toán AI tạo tự động: INTERACTED, RELATED_TO, SIMILAR_TO, LOC_SIMILAR), kèm ràng buộc UNIQUE và chỉ mục.
 
