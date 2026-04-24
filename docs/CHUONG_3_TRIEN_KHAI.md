@@ -457,7 +457,91 @@ Giao diện được xây dựng bằng HTML5, CSS3 và JavaScript thuần (Vani
 
 Thay vì phát triển một engine thuật toán phức tạp như bài toán tối ưu lộ trình chuyên sâu định tuyến đa phương tiện, hệ thống được tinh gọn bằng việc áp dụng nguyên tắc khoảng cách gần nhất (Greedy) bằng công thức tính khoảng cách điểm Euclid cơ bản. Các địa điểm được phân bổ tuần tự theo các buổi trong ngày. Cách thiết kế này vừa giảm thiểu thời gian tính toán ở backend vừa đủ để tạo được một lộ trình tham khảo hợp lý, đóng góp vào việc kiểm chứng khả năng ứng dụng thực tế của kết quả gợi ý.
 
-## 3.6. Tiểu kết chương 3
+## 3.6. Demo Website
+
+Phần này trình bày giao diện thực tế của hệ thống Huế Travel AI sau khi triển khai, minh họa các chức năng chính thông qua ảnh chụp màn hình.
+
+### 3.6.1. Trang chủ — Bản đồ tương tác
+
+Giao diện trang chủ hiển thị bản đồ Leaflet.js toàn màn hình với sidebar bên trái chứa danh sách địa điểm, bộ lọc theo danh mục và thanh tìm kiếm. Các marker được phân loại theo icon tương ứng với category.
+
+*Hình 3.2. Giao diện trang chủ — Bản đồ tương tác*
+
+<!-- TODO: Chèn ảnh chụp trang chủ tại đây -->
+
+### 3.6.2. Đăng ký và Đăng nhập
+
+Hệ thống cung cấp modal đăng ký/đăng nhập với giao diện Dark Mode, hỗ trợ validation realtime (kiểm tra độ dài username, password).
+
+*Hình 3.3. Giao diện đăng ký tài khoản*
+
+<!-- TODO: Chèn ảnh chụp form đăng ký -->
+
+*Hình 3.4. Giao diện đăng nhập*
+
+<!-- TODO: Chèn ảnh chụp form đăng nhập -->
+
+### 3.6.3. Chi tiết địa điểm
+
+Khi click vào một marker hoặc card địa điểm, hệ thống hiển thị thông tin chi tiết bao gồm: tên, mô tả, hình ảnh, điểm chất lượng AI (thanh Progress Bar 60-30-10), danh sách đánh giá kèm nhãn cảm xúc (Sentiment), và các địa điểm tương tự.
+
+*Hình 3.5. Giao diện chi tiết địa điểm*
+
+<!-- TODO: Chèn ảnh chụp popup/panel chi tiết địa điểm -->
+
+### 3.6.4. Đánh giá và Phân tích cảm xúc
+
+Người dùng đã đăng nhập có thể chấm điểm (1–5 sao) và viết bình luận. Hệ thống tự động phân tích cảm xúc (Positive/Negative/Neutral) và phân loại chủ đề (Món ăn, Không gian, Phục vụ...).
+
+*Hình 3.6. Giao diện viết đánh giá và kết quả phân tích cảm xúc*
+
+<!-- TODO: Chèn ảnh chụp form đánh giá + nhãn sentiment -->
+
+### 3.6.5. Gợi ý AI (Hybrid Recommendation)
+
+Tab "Gợi ý AI" trên sidebar hiển thị Top 12 địa điểm được gợi ý cá nhân hóa, mỗi card kèm theo lý do gợi ý (Explainable AI), biểu đồ phân tích thành phần điểm (Collaborative, Content-Based, PageRank) và danh sách users tương đồng.
+
+*Hình 3.7. Giao diện gợi ý AI với Explainable AI*
+
+<!-- TODO: Chèn ảnh chụp tab gợi ý AI -->
+
+*Hình 3.8. Biểu đồ phân tích thành phần điểm gợi ý*
+
+<!-- TODO: Chèn ảnh chụp biểu đồ breakdown điểm -->
+
+### 3.6.6. Lập lộ trình thông minh
+
+Modal AI Planner cho phép người dùng chọn số ngày (1–5), sở thích (danh mục) và chế độ (AI gợi ý / từ danh sách đã thích). Kết quả hiển thị dạng timeline với thời gian và khoảng cách giữa các điểm.
+
+*Hình 3.9. Giao diện modal lập lộ trình*
+
+<!-- TODO: Chèn ảnh chụp modal AI Planner -->
+
+*Hình 3.10. Kết quả lộ trình dạng timeline*
+
+<!-- TODO: Chèn ảnh chụp kết quả lộ trình -->
+
+### 3.6.7. Lịch sử hoạt động
+
+Trang lịch sử hiển thị 3 tab: Địa điểm đã thích, Đánh giá đã viết và Lộ trình đã lưu, giúp người dùng theo dõi hoạt động cá nhân.
+
+*Hình 3.11. Giao diện lịch sử hoạt động*
+
+<!-- TODO: Chèn ảnh chụp trang lịch sử -->
+
+### 3.6.8. Trang quản trị (Admin Dashboard)
+
+Admin Dashboard cung cấp giao diện quản lý toàn diện: thống kê hệ thống, danh sách người dùng, CRUD địa điểm và nút trigger chạy lại thuật toán AI.
+
+*Hình 3.12. Giao diện Dashboard quản trị*
+
+<!-- TODO: Chèn ảnh chụp trang admin -->
+
+*Hình 3.13. Giao diện quản lý địa điểm (Thêm/Sửa/Xóa)*
+
+<!-- TODO: Chèn ảnh chụp CRUD địa điểm -->
+
+## 3.7. Tiểu kết chương 3
 
 Chương này đã trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI, từ thiết kế đến hiện thực hóa. Cụ thể:
 
@@ -474,5 +558,7 @@ Chương này đã trình bày chi tiết quá trình triển khai hệ thống 
 6. **Ứng dụng web:** Backend Flask modular (4 Blueprint, 7 module DAL), Frontend Vanilla JS (9 module), tích hợp Leaflet.js cho bản đồ tương tác.
 
 7. **Tiện ích xếp lộ trình:** Tích hợp tính năng phụ trợ giúp sắp xếp thứ tự tham quan theo ngày dựa trên nguyên tắc gần nhất nhằm hoàn thiện giao diện phục vụ thực nghiệm người dùng.
+
+8. **Demo website:** Minh họa giao diện thực tế qua 12 ảnh chụp màn hình, bao gồm: trang chủ bản đồ, đăng ký/đăng nhập, chi tiết địa điểm, đánh giá + sentiment, gợi ý AI + Explainable AI, lập lộ trình, lịch sử hoạt động và trang quản trị.
 
 Kết quả triển khai và đánh giá hiệu quả hệ thống sẽ được trình bày ở Chương 4.
