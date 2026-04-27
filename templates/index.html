@@ -97,6 +97,11 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/admin.css') }}?v=1"
     />
+    <!-- Chatbot CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/chatbot.css') }}?v=2"
+    />
   </head>
 
   <body>
@@ -481,5 +486,11 @@
 
     <!-- Modal Đặt lại mật khẩu / Reset Password Modal -->
     {% include 'components/modals/reset_password_modal.html' %}
+
+    <!-- Chatbot Widget -->
+    {% include 'components/chatbot_widget.html' %}
+
+    <!-- Chatbot Logic -->
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}?v=2"></script>
   </body>
 </html>

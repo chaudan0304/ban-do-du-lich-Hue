@@ -1,0 +1,22 @@
+| Bảng 4.1 | Thông số quy mô hệ thống | |
+| Bảng 4.2 | Danh sách modal dialogs | |
+| Bảng 4.3 | Bộ dữ liệu thử nghiệm | |
+| Bảng 4.4 | Kết quả xếp hạng Top 10 địa điểm theo Weighted PageRank | |
+| Bảng 4.5 | Kết quả gợi ý Collaborative Filtering cho User A | |
+| Bảng 4.6 | Kết quả gợi ý Content-Based Filtering | |
+| Bảng 4.7 | Kết quả Hybrid Recommendation — trường hợp Cold Start | |
+| Bảng 4.8 | So sánh kết quả trước và sau cải tiến Diversity Pool | |
+| Bảng 4.9 | Chi tiết kết quả gợi ý cho user "admin" sau Diversity Pool | |
+| Bảng 4.10 | Thời gian phản hồi các API chính | |
+| Bảng 4.11 | Thời gian chạy các bước trong setup_algo.py | |
+| Bảng 4.12 | Mức sử dụng tài nguyên hệ thống | |
+| Bảng 4.13 | Kết quả kiểm thử xác thực | |
+| Bảng 4.14 | Kết quả kiểm thử thuật toán gợi ý | |
+| Bảng 4.15 | Kết quả kiểm thử tính năng lộ trình | |
+| Bảng 4.16 | Tổng kết kết quả kiểm thử đơn vị | |
+| Bảng 4.17 | So sánh tính năng với các hệ thống tương tự | |
+| Bảng 4.18 | Kết quả khảo sát — Giao diện | |
+| Bảng 4.19 | Kết quả khảo sát — Độ phù hợp gợi ý | |
+| Bảng 4.20 | Kết quả khảo sát — Chất lượng lộ trình | |
+| Bảng 4.21 | Kết quả khảo sát — Mức độ sẵn lòng sử dụng | |
+| Bảng 4.22 | Tổng hợp điểm đánh giá người dùng | |

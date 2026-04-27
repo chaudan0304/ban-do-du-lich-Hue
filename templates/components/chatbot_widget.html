@@ -1,0 +1,37 @@
+<!-- templates/components/chatbot_widget.html -->
+<div class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle-btn" title="Chat với hỗ trợ AI">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+    
+    <div id="chatbot-window" class="chatbot-window">
+        <div class="chatbot-header">
+            <div class="chatbot-header-title">
+                <i class="fas fa-robot"></i>
+                <span>Trợ lý Ảo Neo4j</span>
+            </div>
+            <button id="chatbot-close" class="chatbot-close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="chatbot-messages" class="chatbot-messages">
+            <div class="chat-message bot">
+                Xin chào! Tôi là trợ lý ảo hỗ trợ thông tin du lịch Huế. Tôi có thể giúp bạn tìm các địa điểm (Di tích, Chùa, Quán ăn...) từ cơ sở dữ liệu Neo4j. Bạn muốn tìm gì?
+            </div>
+            
+            <div id="chat-typing-indicator" class="chat-typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        
+        <div class="chatbot-input-area">
+            <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Nhập câu hỏi (VD: Gợi ý các lăng tẩm)..." autocomplete="off">
+            <button id="chatbot-send" class="chatbot-send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>

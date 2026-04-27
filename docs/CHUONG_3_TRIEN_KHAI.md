@@ -37,6 +37,7 @@ Hệ thống sử dụng các thư viện mã nguồn mở phổ biến, đảm 
 | Pandas | ≥1.3.0 | Xử lý và phân tích dữ liệu dạng bảng |
 | python-dotenv | ≥0.19.0 | Quản lý biến môi trường từ file `.env` |
 | openpyxl | ≥3.0.0 | Đọc/ghi file Excel, phục vụ import/export dữ liệu |
+| google-genai | ≥1.0.0 | Tích hợp AI Gemini cho kiến trúc Chatbot Text2Cypher RAG |
 
 **b) Thư viện Frontend (Web):**
 
@@ -386,6 +387,15 @@ Mỗi địa điểm trong danh sách gợi ý đều kèm theo thông tin giả
 | `reason_type` | Phân loại lý do | `collab`, `content`, `pagerank`, `default` |
 | `reason_details` | Dữ liệu chi tiết cho biểu đồ UI | Điểm và % đóng góp từng thành phần, danh sách users tương đồng, biểu đồ tròn |
 
+### 3.4.6. Tích hợp Chatbot AI đa năng (Text2Cypher RAG)
+
+Hệ thống cung cấp một Chatbot hỗ trợ người dùng truy vấn bất kỳ dữ liệu nào từ Neo4j thông qua ngôn ngữ tự nhiên bằng kiến trúc **Retrieval-Augmented Generation (RAG)** kết hợp **Text-to-Cypher**:
+
+1. **Text2Cypher**: Khi người dùng đặt câu hỏi, mô hình ngôn ngữ lớn (Google Gemini 2.5 Flash) sẽ dựa trên lược đồ cơ sở dữ liệu (schema) do backend cung cấp để viết tự động một truy vấn Cypher thay vì chỉ dựa vào từ khóa cơ bản.
+2. **Security & Execution**: Mã nguồn Python kiểm tra bảo mật nghiêm ngặt (chặn các lệnh can thiệp dữ liệu như `DELETE`, `CREATE`, `SET`...) trước khi thực thi truy vấn Cypher vào Neo4j.
+3. **Generation**: Kết quả JSON trả về từ Neo4j được đưa ngược lại cho mô hình Gemini dưới dạng ngữ cảnh (Context) để AI tự động sinh ra câu trả lời thân thiện, chính xác, trực quan bằng HTML và không bịa đặt thông tin (zero hallucination).
+4. **Fallback Mechanism**: Nếu AI tạo truy vấn lỗi, hệ thống tự động rơi về cơ chế trích xuất từ khóa để đảm bảo trải nghiệm người dùng không bị gián đoạn.
+
 ## 3.5. Triển khai Ứng dụng Web
 
 ### 3.5.1. Kiến trúc Backend (Flask Blueprints)
@@ -541,6 +551,14 @@ Admin Dashboard cung cấp giao diện quản lý toàn diện: thống kê hệ
 
 <!-- TODO: Chèn ảnh chụp CRUD địa điểm -->
 
+### 3.6.9. Chatbot Trợ lý ảo AI
+
+Chatbot xuất hiện dưới dạng một Widget bong bóng ở góc phải dưới màn hình. Giao diện hỗ trợ người dùng hỏi đáp trực tiếp bằng ngôn ngữ tự nhiên, hệ thống tự động tìm kiếm trong Neo4j và tổng hợp câu trả lời theo thời gian thực.
+
+*Hình 3.14. Giao diện Chatbot AI Text2Cypher RAG*
+
+<!-- TODO: Chèn ảnh chụp Chatbot AI -->
+
 ## 3.7. Tiểu kết chương 3
 
 Chương này đã trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI, từ thiết kế đến hiện thực hóa. Cụ thể:
@@ -559,6 +577,8 @@ Chương này đã trình bày chi tiết quá trình triển khai hệ thống 
 
 7. **Tiện ích xếp lộ trình:** Tích hợp tính năng phụ trợ giúp sắp xếp thứ tự tham quan theo ngày dựa trên nguyên tắc gần nhất nhằm hoàn thiện giao diện phục vụ thực nghiệm người dùng.
 
-8. **Demo website:** Minh họa giao diện thực tế qua 12 ảnh chụp màn hình, bao gồm: trang chủ bản đồ, đăng ký/đăng nhập, chi tiết địa điểm, đánh giá + sentiment, gợi ý AI + Explainable AI, lập lộ trình, lịch sử hoạt động và trang quản trị.
+8. **Chatbot AI Text2Cypher:** Tích hợp hệ thống Chatbot trả lời thông minh dựa trên kiến trúc RAG, tự động sinh truy vấn Cypher bằng AI (Gemini) để tra cứu bất kỳ dữ liệu nào trong hệ thống.
+
+9. **Demo website:** Minh họa giao diện thực tế qua 14 ảnh chụp màn hình, bao gồm: trang chủ bản đồ, đăng ký/đăng nhập, chi tiết địa điểm, đánh giá, gợi ý AI, lập lộ trình, lịch sử hoạt động, trang quản trị và Chatbot AI.
 
 Kết quả triển khai và đánh giá hiệu quả hệ thống sẽ được trình bày ở Chương 4.

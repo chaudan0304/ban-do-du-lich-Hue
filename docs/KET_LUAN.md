@@ -34,6 +34,7 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
 
 4. **Ứng dụng web hoàn chỉnh:**
    - Giao diện hiện đại với bản đồ tương tác Leaflet.js, Heatmap, 11 modal dialogs.
+   - Tích hợp Chatbot trợ lý ảo thông minh sử dụng kiến trúc RAG Text2Cypher (Google Gemini).
    - 32 API endpoints hoạt động ổn định (phản hồi < 500ms).
    - Kiến trúc modular: 4 Flask Blueprints, 7 module Data Access Layer, 10 file CSS, 9 file JS.
    - Bảo mật: mã hóa PBKDF2-SHA256, parameterized queries, Flask-Login session.
@@ -108,7 +109,6 @@ Bên cạnh các kết quả đạt được, khóa luận vẫn tồn tại m�
 2. **NLP nâng cao:**
    - Nâng cấp Sentiment Analysis sử dụng PhoBERT (mô hình NLP tiếng Việt).
    - Tự động trích xuất keywords và chủ đề từ bình luận.
-   - Phát triển chatbot hỗ trợ du khách.
 
 3. **Tích hợp dịch vụ bên thứ ba:**
    - Đặt vé tham quan trực tuyến.

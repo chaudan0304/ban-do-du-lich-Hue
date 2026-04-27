@@ -42,6 +42,7 @@ Dựa trên phân tích bài toán đặt ra ở phần Mở đầu, hệ thốn
 | 11   | UC11  | Sắp xếp lộ trình      | Tiện ích tự động xếp lịch trình tham quan cơ bản theo ngày|
 | 12   | UC12  | Lưu lộ trình          | Lưu lộ trình đã tạo để xem lại sau                        |
 | 13   | UC13  | Xem lịch sử           | Xem danh sách địa điểm đã thích, đánh giá và lộ trình đã lưu |
+| 14   | UC19  | Chatbot AI            | Trò chuyện bằng ngôn ngữ tự nhiên, tra cứu dữ liệu Neo4j qua RAG Text2Cypher |
 
 **b) Nhóm chức năng Quản trị viên (Admin):**
 
@@ -450,6 +451,21 @@ Dưới đây là đặc tả chi tiết toàn bộ 18 Use Case của hệ thố
 | **Luồng chính** | 1. Admin nhấn "Chạy thuật toán AI". 2. Gọi API `POST /api/admin/run-algo`. 3. Hệ thống thực hiện tuần tự: (a) Xây dựng đồ thị projection, (b) Chạy PageRank, ghi `pagerankScore` vào node, (c) Tính Node Similarity cho User-User và Location-Location, (d) Cập nhật `:INTERACTED`. 4. Trả về kết quả (số nodes/rels cập nhật). 5. Hiển thị thông báo thành công. |
 | **Luồng ngoại lệ** | • Nếu GDS chưa cài → Hiển thị hướng dẫn cài đặt. • Nếu timeout → Hiển thị lỗi và log chi tiết. |
 
+#### 2.4.2.19. Use Case UC19 — Chatbot AI
+
+*Bảng 2.22. Đặc tả Use Case UC19 — Chatbot AI*
+
+| Thành phần | Mô tả |
+|---|---|
+| **Use Case Name** | Chatbot AI (Text2Cypher RAG) |
+| **Use Case ID** | UC19 |
+| **Use Case Description** | Là một người dùng, tôi muốn hỏi đáp bằng ngôn ngữ tự nhiên với một trợ lý ảo để tra cứu bất kỳ thông tin nào trong hệ thống (địa điểm, danh mục, tọa độ, đánh giá). |
+| **Actor** | User (đã hoặc chưa đăng nhập) |
+| **Trigger** | Người dùng nhấn vào biểu tượng Chatbot ở góc phải dưới màn hình và gửi câu hỏi. |
+| **Pre-Condition** | • Hệ thống đã cấu hình khóa API của Google Gemini. |
+| **Post-Condition** | • Trả về câu trả lời bằng ngôn ngữ tự nhiên lấy dữ liệu từ đồ thị Neo4j. |
+| **Luồng chính** | 1. User gửi câu hỏi bằng văn bản. 2. Hệ thống sử dụng mô hình ngôn ngữ lớn (Gemini) chuyển câu hỏi thành truy vấn Cypher (Text2Cypher). 3. Kiểm tra tính an toàn (chỉ cho phép MATCH, cấm DELETE/SET/...). 4. Thực thi truy vấn Cypher vào Neo4j. 5. Lấy dữ liệu trả về và đưa lại vào LLM làm ngữ cảnh (RAG). 6. Sinh câu trả lời tự nhiên và hiển thị lên giao diện. |
+| **Luồng ngoại lệ** | • Nếu AI tạo Cypher sai hoặc có lỗi → Fallback sử dụng bộ lọc tìm kiếm từ khóa cơ bản. • Nếu truy vấn có ý định sửa đổi dữ liệu → Báo lỗi bảo mật. |
 
 
 ## 2.5. Thiết kế Kiến trúc Hệ thống
@@ -683,9 +699,9 @@ Thuật toán Hybrid Recommendation là thuật toán cốt lõi của hệ th�
 
 Chương này đã trình bày đầy đủ quá trình phân tích và thiết kế hệ thống Huế Travel AI, bao gồm:
 
-1. **Phân tích yêu cầu:** Xác định 18 yêu cầu chức năng chia thành 2 nhóm (User: 13, Admin: 5) cùng 9 yêu cầu phi chức năng về hiệu năng, bảo mật, khả dụng và tương thích.
+1. **Phân tích yêu cầu:** Xác định 19 yêu cầu chức năng chia thành 2 nhóm (User: 14, Admin: 5) cùng 9 yêu cầu phi chức năng về hiệu năng, bảo mật, khả dụng và tương thích.
 
-2. **Biểu đồ Use Case:** Mô hình hóa hệ thống với 2 tác nhân (User, Admin), đặc tả chi tiết toàn bộ 18 Use Case với biểu đồ riêng lẻ và bảng đặc tả đầy đủ (UC01–UC18).
+2. **Biểu đồ Use Case:** Mô hình hóa hệ thống với 2 tác nhân (User, Admin), đặc tả chi tiết toàn bộ 19 Use Case với biểu đồ riêng lẻ và bảng đặc tả đầy đủ (UC01–UC19).
 
 3. **Kiến trúc 3 tầng:** Thiết kế phân tách rõ ràng giữa Presentation (HTML/CSS/JS + Leaflet.js), Business Logic (Flask/Blueprint + AI Engine) và Data Tier (Neo4j/GDS + Cypher), tổ chức theo 7 module Backend độc lập.
 

@@ -37,6 +37,7 @@ Xây dựng một hệ thống web gợi ý du lịch thông minh cho thành ph�
 3. **Phát triển ứng dụng web thực nghiệm:**
    - Xây dựng giao diện web trực quan hiển thị bản đồ tương tác với Leaflet.js.
    - Tích hợp các thuật toán gợi ý đã xây dựng để phục vụ trực tiếp người dùng cuối cùng với hệ thống đánh giá, bình luận.
+   - Tích hợp Chatbot trợ lý ảo thông minh dựa trên kiến trúc RAG (Text-to-Cypher) sử dụng mô hình LLM (Gemini) để truy vấn thông tin bằng ngôn ngữ tự nhiên.
    - Bổ sung tính năng tiện ích (AI Planner) giúp người dùng sắp xếp lộ trình tham quan cơ bản sau khi đã có danh sách các địa điểm được gợi ý (đây là tính năng phụ trợ thêm).
    - Thiết kế Dashboard quản trị cho phép theo dõi ứng dụng.
 
@@ -89,7 +90,7 @@ Nội dung nghiên cứu chính của đề tài bao gồm:
 
 - **Phạm vi không gian:** Các địa điểm du lịch thuộc địa bàn thành phố Huế và vùng phụ cận (bao gồm lăng tẩm, bãi biển, làng nghề truyền thống...).
 - **Phạm vi thời gian:** Thực hiện từ tháng 10/2025 đến tháng 02/2026.
-- Việc xây dựng hệ thống tập trung hoàn toàn vào các thuật toán AI gợi ý điểm tham quan, cùng một tính năng phụ trợ nhỏ là sắp xếp lộ trình. **Không bao gồm** các tính năng kinh doanh giao dịch như đặt phòng khách sạn, vé máy bay hay thanh toán trực tuyến.
+- Việc xây dựng hệ thống tập trung hoàn toàn vào các thuật toán AI gợi ý điểm tham quan, Chatbot trợ lý ảo tra cứu thông tin dựa trên RAG, cùng một tính năng phụ trợ nhỏ là sắp xếp lộ trình. **Không bao gồm** các tính năng kinh doanh giao dịch như đặt phòng khách sạn, vé máy bay hay thanh toán trực tuyến.
 
 ## 7. Ý nghĩa khoa học và thực tiễn
 

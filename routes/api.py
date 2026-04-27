@@ -1073,3 +1073,194 @@ def api_save_itinerary():
 def api_delete_itinerary(id):
     delete_user_itinerary(current_user.id, id)
     return jsonify({"success": True})
+
+
+# =============================================================
+# 10. API: CHATBOT HỖ TRỢ (RAG AI - Neo4j + Gemini)
+# POST /api/chat
+# Body: {"message": "..."}
+# =============================================================
+@bp.route("/api/chat", methods=["POST"])
+def api_chat():
+    try:
+        import os
+        
+        data = request.json
+        message = data.get("message", "").strip().lower()
+
+        if not message:
+            return jsonify({"response": "Vui lòng nhập câu hỏi của bạn."})
+
+        # 1. TRÍCH XUẤT NGỮ CẢNH (RETRIEVAL)
+        from dotenv import load_dotenv
+        env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+        load_dotenv(dotenv_path=env_path, override=True)
+        gemini_api_key = os.getenv("GEMINI_API_KEY")
+
+        context_text = ""
+        client = None
+
+        # KIỂM TRA LỜI CHÀO TRƯỚC ĐỂ TIẾT KIỆM API CALL
+        greetings = ["xin chào", "chào", "hello", "hi", "chào bạn", "bot ơi", "alo", "ê"]
+        is_greeting = any(message.startswith(g) for g in greetings) or message in greetings
+
+        # NẾU CÓ API KEY -> THỬ DÙNG AI ĐỂ TẠO CÂU LỆNH CYPHER (Text2Cypher)
+        if gemini_api_key:
+            try:
+                from google import genai
+                from google.genai import types
+                client = genai.Client(api_key=gemini_api_key)
+
+                if is_greeting:
+                    context_text = "Người dùng đang chào hỏi hoặc gọi bạn."
+                else:
+                    schema_info = """
+                    Nodes:
+                    - Location: name, desc, lat, lng, rating, reviewCount, pagerankNorm, address
+                    - Category: name
+                    - User: name, fullname (TUYỆT ĐỐI KHÔNG LẤY CÁC THÔNG TIN NHẠY CẢM KHÁC)
+                    
+                    Relationships:
+                    - (Location)-[:HAS_CATEGORY]->(Category)
+                    - (User)-[:REVIEWED {rating, comment, sentiment, timestamp}]->(Location)
+                    - (User)-[:LIKED]->(Location)
+                    - (Location)-[:LOC_SIMILAR {score}]->(Location)
+                    """
+
+                    prompt1 = f"""
+                    Bạn là chuyên gia truy vấn dữ liệu Neo4j.
+                    Lược đồ cơ sở dữ liệu:
+                    {schema_info}
+                    
+                    Người dùng hỏi: "{message}"
+                    
+                    Hành động của bạn:
+                    1. Hãy viết MỘT câu lệnh Cypher ĐỂ LẤY DỮ LIỆU trả lời cho câu hỏi trên.
+                    2. CHỈ TRẢ VỀ CÂU LỆNH CYPHER RAW, KHÔNG markdown (không dùng ```cypher), KHÔNG giải thích.
+                    3. NẾU câu hỏi là lời chào (xin chào, hello...), hãy trả về đúng một từ: GREETING
+                    4. CHỈ DÙNG LỆNH ĐỌC (MATCH, RETURN). TUYỆT ĐỐI KHÔNG dùng CREATE, SET, DELETE, MERGE, REMOVE.
+                    5. Luôn thêm LIMIT 15 để không bị quá tải.
+                    6. Dùng toLower() và CONTAINS khi tìm kiếm văn bản để linh hoạt. (VD: WHERE toLower(l.name) CONTAINS 'hoàng thành')
+                    """
+
+                    # Cấu hình max_output_tokens=150 để phản hồi cực nhanh (Cypher rất ngắn)
+                    res_cypher = client.models.generate_content(
+                        model='gemini-2.5-flash',
+                        contents=prompt1,
+                        config=types.GenerateContentConfig(
+                            temperature=0.0,
+                            max_output_tokens=150
+                        )
+                    ).text.strip()
+
+                    if res_cypher == "GREETING":
+                        context_text = "Người dùng đang chào hỏi."
+                    else:
+                        # Dọn dẹp markdown nếu AI lỡ sinh ra
+                        res_cypher = res_cypher.replace("```cypher", "").replace("```", "").strip()
+                    
+                    # Kiểm tra bảo mật (Chỉ đọc)
+                    unsafe_keywords = ["DELETE", "SET ", "CREATE", "MERGE", "REMOVE", "DROP"]
+                    is_safe = not any(kw in res_cypher.upper() for kw in unsafe_keywords)
+
+                    if is_safe and res_cypher.upper().startswith("MATCH"):
+                        cypher_results = run_query(res_cypher, {})
+                        if cypher_results:
+                            context_text = f"Dữ liệu lấy được từ hệ thống:\n{str(cypher_results)}"
+                        else:
+                            context_text = "Câu truy vấn không tìm thấy dữ liệu nào phù hợp."
+                    else:
+                        raise Exception("Câu truy vấn không hợp lệ hoặc không an toàn.")
+                        
+            except Exception as e:
+                logger.error(f"Text2Cypher Error: {e}")
+                context_text = "" # Để rơi xuống luồng fallback bên dưới
+
+        # LUỒNG FALLBACK: NẾU KHÔNG CÓ AI HOẶC TEXT2CYPHER LỖI -> TÌM TỪ KHÓA CƠ BẢN
+        if not context_text:
+            categories_map = {
+                "di tích": "Di tích", "đại nội": "Di tích", "kinh thành": "Di tích", "lăng": "Lăng tẩm",
+                "chùa": "Tâm linh", "tâm linh": "Tâm linh", "thờ": "Tâm linh", "ẩm thực": "Ẩm thực",
+                "ăn": "Ẩm thực", "uống": "Ẩm thực", "cà phê": "Ẩm thực", "nhà hàng": "Ẩm thực", "đặc sản": "Ẩm thực",
+                "biển": "Bãi biển", "tham quan": "Tham quan", "thiên nhiên": "Thiên nhiên", "núi": "Thiên nhiên",
+                "suối": "Thiên nhiên", "mua sắm": "Mua sắm", "chợ": "Mua sắm"
+            }
+
+            matched_cat = None
+            for kw, cat_name in categories_map.items():
+                if kw in message:
+                    matched_cat = cat_name
+                    break
+
+            results = []
+            if matched_cat:
+                query = """
+                MATCH (l:Location)-[:HAS_CATEGORY]->(c:Category)
+                WHERE c.name = $cat
+                RETURN l.name AS name, l.desc AS desc, coalesce(l.rating, 0) AS rating, l.lat AS lat, l.lng AS lng
+                ORDER BY coalesce(l.pagerankNorm, 0) DESC
+                LIMIT 10
+                """
+                results = run_query(query, {"cat": matched_cat})
+            else:
+                stop_words = [
+                    "có", "nào", "đẹp", "không", "ở", "đâu", "tôi", "muốn", "đi", "tìm", "cho", "xin", "gợi", "ý", 
+                    "chỗ", "địa", "điểm", "chơi", "tọa", "độ", "vị", "trí", "địa", "chỉ", "của", "là", "gì", 
+                    "thông", "tin", "chi", "tiết", "như", "thế", "hãy", "kể", "tên", "các", "những", "cho", "hỏi"
+                ]
+                words = message.replace("?", "").replace(".", "").replace(",", "").split()
+                keywords = [w for w in words if w not in stop_words and len(w) > 1]
+
+                if keywords:
+                    keywords = keywords[:4]
+                    where_clauses = " AND ".join([f"(toLower(l.name) CONTAINS $kw_{i} OR toLower(l.desc) CONTAINS $kw_{i})" for i in range(len(keywords))])
+                    query = f"""
+                    MATCH (l:Location)
+                    WHERE {where_clauses}
+                    RETURN l.name AS name, l.desc AS desc, coalesce(l.rating, 0) AS rating, l.lat AS lat, l.lng AS lng
+                    ORDER BY coalesce(l.pagerankNorm, 0) DESC
+                    LIMIT 10
+                    """
+                    results = run_query(query, {f"kw_{i}": kw for i, kw in enumerate(keywords)})
+
+            if results:
+                for r in results:
+                    context_text += f"Địa điểm: {r['name']}\nĐánh giá: {r['rating']}/5 sao\nTọa độ: {r.get('lat', 'N/A')}, {r.get('lng', 'N/A')}\nMô tả: {r['desc']}\n\n"
+            else:
+                context_text = "Hệ thống không tìm thấy dữ liệu nào phù hợp với câu hỏi."
+
+        # 2. SINH CÂU TRẢ LỜI BẰNG AI DỰA TRÊN NGỮ CẢNH (RAG GENERATION)
+        if not gemini_api_key or not client:
+            # Trả lời không có AI
+            return jsonify({
+                "response": "Xin chào! Hiện tại tính năng AI chưa được cấu hình. Tôi chỉ có thể tìm theo danh mục cơ bản. <br><br><b>Kết quả:</b><br>" + context_text.replace("\n", "<br>")
+            })
+
+        # Trả lời với AI
+        prompt_gen = f"""Bạn là "Trợ lý Ảo Neo4j" hỗ trợ du lịch tại Huế.
+Nhiệm vụ: Trả lời câu hỏi của người dùng DỰA VÀO DỮ LIỆU NGỮ CẢNH DƯỚI ĐÂY (được trích xuất từ database).
+
+LƯU Ý QUAN TRỌNG:
+1. TUYỆT ĐỐI KHÔNG tự bịa ra thông tin. Mọi địa điểm, đánh giá, người dùng đều phải có trong ngữ cảnh.
+2. TRẢ LỜI NGẮN GỌN, TRỌNG TÂM, đi thẳng vào vấn đề để tiết kiệm thời gian đọc của người dùng. Không dài dòng.
+3. Nếu người dùng chào hỏi, hãy chào lại thân thiện nhưng ngắn gọn.
+4. Nếu trong ngữ cảnh báo "không tìm thấy", hãy xin lỗi và báo rằng thông tin này hiện chưa có trong cơ sở dữ liệu hệ thống.
+5. KHÔNG nhắc lại những câu thừa như "Dựa vào ngữ cảnh dưới đây...". Hãy trả lời trực tiếp như người thật.
+6. Sử dụng định dạng HTML cơ bản (<br>, <b>, <i>, <ul>, <li>) để đoạn chat trông đẹp mắt.
+
+NGỮ CẢNH (Dữ liệu từ Neo4j):
+{context_text}
+
+CÂU HỎI CỦA NGƯỜI DÙNG:
+{message}
+"""
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt_gen,
+            config=types.GenerateContentConfig(temperature=0.3)
+        )
+        return jsonify({"response": response.text})
+
+    except Exception as e:
+        logger.error(f"Chatbot RAG Error: {e}")
+        return jsonify({"response": f"Đã có lỗi xảy ra. Vui lòng thử lại sau. (Chi tiết: {str(e)})"}), 500
