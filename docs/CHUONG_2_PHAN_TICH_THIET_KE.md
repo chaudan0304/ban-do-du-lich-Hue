@@ -648,7 +648,45 @@ Thuật toán Hybrid Recommendation là thuật toán cốt lõi của hệ th�
 
 *Hình 2.24. Flowchart thuật toán Hybrid Recommendation*
 
-<!-- TODO: Chèn ảnh flowchart thuật toán Hybrid Recommendation tại đây -->
+```mermaid
+flowchart TD
+    Start([Bắt đầu: Yêu cầu gợi ý AI]) --> CheckColdStart{Kiểm tra tương tác<br>(Cold Start)}
+    
+    CheckColdStart -- "Chưa có tương tác" --> Fallback[Sử dụng điểm PageRank cơ bản]
+    Fallback --> Explainable[Explainable AI:<br>Tạo dữ liệu lý do & biểu đồ]
+    
+    CheckColdStart -- "Đã có tương tác" --> SplitProcess
+    
+    subgraph Thuật toán Hybrid Recommendation
+        SplitProcess((Xử lý<br>song song))
+        
+        SplitProcess --> CF[Collaborative Filtering<br>(Trọng số: x4.0)]
+        SplitProcess --> CB[Content-Based Filtering<br>(Trọng số: x3.0)]
+        SplitProcess --> PR[PageRank Diversity Pool<br>(Trọng số: x10.0)]
+        
+        CF --> CF_Calc["Tìm User tương đồng<br>score = count * weight * (1+sim)"]
+        CB --> CB_Calc["Lọc theo Category<br>+ Trọng số co-occurrence"]
+        PR --> PR_Calc["Lấy Top 20 địa điểm<br>có pagerankNorm cao nhất"]
+        
+        CF_Calc --> MergeScore[Gộp danh sách ứng viên<br>& Loại bỏ trùng lặp]
+        CB_Calc --> MergeScore
+        PR_Calc --> MergeScore
+        
+        MergeScore --> FinalCalc["Tính Final Score<br>log10(1+Collab) + log10(1+Content) + PageRank"]
+    end
+    
+    FinalCalc --> Explainable
+    Explainable --> End([Kết thúc: Trả về Top 12 Gợi ý])
+    
+    %% Style
+    classDef startEnd fill:#dcedc8,stroke:#689f38,stroke-width:2px;
+    classDef decision fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef process fill:#f9f9f9,stroke:#333,stroke-width:1px;
+    
+    class Start,End startEnd;
+    class CheckColdStart decision;
+    class Fallback,CF_Calc,CB_Calc,PR_Calc,MergeScore,FinalCalc,Explainable process;
+```
 
 **Luồng xử lý tổng quát:**
 
