@@ -623,7 +623,7 @@ Giao diện chính của hệ thống chia làm 2 phần: **Sidebar** bên trái
 
 *Hình 2.22. Wireframe trang chủ — Bản đồ tương tác*
 
-<!-- TODO: Chèn ảnh wireframe trang chủ tại đây -->
+![Wireframe trang chủ - Bản đồ tương tác](images/Wireframe_Trang_Chu.png)
 
 ### 2.8.2. Wireframe Modal AI Planner
 
@@ -631,7 +631,7 @@ Modal lập lộ trình thông minh cho phép người dùng tùy chỉnh các t
 
 *Hình 2.23. Wireframe modal AI Planner*
 
-<!-- TODO: Chèn ảnh wireframe modal AI Planner tại đây -->
+![Wireframe modal AI Planner](images/Wireframe_AI_Planner.png)
 
 ### 2.8.3. Phong cách thiết kế tổng quan
 
