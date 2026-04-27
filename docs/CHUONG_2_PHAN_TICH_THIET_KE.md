@@ -619,7 +619,7 @@ Tất cả API trả về JSON với cấu trúc thống nhất:
 
 ### 2.8.1. Wireframe trang chủ — Bản đồ tương tác
 
-Giao diện chính của hệ thống chia làm 2 phần: **Sidebar** bên trái (danh sách địa điểm, bộ lọc, gợi ý AI) và **Bản đồ Leaflet.js** bên phải chiếm phần lớn diện tích. Thiết kế theo phong cách Dark Mode hiện đại, tối ưu cho trải nghiệm xem bản đồ ban đêm.
+Giao diện chính của hệ thống chia làm 2 phần: **Sidebar** bên trái (danh sách địa điểm, bộ lọc, gợi ý AI) và **Bản đồ Leaflet.js** bên phải chiếm phần lớn diện tích. Thiết kế theo phong cách sáng (Light Mode) hiện đại, mang lại cảm giác thân thiện, rõ ràng và dễ dàng tra cứu thông tin.
 
 *Hình 2.22. Wireframe trang chủ — Bản đồ tương tác*
 
@@ -636,7 +636,7 @@ Modal lập lộ trình thông minh cho phép người dùng tùy chỉnh các t
 ### 2.8.3. Phong cách thiết kế tổng quan
 
 Giao diện hệ thống được thiết kế theo phong cách hiện đại, tối ưu cho trải nghiệm người dùng với các đặc điểm chính:
-- **Chế độ hiển thị (Theme):** Sử dụng Dark Mode làm chủ đạo với tone màu nền tối, giúp làm nổi bật bản đồ và giảm mỏi mắt cho người dùng khi tra cứu thông tin.
+- **Chế độ hiển thị (Theme):** Sử dụng Light Mode làm chủ đạo với tone màu nền sáng (trắng và xám nhạt), giúp nội dung hiển thị rõ ràng, trực quan và thân thiện với người dùng trong hầu hết các điều kiện ánh sáng.
 - **Màu nhấn (Accent Color):** Sử dụng các dải màu nổi bật (như sắc tím/xanh) cho các nút tương tác và điểm nhấn, tạo cảm giác công nghệ và hiện đại.
 - **Kiểu chữ (Typography):** Đồng bộ sử dụng hệ font chữ sans-serif hiện đại (tiêu biểu như font Inter) trên toàn bộ ứng dụng để đảm bảo độ đọc rõ ràng và sự chuyên nghiệp.
 
@@ -693,7 +693,7 @@ Chương này đã trình bày đầy đủ quá trình phân tích và thiết 
 
 5. **RESTful API:** Thiết kế 32 endpoints theo chuẩn REST, phân nhóm 5 nhóm chức năng (Xác thực, Địa điểm, AI, Lộ trình, Quản trị) với định dạng response thống nhất JSON.
 
-6. **Giao diện:** Wireframe trang chủ bản đồ tương tác và modal tạo lộ trình, bảng màu Dark Mode và quy chuẩn Typography với font Inter.
+6. **Giao diện:** Wireframe trang chủ bản đồ tương tác và modal tạo lộ trình, bảng màu Light Mode và quy chuẩn Typography với font Inter.
 
 7. **Flowchart thuật toán:** Mô tả luồng xử lý chi tiết 6 bước cho thuật toán Hybrid Recommendation (Cold Start Check → Collaborative Filtering → Content-Based → PageRank Pool → Merge & Score → Explainable AI). Lược bỏ chi tiết xử lý của tiện ích phụ trợ lộ trình để tập trung vào logic lõi.
 
