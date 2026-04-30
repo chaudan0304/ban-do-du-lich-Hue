@@ -1,4 +1,4 @@
-# CHƯƠNG 3: TRIỂN KHAI HỆ THỐNG
+# CHƯƠNG 3: XÂY DỰNG ỨNG DỤNG WEB VÀ TÍCH HỢP HỆ KHUYẾN NGHỊ
 
 Chương này trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI dựa trên bản thiết kế ở Chương 2, bao gồm: môi trường và công nghệ phát triển; cấu trúc tổ chức mã nguồn; triển khai cơ sở dữ liệu đồ thị; triển khai các thuật toán gợi ý lai (Hybrid Recommendation); và triển khai ứng dụng web cùng module AI Planner.
 
@@ -467,7 +467,7 @@ Giao diện trang chủ hiển thị bản đồ Leaflet.js toàn màn hình v�
 
 *Hình 3.2. Giao diện trang chủ — Bản đồ tương tác*
 
-<!-- TODO: Chèn ảnh chụp trang chủ tại đây -->
+![Giao diện trang chủ — Bản đồ tương tác](images/Demo_Trang_Chu.png)
 
 ### 3.6.2. Đăng ký và Đăng nhập
 
@@ -475,11 +475,11 @@ Hệ thống cung cấp modal đăng ký/đăng nhập với giao diện Dark Mo
 
 *Hình 3.3. Giao diện đăng ký tài khoản*
 
-<!-- TODO: Chèn ảnh chụp form đăng ký -->
+![Giao diện đăng ký tài khoản](images/Demo_Dang_Ky.png)
 
 *Hình 3.4. Giao diện đăng nhập*
 
-<!-- TODO: Chèn ảnh chụp form đăng nhập -->
+![Giao diện đăng nhập](images/Demo_Dang_Nhap.png)
 
 ### 3.6.3. Chi tiết địa điểm
 
@@ -487,7 +487,7 @@ Khi click vào một marker hoặc card địa điểm, hệ thống hiển th�
 
 *Hình 3.5. Giao diện chi tiết địa điểm*
 
-<!-- TODO: Chèn ảnh chụp popup/panel chi tiết địa điểm -->
+![Giao diện chi tiết địa điểm](images/Demo_Chi_Tiet.png)
 
 ### 3.6.4. Đánh giá và Phân tích cảm xúc
 
@@ -495,7 +495,7 @@ Người dùng đã đăng nhập có thể chấm điểm (1–5 sao) và viế
 
 *Hình 3.6. Giao diện viết đánh giá và kết quả phân tích cảm xúc*
 
-<!-- TODO: Chèn ảnh chụp form đánh giá + nhãn sentiment -->
+![Giao diện viết đánh giá và kết quả phân tích cảm xúc](images/Demo_Danh_Gia.png)
 
 ### 3.6.5. Gợi ý AI (Hybrid Recommendation)
 
@@ -503,11 +503,11 @@ Tab "Gợi ý AI" trên sidebar hiển thị Top 12 địa điểm được gợ
 
 *Hình 3.7. Giao diện gợi ý AI với Explainable AI*
 
-<!-- TODO: Chèn ảnh chụp tab gợi ý AI -->
+![Giao diện gợi ý AI với Explainable AI](images/Demo_Goi_Y_AI.png)
 
 *Hình 3.8. Biểu đồ phân tích thành phần điểm gợi ý*
 
-<!-- TODO: Chèn ảnh chụp biểu đồ breakdown điểm -->
+![Biểu đồ phân tích thành phần điểm gợi ý](images/Demo_Bieu_Do_Diem.png)
 
 ### 3.6.6. Lập lộ trình thông minh
 
@@ -515,11 +515,11 @@ Modal AI Planner cho phép người dùng chọn số ngày (1–5), sở thích
 
 *Hình 3.9. Giao diện modal lập lộ trình*
 
-<!-- TODO: Chèn ảnh chụp modal AI Planner -->
+![Giao diện modal lập lộ trình](images/Demo_Modal_Lo_Trinh.png)
 
 *Hình 3.10. Kết quả lộ trình dạng timeline*
 
-<!-- TODO: Chèn ảnh chụp kết quả lộ trình -->
+![Kết quả lộ trình dạng timeline](images/Demo_Ket_Qua_Lo_Trinh.png)
 
 ### 3.6.7. Lịch sử hoạt động
 
@@ -527,7 +527,7 @@ Trang lịch sử hiển thị 3 tab: Địa điểm đã thích, Đánh giá đ
 
 *Hình 3.11. Giao diện lịch sử hoạt động*
 
-<!-- TODO: Chèn ảnh chụp trang lịch sử -->
+![Giao diện lịch sử hoạt động](images/Demo_Lich_Su.png)
 
 ### 3.6.8. Trang quản trị (Admin Dashboard)
 
@@ -535,11 +535,11 @@ Admin Dashboard cung cấp giao diện quản lý toàn diện: thống kê hệ
 
 *Hình 3.12. Giao diện Dashboard quản trị*
 
-<!-- TODO: Chèn ảnh chụp trang admin -->
+![Giao diện Dashboard quản trị](images/Demo_Admin_Dashboard.png)
 
 *Hình 3.13. Giao diện quản lý địa điểm (Thêm/Sửa/Xóa)*
 
-<!-- TODO: Chèn ảnh chụp CRUD địa điểm -->
+![Giao diện quản lý địa điểm (Thêm/Sửa/Xóa)](images/Demo_Admin_CRUD.png)
 
 ## 3.7. Tiểu kết chương 3
 
