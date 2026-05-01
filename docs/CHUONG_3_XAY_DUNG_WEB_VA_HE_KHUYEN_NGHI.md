@@ -51,7 +51,7 @@ Hệ thống sử dụng các thư viện mã nguồn mở phổ biến, đảm 
 
 ## 3.2. Cấu trúc Tổ chức Mã nguồn
 
-Dự án được tổ chức theo kiến trúc **MVC mở rộng** (Model–View–Controller), tách biệt rõ ràng giữa tầng giao diện, tầng xử lý logic và tầng truy cập dữ liệu. Cấu trúc thư mục tổng quan như sau:
+Dự án được tổ chức theo **kiến trúc 3 Tầng (3-Tier Architecture)** kết hợp mô hình MVC, tách biệt rõ ràng giữa tầng trình bày (Presentation Tier), tầng xử lý nghiệp vụ (Business Logic Tier) và tầng dữ liệu (Data Tier). Cấu trúc thư mục tổng quan như sau:
 
 *Hình 3.1. Cấu trúc thư mục dự án*
 
