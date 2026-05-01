@@ -55,57 +55,7 @@ Dự án được tổ chức theo **kiến trúc 3 Tầng (3-Tier Architecture)
 
 *Hình 3.1. Cấu trúc thư mục dự án*
 
-```
-ban_do_du_lich_hue/
-│
-├── app.py                  # Điểm khởi chạy chính (Flask Application)
-├── models.py               # Model User (Flask-Login UserMixin)
-├── utils.py                # Hàm tiện ích (Sentiment Analysis, Topic Classification)
-├── setup_algo.py           # Engine AI — Thuật toán Hybrid Recommendation
-├── requirements.txt        # Danh sách thư viện Python
-├── .env                    # Biến môi trường (NEO4J_URI, SECRET_KEY...)
-│
-├── routes/                 # Tầng Controller — Flask Blueprints
-│   ├── __init__.py
-│   ├── main.py             # Blueprint "main" — Serve trang chủ
-│   ├── auth.py             # Blueprint "auth" — Xác thực người dùng
-│   ├── api.py              # Blueprint "api" — API cốt lõi (Recommend, Like, Review)
-│   └── admin.py            # Blueprint "admin" — Quản trị hệ thống
-│
-├── db/                     # Tầng Model — Data Access Layer (Neo4j)
-│   ├── __init__.py
-│   ├── connection.py       # Quản lý kết nối Neo4j Driver, hàm run_query()
-│   ├── user.py             # CRUD người dùng, hash mật khẩu
-│   ├── location.py         # CRUD địa điểm, toggle like, thêm/xóa review
-│   ├── planner.py          # AI Itinerary Planner (Nearest Neighbor)
-│   ├── itinerary.py        # Lưu/Xóa/Lấy lộ trình đã lưu
-│   ├── admin.py            # Truy vấn quản trị (thống kê, danh sách user)
-│   └── sync.py             # Đồng bộ Location từ Neo4j ↔ Excel
-│
-├── templates/              # Tầng View — Giao diện HTML (Jinja2)
-│   ├── index.html          # Trang chủ chính
-│   └── components/         # Các thành phần UI tái sử dụng
-│       ├── review_template.html
-│       └── modals/         # 11 modal dialogs
-│
-├── static/                 # Tài nguyên tĩnh
-│   ├── css/                # 10 file CSS (modular theo chức năng)
-│   ├── js/                 # 9 file JavaScript (modular theo chức năng)
-│   └── images/             # ~65 hình ảnh địa điểm du lịch
-│
-├── data/                   # Dữ liệu gốc
-│   └── data.xlsx           # File Excel chứa thông tin địa điểm
-│
-├── scripts/                # Scripts tiện ích
-│   ├── import_data.py      # Nạp dữ liệu từ Excel → Neo4j
-│   └── generate_users.py   # Tạo dữ liệu mẫu (Users, Likes)
-│
-├── tests/                  # Kiểm thử tự động
-│   ├── run_all_tests.py
-│   ├── test_auth.py
-│   ├── test_recommend.py
-│   └── test_planner.py
-```
+![Cấu trúc Thư mục Dự án](images/Cau_truc_thu_muc_du_an.png)
 
 **Nguyên tắc tổ chức:**
 
