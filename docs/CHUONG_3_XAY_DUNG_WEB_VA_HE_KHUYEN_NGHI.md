@@ -105,8 +105,6 @@ ban_do_du_lich_hue/
 │   ├── test_auth.py
 │   ├── test_recommend.py
 │   └── test_planner.py
-│
-└── docs/                   # Tài liệu khóa luận
 ```
 
 **Nguyên tắc tổ chức:**
