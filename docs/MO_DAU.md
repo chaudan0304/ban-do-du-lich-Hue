@@ -113,7 +113,7 @@ Ngoài phần Mở đầu, Kết luận và Tài liệu tham khảo, khóa luậ
 
 **Chương 2 — Phân tích và Thiết kế Hệ thống:** Phân tích sơ bộ yêu cầu chức năng. Thiết kế kiến trúc hệ thống 3 tầng, lược đồ cơ sở dữ liệu đồ thị (Graph Schema) và RESTful API. Thiết kế giao diện và mô hình kết hợp các thuật toán Hybrid Recommendation.
 
-**Chương 3 — Triển khai Hệ thống:** Môi trường và công cụ phát triển. Triển khai cơ sở dữ liệu đồ thị Neo4j. Triển khai cấu trúc mã nguồn các thuật toán gợi ý trọng tâm (Weighted PageRank, Collaborative Filtering, Content-Based Filtering, Adaptive Hybrid). Triển khai ứng dụng web trực quan và bổ sung tính năng phụ trợ xếp lộ trình.
+**Chương 3 — Xây dựng Ứng dụng Web và Tích hợp Hệ Khuyến nghị:** Môi trường và công cụ phát triển. Triển khai cơ sở dữ liệu đồ thị Neo4j. Triển khai cấu trúc mã nguồn các thuật toán gợi ý trọng tâm (Weighted PageRank, Collaborative Filtering, Content-Based Filtering, Adaptive Hybrid). Triển khai ứng dụng web trực quan và bổ sung tính năng phụ trợ xếp lộ trình.
 
 **Chương 4 — Kết quả và Đánh giá:** Kết quả triển khai giao diện. Kết quả thử nghiệm tập trung vào tính hiệu quả của từng thuật toán (PageRank, Collaborative Filtering, Content-Based, Hybrid, Diversity Pool). Đánh giá hiệu năng và phân tích mức độ chấp nhận của người dùng.
 

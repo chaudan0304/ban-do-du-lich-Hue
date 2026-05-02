@@ -27,10 +27,10 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
    - **PageRank Diversity Pool** (Bước 2.5) giải quyết Filter Bubble — tăng kết quả từ 3 lên 15 địa điểm đa dạng.
    - **Explainable AI** giải thích lý do từng gợi ý.
 
-3. **AI Itinerary Planner:**
-   - Tự động lập lộ trình 1–5 ngày với phân bổ tham quan/ẩm thực xen kẽ.
-   - Thuật toán Nearest Neighbor tối ưu quãng đường di chuyển (giảm 47%).
-   - Hỗ trợ 2 chế độ: AI gợi ý mới và Từ danh sách đã thích.
+3. **Tiện ích bổ trợ sắp xếp lộ trình:**
+   - Hỗ trợ người dùng phân bổ danh sách địa điểm đã được gợi ý thành lộ trình 1–5 ngày.
+   - Ứng dụng nguyên tắc Láng giềng gần nhất (Nearest Neighbor) để giảm thiểu quãng đường di chuyển vòng vèo.
+   - Hỗ trợ 2 chế độ: từ gợi ý hệ thống và từ danh sách đã thích.
 
 4. **Ứng dụng web hoàn chỉnh:**
    - Giao diện hiện đại với bản đồ tương tác Leaflet.js, Heatmap, 11 modal dialogs.
@@ -45,7 +45,6 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
 | Unit Tests                      | 14/14 PASS (100%) |
 | Thời gian phản hồi API          | < 500ms           |
 | Thời gian chạy thuật toán       | ~7 giây           |
-| Tối ưu quãng đường (vs Random)  | Giảm 47%          |
 | Điểm đánh giá người dùng        | 4.2 / 5           |
 | Tỷ lệ sẵn lòng sử dụng         | 90%               |
 
