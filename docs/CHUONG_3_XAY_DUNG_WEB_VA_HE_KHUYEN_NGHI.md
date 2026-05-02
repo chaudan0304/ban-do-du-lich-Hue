@@ -317,6 +317,16 @@ Trong đó:
 | **Độ Kết nối (C)** — `pagerankConnectNorm` | **0.3 (30%)** | Tận dụng cấu trúc đồ thị. Các địa điểm "trung tâm" (hubs) thuận tiện cho di chuyển giữa các cụm tham quan. |
 | **Chất lượng (R)** — `avgRating` | **0.1 (10%)** | Vai trò bổ trợ. Tránh để một vài đánh giá 5 sao ngẫu nhiên làm lệch bảng xếp hạng khi dữ liệu còn thưa. |
 
+**Cơ sở lựa chọn trọng số:**
+
+Chiến lược trọng số 60-30-10 được thiết kế dựa trên đặc thù **dữ liệu thưa (Sparse Data)** của hệ thống thử nghiệm (25 người dùng, 52 địa điểm):
+
+- **PageRank chiếm 60%** vì đây là thành phần duy nhất hoạt động ổn định trong mọi trường hợp, kể cả Cold Start. Khác với việc chỉ đếm số lượt Like đơn thuần, PageRank đánh giá cả *chất lượng* của nguồn tương tác — người dùng đã tương tác với nhiều địa điểm sẽ có "tiếng nói" có trọng lượng hơn, phản ánh đúng nguyên lý Trí tuệ đám đông (Crowd Wisdom) [8].
+
+- **Connectivity chiếm 30%** nhằm tận dụng lợi thế riêng của Graph Database mà các hệ thống dùng RDBMS truyền thống không có. Thành phần này giúp ưu tiên các địa điểm nằm ở vị trí "hub" trung tâm trong mạng lưới du lịch Huế — thuận tiện cho di chuyển giữa các cụm tham quan. Tuy nhiên, nó không được vượt quá PageRank vì bản thân Connectivity không phản ánh sở thích cá nhân.
+
+- **Rating chỉ chiếm 10%** là quyết định có chủ đích. Với quy mô 25 người dùng, nhiều địa điểm chỉ nhận được 1–2 đánh giá — chưa đủ mẫu thống kê (sample size) để đảm bảo tính đại diện. Nếu cho trọng số cao hơn (ví dụ 30–40%), chỉ cần 1 đánh giá 5 sao ngẫu nhiên cũng có thể đẩy một địa điểm ít người biết lên vị trí top, gây méo kết quả gợi ý. Với mức 10%, Rating đóng vai trò "tie-breaker" — chỉ tạo sự khác biệt khi hai địa điểm có PageRank và Connectivity tương đương nhau.
+
 **d) Chiến lược Cold Start (Khởi động lạnh):**
 
 Đối với người dùng mới chưa có tương tác (chưa LIKED hoặc INTERACTED), hệ thống bỏ qua Collaborative và Content-Based Filtering, thay vào đó sử dụng **Fallback Query** chỉ dựa trên điểm PageRank tổng hợp (công thức 60-30-10) để đảm bảo mọi người dùng đều nhận được gợi ý ngay từ lần truy cập đầu tiên.
