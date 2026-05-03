@@ -40,31 +40,8 @@
 | Bảng 3.13 | Các Flask Blueprints | |
 | Bảng 3.14 | Các module Data Access Layer | |
 | Bảng 3.15 | Các module JavaScript | |
-| **Chương 4** | | |
-| Bảng 4.1 | Thông số quy mô hệ thống | |
-| Bảng 4.2 | Danh sách modal dialogs | |
-| Bảng 4.3 | Bộ dữ liệu thử nghiệm | |
-| Bảng 4.4 | Kết quả xếp hạng Top 10 địa điểm theo Weighted PageRank | |
-| Bảng 4.5 | Kết quả gợi ý Collaborative Filtering cho User A | |
-| Bảng 4.6 | Kết quả gợi ý Content-Based Filtering | |
-| Bảng 4.7 | Kết quả Hybrid Recommendation — trường hợp Cold Start | |
-| Bảng 4.8 | So sánh kết quả trước và sau cải tiến Diversity Pool | |
-| Bảng 4.9 | Chi tiết kết quả gợi ý cho user "admin" sau Diversity Pool | |
-| Bảng 4.10 | Thời gian phản hồi các API chính | |
-| Bảng 4.11 | Thời gian chạy các bước trong setup_algo.py | |
-| Bảng 4.12 | Mức sử dụng tài nguyên hệ thống | |
-| Bảng 4.13 | Kết quả kiểm thử xác thực | |
-| Bảng 4.14 | Kết quả kiểm thử thuật toán gợi ý | |
-| Bảng 4.15 | Kết quả kiểm thử tính năng lộ trình | |
-| Bảng 4.16 | Tổng kết kết quả kiểm thử đơn vị | |
-| Bảng 4.17 | So sánh tính năng với các hệ thống tương tự | |
-| Bảng 4.18 | Kết quả khảo sát — Giao diện | |
-| Bảng 4.19 | Kết quả khảo sát — Độ phù hợp gợi ý | |
-| Bảng 4.20 | Kết quả khảo sát — Chất lượng lộ trình | |
-| Bảng 4.21 | Kết quả khảo sát — Mức độ sẵn lòng sử dụng | |
-| Bảng 4.22 | Tổng hợp điểm đánh giá người dùng | |
 
-**Tổng số: 57 bảng**
+**Tổng số: 35 bảng**
 
 ---
 
@@ -82,5 +59,17 @@
 | Hình 2.7 | Flowchart thuật toán Hybrid Recommendation | |
 | **Chương 3** | | |
 | Hình 3.1 | Cấu trúc thư mục dự án | |
+| Hình 3.2 | Giao diện trang chủ — Bản đồ tương tác | |
+| Hình 3.3 | Giao diện đăng ký tài khoản | |
+| Hình 3.4 | Giao diện đăng nhập | |
+| Hình 3.5 | Giao diện chi tiết địa điểm | |
+| Hình 3.6 | Giao diện viết đánh giá và kết quả phân tích cảm xúc | |
+| Hình 3.7 | Giao diện gợi ý AI với Explainable AI | |
+| Hình 3.8 | Biểu đồ phân tích thành phần điểm gợi ý | |
+| Hình 3.9 | Giao diện modal lập lộ trình | |
+| Hình 3.10 | Kết quả lộ trình dạng timeline | |
+| Hình 3.11 | Giao diện lịch sử hoạt động | |
+| Hình 3.12 | Giao diện Dashboard quản trị | |
+| Hình 3.13 | Giao diện quản lý địa điểm (Thêm/Sửa/Xóa) | |
 
-**Tổng số: 8 hình**
+**Tổng số: 20 hình**

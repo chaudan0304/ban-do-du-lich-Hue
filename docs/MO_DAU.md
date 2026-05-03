@@ -107,15 +107,13 @@ Nội dung nghiên cứu chính của đề tài bao gồm:
 
 ## 8. Bố cục khóa luận
 
-Ngoài phần Mở đầu, Kết luận và Tài liệu tham khảo, khóa luận được trình bày trong 4 chương và 2 phụ lục:
+Ngoài phần Mở đầu, Kết luận và Tài liệu tham khảo, khóa luận được trình bày trong 3 chương và 2 phụ lục:
 
 **Chương 1 — Cơ sở Lý thuyết:** Tổng quan tình hình nghiên cứu. Trình bày lý thuyết về Hệ thống Gợi ý và các phương pháp (Content-Based, Collaborative Filtering, Hybrid). Giới thiệu Graph Database, Neo4j, thuật toán đồ thị. Phân tích các thuật toán lõi hệ thống: Weighted PageRank, Collaborative Filtering (Jaccard Similarity) và cơ sở lý thuyết tổng quan cho tính năng lập lộ trình bổ sung. Trình bày các công nghệ nền tảng.
 
 **Chương 2 — Phân tích và Thiết kế Hệ thống:** Phân tích sơ bộ yêu cầu chức năng. Thiết kế kiến trúc hệ thống 3 tầng, lược đồ cơ sở dữ liệu đồ thị (Graph Schema) và RESTful API. Thiết kế giao diện và mô hình kết hợp các thuật toán Hybrid Recommendation.
 
-**Chương 3 — Xây dựng Ứng dụng Web và Tích hợp Hệ Khuyến nghị:** Môi trường và công cụ phát triển. Triển khai cơ sở dữ liệu đồ thị Neo4j. Triển khai cấu trúc mã nguồn các thuật toán gợi ý trọng tâm (Weighted PageRank, Collaborative Filtering, Content-Based Filtering, Adaptive Hybrid). Triển khai ứng dụng web trực quan và bổ sung tính năng phụ trợ xếp lộ trình.
-
-**Chương 4 — Kết quả và Đánh giá:** Kết quả triển khai giao diện. Kết quả thử nghiệm tập trung vào tính hiệu quả của từng thuật toán (PageRank, Collaborative Filtering, Content-Based, Hybrid, Diversity Pool). Đánh giá hiệu năng và phân tích mức độ chấp nhận của người dùng.
+**Chương 3 — Xây dựng Ứng dụng Web và Tích hợp Hệ Khuyến nghị:** Môi trường và công cụ phát triển. Triển khai cơ sở dữ liệu đồ thị Neo4j. Triển khai cấu trúc mã nguồn các thuật toán gợi ý trọng tâm (Weighted PageRank, Collaborative Filtering, Content-Based Filtering, Adaptive Hybrid). Triển khai ứng dụng web trực quan, bổ sung tính năng phụ trợ xếp lộ trình và demo giao diện website.
 
 **Phụ lục A — Hướng dẫn Cài đặt và Triển khai:** Chi tiết các bước cài đặt môi trường, cấu hình Neo4j, nạp dữ liệu và khởi chạy ứng dụng.
 
