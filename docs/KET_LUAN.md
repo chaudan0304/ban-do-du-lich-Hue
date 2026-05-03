@@ -58,7 +58,7 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
 
 2. **Cung cấp công cụ Explainable AI (XAI) minh bạch hóa quyết định:** Tích hợp giao diện giải thích chi tiết lý do gợi ý (được hệ thống AI cá nhân hóa dựa trên lịch sử tương tác), giúp tăng tính thuyết phục và độ tin cậy của ứng dụng thay vì chỉ đưa ra kết quả "hộp đen" (black-box) như các hệ thống truyền thống.
 
-3. **Mã nguồn mở và khả năng tái sử dụng:** Toàn bộ mã nguồn của hệ thống được công khai trên nền tảng GitHub ([github.com/chaudan0304/ban-do-du-lich-Hue](https://github.com/chaudan0304/ban-do-du-lich-Hue)), đi kèm cấu trúc phần mềm rõ ràng và tài liệu hướng dẫn cài đặt chi tiết. Điều này giúp cộng đồng lập trình viên, các nhà nghiên cứu và sinh viên có thể dễ dàng tham khảo, học tập hoặc tùy biến triển khai cho các tỉnh thành khác.
+3. **Mã nguồn mở và khả năng tái sử dụng:** Toàn bộ mã nguồn của hệ thống được thiết kế và công khai theo chuẩn mã nguồn mở, đi kèm cấu trúc phần mềm rõ ràng và tài liệu hướng dẫn cài đặt chi tiết. Điều này giúp cộng đồng lập trình viên, các nhà nghiên cứu và sinh viên có thể dễ dàng tham khảo, học tập hoặc tùy biến triển khai cho các tỉnh thành khác.
 
 4. **Tạo nền tảng thu thập và phân tích hành vi du lịch:** Với cơ sở dữ liệu đồ thị linh hoạt, hệ thống đóng vai trò như một bộ thu thập dữ liệu (data collection hub) ghi nhận lại sở thích, mức độ hài lòng và tương tác của du khách. Đây là nguồn dữ liệu quý giá (insights) có khả năng hỗ trợ các cơ quan quản lý ban ngành địa phương trong việc hoạch định chiến lược phát triển du lịch.
 
