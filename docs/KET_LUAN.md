@@ -54,9 +54,13 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
 
 ### 2.2. Đóng góp thực tiễn
 
-1. Hệ thống **Huế Travel AI** hoàn chỉnh, có thể triển khai phục vụ du khách thực tế.
-2. **Mã nguồn mở** trên GitHub ([github.com/chaudan0304/ban-do-du-lich-Hue](https://github.com/chaudan0304/ban-do-du-lich-Hue)), cộng đồng có thể sử dụng, học tập và phát triển.
-3. Tài liệu khóa luận và hướng dẫn cài đặt chi tiết, phục vụ làm tài liệu tham khảo.
+1. **Xây dựng thành công ứng dụng thực tế "Huế Travel AI":** Cung cấp một nền tảng web hoàn chỉnh, có giao diện bản đồ trực quan (GIS) và tiện ích hỗ trợ sắp xếp lộ trình thông minh. Ứng dụng đã sẵn sàng để triển khai phục vụ khách du lịch thực tế khi đến với Thừa Thiên Huế, giúp giải quyết khó khăn trong việc tra cứu điểm đến và lên kế hoạch di chuyển tối ưu.
+
+2. **Cung cấp công cụ Explainable AI (XAI) minh bạch hóa quyết định:** Tích hợp giao diện giải thích chi tiết lý do gợi ý (được hệ thống AI cá nhân hóa dựa trên lịch sử tương tác), giúp tăng tính thuyết phục và độ tin cậy của ứng dụng thay vì chỉ đưa ra kết quả "hộp đen" (black-box) như các hệ thống truyền thống.
+
+3. **Mã nguồn mở và khả năng tái sử dụng:** Toàn bộ mã nguồn của hệ thống được công khai trên nền tảng GitHub ([github.com/chaudan0304/ban-do-du-lich-Hue](https://github.com/chaudan0304/ban-do-du-lich-Hue)), đi kèm cấu trúc phần mềm rõ ràng và tài liệu hướng dẫn cài đặt chi tiết. Điều này giúp cộng đồng lập trình viên, các nhà nghiên cứu và sinh viên có thể dễ dàng tham khảo, học tập hoặc tùy biến triển khai cho các tỉnh thành khác.
+
+4. **Tạo nền tảng thu thập và phân tích hành vi du lịch:** Với cơ sở dữ liệu đồ thị linh hoạt, hệ thống đóng vai trò như một bộ thu thập dữ liệu (data collection hub) ghi nhận lại sở thích, mức độ hài lòng và tương tác của du khách. Đây là nguồn dữ liệu quý giá (insights) có khả năng hỗ trợ các cơ quan quản lý ban ngành địa phương trong việc hoạch định chiến lược phát triển du lịch.
 
 ## 3. Hạn chế
 
