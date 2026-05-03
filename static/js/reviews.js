@@ -494,7 +494,7 @@ function renderReviewItems(reviews, container) {
             <div class="review-avatar-modern">
                 <i class="fas fa-user-circle" style="font-size: 24px;"></i>
             </div>
-            <div class="review-body">
+            <div class="review-content-modern">
                 <div class="review-row-top">
                     <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
                         <span class="review-user-name">${displayName}</span>

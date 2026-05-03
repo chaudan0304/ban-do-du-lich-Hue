@@ -34,19 +34,11 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
 
 4. **Ứng dụng web hoàn chỉnh:**
    - Giao diện hiện đại với bản đồ tương tác Leaflet.js, Heatmap, 11 modal dialogs.
-   - 32 API endpoints hoạt động ổn định (phản hồi < 500ms).
+   - Giao diện Giải thích AI (Explainable AI) minh bạch hóa quyết định gợi ý.
    - Kiến trúc modular: 4 Flask Blueprints, 7 module Data Access Layer, 10 file CSS, 9 file JS.
-   - Bảo mật: mã hóa PBKDF2-SHA256, parameterized queries, Flask-Login session.
+   - Bảo mật: mã hóa mật khẩu, parameterized queries, Flask-Login session.
 
-### 1.3. Kết quả đánh giá
 
-| Tiêu chí                       | Kết quả           |
-| ------------------------------- | ----------------- |
-| Unit Tests                      | 14/14 PASS (100%) |
-| Thời gian phản hồi API          | < 500ms           |
-| Thời gian chạy thuật toán       | ~7 giây           |
-| Điểm đánh giá người dùng        | 4.2 / 5           |
-| Tỷ lệ sẵn lòng sử dụng         | 90%               |
 
 ## 2. Đóng góp của Khóa luận
 

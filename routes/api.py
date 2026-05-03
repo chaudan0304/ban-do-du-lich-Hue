@@ -379,8 +379,8 @@ def recommend(user_name):
                     """
                     MATCH (me:User {name: $name})-[sim:SIMILAR_TO]->(other:User)-[:INTERACTED|LIKED]->(l:Location)
                     WHERE l.name IN $locations AND other <> me
-                    RETURN l.name AS loc_name, other.name AS user_name, round(sim.score * 100) AS similarity
-                    ORDER BY sim.score DESC
+                    RETURN DISTINCT l.name AS loc_name, other.name AS user_name, round(sim.score * 100) AS similarity
+                    ORDER BY similarity DESC
                 """,
                     {"name": user_name, "locations": loc_names},
                 )
@@ -391,8 +391,11 @@ def recommend(user_name):
                     if (
                         len(similar_users_map[ln]) < 5
                     ):  # Giới hạn 5 users / Limit 5 users
+                        raw_name = r["user_name"]
+                        # Che tên user để bảo mật quyền riêng tư (Vd: u***2)
+                        anon_name = raw_name[0] + "***" + raw_name[-1] if len(raw_name) > 2 else raw_name[0] + "***"
                         similar_users_map[ln].append(
-                            {"name": r["user_name"], "similarity": int(r["similarity"])}
+                            {"name": anon_name, "similarity": int(r["similarity"])}
                         )
 
                 # 2. Lấy danh sách địa điểm đã like cùng category
@@ -572,6 +575,15 @@ def api_toggle_like():
         return jsonify({"error": "Thiếu tên địa điểm"}), 400
 
     is_liked, msg = toggle_like_location(current_user.id, location_name)
+
+    # Chạy lại thuật toán AI trong nền khi có thay đổi tương tác (Like/Unlike)
+    # Run AI algorithm in background thread on interaction change
+    import threading
+    from setup_algo import run_hybrid_algo
+    
+    threading.Thread(target=run_hybrid_algo).start()
+    logger.info(f"Thay đổi Like ('{location_name}'). Đang chạy lại thuật toán AI...")
+
     return jsonify({"liked": is_liked, "message": msg}), 200
 
 
@@ -616,6 +628,12 @@ def api_add_review():
     )
 
     if success:
+        # Chạy lại thuật toán AI trong nền khi có đánh giá mới/cập nhật
+        import threading
+        from setup_algo import run_hybrid_algo
+        threading.Thread(target=run_hybrid_algo).start()
+        logger.info(f"Thêm/sửa đánh giá '{loc_name}'. Đang chạy lại thuật toán AI...")
+
         return (
             jsonify(
                 {
@@ -667,6 +685,12 @@ def api_delete_review():
 
     success, result = delete_review(target_user, loc_name, review_id)
     if success:
+        # Chạy lại thuật toán AI trong nền khi xóa đánh giá
+        import threading
+        from setup_algo import run_hybrid_algo
+        threading.Thread(target=run_hybrid_algo).start()
+        logger.info(f"Xóa đánh giá tại '{loc_name}'. Đang chạy lại thuật toán AI...")
+
         return (
             jsonify({"success": True, "message": "Đã xóa đánh giá!", "stats": result}),
             200,
