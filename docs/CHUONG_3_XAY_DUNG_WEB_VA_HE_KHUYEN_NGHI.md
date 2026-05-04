@@ -1,6 +1,6 @@
 # CHƯƠNG 3: XÂY DỰNG ỨNG DỤNG WEB VÀ TÍCH HỢP HỆ KHUYẾN NGHỊ
 
-Chương này trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI dựa trên bản thiết kế ở Chương 2, bao gồm: môi trường và công nghệ phát triển; cấu trúc tổ chức mã nguồn; triển khai cơ sở dữ liệu đồ thị; triển khai các thuật toán gợi ý lai (Hybrid Recommendation); và triển khai ứng dụng web cùng module AI Planner.
+Chương này trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI dựa trên bản thiết kế ở Chương 2, bao gồm: môi trường và công nghệ phát triển; cấu trúc tổ chức mã nguồn; triển khai cơ sở dữ liệu đồ thị; triển khai các thuật toán khuyến nghị lai (Hybrid Recommendation); module phân tích cảm xúc (Sentiment Analysis); và triển khai ứng dụng web cùng module AI Planner.
 
 ## 3.1. Môi trường và Công nghệ Phát triển
 
@@ -126,9 +126,9 @@ Kết hợp 2 nguồn tín hiệu để xây dựng mạng liên kết giữa c�
 
 *Ví dụ:* Đại Nội và Lăng Tự Đức có 3 users chung và cùng danh mục "Di tích lịch sử" → `RELATED_TO.weight = (3 × 1.2) + 0.8 = 4.4`.
 
-## 3.4. Triển khai Thuật toán Gợi ý (Core AI)
+## 3.4. Triển khai Thuật toán Khuyến nghị (Recommendation Engine)
 
-Đây là phần cốt lõi của hệ thống, triển khai mô hình **Hybrid Recommendation System** kết hợp 3 phương pháp chính (đã trình bày lý thuyết ở Chương 1).
+Đây là phần cốt lõi của hệ thống, triển khai mô hình **Hybrid Recommendation System** kết hợp 3 phương pháp chính (đã trình bày lý thuyết ở Chương 1). Cần phân biệt rõ: phần này chỉ bao gồm **thuật toán khuyến nghị** (Recommendation Algorithm) — tức logic xếp hạng và gợi ý địa điểm cá nhân hóa. Mô-đun phân tích cảm xúc (Sentiment Analysis) sẽ được trình bày riêng ở mục 3.4.6 vì đó là một module xử lý ngôn ngữ tự nhiên (NLP) độc lập, phục vụ riêng cho chức năng đánh giá.
 
 ### 3.4.1. Thuật toán Weighted PageRank
 
@@ -344,6 +344,17 @@ Mỗi địa điểm trong danh sách gợi ý đều kèm theo thông tin giả
 | `reason_type` | Phân loại lý do | `collab`, `content`, `pagerank`, `default` |
 | `reason_details` | Dữ liệu chi tiết cho biểu đồ UI | Điểm và % đóng góp từng thành phần, danh sách users tương đồng, biểu đồ tròn |
 
+### 3.4.6. Module Phân tích Cảm xúc (Sentiment Analysis)
+
+Khác với thuật toán khuyến nghị ở các mục 3.4.1–3.4.4 (chịu trách nhiệm xếp hạng và gợi ý địa điểm), module **Phân tích Cảm xúc** là một thành phần xử lý ngôn ngữ tự nhiên (NLP) độc lập, được triển khai trong file `utils.py`. Module này phục vụ riêng cho chức năng đánh giá (Review), không tham gia vào pipeline tính điểm khuyến nghị.
+
+**Vai trò và phạm vi:**
+
+- **`analyze_sentiment(comment)`:** Phân tích cảm xúc bình luận (tích cực / tiêu cực / trung lập) dựa trên từ điển từ khóa tiếng Việt. Kết quả được lưu vào thuộc tính `sentiment` của relationship `:REVIEWED` để hiển thị nhãn cảm xúc trên giao diện.
+- **`classify_comment_topic(comment)`:** Phân loại chủ đề bình luận (phong cảnh, dịch vụ, giá cả, ẩm thực...) dựa trên keyword matching.
+
+**Lưu ý quan trọng:** Module này sử dụng phương pháp keyword-based đơn giản, không áp dụng mô hình học máy. Kết quả sentiment chỉ phục vụ việc hiển thị trực quan cho người dùng, không được sử dụng làm đầu vào cho thuật toán khuyến nghị Hybrid.
+
 ## 3.5. Triển khai Ứng dụng Web
 
 ### 3.5.1. Kiến trúc Backend (Flask Blueprints)
@@ -375,9 +386,9 @@ Hệ thống tách biệt logic truy vấn cơ sở dữ liệu vào thư mục 
 | `db/admin.py` | Truy vấn quản trị (thống kê, danh sách user) |
 | `db/sync.py` | Đồng bộ dữ liệu Location từ Neo4j ↔ Excel |
 
-**Module tiện ích (`utils.py`):**
+**Module Phân tích Cảm xúc (`utils.py`) — *độc lập với thuật toán khuyến nghị*:**
 
-File `utils.py` cung cấp các hàm phân tích văn bản tự động, được tích hợp vào quy trình thêm đánh giá:
+File `utils.py` chứa module Sentiment Analysis, là thành phần NLP riêng biệt phục vụ chức năng đánh giá — không thuộc pipeline thuật toán khuyến nghị (xem mục 3.4.6):
 
 - **`analyze_sentiment(comment)`:** Phân tích cảm xúc bình luận (tích cực / tiêu cực / trung lập) dựa trên từ điển từ khóa tiếng Việt.
 - **`classify_comment_topic(comment)`:** Phân loại chủ đề bình luận (phong cảnh, dịch vụ, giá cả, ẩm thực...) dựa trên keyword matching.
@@ -509,12 +520,14 @@ Chương này đã trình bày chi tiết quá trình triển khai hệ thống 
 
 3. **Cơ sở dữ liệu đồ thị:** Triển khai lược đồ 5 node, 9 relationship trên Neo4j với quy trình tiền xử lý tự động (INTERACTED, RELATED_TO, SIMILAR_TO, LOC_SIMILAR).
 
-4. **Thuật toán gợi ý lai:** Triển khai thành công pipeline 4 bước kết hợp Weighted PageRank (dampingFactor=0.88), Collaborative Filtering (Jaccard, topK=10), Content-Based Filtering (topK=5), PageRank Diversity Pool (Top 20) và chiến lược trọng số thích ứng 60-30-10.
+4. **Thuật toán khuyến nghị lai (Recommendation Engine):** Triển khai thành công pipeline 4 bước kết hợp Weighted PageRank (dampingFactor=0.88), Collaborative Filtering (Jaccard, topK=10), Content-Based Filtering (topK=5), PageRank Diversity Pool (Top 20) và chiến lược trọng số thích ứng 60-30-10.
 
 5. **Explainable AI:** Mỗi gợi ý kèm lý do bằng ngôn ngữ tự nhiên, biểu đồ phân tích và dữ liệu chi tiết.
 
-6. **Ứng dụng web:** Backend Flask modular (4 Blueprint, 7 module DAL), Frontend Vanilla JS (9 module), tích hợp Leaflet.js cho bản đồ tương tác.
+6. **Module Phân tích Cảm xúc (Sentiment Analysis):** Triển khai riêng biệt với thuật toán khuyến nghị, phục vụ chức năng đánh giá — phân tích cảm xúc và phân loại chủ đề bình luận bằng phương pháp keyword-based.
 
-7. **Tiện ích xếp lộ trình:** Tích hợp tính năng phụ trợ giúp sắp xếp thứ tự tham quan theo ngày dựa trên nguyên tắc gần nhất nhằm hoàn thiện giao diện phục vụ thực nghiệm người dùng.
+7. **Ứng dụng web:** Backend Flask modular (4 Blueprint, 7 module DAL), Frontend Vanilla JS (9 module), tích hợp Leaflet.js cho bản đồ tương tác.
 
-8. **Demo website:** Minh họa giao diện thực tế qua 12 ảnh chụp màn hình, bao gồm: trang chủ bản đồ, đăng ký/đăng nhập, chi tiết địa điểm, đánh giá + sentiment, gợi ý AI + Explainable AI, lập lộ trình, lịch sử hoạt động và trang quản trị.
+8. **Tiện ích xếp lộ trình:** Tích hợp tính năng phụ trợ giúp sắp xếp thứ tự tham quan theo ngày dựa trên nguyên tắc gần nhất nhằm hoàn thiện giao diện phục vụ thực nghiệm người dùng.
+
+9. **Demo website:** Minh họa giao diện thực tế qua 12 ảnh chụp màn hình, bao gồm: trang chủ bản đồ, đăng ký/đăng nhập, chi tiết địa điểm, đánh giá + sentiment, gợi ý AI + Explainable AI, lập lộ trình, lịch sử hoạt động và trang quản trị.
