@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cấu trúc Thư mục Dự án - Huế Travel AI</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 40px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      border-bottom: 2px solid #0056b3;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+    }
+
+    .btn-download {
+      background-color: #1a73e8;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      margin-top: 15px;
+    }
+
+    .btn-download:hover {
+      background-color: #1557b0;
+    }
+
+    canvas {
+      border: 1px dashed #ccc;
+      background-color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <canvas id="canvas-struct" width="950" height="1350"></canvas>
+    <br>
+    <button class="btn-download" onclick="downloadCanvas()">⬇ Tải ảnh Cấu trúc Thư mục Dự án</button>
+  </div>
+
+  <script>
+    function drawStructure() {
+      const canvas = document.getElementById('canvas-struct');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Clear
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
+
+      // ===== CONFIG =====
+      const LEFT = 50;
+      const LINE_H = 26;
+      const INDENT = 28;
+      const ICON_SIZE = 16;
+      const START_Y = 70;
+
+      // Colors
+      const COLORS = {
+        root: { bg: '#1a1a2e', text: '#ffffff' },
+        folder: '#e8a838',
+        file: '#5c9ce6',
+        comment: '#888888',
+        treeLine: '#cccccc',
+        // Layer colors for groups
+        layerApp: { bg: 'rgba(33, 150, 243, 0.06)', border: '#2196F3', label: '#1565C0' },      // Core App
+        layerRoutes: { bg: 'rgba(76, 175, 80, 0.06)', border: '#4CAF50', label: '#2E7D32' },     // Routes
+        layerDB: { bg: 'rgba(255, 152, 0, 0.06)', border: '#FF9800', label: '#E65100' },         // DB
+        layerTemplates: { bg: 'rgba(156, 39, 176, 0.06)', border: '#9C27B0', label: '#6A1B9A' }, // Templates
+        layerStatic: { bg: 'rgba(0, 150, 136, 0.06)', border: '#009688', label: '#00695C' },     // Static
+        layerOther: { bg: 'rgba(96, 125, 139, 0.06)', border: '#607D8B', label: '#37474F' },     // Other
+      };
+
+      // ===== TITLE =====
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = 'bold 20px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Cấu trúc Thư mục Dự án — Huế Travel AI', W / 2, 35);
+
+      // ===== TREE DATA =====
+      // type: 'folder' | 'file', depth: indent level, last: is last in group
+      const tree = [
+        // Root
+        { type: 'root', name: 'ban_do_du_lich_hue/', comment: '', depth: 0, group: 'root' },
+
+        // Core App Files
+        { type: 'file', name: 'app.py', comment: 'Điểm khởi chạy chính (Flask Application)', depth: 1, connector: '├──', group: 'app' },
+        { type: 'file', name: 'models.py', comment: 'Model User (Flask-Login UserMixin)', depth: 1, connector: '├──', group: 'app' },
+        { type: 'file', name: 'utils.py', comment: 'Sentiment Analysis, Topic Classification', depth: 1, connector: '├──', group: 'app' },
+        { type: 'file', name: 'setup_algo.py', comment: 'Engine AI — Thuật toán Hybrid Recommendation', depth: 1, connector: '├──', group: 'app' },
+        { type: 'file', name: 'requirements.txt', comment: 'Danh sách thư viện Python', depth: 1, connector: '├──', group: 'app' },
+        { type: 'file', name: '.env', comment: 'Biến môi trường (NEO4J_URI, SECRET_KEY...)', depth: 1, connector: '├──', group: 'app' },
+        { type: 'spacer' },
+
+        // Routes
+        { type: 'folder', name: 'routes/', comment: 'Tầng Controller — Flask Blueprints', depth: 1, connector: '├──', group: 'routes' },
+        { type: 'file', name: '__init__.py', comment: '', depth: 2, connector: '├──', group: 'routes' },
+        { type: 'file', name: 'main.py', comment: 'Blueprint "main" — Serve trang chủ', depth: 2, connector: '├──', group: 'routes' },
+        { type: 'file', name: 'auth.py', comment: 'Blueprint "auth" — Xác thực người dùng', depth: 2, connector: '├──', group: 'routes' },
+        { type: 'file', name: 'api.py', comment: 'Blueprint "api" — API cốt lõi (Recommend, Like, Review)', depth: 2, connector: '├──', group: 'routes' },
+        { type: 'file', name: 'admin.py', comment: 'Blueprint "admin" — Quản trị hệ thống', depth: 2, connector: '└──', group: 'routes' },
+        { type: 'spacer' },
+
+        // DB
+        { type: 'folder', name: 'db/', comment: 'Tầng Model — Data Access Layer (Neo4j)', depth: 1, connector: '├──', group: 'db' },
+        { type: 'file', name: '__init__.py', comment: '', depth: 2, connector: '├──', group: 'db' },
+        { type: 'file', name: 'connection.py', comment: 'Quản lý kết nối Neo4j Driver, hàm run_query()', depth: 2, connector: '├──', group: 'db' },
+        { type: 'file', name: 'user.py', comment: 'CRUD người dùng, hash mật khẩu', depth: 2, connector: '├──', group: 'db' },
+        { type: 'file', name: 'location.py', comment: 'CRUD địa điểm, toggle like, thêm/xóa review', depth: 2, connector: '├──', group: 'db' },
+        { type: 'file', name: 'planner.py', comment: 'AI Itinerary Planner (Nearest Neighbor)', depth: 2, connector: '├──', group: 'db' },
+        { type: 'file', name: 'itinerary.py', comment: 'Lưu/Xóa/Lấy lộ trình đã lưu', depth: 2, connector: '├──', group: 'db' },
+        { type: 'file', name: 'admin.py', comment: 'Truy vấn quản trị (thống kê, danh sách user)', depth: 2, connector: '├──', group: 'db' },
+        { type: 'file', name: 'sync.py', comment: 'Đồng bộ Location từ Neo4j ↔ Excel', depth: 2, connector: '└──', group: 'db' },
+        { type: 'spacer' },
+
+        // Templates
+        { type: 'folder', name: 'templates/', comment: 'Tầng View — Giao diện HTML (Jinja2)', depth: 1, connector: '├──', group: 'templates' },
+        { type: 'file', name: 'index.html', comment: 'Trang chủ chính', depth: 2, connector: '├──', group: 'templates' },
+        { type: 'folder', name: 'components/', comment: 'Các thành phần UI tái sử dụng', depth: 2, connector: '└──', group: 'templates' },
+        { type: 'file', name: 'review_template.html', comment: '', depth: 3, connector: '├──', group: 'templates' },
+        { type: 'folder', name: 'modals/', comment: '11 modal dialogs', depth: 3, connector: '└──', group: 'templates' },
+        { type: 'spacer' },
+
+        // Static
+        { type: 'folder', name: 'static/', comment: 'Tài nguyên tĩnh', depth: 1, connector: '├──', group: 'static' },
+        { type: 'folder', name: 'css/', comment: '10 file CSS (modular theo chức năng)', depth: 2, connector: '├──', group: 'static' },
+        { type: 'folder', name: 'js/', comment: '9 file JavaScript (modular theo chức năng)', depth: 2, connector: '├──', group: 'static' },
+        { type: 'folder', name: 'images/', comment: '~65 hình ảnh địa điểm du lịch', depth: 2, connector: '└──', group: 'static' },
+        { type: 'spacer' },
+
+        // Data
+        { type: 'folder', name: 'data/', comment: 'Dữ liệu gốc', depth: 1, connector: '├──', group: 'other' },
+        { type: 'file', name: 'data.xlsx', comment: 'File Excel chứa thông tin địa điểm', depth: 2, connector: '└──', group: 'other' },
+        { type: 'spacer' },
+
+        // Scripts
+        { type: 'folder', name: 'scripts/', comment: 'Scripts tiện ích', depth: 1, connector: '├──', group: 'other' },
+        { type: 'file', name: 'import_data.py', comment: 'Nạp dữ liệu từ Excel → Neo4j', depth: 2, connector: '├──', group: 'other' },
+        { type: 'file', name: 'generate_users.py', comment: 'Tạo dữ liệu mẫu (Users, Likes)', depth: 2, connector: '└──', group: 'other' },
+        { type: 'spacer' },
+
+        // Tests
+        { type: 'folder', name: 'tests/', comment: 'Kiểm thử tự động', depth: 1, connector: '└──', group: 'other' },
+        { type: 'file', name: 'run_all_tests.py', comment: '', depth: 2, connector: '├──', group: 'other' },
+        { type: 'file', name: 'test_auth.py', comment: '', depth: 2, connector: '├──', group: 'other' },
+        { type: 'file', name: 'test_recommend.py', comment: '', depth: 2, connector: '├──', group: 'other' },
+        { type: 'file', name: 'test_planner.py', comment: '', depth: 2, connector: '└──', group: 'other' },
+      ];
+
+      // ===== GROUP BACKGROUNDS =====
+      // Calculate y positions first
+      let curY = START_Y;
+      tree.forEach(item => {
+        if (item.type === 'spacer') {
+          item._y = curY;
+          curY += 10;
+        } else {
+          item._y = curY;
+          curY += LINE_H;
+        }
+      });
+
+      // Define group ranges for background highlighting
+      const groups = [
+        { id: 'app', label: 'Core Application', color: COLORS.layerApp },
+        { id: 'routes', label: 'Controller Layer', color: COLORS.layerRoutes },
+        { id: 'db', label: 'Data Access Layer', color: COLORS.layerDB },
+        { id: 'templates', label: 'View Layer', color: COLORS.layerTemplates },
+        { id: 'static', label: 'Static Assets', color: COLORS.layerStatic },
+        { id: 'other', label: 'Utilities & Tests', color: COLORS.layerOther },
+      ];
+
+      groups.forEach(group => {
+        const items = tree.filter(t => t.group === group.id);
+        if (items.length === 0) return;
+
+        const minY = items[0]._y - 5;
+        const maxY = items[items.length - 1]._y + LINE_H - 3;
+        const bgX = LEFT - 10;
+        const bgW = W - LEFT;
+
+        // Background
+        ctx.fillStyle = group.color.bg;
+        ctx.beginPath();
+        ctx.roundRect(bgX, minY, bgW, maxY - minY, 6);
+        ctx.fill();
+
+        // Left border accent
+        ctx.fillStyle = group.color.border;
+        ctx.beginPath();
+        ctx.roundRect(bgX, minY, 4, maxY - minY, [4, 0, 0, 4]);
+        ctx.fill();
+
+        // Group label on the right
+        ctx.fillStyle = group.color.label;
+        ctx.font = 'bold 11px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(group.label, W - 30, minY + 15);
+      });
+
+      // ===== DRAW TREE =====
+      tree.forEach((item, idx) => {
+        if (item.type === 'spacer') return;
+
+        const y = item._y;
+        const x = LEFT + (item.depth * INDENT);
+
+        // ===== ICONS =====
+        if (item.type === 'root') {
+          // Root folder icon — big
+          ctx.fillStyle = '#1a1a2e';
+          ctx.font = 'bold 16px Arial';
+          ctx.textAlign = 'left';
+          ctx.fillText('📁', x, y + 15);
+
+          ctx.fillStyle = '#1a1a2e';
+          ctx.font = 'bold 15px "Consolas", "Courier New", monospace';
+          ctx.fillText(item.name, x + 24, y + 15);
+          return;
+        }
+
+        // Connector (├── or └──)
+        if (item.connector) {
+          ctx.fillStyle = '#aaaaaa';
+          ctx.font = '14px "Consolas", monospace';
+          ctx.textAlign = 'left';
+          ctx.fillText(item.connector, x - 2, y + 14);
+        }
+
+        const nameX = x + 40;
+
+        // Icon
+        if (item.type === 'folder') {
+          ctx.fillStyle = COLORS.folder;
+          ctx.font = '13px Arial';
+          ctx.textAlign = 'left';
+          ctx.fillText('📂', nameX - 18, y + 14);
+        } else {
+          // File icon — choose by extension
+          let icon = '📄';
+          if (item.name.endsWith('.py')) icon = '🐍';
+          else if (item.name.endsWith('.html')) icon = '🌐';
+          else if (item.name.endsWith('.txt')) icon = '📋';
+          else if (item.name.endsWith('.xlsx')) icon = '📊';
+          else if (item.name.startsWith('.env')) icon = '🔑';
+
+          ctx.font = '12px Arial';
+          ctx.textAlign = 'left';
+          ctx.fillText(icon, nameX - 18, y + 14);
+        }
+
+        // File/Folder name
+        ctx.fillStyle = item.type === 'folder' ? '#c77600' : '#2a5db0';
+        ctx.font = item.type === 'folder' ? 'bold 13px "Consolas", "Courier New", monospace' : '13px "Consolas", "Courier New", monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText(item.name, nameX, y + 14);
+
+        // Comment
+        if (item.comment) {
+          const nameW = ctx.measureText(item.name).width;
+          ctx.fillStyle = COLORS.comment;
+          ctx.font = '12px "Segoe UI", Arial, sans-serif';
+          ctx.fillText('  # ' + item.comment, nameX + nameW, y + 14);
+        }
+      });
+
+      // ===== LEGEND =====
+      const legendY = H - 55;
+      const legendItems = [
+        { color: COLORS.layerApp.border, label: 'Core Application' },
+        { color: COLORS.layerRoutes.border, label: 'Controller (Routes)' },
+        { color: COLORS.layerDB.border, label: 'Data Access (DB)' },
+        { color: COLORS.layerTemplates.border, label: 'View (Templates)' },
+        { color: COLORS.layerStatic.border, label: 'Static Assets' },
+        { color: COLORS.layerOther.border, label: 'Utilities & Tests' },
+      ];
+
+      // Legend background
+      const legendW = 880;
+      const legendX = (W - legendW) / 2;
+      ctx.fillStyle = '#f8f9fa';
+      ctx.strokeStyle = '#dee2e6';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(legendX, legendY - 8, legendW, 45, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      // Legend title
+      ctx.fillStyle = '#555';
+      ctx.font = 'bold 11px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText('CHÚ THÍCH:', legendX + 15, legendY + 10);
+
+      // Legend items
+      const itemStartX = legendX + 100;
+      const itemSpacing = 130;
+      legendItems.forEach((item, i) => {
+        const lx = itemStartX + i * itemSpacing;
+
+        // Color box
+        ctx.fillStyle = item.color;
+        ctx.beginPath();
+        ctx.roundRect(lx, legendY + 1, 14, 14, 3);
+        ctx.fill();
+
+        // Label
+        ctx.fillStyle = '#555';
+        ctx.font = '11px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(item.label, lx + 19, legendY + 12);
+      });
+
+      // Architecture note
+      ctx.fillStyle = '#999';
+      ctx.font = 'italic 11px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Tổ chức theo kiến trúc MVC mở rộng (Model–View–Controller)', W / 2, legendY + 36);
+    }
+
+    function downloadCanvas() {
+      const canvas = document.getElementById('canvas-struct');
+      const link = document.createElement('a');
+      link.download = 'Cau_truc_thu_muc_du_an.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    window.onload = drawStructure;
+  </script>
+</body>
+
+</html>

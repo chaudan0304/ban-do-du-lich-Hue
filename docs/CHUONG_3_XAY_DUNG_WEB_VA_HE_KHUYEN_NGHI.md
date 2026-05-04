@@ -1,4 +1,4 @@
-# CHƯƠNG 3: TRIỂN KHAI HỆ THỐNG
+# CHƯƠNG 3: XÂY DỰNG ỨNG DỤNG WEB VÀ TÍCH HỢP HỆ KHUYẾN NGHỊ
 
 Chương này trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI dựa trên bản thiết kế ở Chương 2, bao gồm: môi trường và công nghệ phát triển; cấu trúc tổ chức mã nguồn; triển khai cơ sở dữ liệu đồ thị; triển khai các thuật toán gợi ý lai (Hybrid Recommendation); và triển khai ứng dụng web cùng module AI Planner.
 
@@ -51,63 +51,11 @@ Hệ thống sử dụng các thư viện mã nguồn mở phổ biến, đảm 
 
 ## 3.2. Cấu trúc Tổ chức Mã nguồn
 
-Dự án được tổ chức theo kiến trúc **MVC mở rộng** (Model–View–Controller), tách biệt rõ ràng giữa tầng giao diện, tầng xử lý logic và tầng truy cập dữ liệu. Cấu trúc thư mục tổng quan như sau:
+Dự án được tổ chức theo **kiến trúc 3 Tầng (3-Tier Architecture)** kết hợp mô hình MVC, tách biệt rõ ràng giữa tầng trình bày (Presentation Tier), tầng xử lý nghiệp vụ (Business Logic Tier) và tầng dữ liệu (Data Tier). Cấu trúc thư mục tổng quan như sau:
 
 *Hình 3.1. Cấu trúc thư mục dự án*
 
-```
-ban_do_du_lich_hue/
-│
-├── app.py                  # Điểm khởi chạy chính (Flask Application)
-├── models.py               # Model User (Flask-Login UserMixin)
-├── utils.py                # Hàm tiện ích (Sentiment Analysis, Topic Classification)
-├── setup_algo.py           # Engine AI — Thuật toán Hybrid Recommendation
-├── requirements.txt        # Danh sách thư viện Python
-├── .env                    # Biến môi trường (NEO4J_URI, SECRET_KEY...)
-│
-├── routes/                 # Tầng Controller — Flask Blueprints
-│   ├── __init__.py
-│   ├── main.py             # Blueprint "main" — Serve trang chủ
-│   ├── auth.py             # Blueprint "auth" — Xác thực người dùng
-│   ├── api.py              # Blueprint "api" — API cốt lõi (Recommend, Like, Review)
-│   └── admin.py            # Blueprint "admin" — Quản trị hệ thống
-│
-├── db/                     # Tầng Model — Data Access Layer (Neo4j)
-│   ├── __init__.py
-│   ├── connection.py       # Quản lý kết nối Neo4j Driver, hàm run_query()
-│   ├── user.py             # CRUD người dùng, hash mật khẩu
-│   ├── location.py         # CRUD địa điểm, toggle like, thêm/xóa review
-│   ├── planner.py          # AI Itinerary Planner (Nearest Neighbor)
-│   ├── itinerary.py        # Lưu/Xóa/Lấy lộ trình đã lưu
-│   ├── admin.py            # Truy vấn quản trị (thống kê, danh sách user)
-│   └── sync.py             # Đồng bộ Location từ Neo4j ↔ Excel
-│
-├── templates/              # Tầng View — Giao diện HTML (Jinja2)
-│   ├── index.html          # Trang chủ chính
-│   └── components/         # Các thành phần UI tái sử dụng
-│       ├── review_template.html
-│       └── modals/         # 11 modal dialogs
-│
-├── static/                 # Tài nguyên tĩnh
-│   ├── css/                # 10 file CSS (modular theo chức năng)
-│   ├── js/                 # 9 file JavaScript (modular theo chức năng)
-│   └── images/             # ~65 hình ảnh địa điểm du lịch
-│
-├── data/                   # Dữ liệu gốc
-│   └── data.xlsx           # File Excel chứa thông tin địa điểm
-│
-├── scripts/                # Scripts tiện ích
-│   ├── import_data.py      # Nạp dữ liệu từ Excel → Neo4j
-│   └── generate_users.py   # Tạo dữ liệu mẫu (Users, Likes)
-│
-├── tests/                  # Kiểm thử tự động
-│   ├── run_all_tests.py
-│   ├── test_auth.py
-│   ├── test_recommend.py
-│   └── test_planner.py
-│
-└── docs/                   # Tài liệu khóa luận
-```
+![Cấu trúc Thư mục Dự án](images/Cau_truc_thu_muc_du_an.png)
 
 **Nguyên tắc tổ chức:**
 
@@ -369,6 +317,16 @@ Trong đó:
 | **Độ Kết nối (C)** — `pagerankConnectNorm` | **0.3 (30%)** | Tận dụng cấu trúc đồ thị. Các địa điểm "trung tâm" (hubs) thuận tiện cho di chuyển giữa các cụm tham quan. |
 | **Chất lượng (R)** — `avgRating` | **0.1 (10%)** | Vai trò bổ trợ. Tránh để một vài đánh giá 5 sao ngẫu nhiên làm lệch bảng xếp hạng khi dữ liệu còn thưa. |
 
+**Cơ sở lựa chọn trọng số:**
+
+Chiến lược trọng số 60-30-10 được thiết kế dựa trên đặc thù **dữ liệu thưa (Sparse Data)** của hệ thống thử nghiệm (25 người dùng, 52 địa điểm):
+
+- **PageRank chiếm 60%** vì đây là thành phần duy nhất hoạt động ổn định trong mọi trường hợp, kể cả Cold Start. Khác với việc chỉ đếm số lượt Like đơn thuần, PageRank đánh giá cả *chất lượng* của nguồn tương tác — người dùng đã tương tác với nhiều địa điểm sẽ có "tiếng nói" có trọng lượng hơn, phản ánh đúng nguyên lý Trí tuệ đám đông (Crowd Wisdom) [8].
+
+- **Connectivity chiếm 30%** nhằm tận dụng lợi thế riêng của Graph Database mà các hệ thống dùng RDBMS truyền thống không có. Thành phần này giúp ưu tiên các địa điểm nằm ở vị trí "hub" trung tâm trong mạng lưới du lịch Huế — thuận tiện cho di chuyển giữa các cụm tham quan. Tuy nhiên, nó không được vượt quá PageRank vì bản thân Connectivity không phản ánh sở thích cá nhân.
+
+- **Rating chỉ chiếm 10%** là quyết định có chủ đích. Với quy mô 25 người dùng, nhiều địa điểm chỉ nhận được 1–2 đánh giá — chưa đủ mẫu thống kê (sample size) để đảm bảo tính đại diện. Nếu cho trọng số cao hơn (ví dụ 30–40%), chỉ cần 1 đánh giá 5 sao ngẫu nhiên cũng có thể đẩy một địa điểm ít người biết lên vị trí top, gây méo kết quả gợi ý. Với mức 10%, Rating đóng vai trò "tie-breaker" — chỉ tạo sự khác biệt khi hai địa điểm có PageRank và Connectivity tương đương nhau.
+
 **d) Chiến lược Cold Start (Khởi động lạnh):**
 
 Đối với người dùng mới chưa có tương tác (chưa LIKED hoặc INTERACTED), hệ thống bỏ qua Collaborative và Content-Based Filtering, thay vào đó sử dụng **Fallback Query** chỉ dựa trên điểm PageRank tổng hợp (công thức 60-30-10) để đảm bảo mọi người dùng đều nhận được gợi ý ngay từ lần truy cập đầu tiên.
@@ -457,7 +415,91 @@ Giao diện được xây dựng bằng HTML5, CSS3 và JavaScript thuần (Vani
 
 Thay vì phát triển một engine thuật toán phức tạp như bài toán tối ưu lộ trình chuyên sâu định tuyến đa phương tiện, hệ thống được tinh gọn bằng việc áp dụng nguyên tắc khoảng cách gần nhất (Greedy) bằng công thức tính khoảng cách điểm Euclid cơ bản. Các địa điểm được phân bổ tuần tự theo các buổi trong ngày. Cách thiết kế này vừa giảm thiểu thời gian tính toán ở backend vừa đủ để tạo được một lộ trình tham khảo hợp lý, đóng góp vào việc kiểm chứng khả năng ứng dụng thực tế của kết quả gợi ý.
 
-## 3.6. Tiểu kết chương 3
+## 3.6. Demo Website
+
+Phần này trình bày giao diện thực tế của hệ thống Huế Travel AI sau khi triển khai, minh họa các chức năng chính thông qua ảnh chụp màn hình.
+
+### 3.6.1. Trang chủ — Bản đồ tương tác
+
+Giao diện trang chủ hiển thị bản đồ Leaflet.js toàn màn hình với sidebar bên trái chứa danh sách địa điểm, bộ lọc theo danh mục và thanh tìm kiếm. Các marker được phân loại theo icon tương ứng với category.
+
+*Hình 3.2. Giao diện trang chủ — Bản đồ tương tác*
+
+![Giao diện trang chủ — Bản đồ tương tác](images/Demo_Trang_Chu.png)
+
+### 3.6.2. Đăng ký và Đăng nhập
+
+Hệ thống cung cấp modal đăng ký/đăng nhập với giao diện Dark Mode, hỗ trợ validation realtime (kiểm tra độ dài username, password).
+
+*Hình 3.3. Giao diện đăng ký tài khoản*
+
+![Giao diện đăng ký tài khoản](images/Demo_Dang_Ky.png)
+
+*Hình 3.4. Giao diện đăng nhập*
+
+![Giao diện đăng nhập](images/Demo_Dang_Nhap.png)
+
+### 3.6.3. Chi tiết địa điểm
+
+Khi click vào một marker hoặc card địa điểm, hệ thống hiển thị thông tin chi tiết bao gồm: tên, mô tả, hình ảnh, điểm chất lượng AI (thanh Progress Bar 60-30-10), danh sách đánh giá kèm nhãn cảm xúc (Sentiment), và các địa điểm tương tự.
+
+*Hình 3.5. Giao diện chi tiết địa điểm*
+
+![Giao diện chi tiết địa điểm](images/Demo_Chi_Tiet.png)
+
+### 3.6.4. Đánh giá và Phân tích cảm xúc
+
+Người dùng đã đăng nhập có thể chấm điểm (1–5 sao) và viết bình luận. Hệ thống tự động phân tích cảm xúc (Positive/Negative/Neutral) và phân loại chủ đề (Món ăn, Không gian, Phục vụ...).
+
+*Hình 3.6. Giao diện viết đánh giá và kết quả phân tích cảm xúc*
+
+![Giao diện viết đánh giá và kết quả phân tích cảm xúc](images/Demo_Danh_Gia.png)
+
+### 3.6.5. Gợi ý AI (Hybrid Recommendation)
+
+Tab "Gợi ý AI" trên sidebar hiển thị Top 12 địa điểm được gợi ý cá nhân hóa, mỗi card kèm theo lý do gợi ý (Explainable AI), biểu đồ phân tích thành phần điểm (Collaborative, Content-Based, PageRank) và danh sách users tương đồng.
+
+*Hình 3.7. Giao diện gợi ý AI với Explainable AI*
+
+![Giao diện gợi ý AI với Explainable AI](images/Demo_Goi_Y_AI.png)
+
+*Hình 3.8. Biểu đồ phân tích thành phần điểm gợi ý*
+
+![Biểu đồ phân tích thành phần điểm gợi ý](images/Demo_Bieu_Do_Diem.png)
+
+### 3.6.6. Lập lộ trình thông minh
+
+Modal AI Planner cho phép người dùng chọn số ngày (1–5), sở thích (danh mục) và chế độ (AI gợi ý / từ danh sách đã thích). Kết quả hiển thị dạng timeline với thời gian và khoảng cách giữa các điểm.
+
+*Hình 3.9. Giao diện modal lập lộ trình*
+
+![Giao diện modal lập lộ trình](images/Demo_Modal_Lo_Trinh.png)
+
+*Hình 3.10. Kết quả lộ trình dạng timeline*
+
+![Kết quả lộ trình dạng timeline](images/Demo_Ket_Qua_Lo_Trinh.png)
+
+### 3.6.7. Lịch sử hoạt động
+
+Trang lịch sử hiển thị 3 tab: Địa điểm đã thích, Đánh giá đã viết và Lộ trình đã lưu, giúp người dùng theo dõi hoạt động cá nhân.
+
+*Hình 3.11. Giao diện lịch sử hoạt động*
+
+![Giao diện lịch sử hoạt động](images/Demo_Lich_Su.png)
+
+### 3.6.8. Trang quản trị (Admin Dashboard)
+
+Admin Dashboard cung cấp giao diện quản lý toàn diện: thống kê hệ thống, danh sách người dùng, CRUD địa điểm và nút trigger chạy lại thuật toán AI.
+
+*Hình 3.12. Giao diện Dashboard quản trị*
+
+![Giao diện Dashboard quản trị](images/Demo_Admin_Dashboard.png)
+
+*Hình 3.13. Giao diện quản lý địa điểm (Thêm/Sửa/Xóa)*
+
+![Giao diện quản lý địa điểm (Thêm/Sửa/Xóa)](images/Demo_Admin_CRUD.png)
+
+## 3.7. Tiểu kết chương 3
 
 Chương này đã trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI, từ thiết kế đến hiện thực hóa. Cụ thể:
 
@@ -475,4 +517,4 @@ Chương này đã trình bày chi tiết quá trình triển khai hệ thống 
 
 7. **Tiện ích xếp lộ trình:** Tích hợp tính năng phụ trợ giúp sắp xếp thứ tự tham quan theo ngày dựa trên nguyên tắc gần nhất nhằm hoàn thiện giao diện phục vụ thực nghiệm người dùng.
 
-Kết quả triển khai và đánh giá hiệu quả hệ thống sẽ được trình bày ở Chương 4.
+8. **Demo website:** Minh họa giao diện thực tế qua 12 ảnh chụp màn hình, bao gồm: trang chủ bản đồ, đăng ký/đăng nhập, chi tiết địa điểm, đánh giá + sentiment, gợi ý AI + Explainable AI, lập lộ trình, lịch sử hoạt động và trang quản trị.

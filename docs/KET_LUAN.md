@@ -27,27 +27,18 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
    - **PageRank Diversity Pool** (Bước 2.5) giải quyết Filter Bubble — tăng kết quả từ 3 lên 15 địa điểm đa dạng.
    - **Explainable AI** giải thích lý do từng gợi ý.
 
-3. **AI Itinerary Planner:**
-   - Tự động lập lộ trình 1–5 ngày với phân bổ tham quan/ẩm thực xen kẽ.
-   - Thuật toán Nearest Neighbor tối ưu quãng đường di chuyển (giảm 47%).
-   - Hỗ trợ 2 chế độ: AI gợi ý mới và Từ danh sách đã thích.
+3. **Tiện ích bổ trợ sắp xếp lộ trình:**
+   - Hỗ trợ người dùng phân bổ danh sách địa điểm đã được gợi ý thành lộ trình 1–5 ngày.
+   - Ứng dụng nguyên tắc Láng giềng gần nhất (Nearest Neighbor) để giảm thiểu quãng đường di chuyển vòng vèo.
+   - Hỗ trợ 2 chế độ: từ gợi ý hệ thống và từ danh sách đã thích.
 
 4. **Ứng dụng web hoàn chỉnh:**
    - Giao diện hiện đại với bản đồ tương tác Leaflet.js, Heatmap, 11 modal dialogs.
-   - 32 API endpoints hoạt động ổn định (phản hồi < 500ms).
+   - Giao diện Giải thích AI (Explainable AI) minh bạch hóa quyết định gợi ý.
    - Kiến trúc modular: 4 Flask Blueprints, 7 module Data Access Layer, 10 file CSS, 9 file JS.
-   - Bảo mật: mã hóa PBKDF2-SHA256, parameterized queries, Flask-Login session.
+   - Bảo mật: mã hóa mật khẩu, parameterized queries, Flask-Login session.
 
-### 1.3. Kết quả đánh giá
 
-| Tiêu chí                       | Kết quả           |
-| ------------------------------- | ----------------- |
-| Unit Tests                      | 14/14 PASS (100%) |
-| Thời gian phản hồi API          | < 500ms           |
-| Thời gian chạy thuật toán       | ~7 giây           |
-| Tối ưu quãng đường (vs Random)  | Giảm 47%          |
-| Điểm đánh giá người dùng        | 4.2 / 5           |
-| Tỷ lệ sẵn lòng sử dụng         | 90%               |
 
 ## 2. Đóng góp của Khóa luận
 
@@ -63,9 +54,13 @@ Hệ thống **Huế Travel AI** đã được xây dựng hoàn chỉnh và ho�
 
 ### 2.2. Đóng góp thực tiễn
 
-1. Hệ thống **Huế Travel AI** hoàn chỉnh, có thể triển khai phục vụ du khách thực tế.
-2. **Mã nguồn mở** trên GitHub ([github.com/chaudan0304/ban-do-du-lich-Hue](https://github.com/chaudan0304/ban-do-du-lich-Hue)), cộng đồng có thể sử dụng, học tập và phát triển.
-3. Tài liệu khóa luận và hướng dẫn cài đặt chi tiết, phục vụ làm tài liệu tham khảo.
+1. **Xây dựng thành công ứng dụng thực tế "Huế Travel AI":** Cung cấp một nền tảng web hoàn chỉnh, có giao diện bản đồ trực quan (GIS) và tiện ích hỗ trợ sắp xếp lộ trình thông minh. Ứng dụng đã sẵn sàng để triển khai phục vụ khách du lịch thực tế khi đến với Thừa Thiên Huế, giúp giải quyết khó khăn trong việc tra cứu điểm đến và lên kế hoạch di chuyển tối ưu.
+
+2. **Cung cấp công cụ Explainable AI (XAI) minh bạch hóa quyết định:** Tích hợp giao diện giải thích chi tiết lý do gợi ý (được hệ thống AI cá nhân hóa dựa trên lịch sử tương tác), giúp tăng tính thuyết phục và độ tin cậy của ứng dụng thay vì chỉ đưa ra kết quả "hộp đen" (black-box) như các hệ thống truyền thống.
+
+3. **Mã nguồn mở và khả năng tái sử dụng:** Toàn bộ mã nguồn của hệ thống được thiết kế và công khai theo chuẩn mã nguồn mở, đi kèm cấu trúc phần mềm rõ ràng và tài liệu hướng dẫn cài đặt chi tiết. Điều này giúp cộng đồng lập trình viên, các nhà nghiên cứu và sinh viên có thể dễ dàng tham khảo, học tập hoặc tùy biến triển khai cho các tỉnh thành khác.
+
+4. **Tạo nền tảng thu thập và phân tích hành vi du lịch:** Với cơ sở dữ liệu đồ thị linh hoạt, hệ thống đóng vai trò như một bộ thu thập dữ liệu (data collection hub) ghi nhận lại sở thích, mức độ hài lòng và tương tác của du khách. Đây là nguồn dữ liệu quý giá (insights) có khả năng hỗ trợ các cơ quan quản lý ban ngành địa phương trong việc hoạch định chiến lược phát triển du lịch.
 
 ## 3. Hạn chế
 

@@ -195,9 +195,9 @@ User đã thích địa điểm thuộc danh mục "Tâm linh": Chùa Thiên M�
 
 ## 4.3. Kết quả chức năng tiện ích xếp lộ trình
 
-Tính năng tiện ích lập lộ trình đã được thử nghiệm với các thao tác người dùng về lựa chọn số ngày và sở thích cơ bản. Kết quả trả về cho thấy tiện ích tính toán và ghép nối danh sách các gợi ý tốt lên giao diện dạng timeline một cách mượt mà và trực quan.
+Tính năng tiện ích lập lộ trình đã được thử nghiệm với các thao tác người dùng về lựa chọn số ngày và sở thích cơ bản. Kết quả thực nghiệm cho thấy phân hệ tiện ích này có khả năng tính toán và trực quan hóa danh sách địa điểm thành một lộ trình dạng timeline một cách mượt mà.
 
-Thay vì sắp xếp ngẫu nhiên vốn có thể gây bất tiện trong thực tế, việc sử dụng phép tính khoảng cách địa lý (Heuristic Láng giềng gần nhất - Nearest Neighbor) đủ để giảm tải được số chuyến đi vòng vèo, giúp tiết kiệm đáng kể thời gian quan sát bản đồ của du khách.
+Thay vì sắp xếp ngẫu nhiên, việc ứng dụng chiến lược Láng giềng gần nhất (Nearest Neighbor) dựa trên khoảng cách địa lý đã giúp tối ưu hóa quãng đường di chuyển cơ bản, hạn chế các vòng lặp không cần thiết và tiết kiệm thời gian tra cứu bản đồ cho du khách.
 
 Vì đây chỉ là một công cụ tiện ích bổ sung nằm ngoài thuật toán dự đoán chính của luận văn, nên việc đánh giá chuyên sâu bằng các số liệu quãng đường sẽ không được tập trung. Kết quả của tính năng chủ yếu được ghi nhận thông qua tính chạy ổn định và sự hài lòng trong việc tương tác trực tiếp của người dùng.
 
