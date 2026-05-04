@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đồ thị Neo4j Thực tế - Huế Travel AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f6f8;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            max-width: 1000px;
+            width: 100%;
+            text-align: center;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        .instructions {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .instructions kbd {
+            background-color: #eee;
+            border-radius: 3px;
+            border: 1px solid #b4b4b4;
+            box-shadow: 0 1px 1px rgba(0,0,0,.2), 0 2px 0 0 rgba(255,255,255,.7) inset;
+            color: #333;
+            display: inline-block;
+            font-size: 0.85em;
+            font-weight: 700;
+            line-height: 1;
+            padding: 2px 4px;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Ví dụ mô hình đồ thị thực tế trong du lịch (Neo4j)</h2>
+        <div class="mermaid">
+            graph TD
+                %% Định nghĩa CSS class cho các node
+                classDef user fill:#FFDDC1,stroke:#FF9999,stroke-width:2px,color:#333,rx:10,ry:10;
+                classDef location fill:#C1E1C1,stroke:#66CC66,stroke-width:2px,color:#333,rx:10,ry:10;
+                classDef category fill:#C1D4FF,stroke:#6699FF,stroke-width:2px,color:#333,rx:10,ry:10;
+
+                %% Định nghĩa các Node
+                U1["(:User)<br/>name: 'nguyenvana'"]:::user
+                L1["(:Location)<br/>name: 'Quốc Tử Giám (Huế)'"]:::location
+                L2["(:Location)<br/>name: 'Hoàng Thành Huế'"]:::location
+                C1["(:Category)<br/>name: 'Di tích'"]:::category
+
+                %% Định nghĩa các Relationship
+                U1 -->|"[:LIKED]<br/>timestamp: 2026-05-03T15:00:00"| L1
+                U1 -->|"[:REVIEWED]<br/>rating: 4.0<br/>sentiment: 'Neutral'<br/>topics: ['Không gian']"| L2
+                
+                L1 -->|"[:HAS_CATEGORY]"| C1
+                L2 -->|"[:HAS_CATEGORY]"| C1
+        </div>
+        
+        <div class="instructions">
+            Mẹo: Để chụp ảnh nét chất lượng cao, hãy dùng <kbd>Windows</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd> và quét trọn vùng đồ thị ở trên để chèn vào báo cáo Word.
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                htmlLabels: true,
+                curve: 'basis', /* Các đường cong mượt mà */
+                nodeSpacing: 50,
+                rankSpacing: 50
+            }
+        });
+    </script>
+</body>
+</html>

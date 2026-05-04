@@ -133,19 +133,29 @@ Theo Burke (2002) [11], có nhiều chiến lược kết hợp:
 - **Edges (Cạnh/Quan hệ):** Đại diện cho mối quan hệ giữa các thực thể. *Ví dụ:* :LIKED, :REVIEWED, :HAS_CATEGORY.
 - **Properties (Thuộc tính):** Các cặp key-value gắn liền với nodes hoặc edges. *Ví dụ:* name, rating, weight.
 
-```
-Ví dụ mô hình đồ thị trong du lịch:
+Ví dụ mô hình đồ thị trong du lịch (trích xuất từ dữ liệu thực tế trong Neo4j):
 
-   (User: Châu Đàn)
-        │
-        │── [:LIKED] ──→ (Location: Đại Nội)
-        │                       │
-        │                       └── [:HAS_CATEGORY] ──→ (Category: Di tích)
-        │
-        └── [:REVIEWED {rating: 5}] ──→ (Location: Chùa Thiên Mụ)
-                                              │
-                                              └── [:HAS_CATEGORY] ──→ (Category: Tâm linh)
+```mermaid
+graph TD
+    %% Định nghĩa CSS class cho các node
+    classDef user fill:#FFDDC1,stroke:#FF9999,stroke-width:2px,color:#333,rx:10,ry:10;
+    classDef location fill:#C1E1C1,stroke:#66CC66,stroke-width:2px,color:#333,rx:10,ry:10;
+    classDef category fill:#C1D4FF,stroke:#6699FF,stroke-width:2px,color:#333,rx:10,ry:10;
+
+    %% Định nghĩa các Node
+    U1["(:User)<br/>name: 'nguyenvana'"]:::user
+    L1["(:Location)<br/>name: 'Quốc Tử Giám (Huế)'"]:::location
+    L2["(:Location)<br/>name: 'Hoàng Thành Huế'"]:::location
+    C1["(:Category)<br/>name: 'Di tích'"]:::category
+
+    %% Định nghĩa các Relationship
+    U1 -->|"[:LIKED]<br/>timestamp: 2026-05-03T15:00:00"| L1
+    U1 -->|"[:REVIEWED]<br/>rating: 4.0<br/>sentiment: 'Neutral'<br/>topics: ['Không gian']"| L2
+    
+    L1 -->|"[:HAS_CATEGORY]"| C1
+    L2 -->|"[:HAS_CATEGORY]"| C1
 ```
+
 
 ### 1.3.2. So sánh với Cơ sở dữ liệu Quan hệ (RDBMS)
 
