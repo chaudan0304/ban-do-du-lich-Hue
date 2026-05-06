@@ -87,8 +87,8 @@ Theo Ricci và cộng sự (2015) [7], có 3 phương pháp chính trong xây d�
 
 **Có 2 loại chính:**
 
-- **User-Based CF:** Tìm nhóm người dùng có sở thích tương tự, gợi ý từ hành vi của nhóm này [9].
-- **Item-Based CF:** Tìm các items được đánh giá tương tự bởi cùng nhóm người dùng, gợi ý items có hành vi tương đồng [29].
+- **Lọc cộng tác dựa trên người dùng (User-Based CF):** Tìm nhóm người dùng có sở thích tương tự, gợi ý từ hành vi của nhóm này [9].
+- **Lọc cộng tác dựa trên Item (Item-Based CF):** Tìm các items được đánh giá tương tự bởi cùng nhóm người dùng, gợi ý items có hành vi tương đồng [29].
 
 **Ưu điểm:**
 
@@ -285,7 +285,7 @@ Như vậy, một địa điểm nhận được đánh giá 5 sao sẽ có tr�
 
 ## 1.6. Thuật toán Lọc Cộng tác (Collaborative Filtering)
 
-### 1.6.1. User-Based Collaborative Filtering
+### 1.6.1. Lọc cộng tác dựa trên người dùng (User-Based Collaborative Filtering)
 
 **Nguyên lý:** Tìm nhóm người dùng có sở thích tương tự (similar users) với người dùng hiện tại, sau đó gợi ý các items mà nhóm này đã thích nhưng người dùng hiện tại chưa biết [9].
 
@@ -321,11 +321,11 @@ Trong đó A, B là tập hợp các items mà mỗi user đã tương tác. Gi�
 
 **Lý do chọn Jaccard:** Đề tài sử dụng dữ liệu tương tác dạng nhị phân (đã/chưa tương tác) trên đồ thị Neo4j, và Neo4j GDS hỗ trợ sẵn thuật toán Node Similarity dựa trên Jaccard Index [16], phù hợp với đặc điểm dữ liệu.
 
-### 1.6.3. Item-Based Collaborative Filtering
+### 1.6.3. Lọc cộng tác dựa trên Item (Item-Based Collaborative Filtering)
 
 **Nguyên lý:** Thay vì so sánh người dùng, phương pháp này so sánh các items. Nếu người dùng thích item A, hệ thống sẽ tìm các items tương tự với A (dựa trên tập người dùng đã tương tác với chúng) để gợi ý [29].
 
-**Ưu điểm so với User-Based:**
+**Ưu điểm so với phương pháp dựa trên người dùng (User-Based):**
 
 - Ổn định hơn vì đặc trưng item ít thay đổi theo thời gian.
 - Có thể tính toán trước (offline) rồi phục vụ trực tuyến.
@@ -450,7 +450,7 @@ Chương này đã trình bày đầy đủ các cơ sở lý thuyết và công
 
 4. **Thuật toán PageRank:** Nguyên lý, công thức toán học, biến thể Weighted PageRank với trọng số tương tác và các tham số điều chỉnh.
 
-5. **Collaborative Filtering:** User-Based, Item-Based, các độ đo tương đồng (Cosine, Jaccard) và triển khai dạng Graph Traversal trên Neo4j.
+5. **Collaborative Filtering:** Lọc cộng tác dựa trên người dùng (User-Based), Lọc cộng tác dựa trên Item (Item-Based), các độ đo tương đồng (Cosine, Jaccard) và triển khai dạng Graph Traversal trên Neo4j.
 
 6. **Content-Based Filtering:** Lọc theo danh mục và đồng xuất hiện, ứng dụng trong bài toán du lịch.
 

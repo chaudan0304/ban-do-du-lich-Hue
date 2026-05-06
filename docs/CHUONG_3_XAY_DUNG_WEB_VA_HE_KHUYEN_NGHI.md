@@ -195,7 +195,7 @@ pagerankNorm = pagerankScore / max(pagerankScore)
 pagerankConnectNorm = pagerankConnect / max(pagerankConnect)
 ```
 
-### 3.4.2. Thuật toán Collaborative Filtering
+### 3.4.2. Thuật toán Lọc cộng tác dựa trên người dùng (User-Based Collaborative Filtering)
 
 Sử dụng thuật toán **Node Similarity** (Jaccard Index) từ thư viện Neo4j GDS (đã trình bày lý thuyết ở mục 1.6.2) để tìm người dùng có sở thích tương đồng.
 
@@ -234,9 +234,9 @@ YIELD nodesCompared, relationshipsWritten, similarityDistribution
 
 Kết quả tạo ra relationship `(:User)-[:SIMILAR_TO {score}]-(:User)`. Khi gợi ý cho user A, hệ thống duyệt đồ thị: tìm users tương đồng → lấy địa điểm họ đã thích mà A chưa đi → tính điểm dựa trên số lượng users tương đồng và trung bình trọng số.
 
-### 3.4.3. Thuật toán Content-Based Filtering
+### 3.4.3. Thuật toán Lọc cộng tác dựa trên Item (Item-Based Collaborative Filtering)
 
-Gợi ý địa điểm có cùng danh mục với những nơi người dùng đã thích, bổ trợ cho Collaborative Filtering khi địa điểm mới chưa có đủ tương tác.
+Thay vì tìm người dùng tương đồng, hệ thống tìm các địa điểm tương đồng dựa trên tập người dùng đã tương tác chung. Thuật toán này chủ yếu bổ trợ cho việc hiển thị "Các địa điểm tương tự" (Similar Locations) khi người dùng xem chi tiết một địa điểm cụ thể.
 
 **a) Triển khai GDS Node Similarity cho Location:**
 
@@ -259,7 +259,7 @@ CALL gds.nodeSimilarity.write('loc_similarity_graph', {
 
 **b) Tham số thuật toán:**
 
-*Bảng 3.8. Tham số Content-Based Filtering (Location Similarity)*
+*Bảng 3.8. Tham số Item-Based Collaborative Filtering (Location Similarity)*
 
 | Tham số | Giá trị | Ý nghĩa |
 |---|---|---|
@@ -268,18 +268,18 @@ CALL gds.nodeSimilarity.write('loc_similarity_graph', {
 | `similarityCutoff` | 0.15 | Ngưỡng cao hơn User Similarity (15% > 10%) do cần chính xác hơn |
 | `orientation` | `'REVERSE'` | Đảo hướng INTERACTED để nhìn từ Location về User |
 
-**c) So sánh 2 thuật toán:**
+**c) So sánh hai phương pháp Lọc cộng tác:**
 
-*Bảng 3.9. So sánh Collaborative Filtering và Content-Based Filtering*
+*Bảng 3.9. So sánh hai phương pháp Lọc cộng tác*
 
-| Tiêu chí | Collaborative Filtering | Content-Based Filtering |
+| Tiêu chí | Lọc cộng tác dựa trên người dùng | Lọc cộng tác dựa trên Item |
 |---|---|---|
 | Đối tượng so sánh | User ↔ User | Location ↔ Location |
-| Dựa trên | Tập địa điểm đã tương tác | Tập users đã tương tác + Category |
+| Dựa trên | Tập địa điểm đã tương tác | Tập users đã tương tác |
 | Relationship tạo ra | `SIMILAR_TO` (User) | `LOC_SIMILAR` (Location) |
 | topK | 10 | 5 |
 | similarityCutoff | 0.1 (10%) | 0.15 (15%) |
-| Câu hỏi giải quyết | "Người giống bạn thích gì?" | "Nơi giống nơi bạn thích?" |
+| Câu hỏi giải quyết | "Người giống bạn thích gì?" | "Những người thích nơi này còn thích gì?" |
 
 ### 3.4.4. Mô hình Gợi ý Lai và Chiến lược Trọng số (Adaptive Hybrid)
 
@@ -520,7 +520,7 @@ Chương này đã trình bày chi tiết quá trình triển khai hệ thống 
 
 3. **Cơ sở dữ liệu đồ thị:** Triển khai lược đồ 5 node, 9 relationship trên Neo4j với quy trình tiền xử lý tự động (INTERACTED, RELATED_TO, SIMILAR_TO, LOC_SIMILAR).
 
-4. **Thuật toán khuyến nghị lai (Recommendation Engine):** Triển khai thành công pipeline 4 bước kết hợp Weighted PageRank (dampingFactor=0.88), Collaborative Filtering (Jaccard, topK=10), Content-Based Filtering (topK=5), PageRank Diversity Pool (Top 20) và chiến lược trọng số thích ứng 60-30-10.
+4. **Thuật toán khuyến nghị lai (Recommendation Engine):** Triển khai thành công pipeline kết hợp Weighted PageRank (dampingFactor=0.88), Lọc cộng tác dựa trên người dùng (Jaccard, topK=10), Lọc cộng tác dựa trên Item (topK=5), Content-Based Filtering từ danh mục, PageRank Diversity Pool (Top 20) và chiến lược trọng số thích ứng 60-30-10.
 
 5. **Explainable AI:** Mỗi gợi ý kèm lý do bằng ngôn ngữ tự nhiên, biểu đồ phân tích và dữ liệu chi tiết.
 

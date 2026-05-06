@@ -30,7 +30,7 @@ Xây dựng một hệ thống web gợi ý du lịch thông minh cho thành ph�
 
 2. **Triển khai thuật toán Hybrid Recommendation:**
    - Weighted PageRank (trên 2 đồ thị riêng biệt: User–Location và Location–Location) để đánh giá độ phổ biến và độ kết nối của địa điểm.
-   - Collaborative Filtering (User-Based) với Jaccard Similarity để gợi ý dựa trên người dùng có sở thích tương tự.
+   - Lọc cộng tác dựa trên người dùng (User-Based Collaborative Filtering) với Jaccard Similarity để gợi ý dựa trên người dùng có sở thích tương tự.
    - Content-Based Filtering để gợi ý theo danh mục sở thích.
    - Kết hợp 3 phương pháp trên với chiến lược trọng số thích ứng (Adaptive Weighting).
 
