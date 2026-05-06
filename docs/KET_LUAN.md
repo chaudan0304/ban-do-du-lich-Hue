@@ -78,52 +78,23 @@ Bên cạnh các kết quả đạt được, khóa luận vẫn tồn tại m�
 
 ## 4. Hướng Phát triển
 
-### 4.1. Ngắn hạn (3–6 tháng)
+Mặc dù hệ thống đã đáp ứng được các mục tiêu nghiên cứu đề ra, để hoàn thiện và nâng cao hiệu năng của mô hình khuyến nghị cũng như tính ứng dụng của đề tài, một số hướng phát triển tiếp theo được đề xuất như sau:
 
-1. **Mở rộng dữ liệu:**
-   - Thu thập thêm địa điểm (mục tiêu 200+) từ Google Places API và cộng đồng người dùng.
-   - Thu hút người dùng thực tế thông qua chiến dịch quảng bá.
+### 4.1. Cải thiện và Mở rộng Mô hình Khuyến nghị
 
-2. **Cải thiện Cold Start:**
-   - Hỏi sở thích khi đăng ký (Onboarding Survey) để khởi tạo vector sở thích ban đầu.
-   - Sử dụng demographic-based filtering (giới tính, độ tuổi, quốc tịch).
+1. **Nâng cấp phương pháp Lọc dựa trên nội dung (Content-Based Filtering):** Thay vì chỉ tính điểm thưởng dựa trên sự trùng khớp danh mục (Category) đơn giản, hệ thống có thể tích hợp **Vector Embeddings** (sử dụng các mô hình ngôn ngữ lớn) để biểu diễn mô tả địa điểm và đánh giá của người dùng thành các vector đa chiều. Việc tính toán độ tương đồng trên không gian vector sẽ mang lại kết quả gợi ý sâu sắc và chính xác hơn.
+2. **Triển khai Học sâu trên đồ thị (Graph Neural Networks - GNN):** Mặc dù các thuật toán Graph Data Science (GDS) truyền thống như PageRank hay Node Similarity đã hoạt động hiệu quả, việc nghiên cứu áp dụng các mô hình học sâu như **GraphSAGE** hay **GCN** có thể giúp hệ thống tự động trích xuất các đặc trưng tiềm ẩn (latent features) phức tạp từ mạng lưới tương tác.
+3. **Cải tiến cơ chế Khởi động lạnh (Cold Start):** Xây dựng quy trình thu thập sở thích ban đầu (Onboarding Survey) cho người dùng mới đăng ký, kết hợp với các kỹ thuật Demographic-based Filtering (lọc theo độ tuổi, giới tính) để khởi tạo không gian cá nhân hóa ngay từ lần truy cập đầu tiên thay vì chỉ phụ thuộc vào PageRank.
 
-3. **Tăng cường bảo mật:**
-   - Rate Limiting chống tấn công brute force.
-   - CSRF Protection cho các form submission.
-   - API authentication bằng JWT (JSON Web Token).
+### 4.2. Nâng cấp Tiện ích Lập lộ trình và Phân tích Cảm xúc
 
-### 4.2. Trung hạn (6–12 tháng)
+1. **Tối ưu hóa bài toán lập lộ trình (Itinerary Optimization):** Nâng cấp thuật toán tham lam (Greedy) và khoảng cách Euclid hiện tại bằng các giải pháp định tuyến chuyên sâu kết hợp với các API bản đồ thực tế (ví dụ: Google Maps Distance Matrix hoặc OpenRouteService). Điều này giúp hệ thống xem xét cả tình trạng giao thông và đường đi thực tế để phân bổ lịch trình tối ưu nhất.
+2. **Áp dụng NLP tiên tiến cho Sentiment Analysis:** Chuyển đổi từ phương pháp khớp từ khóa (Keyword-based) sang các mô hình xử lý ngôn ngữ tự nhiên tiên tiến dành riêng cho tiếng Việt (như **PhoBERT**). Mục tiêu hướng đến là phân tích cảm xúc dựa trên khía cạnh (Aspect-based Sentiment Analysis) để trích xuất điểm số hài lòng chi tiết, từ đó đưa kết quả này vào làm một tham số trọng lượng quan trọng trong pipeline khuyến nghị.
 
-1. **Ứng dụng di động:**
-   - Phát triển ứng dụng cross-platform (React Native hoặc Flutter).
-   - Tích hợp GPS real-time và thông báo location-based.
-   - Hỗ trợ chế độ ngoại tuyến (offline mode).
+### 4.3. Mở rộng Dữ liệu và Tích hợp Hệ thống
 
-2. **NLP nâng cao:**
-   - Nâng cấp Sentiment Analysis sử dụng PhoBERT (mô hình NLP tiếng Việt).
-   - Tự động trích xuất keywords và chủ đề từ bình luận.
-   - Phát triển chatbot hỗ trợ du khách.
-
-3. **Tích hợp dịch vụ bên thứ ba:**
-   - Đặt vé tham quan trực tuyến.
-   - Liên kết đặt phòng khách sạn (Agoda, Booking.com).
-   - Gọi xe di chuyển (Grab).
-
-### 4.3. Dài hạn (1–2 năm)
-
-1. **Mở rộng địa lý:**
-   - Hỗ trợ các điểm đến du lịch khác: Đà Nẵng, Hội An, Nha Trang, Đà Lạt...
-   - Thiết kế kiến trúc multi-tenant cho triển khai đa địa phương.
-
-2. **Machine Learning nâng cao:**
-   - Deep Learning Recommendation với Matrix Factorization hoặc Neural Collaborative Filtering.
-   - Graph Neural Networks (GNN) khai thác sâu hơn cấu trúc đồ thị.
-   - Reinforcement Learning cho dynamic recommendations (cập nhật gợi ý real-time).
-
-3. **Nền tảng B2B:**
-   - Cung cấp API cho đối tác du lịch (tour operator, khách sạn).
-   - Dashboard phân tích xu hướng du lịch cho cơ quan quản lý.
+1. **Tăng cường quy mô dữ liệu (Scalability):** Mở rộng tập dữ liệu từ 52 địa điểm hiện tại lên quy mô hàng trăm địa điểm, không chỉ gói gọn trong trung tâm thành phố Huế mà còn lan rộng ra các huyện lân cận và các tỉnh thành khác nhằm kiểm chứng độ ổn định và khả năng tính toán của đồ thị với dữ liệu lớn (Big Data).
+2. **Cập nhật dữ liệu thời gian thực (Real-time Data Streaming):** Xây dựng luồng xử lý tự động thu thập và đồng bộ các đánh giá, tương tác của người dùng từ các nền tảng du lịch lớn (TripAdvisor, Google Reviews) vào Neo4j, giúp mô hình luôn nắm bắt được xu hướng du lịch hiện thời của cộng đồng.
 
 ## 5. Lời kết
 
