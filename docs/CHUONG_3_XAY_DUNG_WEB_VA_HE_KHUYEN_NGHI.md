@@ -281,7 +281,30 @@ CALL gds.nodeSimilarity.write('loc_similarity_graph', {
 | similarityCutoff | 0.1 (10%) | 0.15 (15%) |
 | Câu hỏi giải quyết | "Người giống bạn thích gì?" | "Những người thích nơi này còn thích gì?" |
 
-### 3.4.4. Mô hình Gợi ý Lai và Chiến lược Trọng số (Adaptive Hybrid)
+### 3.4.4. Thuật toán Content-Based Filtering (Lọc dựa trên nội dung)
+
+Phương pháp Lọc dựa trên nội dung (Content-Based Filtering) được áp dụng tại hai khâu quan trọng của hệ thống:
+
+**a) Tiền xử lý đồ thị (Graph Pre-processing):**
+
+Hệ thống quét toàn bộ các địa điểm có cùng danh mục (`Category`) và tự động tạo mối quan hệ `RELATED_TO` giữa chúng. Mối quan hệ này được gán một trọng số cố định nhằm báo hiệu cho thuật toán PageRank rằng hai địa điểm này có tính chất tương đồng về mặt nội dung.
+
+```cypher
+MATCH (l1:Location)-[:HAS_CATEGORY]->(cat:Category)<-[:HAS_CATEGORY]-(l2:Location)
+WHERE elementId(l1) < elementId(l2)
+MERGE (l1)-[r:RELATED_TO]-(l2)
+SET r.weight = coalesce(r.weight, 0) + $weight
+```
+
+**b) Truy vấn gợi ý trực tiếp (Real-time Querying):**
+
+Trong quá trình tính điểm cho mô hình Gợi ý Lai (sẽ trình bày ở mục tiếp theo), hệ thống so sánh danh mục của địa điểm đang xét với các danh mục mà người dùng đã từng thích. Nếu có sự trùng khớp, hệ thống cộng trực tiếp một điểm thưởng (bonus score) vào điểm tổng hợp của địa điểm đó:
+
+```cypher
+... CASE WHEN category_match > 0 THEN 0.2 ELSE 0 END as hybrid_score ...
+```
+
+### 3.4.5. Mô hình Gợi ý Lai và Chiến lược Trọng số (Adaptive Hybrid)
 
 Đây là phần tích hợp trung tâm, kết hợp kết quả từ 3 thuật toán trên thành một pipeline thống nhất.
 
@@ -331,7 +354,7 @@ Chiến lược trọng số 60-30-10 được thiết kế dựa trên đặc t
 
 Đối với người dùng mới chưa có tương tác (chưa LIKED hoặc INTERACTED), hệ thống bỏ qua Collaborative và Content-Based Filtering, thay vào đó sử dụng **Fallback Query** chỉ dựa trên điểm PageRank tổng hợp (công thức 60-30-10) để đảm bảo mọi người dùng đều nhận được gợi ý ngay từ lần truy cập đầu tiên.
 
-### 3.4.5. Explainable AI (Giải thích kết quả gợi ý)
+### 3.4.6. Explainable AI (Giải thích kết quả gợi ý)
 
 Mỗi địa điểm trong danh sách gợi ý đều kèm theo thông tin giải thích chi tiết, giúp người dùng hiểu *tại sao* hệ thống chọn nơi đó — tăng tính minh bạch và độ tin cậy của hệ thống.
 
@@ -344,9 +367,9 @@ Mỗi địa điểm trong danh sách gợi ý đều kèm theo thông tin giả
 | `reason_type` | Phân loại lý do | `collab`, `content`, `pagerank`, `default` |
 | `reason_details` | Dữ liệu chi tiết cho biểu đồ UI | Điểm và % đóng góp từng thành phần, danh sách users tương đồng, biểu đồ tròn |
 
-### 3.4.6. Module Phân tích Cảm xúc (Sentiment Analysis)
+### 3.4.7. Module Phân tích Cảm xúc (Sentiment Analysis)
 
-Khác với thuật toán khuyến nghị ở các mục 3.4.1–3.4.4 (chịu trách nhiệm xếp hạng và gợi ý địa điểm), module **Phân tích Cảm xúc** là một thành phần xử lý ngôn ngữ tự nhiên (NLP) độc lập, được triển khai trong file `utils.py`. Module này phục vụ riêng cho chức năng đánh giá (Review), không tham gia vào pipeline tính điểm khuyến nghị.
+Khác với thuật toán khuyến nghị ở các mục 3.4.1–3.4.5 (chịu trách nhiệm xếp hạng và gợi ý địa điểm), module **Phân tích Cảm xúc** là một thành phần xử lý ngôn ngữ tự nhiên (NLP) độc lập, được triển khai trong file `utils.py`. Module này phục vụ riêng cho chức năng đánh giá (Review), không tham gia vào pipeline tính điểm khuyến nghị.
 
 **Vai trò và phạm vi:**
 
@@ -388,7 +411,7 @@ Hệ thống tách biệt logic truy vấn cơ sở dữ liệu vào thư mục 
 
 **Module Phân tích Cảm xúc (`utils.py`) — *độc lập với thuật toán khuyến nghị*:**
 
-File `utils.py` chứa module Sentiment Analysis, là thành phần NLP riêng biệt phục vụ chức năng đánh giá — không thuộc pipeline thuật toán khuyến nghị (xem mục 3.4.6):
+File `utils.py` chứa module Sentiment Analysis, là thành phần NLP riêng biệt phục vụ chức năng đánh giá — không thuộc pipeline thuật toán khuyến nghị (xem mục 3.4.7):
 
 - **`analyze_sentiment(comment)`:** Phân tích cảm xúc bình luận (tích cực / tiêu cực / trung lập) dựa trên từ điển từ khóa tiếng Việt.
 - **`classify_comment_topic(comment)`:** Phân loại chủ đề bình luận (phong cảnh, dịch vụ, giá cả, ẩm thực...) dựa trên keyword matching.

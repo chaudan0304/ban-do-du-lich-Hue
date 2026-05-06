@@ -73,7 +73,7 @@ app.secret_key = secret
 # ======================================================
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "main.index"  # Redirect về trang chủ nếu chưa login / Redirect to homepage if not logged in
+login_manager.login_view = "main.index"  # type: ignore # Redirect về trang chủ nếu chưa login / Redirect to homepage if not logged in
 
 
 # -----------------------------------------------------------

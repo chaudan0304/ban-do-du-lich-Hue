@@ -7,7 +7,7 @@
     <title>Flowchart Thuật toán Hybrid Recommendation</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
             padding: 20px;
             text-align: center;
@@ -100,14 +100,14 @@
             theme: 'default',
             fontFamily: 'Arial, sans-serif'
         });
-        
-        window.downloadPNG = function() {
+
+        window.downloadPNG = function () {
             const svg = document.querySelector('.mermaid svg');
             if (!svg) {
                 alert("Biểu đồ chưa tải xong, vui lòng đợi thêm chút!");
                 return;
             }
-            
+
             // Lấy kích thước thực của SVG
             const viewBox = svg.getAttribute('viewBox');
             let width, height;
@@ -120,33 +120,33 @@
                 width = rect.width;
                 height = rect.height;
             }
-            
+
             // Tạo bản sao SVG để xử lý
             const clonedSvg = svg.cloneNode(true);
             clonedSvg.setAttribute('width', width);
             clonedSvg.setAttribute('height', height);
-            
+
             const svgData = new XMLSerializer().serializeToString(clonedSvg);
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
+
             // Scale lên 2x để ảnh nét hơn
             const scale = 2;
             canvas.width = width * scale;
             canvas.height = height * scale;
-            
+
             // Tô nền trắng
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             const img = new Image();
             // Encode SVG to base64
             img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-            
-            img.onload = function() {
+
+            img.onload = function () {
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 const pngData = canvas.toDataURL('image/png');
-                
+
                 // Tạo thẻ a ẩn để tải file
                 const a = document.createElement('a');
                 a.download = 'Flowchart_Hybrid_Recommendation.png';
