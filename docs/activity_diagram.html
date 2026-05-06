@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ đồ Hoạt động - Huế Travel AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        p {
+            color: #64748b;
+        }
+        .diagram-container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            width: fit-content;
+            min-width: 800px;
+            margin-bottom: 30px;
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+        }
+        button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        button:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Sơ đồ Hoạt động (Activity Diagram)</h1>
+    <p>Hệ thống Khuyến nghị Du lịch Huế - Huế Travel AI</p>
+</div>
+
+<div class="diagram-container" id="diagram-to-export">
+    <div class="mermaid">
+        graph TD
+            Start([Bắt đầu]) --> Login[Người dùng đăng nhập]
+            
+            %% Nhánh tương tác dữ liệu
+            Login --> Interaction{Tương tác?}
+            Interaction -- "Thích/Đánh giá" --> UpdateDB[Lưu vào Neo4j]
+            UpdateDB --> RunAlgo[setup_algo.py: Cập nhật PageRank & Similarity]
+            RunAlgo --> Interaction
+            
+            %% Nhánh yêu cầu gợi ý
+            Interaction -- "Xem Gợi ý AI" --> RequestRec[Yêu cầu Gợi ý]
+            RequestRec --> RunQuery[Thực thi Cypher Hybrid Query]
+            RunQuery --> CalcScore[Tính điểm Hybrid 60-30-10 & XAI]
+            CalcScore --> Display[Hiển thị danh sách gợi ý + Biểu đồ phân tích]
+            Display --> Interaction
+            
+            Interaction -- "Thoát" --> End([Kết thúc])
+    </div>
+</div>
+
+<div class="controls">
+    <button onclick="downloadPNG()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        Tải ảnh PNG (Chất lượng cao)
+    </button>
+</div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true });
+
+    async function downloadPNG() {
+        const element = document.getElementById('diagram-to-export');
+        const canvas = await html2canvas(element, {
+            scale: 3, 
+            backgroundColor: '#ffffff'
+        });
+        
+        const link = document.createElement('a');
+        link.download = 'so_do_hoat_dong_hue_travel_ai.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+</script>
+
+</body>
+</html>
