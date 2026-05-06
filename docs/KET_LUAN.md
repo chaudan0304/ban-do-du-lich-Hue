@@ -98,9 +98,11 @@ Mặc dù hệ thống đã đáp ứng được các mục tiêu nghiên cứu 
 
 ## 5. Lời kết
 
-Khóa luận đã hoàn thành mục tiêu đề ra: xây dựng thành công hệ thống gợi ý du lịch thông minh cho thành phố Huế trên nền tảng Graph Database và Hybrid Recommendation. Hệ thống không chỉ giải quyết bài toán thực tế "Đi đâu, chơi gì?" tại Huế mà còn đóng góp mô hình kỹ thuật có thể tái sử dụng cho các bài toán gợi ý tương tự.
+Khóa luận đã hoàn thành xuất sắc mục tiêu nghiên cứu và xây dựng thành công **Hệ thống Gợi ý Du lịch Thông minh cho Thành phố Huế**, ứng dụng sức mạnh của **Cơ sở dữ liệu đồ thị (Graph Database)** kết hợp cùng **Thuật toán Khuyến nghị Lai (Hybrid Recommendation)**. Đề tài không chỉ dừng lại ở việc thử nghiệm các mô hình thuật toán trên lý thuyết, mà đã hiện thực hóa thành một ứng dụng phần mềm hoàn chỉnh, có khả năng giải quyết trực tiếp và trực quan bài toán "Đi đâu, chơi gì?" — một rào cản phổ biến trong trải nghiệm của du khách.
 
-Với nền tảng kiến trúc mở, mã nguồn mở và hướng phát triển rõ ràng, hệ thống Huế Travel AI có tiềm năng phát triển thành một nền tảng du lịch thông minh quy mô lớn, góp phần vào sự chuyển đổi số của ngành du lịch Thừa Thiên Huế nói riêng và Việt Nam nói chung.
+Bằng việc tích hợp khéo léo giữa thuật toán **Weighted PageRank**, **Lọc cộng tác (Collaborative Filtering)** và **Lọc dựa trên nội dung (Content-Based Filtering)** thông qua một chiến lược trọng số thích ứng, hệ thống đã khắc phục hiệu quả những thách thức kinh điển của lĩnh vực hệ thống gợi ý như vấn đề "Khởi động lạnh" (Cold Start) hay "Bẫy bong bóng lọc" (Filter Bubble). Bên cạnh đó, việc cung cấp tính năng minh bạch hóa lý do gợi ý (Explainable AI) cùng tiện ích hỗ trợ phân bổ lộ trình đã thể hiện rõ sự giao thoa thành công giữa nghiên cứu kỹ thuật chuyên sâu và tư duy thiết kế lấy người dùng làm trung tâm (User-Centered Design).
+
+Mặc dù vẫn còn những giới hạn nhất định về quy mô dữ liệu thử nghiệm, nhưng những kết quả đạt được đã chứng minh rõ ràng tính đúng đắn và tiềm năng to lớn của việc áp dụng Graph Database vào việc mô hình hóa các mối quan hệ du lịch phức tạp. Với kiến trúc hệ thống mở, nền tảng công nghệ hiện đại và định hướng phát triển thuật toán rõ ràng trong tương lai, mô hình **Huế Travel AI** hoàn toàn có cơ sở vững chắc để tiếp tục được mở rộng, tối ưu hóa và trở thành một mảnh ghép công nghệ hữu ích, đóng góp tích cực vào công cuộc chuyển đổi số của ngành du lịch tỉnh Thừa Thiên Huế nói riêng và Việt Nam nói chung.
 
 **Huế, tháng 02 năm 2026**
 
