@@ -32,7 +32,9 @@
 | PK | Primary Key | Khóa chính |
 | RDBMS | Relational Database Management System | Hệ quản trị cơ sở dữ liệu quan hệ |
 | REST | Representational State Transfer | Truyền trạng thái biểu diễn |
+| RAG | Retrieval-Augmented Generation | Thế hệ tăng cường truy xuất |
 | SQL | Structured Query Language | Ngôn ngữ truy vấn có cấu trúc |
+| TF-IDF | Term Frequency-Inverse Document Frequency | Tần suất từ – Nghịch đảo tần suất văn bản |
 | TSP | Traveling Salesman Problem | Bài toán người bán hàng |
 | UAT | User Acceptance Testing | Kiểm thử chấp nhận người dùng |
 | UC | Use Case | Trường hợp sử dụng |
