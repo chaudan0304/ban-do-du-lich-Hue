@@ -362,15 +362,15 @@ Với cách tiếp cận này, việc tìm kiếm gợi ý trở thành bài to�
 
 - **Bước 3 — So khớp và Gợi ý (Similarity Matching):** So sánh đặc trưng của các items chưa tương tác với hồ sơ sở thích, ưu tiên những items có mức độ trùng khớp cao nhất.
 
-**Các loại đặc trưng thường được sử dụng:**
+**Lựa chọn đặc trưng cho đề tài:**
 
-| Loại đặc trưng | Kỹ thuật biểu diễn | Ví dụ trong du lịch |
-|---|---|---|
-| **Danh mục (Category)** | So khớp nhãn (Label Matching) | Di tích, Ẩm thực, Tâm linh |
-| **Văn bản (Text)** | TF-IDF, Word Embeddings | Mô tả địa điểm, bình luận |
-| **Metadata** | Feature Vector | Tags, thuộc tính, vị trí địa lý |
+Trong lý thuyết chung, CBF có thể sử dụng nhiều loại đặc trưng: văn bản (TF-IDF, Word Embeddings), metadata (tags, vị trí), hoặc danh mục (nhãn phân loại) [10]. Tuy nhiên, các kỹ thuật xử lý văn bản đòi hỏi tập dữ liệu lớn và mô hình NLP phức tạp — không phù hợp với quy mô đề tài.
 
-Trong đề tài, CBF được triển khai dựa trên đặc trưng **danh mục (Category)** — tận dụng cấu trúc đồ thị với quan hệ `:HAS_CATEGORY` để xác định sự tương đồng giữa các địa điểm. Đây là đặc trưng phù hợp nhất cho bài toán du lịch vì mỗi địa điểm đều được phân loại rõ ràng theo danh mục, không cần kỹ thuật xử lý ngôn ngữ tự nhiên phức tạp.
+Đề tài sử dụng kỹ thuật **So khớp nhãn danh mục (Category Label Matching)** trên cơ sở dữ liệu đồ thị, cụ thể:
+
+- **Đặc trưng sử dụng:** Danh mục (Category) của địa điểm — mỗi địa điểm được gắn nhãn như "Di tích lịch sử", "Ẩm thực", "Tâm linh" thông qua quan hệ `:HAS_CATEGORY` trong Neo4j.
+- **Phương pháp so khớp:** Duyệt đồ thị (Graph Traversal) — từ địa điểm đã thích, duyệt qua node `:Category` chung để tìm các địa điểm có cùng danh mục. Hai địa điểm chia sẻ cùng node Category được coi là có nội dung tương tự.
+- **Lý do lựa chọn:** (1) Dữ liệu du lịch có danh mục phân loại rõ ràng, sẵn có; (2) Tận dụng trực tiếp cấu trúc đồ thị của Neo4j mà không cần thư viện NLP bổ sung; (3) Kết quả trực quan, dễ giải thích cho người dùng.
 
 ### 1.7.2. Ứng dụng trong đề tài
 
