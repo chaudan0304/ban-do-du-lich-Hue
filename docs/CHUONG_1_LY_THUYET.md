@@ -352,15 +352,25 @@ Với cách tiếp cận này, việc tìm kiếm gợi ý trở thành bài to�
 
 ### 1.7.1. Nguyên lý Hoạt động
 
-**Content-Based Filtering** phân tích nội dung và đặc điểm (features) của items để tìm items tương tự với những gì người dùng đã thể hiện sự quan tâm [10], [30].
+**Content-Based Filtering (CBF)** là phương pháp gợi ý dựa trên việc phân tích nội dung và đặc điểm (features) của items, từ đó tìm các items có đặc trưng tương tự với những items mà người dùng đã thể hiện sự quan tâm trước đó [10], [30]. Khác với Collaborative Filtering (cần dữ liệu từ nhiều người dùng), CBF chỉ cần dữ liệu từ **chính người dùng hiện tại** kết hợp với **đặc trưng nội dung** của items.
 
-Các đặc trưng thường được sử dụng:
+**Quy trình hoạt động 3 bước:**
 
-| Loại đặc trưng | Kỹ thuật biểu diễn | Ví dụ |
+- **Bước 1 — Trích xuất đặc trưng (Feature Extraction):** Mỗi item được biểu diễn dưới dạng tập hợp các đặc trưng. Trong bài toán du lịch, đặc trưng chính của mỗi địa điểm là **danh mục** (Category) mà nó thuộc về — ví dụ: "Di tích lịch sử", "Ẩm thực", "Tâm linh".
+
+- **Bước 2 — Xây dựng hồ sơ sở thích (User Profile Construction):** Hệ thống phân tích hành vi của người dùng (đã thích, đã đánh giá) để xác định các đặc trưng mà họ ưu tiên. Ví dụ: nếu người dùng đã thích 3 địa điểm thuộc danh mục "Di tích lịch sử", hồ sơ của họ sẽ có trọng số cao cho danh mục này.
+
+- **Bước 3 — So khớp và Gợi ý (Similarity Matching):** So sánh đặc trưng của các items chưa tương tác với hồ sơ sở thích, ưu tiên những items có mức độ trùng khớp cao nhất.
+
+**Các loại đặc trưng thường được sử dụng:**
+
+| Loại đặc trưng | Kỹ thuật biểu diễn | Ví dụ trong du lịch |
 |---|---|---|
+| **Danh mục (Category)** | So khớp nhãn (Label Matching) | Di tích, Ẩm thực, Tâm linh |
 | **Văn bản (Text)** | TF-IDF, Word Embeddings | Mô tả địa điểm, bình luận |
-| **Danh mục (Category)** | One-hot Encoding | Di tích, Ẩm thực, Tâm linh |
 | **Metadata** | Feature Vector | Tags, thuộc tính, vị trí địa lý |
+
+Trong đề tài, CBF được triển khai dựa trên đặc trưng **danh mục (Category)** — tận dụng cấu trúc đồ thị với quan hệ `:HAS_CATEGORY` để xác định sự tương đồng giữa các địa điểm. Đây là đặc trưng phù hợp nhất cho bài toán du lịch vì mỗi địa điểm đều được phân loại rõ ràng theo danh mục, không cần kỹ thuật xử lý ngôn ngữ tự nhiên phức tạp.
 
 ### 1.7.2. Ứng dụng trong đề tài
 

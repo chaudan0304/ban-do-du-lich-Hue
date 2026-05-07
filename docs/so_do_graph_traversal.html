@@ -80,8 +80,6 @@
 
 <body>
     <div class="container">
-        <h2>Hình 1.1. Sơ đồ Graph Traversal — Collaborative Filtering trên Graph Database</h2>
-        <p class="subtitle">Quy trình duyệt đồ thị 3 bước nhảy (3-hop traversal) để tìm gợi ý</p>
         <canvas id="canvas" width="1000" height="560"></canvas>
 
         <div class="legend">
@@ -297,17 +295,6 @@
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Title
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 16px "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Collaborative Filtering — Duyệt đồ thị 3 bước nhảy (Graph Traversal)', canvas.width / 2, 35);
-
-            // Subtitle
-            ctx.fillStyle = '#777';
-            ctx.font = '12px "Segoe UI", sans-serif';
-            ctx.fillText('User hiện tại → Location chung → User tương đồng → Location MỚI (gợi ý)', canvas.width / 2, 55);
-
             // ─── Draw edges ───
             // Hop 1: User A → Location chung
             drawArrow(nodes.userA, nodes.loc1, ':INTERACTED', 'solid', COLORS.edgeSolid);
@@ -326,61 +313,14 @@
             Object.values(nodes).forEach(drawNode);
 
             // ─── Draw hop badges ───
-            drawHopBadge(240, 80, 'Bước 1: Tìm Location chung', COLORS.hopBg1);
-            drawHopBadge(540, 50, 'Bước 2: Tìm User tương đồng', COLORS.hopBg2);
-            drawHopBadge(790, 90, 'Bước 3: Lấy Location MỚI', COLORS.hopBg3);
+            drawHopBadge(240, 75, 'Bước 1: Tìm Location chung', COLORS.hopBg1);
+            drawHopBadge(540, 75, 'Bước 2: Tìm User tương đồng', COLORS.hopBg2);
+            drawHopBadge(840, 75, 'Bước 3: Lấy Location MỚI', COLORS.hopBg3);
 
-            // ─── Draw result box ───
-            const rx = 700, ry = 430, rw = 260, rh = 95;
-            roundRect(rx, ry, rw, rh, 10);
-            ctx.fillStyle = COLORS.resultBg;
-            ctx.fill();
-            ctx.strokeStyle = COLORS.resultBorder;
-            ctx.lineWidth = 2;
-            ctx.stroke();
 
-            ctx.fillStyle = COLORS.resultText;
-            ctx.font = 'bold 13px "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('🎯 GỢI Ý cho User A', rx + rw / 2, ry + 25);
 
-            ctx.font = '12px "Segoe UI", sans-serif';
-            ctx.fillText('✓ Lăng Tự Đức', rx + rw / 2, ry + 48);
-            ctx.fillText('✓ Lăng Khải Định', rx + rw / 2, ry + 68);
 
-            // Arrow from newLoc to result
-            ctx.beginPath();
-            ctx.strokeStyle = COLORS.resultBorder;
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 3]);
-            ctx.moveTo(nodes.newLoc1.x, nodes.newLoc1.y + 30);
-            ctx.quadraticCurveTo(nodes.newLoc1.x + 10, ry + rh / 2, rx + rw, ry + rh / 2 - 10);
-            ctx.stroke();
-            ctx.moveTo(nodes.newLoc2.x, nodes.newLoc2.y + 30);
-            ctx.quadraticCurveTo(nodes.newLoc2.x + 10, ry + rh / 2, rx + rw, ry + rh / 2 + 10);
-            ctx.stroke();
-            ctx.setLineDash([]);
 
-            // ─── Annotation box ───
-            const ax = 40, ay = 430, aw = 620, ah = 95;
-            roundRect(ax, ay, aw, ah, 10);
-            ctx.fillStyle = '#F3E5F5';
-            ctx.fill();
-            ctx.strokeStyle = '#7B1FA2';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            ctx.fillStyle = '#4A148C';
-            ctx.font = 'bold 12px "Segoe UI", sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText('📌 Truy vấn Cypher tương đương:', ax + 15, ay + 22);
-
-            ctx.font = '11px "Consolas", "Courier New", monospace';
-            ctx.fillStyle = '#6A1B9A';
-            ctx.fillText('MATCH (me:User)-[:INTERACTED]->(common:Location)<-[:INTERACTED]-(other:User)', ax + 15, ay + 42);
-            ctx.fillText('WHERE me <> other', ax + 15, ay + 57);
-            ctx.fillText('MATCH (other)-[:INTERACTED]->(new_loc:Location)', ax + 15, ay + 72);
-            ctx.fillText('WHERE NOT (me)-[:INTERACTED]->(new_loc)  // Lọc chưa tương tác', ax + 15, ay + 87);
         }
 
         draw();

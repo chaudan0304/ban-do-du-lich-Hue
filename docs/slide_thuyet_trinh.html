@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Slide Thuyết Trình - Huế Travel AI</title>
+
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+  
+  <!-- Theme Customization (Dark Modern) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/night.min.css">
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    .reveal {
+      font-family: 'Inter', sans-serif;
+    }
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      font-family: 'Inter', sans-serif;
+      text-transform: none;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .reveal h1 {
+      font-size: 1.8em;
+      background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+    }
+
+    .reveal h2 {
+      font-size: 1.4em;
+      color: #38bdf8;
+      border-bottom: 2px solid rgba(56, 189, 248, 0.3);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .reveal p, .reveal li {
+      font-size: 0.75em;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    .reveal ul {
+      margin-top: 15px;
+    }
+
+    .reveal li {
+      margin-bottom: 10px;
+    }
+
+    .highlight-text {
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    .grid-2-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      text-align: left;
+    }
+    
+    .box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .box h3 {
+      font-size: 1.1em;
+      color: #fbbf24;
+      margin-top: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.6em;
+      font-weight: 600;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .badge.green { background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3); }
+    .badge.purple { background: rgba(167, 139, 250, 0.15); color: #a78bfa; border-color: rgba(167, 139, 250, 0.3); }
+    .badge.orange { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3); }
+
+    .footer {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      font-size: 14px;
+      color: #64748b;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Slide 1: Bìa -->
+      <section data-transition="fade">
+        <h3 style="color: #94a3b8; font-weight: 400; font-size: 1em;">Bảo Vệ Khóa Luận Tốt Nghiệp</h3>
+        <h1 style="margin-top: 30px; line-height: 1.2;">Ứng dụng AI xây dựng hệ thống Khuyến nghị & Lập lộ trình Du lịch Huế</h1>
+        <p style="color: #64748b; font-size: 1.2em; font-weight: 300;">(Huế Travel AI Map)</p>
+        
+        <div style="margin-top: 50px; font-size: 0.7em; display: flex; justify-content: center; gap: 80px;">
+          <div style="text-align: left;">
+            <p style="color: #94a3b8; margin: 0;">Sinh viên thực hiện:</p>
+            <p style="font-weight: 600; font-size: 1.2em; margin-top: 5px; color: #fff;">[Tên Của Bạn]</p>
+          </div>
+          <div style="text-align: left;">
+            <p style="color: #94a3b8; margin: 0;">Giảng viên hướng dẫn:</p>
+            <p style="font-weight: 600; font-size: 1.2em; margin-top: 5px; color: #fff;">[Tên Giảng Viên]</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 2: Lý do chọn đề tài -->
+      <section data-transition="slide">
+        <h2>1. Lý do chọn đề tài</h2>
+        <div class="grid-2-col">
+          <div class="box">
+            <h3>Bối cảnh & Tiềm năng</h3>
+            <ul>
+              <li>Huế sở hữu di sản văn hóa thế giới và tiềm năng du lịch khổng lồ.</li>
+              <li>Sự bùng nổ của <span class="highlight-text">Du lịch tự túc (FIT)</span> và chuyển đổi số trong ngành du lịch.</li>
+            </ul>
+          </div>
+          <div class="box" style="border-color: rgba(239, 68, 68, 0.3);">
+            <h3 style="color: #f87171;">Vấn đề hiện tại</h3>
+            <ul>
+              <li>Du khách bị "quá tải thông tin" (Information Overload) khi tìm kiếm điểm đến.</li>
+              <li>Thiếu công cụ cá nhân hóa trải nghiệm cho từng sở thích cá nhân.</li>
+              <li>Khó khăn trong việc <span class="highlight-text">tự sắp xếp lộ trình</span> di chuyển tối ưu về thời gian và khoảng cách.</li>
+            </ul>
+          </div>
+        </div>
+        <p style="margin-top: 30px; text-align: center; font-size: 0.9em; font-weight: 600; color: #34d399;">
+          🎯 Cần một hệ thống thông minh (AI-driven) để giải quyết trọn vẹn "Pain-points" này.
+        </p>
+      </section>
+
+      <!-- Slide 3: Mục tiêu đề tài -->
+      <section data-transition="slide">
+        <h2>2. Mục tiêu nghiên cứu</h2>
+        <ul>
+          <li class="fragment">
+            <strong>Về mặt lý thuyết:</strong> Nghiên cứu và áp dụng Cơ sở dữ liệu Đồ thị (Neo4j) và các thuật toán Gợi ý (Recommendation Systems) vào bài toán thực tế.
+          </li>
+          <li class="fragment">
+            <strong>Về mặt thực tiễn - Xây dựng hệ thống Huế Travel AI:</strong>
+            <ul>
+              <li>Xây dựng <span class="highlight-text">Bản đồ số tương tác</span> tổng hợp các điểm đến đặc sắc tại Huế.</li>
+              <li>Phát triển thuật toán <span class="highlight-text">Hybrid Recommendation (Gợi ý lai)</span> tự động đề xuất địa điểm theo sở thích cá nhân hóa.</li>
+              <li>Thuật toán <span class="highlight-text">Lập lộ trình tự động</span> (Greedy Search + Haversine) tối ưu hóa quãng đường di chuyển.</li>
+            </ul>
+          </li>
+          <li class="fragment">
+            <strong>XAI (Explainable AI):</strong> Cung cấp tính năng giải thích lý do gợi ý, giúp tăng độ tin cậy cho người dùng.
+          </li>
+        </ul>
+      </section>
+
+      <!-- Slide 4: Nội dung - Kiến trúc hệ thống -->
+      <section data-transition="slide">
+        <h2>3. Nội dung - Kiến trúc Hệ thống</h2>
+        <p>Hệ thống được thiết kế theo <span class="highlight-text">Kiến trúc 3 Tầng (3-Tier Architecture)</span> hiện đại:</p>
+        
+        <div style="display: flex; justify-content: space-between; gap: 20px; margin-top: 30px;">
+          <div class="box" style="flex: 1; text-align: center;">
+            <h3 style="color: #38bdf8;">1. Presentation Tier</h3>
+            <p style="font-size: 0.8em; color: #cbd5e1;">(Giao diện người dùng)</p>
+            <div style="margin-top: 15px;">
+              <span class="badge">HTML5/CSS3</span>
+              <span class="badge">JavaScript</span>
+              <span class="badge">LeafletJS (Map)</span>
+              <span class="badge">Canvas</span>
+            </div>
+          </div>
+          
+          <div class="box" style="flex: 1; text-align: center;">
+            <h3 style="color: #34d399;">2. Business Logic</h3>
+            <p style="font-size: 0.8em; color: #cbd5e1;">(Xử lý & Thuật toán)</p>
+            <div style="margin-top: 15px;">
+              <span class="badge green">Python</span>
+              <span class="badge green">Flask Framework</span>
+              <span class="badge green">Hybrid Algo</span>
+              <span class="badge green">Haversine</span>
+            </div>
+          </div>
+          
+          <div class="box" style="flex: 1; text-align: center;">
+            <h3 style="color: #fbbf24;">3. Data Tier</h3>
+            <p style="font-size: 0.8em; color: #cbd5e1;">(Lưu trữ Đồ thị)</p>
+            <div style="margin-top: 15px;">
+              <span class="badge orange">Neo4j Graph DB</span>
+              <span class="badge orange">Cypher Query</span>
+              <span class="badge orange">JSON</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 5: Nội dung - Thuật toán Gợi ý Lai -->
+      <section data-transition="slide">
+        <h2>3. Nội dung - Mô hình Hybrid Recommendation</h2>
+        <div class="grid-2-col" style="align-items: center;">
+          <div>
+            <p>Thuật toán gợi ý kết hợp 3 phương pháp (Trọng số điều chỉnh linh hoạt):</p>
+            <ol style="font-size: 0.85em; color: #e2e8f0; line-height: 1.6;">
+              <li class="fragment"><strong>Content-Based Filtering (10%):</strong><br>Dựa trên sự tương đồng về Tags/Category của các địa điểm người dùng đã thích.</li>
+              <li class="fragment"><strong>Collaborative Filtering (60%):</strong><br>Gợi ý từ hành vi của những người dùng có cùng sở thích (Node Similarity).</li>
+              <li class="fragment"><strong>PageRank Algorithm (30%):</strong><br>Đề xuất các điểm đến nổi tiếng, mang tính biểu tượng (Diversity Pool) giải quyết bài toán Cold-Start.</li>
+            </ol>
+          </div>
+          <div class="box" style="text-align: center;">
+            <h3 style="color: #a78bfa;">Lý do sử dụng Neo4j Graph DB</h3>
+            <ul style="font-size: 0.85em; text-align: left;">
+              <li>Mô hình hóa dữ liệu tự nhiên dưới dạng Đỉnh (User, Location, Tag) và Cạnh (:LIKED, :HAS_TAG).</li>
+              <li>Truy vấn quan hệ nhiều tầng tốc độ cao.</li>
+              <li>Dễ dàng thực thi các thuật toán Graph (PageRank) bằng thư viện GDS.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6: Phương pháp nghiên cứu -->
+      <section data-transition="slide">
+        <h2>4. Phương pháp nghiên cứu</h2>
+        <div class="box">
+          <ul>
+            <li><span class="highlight-text">Nghiên cứu tài liệu:</span> Phân tích tài liệu về Hệ gợi ý (Recommender Systems), CSDL đồ thị (Graph Database), và các bài toán định tuyến (Routing).</li>
+            <li><span class="highlight-text">Phương pháp thu thập dữ liệu:</span> Xây dựng tập dữ liệu (Dataset) thực tế gồm các địa danh, nhà hàng, khách sạn tại Thừa Thiên Huế (Tọa độ GPS, Thể loại, Mô tả).</li>
+            <li><span class="highlight-text">Phương pháp thực nghiệm:</span> 
+              <ul>
+                <li>Lập trình mô phỏng các thuật toán (PageRank, Tham lam - Greedy Search).</li>
+                <li>Xây dựng ứng dụng Web thực tế để kiểm thử và trực quan hóa kết quả.</li>
+                <li>Mô phỏng dữ liệu người dùng (Mock data) để kiểm tra độ chính xác của hệ gợi ý.</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 7: Kết quả đạt được -->
+      <section data-transition="slide">
+        <h2>5. Kết quả đạt được & Demo</h2>
+        <div class="grid-2-col">
+          <div>
+            <ul>
+              <li>Hoàn thiện hệ thống Web đáp ứng đầy đủ tính năng: <span class="highlight-text">Bản đồ, Gợi ý AI, XAI, và Lộ trình</span>.</li>
+              <li>Thuật toán Hybrid hoạt động ổn định, giải quyết được bài toán Cold-Start nhờ kết hợp PageRank.</li>
+              <li>Giao diện quản trị (Admin Dashboard) thân thiện, tự động đồng bộ dữ liệu đồ thị.</li>
+            </ul>
+          </div>
+          <div class="box" style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+            <h3 style="color: #38bdf8; margin-bottom: 20px;">[ DEMO HỆ THỐNG ]</h3>
+            <p style="font-size: 0.8em; text-align: center; color: #94a3b8;">
+              (Chuyển sang trình duyệt web để demo trực tiếp ứng dụng Hue Travel AI)
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8: Kết luận & Hướng phát triển -->
+      <section data-transition="slide">
+        <h2>6. Kết luận & Hướng phát triển</h2>
+        <div class="box" style="margin-bottom: 20px;">
+          <h3 style="color: #34d399;">Kết luận</h3>
+          <p style="margin: 0;">Đề tài đã chứng minh được tính khả thi và ưu việt của việc áp dụng Graph Database (Neo4j) vào hệ gợi ý du lịch, mang lại trải nghiệm cá nhân hóa cao cho người dùng.</p>
+        </div>
+        <div class="box" style="border-color: rgba(167, 139, 250, 0.3);">
+          <h3 style="color: #a78bfa;">Hướng phát triển tương lai</h3>
+          <ul style="margin: 0;">
+            <li>Tích hợp API thời tiết thực tế để tối ưu lộ trình (Ví dụ: gợi ý điểm trong nhà khi trời mưa).</li>
+            <li>Mở rộng bộ dữ liệu (Dataset) quy mô lớn hơn với các điểm đến ở miền Trung.</li>
+            <li>Tối ưu thuật toán đường đi bằng TSP (Traveling Salesperson Problem) kết hợp AI (Genetic Algorithm) cho lộ trình phức tạp nhiều ngày.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 9: Q&A -->
+      <section data-transition="zoom">
+        <h1 style="font-size: 3.5em; margin-bottom: 20px;">Thank You!</h1>
+        <p style="font-size: 1.5em; color: #34d399;">Q & A</p>
+        <p style="margin-top: 50px; font-style: italic; color: #64748b;">Em xin chân thành cảm ơn Quý Thầy/Cô đã lắng nghe!</p>
+      </section>
+
+    </div>
+    
+    <div class="footer">
+      Khóa luận Tốt nghiệp - Hệ thống Huế Travel AI
+    </div>
+  </div>
+
+  <!-- Reveal.js Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t', // Hiển thị số trang (current/total)
+      transition: 'fade', // Các hiệu ứng: none/fade/slide/convex/concave/zoom
+      backgroundTransition: 'fade',
+      controls: true,
+      progress: true,
+      center: true,
+      margin: 0.05,
+      minScale: 0.2,
+      maxScale: 2.0
+    });
+  </script>
+</body>
+</html>
