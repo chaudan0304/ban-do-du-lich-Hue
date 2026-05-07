@@ -332,23 +332,21 @@ Trong đó A, B là tập hợp các items mà mỗi user đã tương tác. Gi�
 
 ### 1.6.4. Triển khai trên Graph Database
 
-Một lợi thế quan trọng của Graph Database là khả năng triển khai Collaborative Filtering dưới dạng **duyệt đồ thị (Graph Traversal)** thay vì phép nhân ma trận truyền thống [6]. Quy trình được biểu diễn qua sơ đồ:
+Một lợi thế quan trọng của Graph Database là khả năng triển khai Collaborative Filtering dưới dạng **duyệt đồ thị (Graph Traversal)** thay vì phép nhân ma trận truyền thống [6]. Quy trình duyệt đồ thị 3 bước nhảy (3-hop traversal) được biểu diễn qua sơ đồ:
 
-```
-User hiện tại ──[:INTERACTED]──→ Location chung ←──[:INTERACTED]── User tương đồng
-                                                                          │
-                                                                   [:INTERACTED]
-                                                                          │
-                                                                          ▼
-                                                                Location MỚI
-                                                                (chưa tương tác)
-                                                                          │
-                                                                          ▼
-                                                                    GỢI Ý cho
-                                                                  User hiện tại
-```
+*Hình 1.1. Sơ đồ Graph Traversal — Collaborative Filtering trên Graph Database*
 
-Với cách tiếp cận này, việc tìm kiếm gợi ý trở thành bài toán duyệt đường đi trên đồ thị (3 bước nhảy), tận dụng lợi thế tốc độ truy vấn quan hệ của Neo4j.
+![Sơ đồ Graph Traversal — Collaborative Filtering trên Graph Database](images/So_do_Graph_Traversal_CF.png)
+
+Quy trình 3 bước nhảy (3-hop traversal) hoạt động như sau:
+
+- **Bước 1 — Tìm Location chung:** Xuất phát từ User hiện tại (User A), duyệt qua quan hệ `:INTERACTED` để tìm tất cả các địa điểm mà User A đã tương tác (ví dụ: Đại Nội Huế, Chùa Thiên Mụ).
+
+- **Bước 2 — Tìm User tương đồng:** Từ các Location chung đó, duyệt ngược qua `:INTERACTED` để tìm những người dùng khác (User B, User C) cũng đã tương tác với cùng các địa điểm — đây chính là nhóm User tương đồng.
+
+- **Bước 3 — Lấy Location MỚI:** Từ nhóm User tương đồng, tiếp tục duyệt qua `:INTERACTED` để tìm các địa điểm mà họ đã thích nhưng User A chưa biết (ví dụ: Lăng Tự Đức, Lăng Khải Định) → đưa vào danh sách gợi ý.
+
+Với cách tiếp cận này, việc tìm kiếm gợi ý trở thành bài toán duyệt đường đi trên đồ thị (3 bước nhảy), tận dụng lợi thế tốc độ truy vấn quan hệ O(1) cho mỗi bước nhảy của Neo4j — không phụ thuộc vào kích thước tổng thể của đồ thị.
 
 ## 1.7. Thuật toán Lọc theo Nội dung (Content-Based Filtering)
 

@@ -283,26 +283,52 @@ CALL gds.nodeSimilarity.write('loc_similarity_graph', {
 
 ### 3.4.4. Thuật toán Content-Based Filtering (Lọc dựa trên nội dung)
 
-Phương pháp Lọc dựa trên nội dung (Content-Based Filtering) được áp dụng tại hai khâu quan trọng của hệ thống:
+Khác với Collaborative Filtering (dựa trên hành vi người dùng tương đồng), **Content-Based Filtering** phân tích đặc trưng nội dung của địa điểm để tìm những nơi có tính chất tương tự với sở thích hiện tại của người dùng (đã trình bày lý thuyết ở mục 1.7). Trong hệ thống, phương pháp này được áp dụng tại **hai khâu** quan trọng, mỗi khâu phục vụ một mục đích khác nhau:
 
-**a) Tiền xử lý đồ thị (Graph Pre-processing):**
+**a) Tiền xử lý đồ thị — Tạo mạng liên kết nội dung (Graph Pre-processing):**
 
-Hệ thống quét toàn bộ các địa điểm có cùng danh mục (`Category`) và tự động tạo mối quan hệ `RELATED_TO` giữa chúng. Mối quan hệ này được gán một trọng số cố định nhằm báo hiệu cho thuật toán PageRank rằng hai địa điểm này có tính chất tương đồng về mặt nội dung.
+Trong giai đoạn tiền xử lý (script `setup_algo.py`, Bước 3b), hệ thống quét toàn bộ các cặp địa điểm có **cùng danh mục** (`Category`) và tự động tạo mối quan hệ `:RELATED_TO` giữa chúng. Mối quan hệ này được gán một trọng số cố định `WEIGHT_CATEGORY = 0.8`, phản ánh sự tương đồng về mặt nội dung giữa hai địa điểm:
 
 ```cypher
+-- Tìm các cặp Location cùng danh mục và tạo liên kết
 MATCH (l1:Location)-[:HAS_CATEGORY]->(cat:Category)<-[:HAS_CATEGORY]-(l2:Location)
 WHERE elementId(l1) < elementId(l2)
 MERGE (l1)-[r:RELATED_TO]-(l2)
-SET r.weight = coalesce(r.weight, 0) + $weight
+SET r.weight = coalesce(r.weight, 0) + 0.8
 ```
 
-**b) Truy vấn gợi ý trực tiếp (Real-time Querying):**
+Trọng số này được **cộng dồn** với trọng số Co-occurrence (nếu có) trên cùng mối quan hệ `:RELATED_TO`, tạo nên tín hiệu tổng hợp từ cả hai nguồn (xem mục 3.3.2). Kết quả là một mạng liên kết giữa các địa điểm — làm đầu vào cho thuật toán **PageRank Kết nối** (mục 3.4.1b), giúp xác định các địa điểm "trung tâm" trong mạng lưới du lịch.
 
-Trong quá trình tính điểm cho mô hình Gợi ý Lai (sẽ trình bày ở mục tiếp theo), hệ thống so sánh danh mục của địa điểm đang xét với các danh mục mà người dùng đã từng thích. Nếu có sự trùng khớp, hệ thống cộng trực tiếp một điểm thưởng (bonus score) vào điểm tổng hợp của địa điểm đó:
+**b) Truy vấn gợi ý trực tiếp — Điểm thưởng danh mục (Real-time Category Bonus):**
+
+Trong quá trình tính điểm cho mô hình Gợi ý Lai (Bước 2 của pipeline, xem mục 3.4.5), hệ thống thực hiện so khớp danh mục theo hai bước:
+
+1. Duyệt các địa điểm mà người dùng đã tương tác, lấy danh mục (`Category`) của chúng;
+2. Với mỗi địa điểm ứng viên, kiểm tra xem danh mục của nó có trùng khớp với các danh mục đã thích hay không.
+
+Nếu có sự trùng khớp, điểm thưởng (bonus) được cộng trực tiếp vào điểm tổng hợp. Đồng thời, hệ thống cũng tận dụng trọng số từ quan hệ `:RELATED_TO` (bao gồm cả Co-occurrence và Category) để tính điểm Content-Based chi tiết hơn:
 
 ```cypher
-... CASE WHEN category_match > 0 THEN 0.2 ELSE 0 END as hybrid_score ...
+-- Bước 2 trong pipeline Hybrid: Content-Based Filtering
+OPTIONAL MATCH (me)-[:INTERACTED]->(liked_loc:Location)
+OPTIONAL MATCH (liked_loc)-[:HAS_CATEGORY]->(cat:Category)<-[:HAS_CATEGORY]-(l_content:Location)
+WHERE NOT (me)-[:INTERACTED]->(l_content) AND NOT (me)-[:LIKED]->(l_content)
+OPTIONAL MATCH (liked_loc)-[r:RELATED_TO]-(l_content)
+WITH me, l_content, sum(1 + coalesce(r.weight, 0)) AS score_content
 ```
+
+*Ví dụ:* Nếu người dùng đã thích "Chùa Thiên Mụ" (danh mục: Tâm linh), hệ thống sẽ tìm các địa điểm khác cũng thuộc danh mục "Tâm linh" (như Chùa Từ Đàm, Điện Hòn Chén). Nếu "Chùa Từ Đàm" vừa cùng danh mục, vừa có 2 users chung tương tác → `score_content = 1 + (2 × 1.2 + 0.8) = 4.2`, cao hơn đáng kể so với địa điểm chỉ cùng danh mục đơn thuần (`score_content = 1 + 0.8 = 1.8`).
+
+**c) Tóm tắt vai trò của Content-Based Filtering trong hệ thống:**
+
+*Bảng 3.9.1. Hai khâu áp dụng Content-Based Filtering*
+
+| Khâu | Thời điểm | Đầu vào | Đầu ra | Tác động |
+|---|---|---|---|---|
+| Tiền xử lý đồ thị | Offline (khi chạy `setup_algo.py`) | Quan hệ `:HAS_CATEGORY` | Trọng số `:RELATED_TO` (+0.8) | Cải thiện PageRank Kết nối |
+| Truy vấn gợi ý | Real-time (khi user yêu cầu gợi ý) | Danh mục đã thích + `:RELATED_TO` | Điểm `score_content` | Ưu tiên địa điểm cùng sở thích |
+
+Sự kết hợp cả hai khâu giúp Content-Based Filtering đóng góp vào hệ thống ở cả tầng cấu trúc đồ thị (ảnh hưởng gián tiếp qua PageRank) lẫn tầng truy vấn cá nhân hóa (ảnh hưởng trực tiếp qua điểm thưởng danh mục).
 
 ### 3.4.5. Mô hình Gợi ý Lai và Chiến lược Trọng số (Adaptive Hybrid)
 
