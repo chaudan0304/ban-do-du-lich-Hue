@@ -6,7 +6,7 @@ Chương này trình bày các cơ sở lý thuyết liên quan đến đề tà
 
 ### 1.1.1. Tình hình nghiên cứu ngoài nước
 
-Hệ thống gợi ý (Recommendation System) đã được nghiên cứu rộng rãi từ giữa những năm 1990. Nghiên cứu tiên phong của Goldberg và cộng sự (1992) về hệ thống Tapestry đã đặt nền móng cho lĩnh vực lọc cộng tác (Collaborative Filtering). Từ đó, nhiều công trình quan trọng đã được công bố:
+Hệ thống gợi ý (Recommendation System) đã được nghiên cứu rộng rãi từ giữa những năm 1990. Nghiên cứu tiên phong của Goldberg và cộng sự (1992) [33] về hệ thống Tapestry đã đặt nền móng cho lĩnh vực lọc cộng tác (Collaborative Filtering). Từ đó, nhiều công trình quan trọng đã được công bố:
 
 - **Ricci và cộng sự (2015)** [7] đã hệ thống hóa toàn diện các phương pháp xây dựng hệ thống gợi ý trong cuốn _Recommender Systems Handbook_, bao gồm: lọc cộng tác, lọc theo nội dung, phương pháp lai và các kỹ thuật đánh giá hiệu quả.
 

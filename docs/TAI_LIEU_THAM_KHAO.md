@@ -56,7 +56,7 @@
 
 ## Mã nguồn và Công cụ
 
-[22] GitHub Repository, "Huế Travel AI - Smart Travel Recommendation System," [Online]. Available: https://github.com/chaudan0304/ban-do-du-lich-Hue.
+[22] GitHub Repository, "Bản Đồ Du Lịch Huế - Hệ thống Gợi ý Du lịch Thông minh," [Online]. Available: https://github.com/chaudan0304/ban-do-du-lich-Hue.
 
 [23] Python Software Foundation, "Python 3.11 Documentation," [Online]. Available: https://docs.python.org/3.11/.
 
@@ -68,7 +68,7 @@
 
 ## Các Thuật toán và Bài báo Khoa học
 
-[26] T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, _Introduction to Algorithms_, 3rd ed. MIT Press, 2009. (Chapter 35: Approximation Algorithms - Nearest Neighbor for TSP)
+[26] T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, _Introduction to Algorithms_, 3rd ed. MIT Press, 2009. (Chapter 35: Approximation Algorithms — Nearest Neighbor for TSP)
 
 [27] S. Brin and L. Page, "The Anatomy of a Large-Scale Hypertextual Web Search Engine," _Computer Networks and ISDN Systems_, vol. 30, no. 1-7, pp. 107-117, 1998.
 
@@ -82,7 +82,8 @@
 
 [32] X. Su, J. He, J. Ren, and J. Peng, "Personalized Chinese Tourism Recommendation Algorithm Based on Knowledge Graph," _Applied Sciences_, vol. 12, no. 20, Article 10226, 2022. DOI: 10.3390/app122010226.
 
+[33] D. Goldberg, D. Nichols, B. M. Oki, and D. Terry, "Using Collaborative Filtering to Weave an Information Tapestry," _Communications of the ACM_, vol. 35, no. 12, pp. 61-70, 1992.
+
 ---
 
-**Tổng số tài liệu tham khảo: 32**
-
+**Tổng số tài liệu tham khảo: 33**
