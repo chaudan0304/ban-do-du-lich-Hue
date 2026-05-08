@@ -2,108 +2,46 @@
 
 ## 1. Lý do chọn đề tài
 
-Trong bối cảnh ngành du lịch Việt Nam đang phục hồi mạnh mẽ sau đại dịch COVID-19, Thừa Thiên Huế là một trong những điểm đến hấp dẫn nhất miền Trung với hệ thống di sản văn hóa thế giới phong phú. Theo thống kê của Sở Du lịch tỉnh Thừa Thiên Huế, năm 2024 tỉnh đón hơn 4 triệu lượt khách, tăng 25% so với năm trước [2].
+1. **Tiềm năng du lịch lớn:** Thừa Thiên Huế sở hữu hệ thống di sản văn hóa thế giới phong phú, năm 2024 đón hơn 4 triệu lượt khách (tăng 25% so với năm trước) [2], tạo ra nhu cầu cấp thiết về công cụ hỗ trợ du lịch thông minh.
 
-Tuy nhiên, du khách thường gặp những khó khăn nhất định trong quá trình trải nghiệm du lịch tại Huế:
+2. **Khó khăn thực tế của du khách:** Du khách — đặc biệt khách lần đầu — gặp nhiều trở ngại khi đến Huế: khó lựa chọn địa điểm phù hợp giữa hàng trăm di tích, đền chùa, quán ăn; đồng thời lúng túng trong việc sắp xếp lộ trình tối ưu, dẫn đến di chuyển lòng vòng, lãng phí thời gian và chi phí.
 
-- **Khó khăn trong lựa chọn địa điểm:** Với hàng trăm di tích, đền chùa, quán ăn và địa điểm giải trí, du khách — đặc biệt là khách lần đầu — không biết nên ưu tiên tham quan ở đâu cho phù hợp với sở thích và quỹ thời gian.
-- **Khó khăn trong lập lộ trình:** Du khách thường di chuyển lòng vòng, không tối ưu hóa được quãng đường giữa các địa điểm, gây lãng phí thời gian và chi phí.
-- **Thiếu cá nhân hóa:** Các nền tảng du lịch phổ biến hiện tại (Google Maps, TripAdvisor) đưa ra gợi ý chung cho tất cả đối tượng, chưa thực sự cá nhân hóa dựa trên hành vi và sở thích riêng biệt của từng người dùng.
+3. **Hạn chế của các nền tảng hiện có:** Các công cụ du lịch phổ biến (Google Maps, TripAdvisor) chỉ đưa ra gợi ý chung cho tất cả đối tượng, chưa thực sự cá nhân hóa dựa trên hành vi và sở thích riêng biệt của từng người dùng.
 
-**Hệ thống gợi ý (Recommendation System)** là giải pháp hiệu quả cho những bài toán trên. Đặc biệt, **cơ sở dữ liệu đồ thị (Graph Database)** với khả năng mô hình hóa tự nhiên các mối quan hệ phức tạp giữa người dùng, địa điểm và danh mục, kết hợp với các thuật toán phân tích đồ thị như **PageRank** và **Collaborative Filtering**, có thể đưa ra những gợi ý cá nhân hóa chính xác và hiệu quả.
+4. **Thiếu vắng ứng dụng công nghệ hiện đại trong gợi ý du lịch:** Hiện tại, tại Việt Nam chưa có nhiều hệ thống khai thác cơ sở dữ liệu đồ thị (Graph Database) và các thuật toán Hybrid Recommendation (PageRank, Collaborative Filtering, Content-Based Filtering) để xây dựng hệ thống gợi ý du lịch cá nhân hóa, mặc dù đây là hướng tiếp cận đã được chứng minh hiệu quả trong nhiều nghiên cứu quốc tế.
 
 Xuất phát từ những lý do trên, tác giả đã chọn đề tài:
 
 > **"XÂY DỰNG HỆ THỐNG GỢI Ý DU LỊCH THÔNG MINH CHO THÀNH PHỐ HUẾ SỬ DỤNG GRAPH DATABASE VÀ THUẬT TOÁN HYBRID RECOMMENDATION"**
 
-## 2. Mục tiêu nghiên cứu
+## 2. Mục tiêu đề tài
 
-### 2.1. Mục tiêu tổng quát
-
-Xây dựng một hệ thống web gợi ý du lịch thông minh cho thành phố Huế, sử dụng công nghệ Graph Database (Neo4j) và các thuật toán Hybrid Recommendation để đưa ra gợi ý cá nhân hóa, giúp du khách lựa chọn địa điểm phù hợp và lập lộ trình tham quan tối ưu.
-
-### 2.2. Mục tiêu cụ thể
-
-1. **Xây dựng cơ sở dữ liệu đồ thị (Graph Database):**
-   - Mô hình hóa quan hệ giữa người dùng, địa điểm du lịch và danh mục dưới dạng đồ thị trên Neo4j.
-   - Thiết kế lược đồ dữ liệu (Graph Schema) gồm các node và relationship phù hợp với bài toán gợi ý.
-
-2. **Triển khai thuật toán Hybrid Recommendation:**
-   - Weighted PageRank (trên 2 đồ thị riêng biệt: User–Location và Location–Location) để đánh giá độ phổ biến và độ kết nối của địa điểm.
-   - Lọc cộng tác dựa trên người dùng (User-Based Collaborative Filtering) với Jaccard Similarity để gợi ý dựa trên người dùng có sở thích tương tự.
-   - Content-Based Filtering để gợi ý theo danh mục sở thích.
-   - Kết hợp 3 phương pháp trên với chiến lược trọng số thích ứng (Adaptive Weighting).
-
-3. **Phát triển ứng dụng web thực nghiệm:**
-   - Xây dựng giao diện web trực quan hiển thị bản đồ tương tác với Leaflet.js.
-   - Tích hợp các thuật toán gợi ý đã xây dựng để phục vụ trực tiếp người dùng cuối cùng với hệ thống đánh giá, bình luận.
-   - Bổ sung tính năng tiện ích (AI Planner) giúp người dùng sắp xếp lộ trình tham quan cơ bản sau khi đã có danh sách các địa điểm được gợi ý (đây là tính năng phụ trợ thêm).
-   - Thiết kế Dashboard quản trị cho phép theo dõi ứng dụng.
+- Xây dựng cơ sở dữ liệu đồ thị (Neo4j) mô hình hóa quan hệ giữa người dùng, địa điểm và danh mục du lịch tại Huế.
+- Cài đặt và tích hợp thuật toán Hybrid Recommendation gồm: Weighted PageRank, User-Based Collaborative Filtering (Jaccard Similarity), Content-Based Filtering với chiến lược trọng số thích ứng (Adaptive Weighting).
+- Phát triển ứng dụng web hiển thị bản đồ tương tác (Leaflet.js), tích hợp hệ thống gợi ý cá nhân hóa, đánh giá–bình luận và tính năng phụ trợ sắp xếp lộ trình (AI Planner).
 
 ## 3. Nội dung nghiên cứu
 
-Nội dung nghiên cứu chính của đề tài bao gồm:
-- Khảo sát và phân tích các nền tảng lý thuyết về hệ thống gợi ý (Recommendation System) và cơ sở dữ liệu đồ thị (Graph Database).
-- Phân tích yêu cầu, thiết kế kiến trúc và mô hình dữ liệu cho hệ thống gợi ý du lịch thông minh tại thành phố Huế.
-- Xây dựng cơ sở dữ liệu đồ thị, ứng dụng Neo4j để lưu trữ, tổ chức dữ liệu các địa điểm du lịch và lịch sử tương tác của người dùng.
-- Cài đặt và tích hợp các thuật toán lõi của hệ thống: thuật toán lọc cộng tác (Collaborative Filtering), lọc theo nội dung (Content-Based Filtering), thuật toán lai (Hybrid Recommendation) và PageRank. Đây là nhóm đối tượng trung tâm của khóa luận.
-- Phát triển ứng dụng web thực nghiệm, tích hợp các mô hình đã cài đặt, đồng thời bổ sung tính năng tiện ích hỗ trợ sắp xếp lộ trình cơ bản.
-- Tiến hành kiểm thử và đánh giá hiệu năng của hệ thống cũng như tính chính xác, đa dạng của các thuật toán gợi ý.
+- Nghiên cứu cơ sở lý thuyết về Recommendation System, Graph Database và các thuật toán liên quan (PageRank, Collaborative Filtering, Content-Based Filtering).
+- Phân tích yêu cầu, thiết kế kiến trúc 3 tầng, lược đồ Graph Schema và RESTful API.
+- Xây dựng cơ sở dữ liệu đồ thị Neo4j, thu thập và chuẩn hóa dữ liệu địa điểm du lịch Huế.
+- Cài đặt các thuật toán lõi: Weighted PageRank, Collaborative Filtering, Content-Based Filtering và mô hình kết hợp Adaptive Hybrid — đây là trọng tâm của khóa luận.
+- Phát triển ứng dụng web thực nghiệm, tích hợp hệ thống gợi ý và bổ sung tính năng phụ trợ lập lộ trình.
+- Kiểm thử và đánh giá hiệu năng hệ thống, tính chính xác và đa dạng của các thuật toán gợi ý.
 
-## 4. Đối tượng nghiên cứu
+## 4. Ý nghĩa đề tài
 
-- Các thuật toán gợi ý: PageRank, Collaborative Filtering, Content-Based Filtering và phương pháp lai (Hybrid).
-- Cơ sở dữ liệu đồ thị Neo4j và thư viện Neo4j Graph Data Science (GDS).
-- Đặc điểm và thông tin của các địa điểm du lịch tiêu biểu tại thành phố Huế và vùng phụ cận.
-- Hành vi tương tác của người dùng (user interactions) đối với các địa điểm du lịch trong hệ thống.
+### 4.1. Ý nghĩa khoa học
 
-## 5. Phương hướng nghiên cứu
-
-### 5.1. Phương pháp nghiên cứu lý thuyết
-
-- Nghiên cứu tài liệu, sách chuyên khảo và các bài báo khoa học về hệ thống gợi ý, Graph Database và các thuật toán liên quan [4]–[12].
-- Phân tích, so sánh ưu nhược điểm của các phương pháp gợi ý để lựa chọn hướng tiếp cận phù hợp.
-- Tham khảo tài liệu kỹ thuật chính thức của Neo4j [15], [16] và Flask [17].
-
-### 5.2. Phương pháp thu thập dữ liệu
-
-- Thu thập thông tin địa điểm du lịch từ các nguồn: Website Sở Du lịch Thừa Thiên Huế, Google Maps, TripAdvisor.
-- Tổng hợp, chuẩn hóa dữ liệu (tên, tọa độ, mô tả, hình ảnh, danh mục) vào file Excel.
-- Import dữ liệu vào Neo4j Graph Database thông qua script tự động.
-
-### 5.3. Phương pháp phân tích và thiết kế
-
-- Phân tích yêu cầu hệ thống (Use Case Diagram).
-- Thiết kế kiến trúc hệ thống theo mô hình phân lớp (Layered Architecture).
-- Thiết kế lược đồ cơ sở dữ liệu đồ thị (Graph Schema).
-- Thiết kế giao diện (Wireframe) và luồng thuật toán (Flowchart).
-
-### 5.4. Phương pháp triển khai và đánh giá
-
-- Sử dụng phương pháp phát triển phần mềm Agile, triển khai từng module độc lập.
-- Kiểm thử đơn vị (Unit Testing) cho các module chính.
-- Đánh giá hiệu năng hệ thống qua thời gian phản hồi API.
-- Đánh giá chấp nhận người dùng (User Acceptance Testing) thông qua khảo sát thực tế.
-
-## 6. Phạm vi đề tài
-
-- **Phạm vi không gian:** Các địa điểm du lịch thuộc địa bàn thành phố Huế và vùng phụ cận (bao gồm lăng tẩm, bãi biển, làng nghề truyền thống...).
-- **Phạm vi thời gian:** Thực hiện từ tháng 10/2025 đến tháng 02/2026.
-- Việc xây dựng hệ thống tập trung hoàn toàn vào các thuật toán AI gợi ý điểm tham quan, cùng một tính năng phụ trợ nhỏ là sắp xếp lộ trình. **Không bao gồm** các tính năng kinh doanh giao dịch như đặt phòng khách sạn, vé máy bay hay thanh toán trực tuyến.
-
-## 7. Ý nghĩa khoa học và thực tiễn
-
-### 7.1. Ý nghĩa khoa học
-
-- Đề xuất mô hình **Hybrid Recommendation trên Graph Database** phù hợp cho bài toán gợi ý du lịch, kết hợp 3 thuật toán: Weighted PageRank, Collaborative Filtering (Jaccard Similarity) và Content-Based Filtering.
+- Đề xuất mô hình **Hybrid Recommendation trên Graph Database** kết hợp 3 thuật toán: Weighted PageRank, Collaborative Filtering và Content-Based Filtering — phù hợp cho bài toán gợi ý du lịch.
 - Đề xuất giải pháp **PageRank Diversity Pool** giải quyết vấn đề bẫy bong bóng lọc (Filter Bubble) trong hệ thống gợi ý.
-- Đóng góp mô hình triển khai Recommendation System trên nền tảng Neo4j Graph Data Science, có thể tái sử dụng cho các bài toán tương tự.
+- Đóng góp mô hình triển khai Recommendation System trên Neo4j Graph Data Science, có thể tái sử dụng cho các bài toán tương tự.
 
-### 7.2. Ý nghĩa thực tiễn
+### 4.2. Ý nghĩa thực tiễn
 
 - Hỗ trợ du khách lập kế hoạch du lịch Huế hiệu quả, tiết kiệm thời gian lựa chọn địa điểm và di chuyển.
-- Tối ưu hóa trải nghiệm du lịch với lộ trình đi lại hợp lý, xen kẽ tham quan và ẩm thực.
-- Cung cấp nền tảng mã nguồn mở có thể mở rộng và áp dụng cho các địa phương du lịch khác trên toàn quốc.
+- Nâng cao trải nghiệm du lịch với gợi ý cá nhân hóa và lộ trình tối ưu.
+- Cung cấp nền tảng mã nguồn mở có thể mở rộng, áp dụng cho các địa phương du lịch khác trên toàn quốc.
 
 ## 8. Bố cục khóa luận
 
