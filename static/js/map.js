@@ -61,7 +61,7 @@ let globalHeatData = [];        // Dữ liệu nhiệt [lat, lng, intensity] / H
 //           Sets up map click handler for Admin (pick coordinates when adding/editing locations).
 function initMap() {
   map = L.map("map", { zoomControl: false }).setView([16.4637, 107.5909], 14);
-  
+
   // Tile layer OpenStreetMap / OpenStreetMap tile layer
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap contributors",
@@ -69,7 +69,7 @@ function initMap() {
 
   // Zoom control ở góc trên-phải / Zoom control at top-right
   L.control.zoom({ position: "topright" }).addTo(map);
-  
+
   // Marker Cluster: Gom nhóm markers khi zoom nhỏ, tách ra khi zoom >= 16
   // Marker Cluster: Groups markers at low zoom, separates at zoom >= 16
   markerLayer = L.markerClusterGroup({ disableClusteringAtZoom: 16 });
@@ -112,15 +112,15 @@ function initMap() {
     if (isPickingMode === "add" || (addModal && addModal.classList.contains("active"))) {
       const latInput = document.getElementById("addLat");
       const lngInput = document.getElementById("addLng");
-      
+
       if (latInput && lngInput) {
-          latInput.value = lat;
-          lngInput.value = lng;
+        latInput.value = lat;
+        lngInput.value = lng;
       }
 
       // Reset trạng thái chọn / Reset picking state
       isPickingMode = null;
-      document.getElementById("map").style.cursor = ""; 
+      document.getElementById("map").style.cursor = "";
 
       // Đảm bảo form thêm hiện lên / Ensure add form is visible
       if (addModal) addModal.classList.add("active");
@@ -175,45 +175,45 @@ function initMap() {
 // Purpose:  Creates marker icons (divIcon) with appropriate emoji per location category.
 //           Distinguishes Top 1/5/10 PageRank with border colors (gold/red/orange).
 function getDynamicIcon(loc) {
-    // Bảng ánh xạ danh mục → emoji / Category → emoji mapping table
-    const iconMap = {
-        "Di tích": "🏛️",
-        "Ẩm thực": "🍜",
-        "Thiên nhiên": "🌳",
-        "Bãi biển": "🏖️",
-        "Tâm linh": "🛕",
-        "Lăng tẩm": "🏯",
-        "Tham quan": "🏞️",
-        "Mua sắm": "🛍️",
-        "Cafe": "☕",
-        "Check-in": "📸",
-        "Dịch vụ": "🏨"
-    };
+  // Bảng ánh xạ danh mục → emoji / Category → emoji mapping table
+  const iconMap = {
+    "Di tích": "🏛️",
+    "Ẩm thực": "🍜",
+    "Thiên nhiên": "🌳",
+    "Bãi biển": "🏖️",
+    "Tâm linh": "🛕",
+    "Lăng tẩm": "🏯",
+    "Tham quan": "🏞️",
+    "Mua sắm": "🛍️",
+    "Cafe": "☕",
+    "Check-in": "📸",
+    "Dịch vụ": "🏨"
+  };
 
-    // Tìm symbol theo category / Find symbol by category
-    let symbol = "📍"; // Mặc định / Default
-    if (loc.category) {
-        for (const [key, val] of Object.entries(iconMap)) {
-            if (loc.category.includes(key)) {
-                symbol = val;
-                break;
-            }
-        }
+  // Tìm symbol theo category / Find symbol by category
+  let symbol = "📍"; // Mặc định / Default
+  if (loc.category) {
+    for (const [key, val] of Object.entries(iconMap)) {
+      if (loc.category.includes(key)) {
+        symbol = val;
+        break;
+      }
     }
+  }
 
-    // Phân biệt 3 mức Top PageRank bằng class CSS / Distinguish 3 PageRank tiers via CSS class
-    let pinClass = 'custom-pin';
-    if (loc.topRank === 1)       pinClass = 'custom-pin pin-top1';  // Vàng gold / Gold
-    else if (loc.topRank <= 5)   pinClass = 'custom-pin pin-top5';  // Đỏ / Red
-    else if (loc.topRank <= 10)  pinClass = 'custom-pin pin-top10'; // Cam / Orange
+  // Phân biệt 3 mức Top PageRank bằng class CSS / Distinguish 3 PageRank tiers via CSS class
+  let pinClass = 'custom-pin';
+  if (loc.topRank === 1) pinClass = 'custom-pin pin-top1';  // Vàng gold / Gold
+  else if (loc.topRank <= 5) pinClass = 'custom-pin pin-top5';  // Đỏ / Red
+  else if (loc.topRank <= 10) pinClass = 'custom-pin pin-top10'; // Cam / Orange
 
-    return L.divIcon({
-      className: "custom-div-icon",
-      html: `<div class='${pinClass}'><span>${symbol}</span></div>`,
-      iconSize: [30, 42],
-      iconAnchor: [15, 42],
-      popupAnchor: [0, -40]
-    });
+  return L.divIcon({
+    className: "custom-div-icon",
+    html: `<div class='${pinClass}'><span>${symbol}</span></div>`,
+    iconSize: [30, 42],
+    iconAnchor: [15, 42],
+    popupAnchor: [0, -40]
+  });
 }
 
 
@@ -225,33 +225,33 @@ function getDynamicIcon(loc) {
 //   - autoFit: Tự động zoom map vào dữ liệu / Auto-zoom map to fit data
 async function loadLocations(cat = "All", autoFit = true) {
   const listEl = document.getElementById("locationList");
-  if(listEl) listEl.innerHTML = `<div style="text-align:center; padding:20px;">Đang tải...</div>`;
-  
+  if (listEl) listEl.innerHTML = `<div style="text-align:center; padding:20px;">Đang tải...</div>`;
+
   try {
     // Nếu chưa có cache, gọi API lấy toàn bộ 1 lần
     // If no cache exists, fetch all locations once from API
     if (!cachedAllLocations) {
-       const initialData = await apiFetch("/api/locations"); 
-       cachedAllLocations = initialData || [];
+      const initialData = await apiFetch("/api/locations");
+      cachedAllLocations = initialData || [];
     }
 
     // Lọc dữ liệu từ Cache (client-side filtering)
     // Filter data from Cache (client-side filtering)
     let data = cachedAllLocations;
     if (cat !== "All") {
-        const keyword = cat.trim().toLowerCase();
-        data = cachedAllLocations.filter(loc => 
-            loc.category && loc.category.toLowerCase().includes(keyword)
-        );
+      const keyword = cat.trim().toLowerCase();
+      data = cachedAllLocations.filter(loc =>
+        loc.category && loc.category.toLowerCase().includes(keyword)
+      );
     }
-    
+
     currentListData = data;
     renderLocations(currentListData, autoFit);
     return Promise.resolve();
 
   } catch (err) {
     console.error(err);
-    if(listEl) listEl.innerHTML = "Lỗi tải dữ liệu";
+    if (listEl) listEl.innerHTML = "Lỗi tải dữ liệu";
   }
 }
 
@@ -262,14 +262,14 @@ function renderLocations(data, autoFit = true) {
   const list = document.getElementById("locationList");
   if (markerLayer) markerLayer.clearLayers();
   markersMap = {};
-  if(list) list.innerHTML = "";
-  
+  if (list) list.innerHTML = "";
+
   // Cập nhật dữ liệu Heatmap / Update Heatmap data
   globalHeatData = data.map(l => [l.lat, l.lng, (l.score || 0.1) * 5]); // Intensity * 5
-  if(isHeatmapActive) updateHeatmapLayer();
+  if (isHeatmapActive) updateHeatmapLayer();
 
   if (!data || data.length === 0) {
-    if(list) list.innerHTML = `<div class="empty-state">Không tìm thấy địa điểm nào.</div>`;
+    if (list) list.innerHTML = `<div class="empty-state">Không tìm thấy địa điểm nào.</div>`;
     return;
   }
 
@@ -278,13 +278,13 @@ function renderLocations(data, autoFit = true) {
   // Uses full cache for consistent ranking (regardless of current filter)
   const allData = cachedAllLocations || data;
   const sortedByScore = [...allData].sort((a, b) => (b.score || 0) - (a.score || 0));
-  
+
   // Tạo map: tên location → thứ hạng (1-based) / Create rank map: name → rank (1-based)
   const rankMap = {};
   sortedByScore.forEach((loc, index) => {
     rankMap[loc.name] = index + 1;
   });
-  
+
   // Gán topRank cho data hiện tại / Assign topRank to current data
   data.forEach(loc => {
     loc.topRank = rankMap[loc.name] || 999;
@@ -295,10 +295,10 @@ function renderLocations(data, autoFit = true) {
     let displayScore = ((loc.score || 0) * 100).toFixed(1);
 
     // ── Render mục sidebar / Render sidebar item ──
-    if(list) {
-        const div = document.createElement("div");
-        div.className = "mini-item";
-        div.innerHTML = `
+    if (list) {
+      const div = document.createElement("div");
+      div.className = "mini-item";
+      div.innerHTML = `
         <img src="${loc.image}" loading="lazy" class="mini-img" onerror="this.src='/static/images/no-image.png'">
         <div class="mini-content">
             <div class="mini-name">${escapeHTML(loc.name)}</div>
@@ -308,8 +308,8 @@ function renderLocations(data, autoFit = true) {
             </div>
         </div>
         `;
-        div.onclick = () => showDetail(loc);
-        list.appendChild(div);
+      div.onclick = () => showDetail(loc);
+      list.appendChild(div);
     }
 
     // ── Render marker trên bản đồ / Render map marker ──
@@ -367,10 +367,10 @@ function handleLocalSearch() {
   const input = document.getElementById("miniSearchInput");
   if (!input) return;
   const keyword = input.value.toLowerCase().trim();
-  
+
   if (!keyword) {
     // Nếu xóa hết từ khóa → hiện lại dữ liệu gốc / If keyword cleared → show original data
-    if(currentListData.length > 0) renderLocations(currentListData, false);
+    if (currentListData.length > 0) renderLocations(currentListData, false);
     else loadLocations("All", false);
     return;
   }
@@ -379,8 +379,8 @@ function handleLocalSearch() {
   // Search on FULL CACHE (not just current category)
   const sourceData = cachedAllLocations || [];
   const filtered = sourceData.filter((loc) => {
-    return loc.name.toLowerCase().includes(keyword) || 
-           (loc.description && loc.description.toLowerCase().includes(keyword));
+    return loc.name.toLowerCase().includes(keyword) ||
+      (loc.description && loc.description.toLowerCase().includes(keyword));
   });
 
   renderLocations(filtered, true); // Auto zoom vào kết quả tìm kiếm / Auto zoom to search results
@@ -420,7 +420,7 @@ async function showDetail(loc) {
   // Đồng bộ Filter: Luôn chuyển sang category của địa điểm
   // Sync Filter: Always switch to location's category
   if (currentCategory !== loc.category) {
-      await filterData(loc.category, null, false);
+    await filterData(loc.category, null, false);
   }
 
   currentOpenLoc = loc;
@@ -430,31 +430,31 @@ async function showDetail(loc) {
   // Link chỉ đường Google Maps / Google Maps direction link
   let mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.name + " Thừa Thiên Huế")}`;
   flyToLocation(loc.lat, loc.lng, loc.name);
-  
+
   const panel = document.getElementById("detail-panel");
   const content = document.getElementById("detail-content");
-  
+
   // Kiểm tra trạng thái "đã thích" / Check "liked" status
   const isLiked = userLikedSet.has(loc.name);
-  
+
   // ══════════════════════════════════════════════════════════
   // XÂY DỰNG HTML GIẢI THÍCH AI / BUILD EXPLAINABLE AI HTML
   // ══════════════════════════════════════════════════════════
   let explainHTML = '';
   if (currentUser && loc.reason_details) {
-      const hasHistory = userLikedSet && userLikedSet.size > 0;
-      const rd = loc.reason_details;
-      const pCollab = rd.collab.percent;
-      const pContent = rd.content.percent;
-      const pPopReal = ((loc.score || 0) * 100).toFixed(1);
-      const chart = rd.chart || {collab: 0, content: 0, pagerank: 100};
+    const hasHistory = userLikedSet && userLikedSet.size > 0;
+    const rd = loc.reason_details;
+    const pCollab = rd.collab.percent;
+    const pContent = rd.content.percent;
+    const pPopReal = ((loc.score || 0) * 100).toFixed(1);
+    const chart = rd.chart || { collab: 0, content: 0, pagerank: 100 };
 
-      if (!hasHistory) {
-          // ── TRƯỜNG HỢP 1: COLD START (User chưa có lịch sử)
-          //    CASE 1: COLD START (User has no history)
-          // Hiển thị thông tin nói rằng AI gợi ý dựa trên sự phổ biến chung
-          // Shows info that AI recommends based on general popularity
-          explainHTML = `
+    if (!hasHistory) {
+      // ── TRƯỜNG HỢP 1: COLD START (User chưa có lịch sử)
+      //    CASE 1: COLD START (User has no history)
+      // Hiển thị thông tin nói rằng AI gợi ý dựa trên sự phổ biến chung
+      // Shows info that AI recommends based on general popularity
+      explainHTML = `
           <div class="ai-reason-card">
               <div class="ai-reason-title"><i class="fas fa-fire" style="color:#ea580c;"></i> ĐỊA ĐIỂM NỔI BẬT</div>
               <div class="ai-highlight-box" style="background: #fff7ed; border-color: #ffedd5;">
@@ -473,106 +473,82 @@ async function showDetail(loc) {
                   <i class="fas fa-info-circle"></i> Hãy thả tim <i class="far fa-heart"></i> vài địa điểm để AI hiểu gu của bạn hơn nhé!
               </div>
           </div>`;
-      } else {
-          // ── TRƯỜNG HỢP 2: PERSONALIZED (User có lịch sử tương tác)
-          //    CASE 2: PERSONALIZED (User has interaction history)
-          // Hiển thị chi tiết giải thích tại sao AI gợi ý (biểu đồ donut, progress bar, user tương đồng)
-          // Shows detailed explanation of why AI recommends (donut chart, progress bars, similar users)
-          const simUsersData = rd.collab.similar_users || [];
-          const matchedLikes = rd.content.matched_likes || [];
+    } else {
+      // ── TRƯỜNG HỢP 2: PERSONALIZED (User có lịch sử tương tác)
+      //    CASE 2: PERSONALIZED (User has interaction history)
+      // Hiển thị chi tiết giải thích tại sao AI gợi ý (biểu đồ donut, progress bar, user tương đồng)
+      // Shows detailed explanation of why AI recommends (donut chart, progress bars, similar users)
+      const simUsersData = rd.collab.similar_users || [];
+      const matchedLikes = rd.content.matched_likes || [];
 
-          // Highlight động theo loại gợi ý / Dynamic highlight based on recommendation type
-          let highlightIcon = '🤖', highlightMsg = 'Được gợi ý bởi hệ thống AI thông minh';
-          let highlightBg = '#eff6ff', highlightBorder = '#dbeafe', highlightColor = '#1e40af';
+      // Highlight động theo loại gợi ý / Dynamic highlight based on recommendation type
+      let highlightIcon = '🤖', highlightMsg = 'Được gợi ý bởi hệ thống AI thông minh';
+      let highlightBg = '#eff6ff', highlightBorder = '#dbeafe', highlightColor = '#1e40af';
 
-          if (loc.reason_type === 'collab' && simUsersData.length > 0) {
-              // Collaborative Filtering: Gợi ý vì người dùng tương đồng đã thích
-              // Collaborative Filtering: Recommended because similar users liked it
-              highlightIcon = '👥';
-              highlightMsg = simUsersData.map(u => '<b>' + u.name + '</b> (giống ' + u.similarity + '%)').join(', ') + ' đã thích nơi này';
-              highlightBg = '#eef2ff'; highlightBorder = '#e0e7ff'; highlightColor = '#3730a3';
-          } else if (loc.reason_type === 'content' && matchedLikes.length > 0) {
-              // Content-based: Gợi ý vì cùng thể loại với nơi đã thích
-              // Content-based: Recommended because same category as liked places
-              highlightIcon = '🎯';
-              highlightMsg = 'Gợi ý vì bạn đã thích <b>' + matchedLikes.join('</b>, <b>') + '</b>';
-              highlightBg = '#fdf2f8'; highlightBorder = '#fce7f3'; highlightColor = '#9d174d';
-          } else if (loc.reason_type === 'pagerank') {
-              // PageRank: Địa điểm phổ biến trong cộng đồng / PageRank: Popular in community
-              highlightIcon = '🔥';
-              highlightMsg = 'Địa điểm được đánh giá cao bởi cộng đồng du lịch';
-              highlightBg = '#fff7ed'; highlightBorder = '#ffedd5'; highlightColor = '#9a3412';
-          }
-
-          // Biểu đồ donut (conic-gradient CSS) / Donut chart (conic-gradient CSS)
-          const c1 = chart.collab, c2 = chart.content, c3 = chart.pagerank;
-          const conicGrad = 'conic-gradient(#6366f1 0% ' + c1 + '%, #ec4899 ' + c1 + '% ' + (c1+c2) + '%, #f59e0b ' + (c1+c2) + '% 100%)';
-          const finalScore = loc.final_score ? loc.final_score.toFixed(1) : pPopReal;
-
-          // Chip hiển thị người dùng tương đồng / Similar users display chips
-          let simUsersHTML = '';
-          if (simUsersData.length > 0) {
-              simUsersHTML = '<div class="explai-section">' +
-                  '<div class="explai-section-title"><i class="fas fa-user-friends" style="color:#6366f1;"></i> Người dùng tương đồng</div>' +
-                  '<div class="explai-users-list">' +
-                  simUsersData.map(u =>
-                      '<div class="explai-user-chip">' +
-                          '<div class="explai-user-avatar">' + u.name.charAt(0).toUpperCase() + '</div>' +
-                          '<div class="explai-user-info">' +
-                              '<span class="explai-user-name">' + u.name + '</span>' +
-                              '<span class="explai-user-score">Giống ' + u.similarity + '%</span>' +
-                          '</div>' +
-                      '</div>'
-                  ).join('') +
-                  '</div></div>';
-          }
-
-          // Chip hiển thị địa điểm đã thích cùng loại (dùng data attribute thay vì inline onclick)
-          // Matched likes chips (uses data attributes instead of inline onclick for XSS prevention)
-          let matchedHTML = '';
-          if (matchedLikes.length > 0) {
-              matchedHTML = '<div class="explai-section">' +
-                  '<div class="explai-section-title"><i class="fas fa-heart" style="color:#ec4899;"></i> Cùng thể loại với nơi bạn thích</div>' +
-                  '<div class="explai-matched-list">' +
-                  matchedLikes.map(name =>
-                      '<div class="explai-matched-chip" data-loc-name="' + escapeHTML(name) + '" style="cursor:pointer;">' +
-                          '<i class="fas fa-map-marker-alt"></i> ' + escapeHTML(name) +
-                      '</div>'
-                  ).join('') +
-                  '</div></div>';
-          }
-
-          // Ghép tất cả thành HTML card giải thích AI / Combine into AI explanation card HTML
-          explainHTML = '<div class="ai-reason-card">' +
-              '<div class="ai-reason-title"><i class="fas fa-robot"></i> TẠI SAO GỢI Ý CHO BẠN?</div>' +
-              '<div class="ai-highlight-box" style="background:' + highlightBg + '; border-color:' + highlightBorder + ';">' +
-                  '<span style="font-size:18px;">' + highlightIcon + '</span>' +
-                  '<span style="color:' + highlightColor + ';">' + highlightMsg + '</span>' +
-              '</div>' +
-              '<div class="explai-chart-row">' +
-                  '<div class="explai-donut-wrap">' +
-                      '<div class="explai-donut" style="background:' + conicGrad + ';">' +
-                          '<div class="explai-donut-hole">' +
-                              '<span class="explai-donut-score">' + finalScore + '</span>' +
-                              '<span class="explai-donut-label">điểm</span>' +
-                          '</div>' +
-                      '</div>' +
-                      '<div class="explai-donut-legend">' +
-                          '<span><i class="fas fa-circle" style="color:#6366f1; font-size:8px;"></i> Collab ' + c1 + '%</span>' +
-                          '<span><i class="fas fa-circle" style="color:#ec4899; font-size:8px;"></i> Content ' + c2 + '%</span>' +
-                          '<span><i class="fas fa-circle" style="color:#f59e0b; font-size:8px;"></i> PageRank ' + c3 + '%</span>' +
-                      '</div>' +
-                  '</div>' +
-                  '<div class="explai-bars">' +
-                      '<div class="ai-progress-row"><div class="progress-label"><span><i class="fas fa-users" style="color:#6366f1; width:14px;"></i> Collaborative</span><span>' + pCollab + '%</span></div><div class="progress-track"><div class="progress-fill" style="width:' + pCollab + '%; background:#6366f1;"></div></div></div>' +
-                      '<div class="ai-progress-row"><div class="progress-label"><span><i class="fas fa-heart" style="color:#ec4899; width:14px;"></i> Content-based</span><span>' + pContent + '%</span></div><div class="progress-track"><div class="progress-fill" style="width:' + pContent + '%; background:#ec4899;"></div></div></div>' +
-                      '<div class="ai-progress-row"><div class="progress-label"><span><i class="fas fa-chart-line" style="color:#f59e0b; width:14px;"></i> PageRank</span><span>' + pPopReal + '%</span></div><div class="progress-track"><div class="progress-fill" style="width:' + pPopReal + '%; background: linear-gradient(90deg, #f59e0b, #ea580c);"></div></div></div>' +
-                  '</div>' +
-              '</div>' +
-              simUsersHTML +
-              matchedHTML +
-          '</div>';
+      if (loc.reason_type === 'collab' && simUsersData.length > 0) {
+        // Collaborative Filtering: Gợi ý vì người dùng tương đồng đã thích
+        // Collaborative Filtering: Recommended because similar users liked it
+        highlightIcon = '👥';
+        highlightMsg = simUsersData.map(u => '<b>' + u.name + '</b> (giống ' + u.similarity + '%)').join(', ') + ' đã thích nơi này';
+        highlightBg = '#eef2ff'; highlightBorder = '#e0e7ff'; highlightColor = '#3730a3';
+      } else if (loc.reason_type === 'content' && matchedLikes.length > 0) {
+        // Content-based: Gợi ý vì cùng thể loại với nơi đã thích
+        // Content-based: Recommended because same category as liked places
+        highlightIcon = '🎯';
+        highlightMsg = 'Gợi ý vì bạn đã thích <b>' + matchedLikes.join('</b>, <b>') + '</b>';
+        highlightBg = '#fdf2f8'; highlightBorder = '#fce7f3'; highlightColor = '#9d174d';
+      } else if (loc.reason_type === 'pagerank') {
+        // PageRank: Địa điểm phổ biến trong cộng đồng / PageRank: Popular in community
+        highlightIcon = '🔥';
+        highlightMsg = 'Địa điểm được đánh giá cao bởi cộng đồng du lịch';
+        highlightBg = '#fff7ed'; highlightBorder = '#ffedd5'; highlightColor = '#9a3412';
       }
+
+      // Biểu đồ donut (conic-gradient CSS) / Donut chart (conic-gradient CSS)
+      const c1 = chart.collab, c2 = chart.content, c3 = chart.pagerank;
+      const conicGrad = 'conic-gradient(#6366f1 0% ' + c1 + '%, #ec4899 ' + c1 + '% ' + (c1 + c2) + '%, #f59e0b ' + (c1 + c2) + '% 100%)';
+      const finalScore = loc.final_score ? loc.final_score.toFixed(1) : pPopReal;
+
+      // Chip hiển thị người dùng tương đồng / Similar users display chips
+      let simUsersHTML = '';
+      if (simUsersData.length > 0) {
+        simUsersHTML = '<div class="explai-section">' +
+          '<div class="explai-section-title"><i class="fas fa-user-friends" style="color:#6366f1;"></i> Người dùng tương đồng</div>' +
+          '<div class="explai-users-list">' +
+          simUsersData.map(u =>
+            '<div class="explai-user-chip">' +
+            '<div class="explai-user-avatar">' + u.name.charAt(0).toUpperCase() + '</div>' +
+            '<div class="explai-user-info">' +
+            '<span class="explai-user-name">' + u.name + '</span>' +
+            '<span class="explai-user-score">Giống ' + u.similarity + '%</span>' +
+            '</div>' +
+            '</div>'
+          ).join('') +
+          '</div></div>';
+      }
+
+      // Chip hiển thị địa điểm đã thích cùng loại (dùng data attribute thay vì inline onclick)
+      // Matched likes chips (uses data attributes instead of inline onclick for XSS prevention)
+      let matchedHTML = '';
+      if (matchedLikes.length > 0) {
+        matchedHTML = '<div class="explai-section">' +
+          '<div class="explai-section-title"><i class="fas fa-heart" style="color:#ec4899;"></i> Cùng thể loại với nơi bạn thích</div>' +
+          '<div class="explai-matched-list">' +
+          matchedLikes.map(name =>
+            '<div class="explai-matched-chip" data-loc-name="' + escapeHTML(name) + '" style="cursor:pointer;">' +
+            '<i class="fas fa-map-marker-alt"></i> ' + escapeHTML(name) +
+            '</div>'
+          ).join('') +
+          '</div></div>';
+      }
+
+      // Ghép tất cả thành HTML card giải thích AI / Combine into AI explanation card HTML
+      explainHTML = '<div class="ai-reason-card">' +
+        '<div class="ai-reason-title"><i class="fas fa-robot"></i> TẠI SAO GỢI Ý CHO BẠN?</div>' +
+        simUsersHTML +
+        matchedHTML +
+        '</div>';
+    }
   }
 
   // ══════════════════════════════════════════════════════════
@@ -605,12 +581,12 @@ async function showDetail(loc) {
 
         <!-- 6. Nút hành động (Thích, Chỉ đường) / Action Buttons (Like, Directions) -->
         <div class="detail-actions-row">
-            ${currentUser 
-              ? `<button id="btn-like-detail" class="${isLiked ? "btn-large-action btn-outline liked" : "btn-large-action btn-outline"}">
+            ${currentUser
+      ? `<button id="btn-like-detail" class="${isLiked ? "btn-large-action btn-outline liked" : "btn-large-action btn-outline"}">
                   <i class="${isLiked ? "fas" : "far"} fa-heart"></i> ${isLiked ? "Đã thích" : "Yêu thích"}
                  </button>`
-              : `<button class="btn-large-action btn-outline" onclick="openAuthModal()"><i class="fas fa-lock"></i> Đăng nhập để thích</button>`
-            }
+      : `<button class="btn-large-action btn-outline" onclick="openAuthModal()"><i class="fas fa-lock"></i> Đăng nhập để thích</button>`
+    }
             <a href="${mapLink}" target="_blank" class="btn-large-action btn-primary-blue">
                 <i class="fas fa-directions"></i> Chỉ đường
             </a>
@@ -648,22 +624,22 @@ async function showDetail(loc) {
   const reviewPlaceholder = content.querySelector("#review-section-placeholder");
   const template = document.getElementById("review-template");
   if (reviewPlaceholder && template) {
-      const clone = template.content.cloneNode(true);
-      
-      // Gắn event thủ công vì cloneNode mất inline onclick / Wire up events manually since cloneNode loses inline onclicks
-      const btnToggle = clone.getElementById("btn-toggle-review");
-      if(btnToggle) {
-          if (!currentUser) {
-              btnToggle.style.display = "none"; // Ẩn nút viết đánh giá nếu chưa đăng nhập / Hide write review button if not logged in
-          } else {
-              btnToggle.onclick = toggleReviewForm;
-          }
+    const clone = template.content.cloneNode(true);
+
+    // Gắn event thủ công vì cloneNode mất inline onclick / Wire up events manually since cloneNode loses inline onclicks
+    const btnToggle = clone.getElementById("btn-toggle-review");
+    if (btnToggle) {
+      if (!currentUser) {
+        btnToggle.style.display = "none"; // Ẩn nút viết đánh giá nếu chưa đăng nhập / Hide write review button if not logged in
+      } else {
+        btnToggle.onclick = toggleReviewForm;
       }
+    }
 
-      const btnSubmit = clone.getElementById("btn-submit-review");
-      if(btnSubmit) btnSubmit.onclick = () => submitReview(loc.name);
+    const btnSubmit = clone.getElementById("btn-submit-review");
+    if (btnSubmit) btnSubmit.onclick = () => submitReview(loc.name);
 
-      reviewPlaceholder.appendChild(clone);
+    reviewPlaceholder.appendChild(clone);
   }
 
   // ── GẮN EVENT AN TOÀN (CHỐNG XSS) / ATTACH SAFE EVENT LISTENERS (XSS PREVENTION) ──
@@ -673,27 +649,27 @@ async function showDetail(loc) {
   // Nút Thích / Like button
   const btnLike = content.querySelector('#btn-like-detail');
   if (btnLike) {
-      btnLike.addEventListener('click', function() { handleLike(this, loc.name); });
+    btnLike.addEventListener('click', function () { handleLike(this, loc.name); });
   }
 
   // Nút Xóa (admin) / Delete button (admin)
   const btnDelete = content.querySelector('#btn-delete-location');
   if (btnDelete) {
-      btnDelete.addEventListener('click', () => deleteLocation(loc.name));
+    btnDelete.addEventListener('click', () => deleteLocation(loc.name));
   }
 
   // Chip địa điểm đã thích cùng loại (click để xem chi tiết)
   // Matched likes chips (click to view detail)
   content.querySelectorAll('.explai-matched-chip[data-loc-name]').forEach(chip => {
-      chip.addEventListener('click', () => showDetailFromData(chip.dataset.locName));
+    chip.addEventListener('click', () => showDetailFromData(chip.dataset.locName));
   });
 
   // Hiện panel chi tiết / Show detail panel
   panel.classList.add("active");
-  
+
   // Tải đánh giá & địa điểm tương tự / Load reviews & similar locations
-  if(window.loadReviews) window.loadReviews(loc.name);
-  if(window.loadSimilarLocations) window.loadSimilarLocations(loc.name);
+  if (window.loadReviews) window.loadReviews(loc.name);
+  if (window.loadSimilarLocations) window.loadSimilarLocations(loc.name);
 }
 
 // ── ĐÓNG PANEL CHI TIẾT / CLOSE DETAIL PANEL ──
@@ -707,36 +683,36 @@ function closeDetail() {
 // Sử dụng / Uses: Plugin leaflet.heat với gradient xanh → vàng → đỏ.
 //                 leaflet.heat plugin with blue → yellow → red gradient.
 function toggleHeatmap() {
-    isHeatmapActive = !isHeatmapActive;
-    const btn = document.getElementById("btn-toggle-heatmap");
-    const legend = document.getElementById("heatmap-legend");
+  isHeatmapActive = !isHeatmapActive;
+  const btn = document.getElementById("btn-toggle-heatmap");
+  const legend = document.getElementById("heatmap-legend");
 
-    if (isHeatmapActive) {
-        btn.classList.add("active");
-        legend.style.display = "block";
-        updateHeatmapLayer();
-    } else {
-        btn.classList.remove("active");
-        legend.style.display = "none";
-        if (heatLayer) map.removeLayer(heatLayer);
-    }
+  if (isHeatmapActive) {
+    btn.classList.add("active");
+    legend.style.display = "block";
+    updateHeatmapLayer();
+  } else {
+    btn.classList.remove("active");
+    legend.style.display = "none";
+    if (heatLayer) map.removeLayer(heatLayer);
+  }
 }
 
 // Cập nhật layer nhiệt từ dữ liệu globalHeatData / Update heat layer from globalHeatData
 function updateHeatmapLayer() {
-    if (!map || !globalHeatData.length) return;
-    if (heatLayer) map.removeLayer(heatLayer);
+  if (!map || !globalHeatData.length) return;
+  if (heatLayer) map.removeLayer(heatLayer);
 
-    // Yêu cầu plugin leaflet.heat / Requires leaflet.heat plugin
-    if (L.heatLayer) {
-        heatLayer = L.heatLayer(globalHeatData, {
-            radius: 25,
-            blur: 15,
-            maxZoom: 14,
-            max: 5.0, // Tương ứng max intensity / Should match max intensity scale
-            gradient: { 0.2: "blue", 0.4: "lime", 0.6: "yellow", 0.8: "orange", 1.0: "red" }
-        }).addTo(map);
-    }
+  // Yêu cầu plugin leaflet.heat / Requires leaflet.heat plugin
+  if (L.heatLayer) {
+    heatLayer = L.heatLayer(globalHeatData, {
+      radius: 25,
+      blur: 15,
+      maxZoom: 14,
+      max: 5.0, // Tương ứng max intensity / Should match max intensity scale
+      gradient: { 0.2: "blue", 0.4: "lime", 0.6: "yellow", 0.8: "orange", 1.0: "red" }
+    }).addTo(map);
+  }
 }
 
 // ── HIỂN THỊ CHI TIẾT TỪ TÊN / SHOW DETAIL FROM NAME ──
@@ -745,14 +721,14 @@ function updateHeatmapLayer() {
 // Purpose:  Finds location in cache by name, then calls showDetail().
 //           Used when clicking from history list, suggestions, or itinerary.
 function showDetailFromData(name) {
-    if(window.closeUserProfile) window.closeUserProfile();
-    
-    // Tìm trong cache / Find in cache
-    let loc = cachedAllLocations ? cachedAllLocations.find(l => l.name === name) : null;
-    if(loc) showDetail(loc);
-    else {
-        showNotification({type: 'error', message: 'Không tìm thấy dữ liệu địa điểm này'});
-    }
+  if (window.closeUserProfile) window.closeUserProfile();
+
+  // Tìm trong cache / Find in cache
+  let loc = cachedAllLocations ? cachedAllLocations.find(l => l.name === name) : null;
+  if (loc) showDetail(loc);
+  else {
+    showNotification({ type: 'error', message: 'Không tìm thấy dữ liệu địa điểm này' });
+  }
 }
 
 // ── HIỂN THỊ CHI TIẾT KÈM DỮ LIỆU AI / SHOW DETAIL WITH AI DATA ──
@@ -764,32 +740,32 @@ function showDetailFromData(name) {
 //   Chuẩn hóa tên (trim + lowercase) để so sánh, tránh lỗi do khoảng trắng/hoa-thường.
 //   Normalizes names (trim + lowercase) for comparison, avoids whitespace/case mismatches.
 function showDetailWithAI(aiLoc) {
-    console.log("🖱️ showDetailWithAI called for:", aiLoc.name);
-    
-    // Đóng profile modal nếu đang mở / Close profile modal if open
-    if(window.closeUserProfile) window.closeUserProfile();
+  console.log("🖱️ showDetailWithAI called for:", aiLoc.name);
 
-    // Helper chuẩn hóa chuỗi để so sánh / Helper to normalize string for comparison
-    const normalize = (str) => str ? str.trim().toLowerCase() : "";
-    const targetName = normalize(aiLoc.name);
+  // Đóng profile modal nếu đang mở / Close profile modal if open
+  if (window.closeUserProfile) window.closeUserProfile();
 
-    // Tìm real location trong cache / Find real location in cache
-    let realLoc = cachedAllLocations ? cachedAllLocations.find(l => normalize(l.name) === targetName) : null;
-    
-    if (realLoc) {
-        console.log(`✅ Found "${realLoc.name}" in cache`);
-        // Merge AI Data vào real location / Merge AI data into real location
-        realLoc.reason_details = aiLoc.reason_details;
-        realLoc.reason = aiLoc.reason;
-        realLoc.reason_icon = aiLoc.reason_icon;
-        realLoc.reason_type = aiLoc.reason_type;
-        
-        // Gọi showDetail trực tiếp / Call showDetail directly
-        showDetail(realLoc);
-    } else {
-        console.warn(`⚠️ "${aiLoc.name}" not in cache, using API data directly`);
-        // Đảm bảo có category mặc định / Ensure default category exists
-        if (!aiLoc.category) aiLoc.category = "Tham quan"; 
-        showDetail(aiLoc);
-    }
+  // Helper chuẩn hóa chuỗi để so sánh / Helper to normalize string for comparison
+  const normalize = (str) => str ? str.trim().toLowerCase() : "";
+  const targetName = normalize(aiLoc.name);
+
+  // Tìm real location trong cache / Find real location in cache
+  let realLoc = cachedAllLocations ? cachedAllLocations.find(l => normalize(l.name) === targetName) : null;
+
+  if (realLoc) {
+    console.log(`✅ Found "${realLoc.name}" in cache`);
+    // Merge AI Data vào real location / Merge AI data into real location
+    realLoc.reason_details = aiLoc.reason_details;
+    realLoc.reason = aiLoc.reason;
+    realLoc.reason_icon = aiLoc.reason_icon;
+    realLoc.reason_type = aiLoc.reason_type;
+
+    // Gọi showDetail trực tiếp / Call showDetail directly
+    showDetail(realLoc);
+  } else {
+    console.warn(`⚠️ "${aiLoc.name}" not in cache, using API data directly`);
+    // Đảm bảo có category mặc định / Ensure default category exists
+    if (!aiLoc.category) aiLoc.category = "Tham quan";
+    showDetail(aiLoc);
+  }
 }

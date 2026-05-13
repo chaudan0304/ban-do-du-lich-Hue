@@ -106,23 +106,7 @@ def close_driver():
 # Auto-detects constraint errors and raises ConstraintViolationError
 # =============================================================
 def run_query(query, params=None):
-    """
-    Hàm chạy lệnh Cypher chung.
-    General Cypher query execution function.
-
-    Args:
-        query (str): Câu lệnh Cypher / Cypher query string
-        params (dict): Tham số truyền vào query / Parameters for the query
-
-    Returns:
-        list[dict]: Danh sách kết quả. Trả về list rỗng [] nếu không có kết quả.
-                    List of results. Returns empty list [] if no results.
-
-    Raises:
-        DatabaseError: Khi có lỗi kết nối hoặc lỗi query / Connection or query error
-        ConstraintViolationError: Khi vi phạm ràng buộc (tên trùng, etc.)
-                                  On constraint violation (duplicate name, etc.)
-    """
+   
     driver = get_driver()
     if not driver:
         raise DatabaseError("Không thể kết nối đến Neo4j Database")
@@ -136,8 +120,6 @@ def run_query(query, params=None):
         error_str = str(e).lower()
         logger.error(f"NEO4J Query Error: {e}")
 
-        # Phát hiện lỗi constraint (tên trùng, vi phạm ràng buộc)
-        # Detect constraint errors (duplicate name, constraint violation)
         if "constraint" in error_str or "already exists" in error_str:
             raise ConstraintViolationError(f"Vi phạm ràng buộc: {e}") from e
         raise DatabaseError(f"Lỗi truy vấn database: {e}") from e
@@ -156,21 +138,7 @@ def run_query(query, params=None):
 #     Delete review + update INTERACTED
 # =============================================================
 def run_write_transaction(queries_with_params):
-    """
-    Chạy nhiều lệnh Cypher trong MỘT transaction duy nhất (atomic).
-    Run multiple Cypher commands in ONE atomic transaction.
-
-    Args:
-        queries_with_params: list of (query_string, params_dict) tuples.
-            Danh sách các tuple (câu_query, dict_tham_số).
-
-    Returns:
-        list[list[dict]]: Danh sách kết quả cho từng query.
-                          List of results for each query.
-
-    Raises:
-        DatabaseError: Khi có lỗi kết nối hoặc lỗi query / Connection or query error
-    """
+   
     driver = get_driver()
     if not driver:
         raise DatabaseError("Không thể kết nối đến Neo4j Database")

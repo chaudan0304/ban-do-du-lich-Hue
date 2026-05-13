@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,39 +12,46 @@
             margin: 0;
             padding: 20px;
         }
+
         .header {
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .header h1 {
             color: #1a5b9e;
             margin-top: 0;
         }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
             gap: 20px;
         }
+
         .card {
             background-color: #fff;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
+
         .card h2 {
             font-size: 18px;
             margin-bottom: 20px;
             color: #333;
         }
+
         canvas {
             border: 1px dashed #ccc;
             background-color: #fff;
             margin-bottom: 15px;
         }
+
         .btn-download {
             background-color: #1a73e8;
             color: #fff;
@@ -55,17 +63,20 @@
             text-decoration: none;
             display: inline-block;
         }
+
         .btn-download:hover {
             background-color: #1557b0;
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>Danh sách Ảnh Mini Use Case (Click để tải xuống PNG)</h1>
-        <p>Tôi đã tạo sẵn mã để tự động vẽ ảnh Mini cho tất cả các Use Case. Bạn chỉ cần bấm "Tải ảnh" dưới mỗi khung hình.</p>
+        <p>Tôi đã tạo sẵn mã để tự động vẽ ảnh Mini cho tất cả các Use Case. Bạn chỉ cần bấm "Tải ảnh" dưới mỗi khung
+            hình.</p>
     </div>
-    
+
     <div class="grid" id="grid">
     </div>
 
@@ -80,7 +91,7 @@
             { id: "UC07", name: "Xem chi tiết địa điểm", actor: "User" },
             { id: "UC08", name: "Like địa điểm", actor: "User" },
             { id: "UC09", name: "Viết đánh giá", actor: "User" },
-            { id: "UC10", name: "Xem gợi ý AI", actor: "User" },
+            { id: "UC10", name: "Xem gợi ý cá nhân hóa", actor: "User" },
             { id: "UC11", name: "Sắp xếp lộ trình", actor: "User" },
             { id: "UC12", name: "Lưu lộ trình", actor: "User" },
             { id: "UC13", name: "Xem lịch sử", actor: "User" },
@@ -88,7 +99,7 @@
             { id: "UC15", name: "Thêm địa điểm", actor: "Admin" },
             { id: "UC16", name: "Sửa địa điểm", actor: "Admin" },
             { id: "UC17", name: "Xóa địa điểm", actor: "Admin" },
-            { id: "UC18", name: "Chạy thuật toán AI", actor: "Admin" },
+            { id: "UC18", name: "Chạy thuật toán", actor: "Admin" },
         ];
 
         function drawActor(ctx, x, y, name) {
@@ -97,35 +108,35 @@
             ctx.fillStyle = '#1a5b9e';
             ctx.textAlign = 'center';
             ctx.font = 'bold 12px Arial';
-            
+
             // Head
             ctx.beginPath();
             ctx.arc(x, y - 40, 12, 0, Math.PI * 2);
             ctx.stroke();
-            
+
             // Body
             ctx.beginPath();
             ctx.moveTo(x, y - 28);
             ctx.lineTo(x, y + 10);
             ctx.stroke();
-            
+
             // Arms
             ctx.beginPath();
             ctx.moveTo(x - 15, y - 10);
             ctx.lineTo(x + 15, y - 10);
             ctx.stroke();
-            
+
             // Legs
             ctx.beginPath();
             ctx.moveTo(x, y + 10);
             ctx.lineTo(x - 15, y + 35);
             ctx.stroke();
-            
+
             ctx.beginPath();
             ctx.moveTo(x, y + 10);
             ctx.lineTo(x + 15, y + 35);
             ctx.stroke();
-            
+
             // Name
             ctx.fillText(name, x, y + 55);
         }
@@ -134,20 +145,20 @@
             // Clear background
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, 400, 220);
-            
+
             // Draw System Box
             ctx.strokeStyle = '#6495ed';
             ctx.lineWidth = 1.5;
             ctx.strokeRect(150, 20, 230, 180);
-            
+
             ctx.fillStyle = '#1a5b9e';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('Hệ thống', 265, 40);
-            
+
             // Draw Actor
             drawActor(ctx, 60, 110, actor);
-            
+
             // Draw connection line
             ctx.strokeStyle = '#888';
             ctx.lineWidth = 1.5;
@@ -155,19 +166,19 @@
             ctx.moveTo(75, 100);
             ctx.lineTo(190, 110);
             ctx.stroke();
-            
+
             // Draw Use Case Oval
             ctx.fillStyle = '#3498db';
             ctx.beginPath();
             ctx.ellipse(265, 110, 75, 30, 0, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // Use Case Text
             ctx.fillStyle = '#ffffff';
             ctx.font = '12px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
+
             // Word wrap for long names
             const words = name.split(' ');
             if (words.length > 3) {
@@ -192,18 +203,18 @@
         useCases.forEach(uc => {
             const card = document.createElement('div');
             card.className = 'card';
-            
+
             const title = document.createElement('h2');
             title.textContent = `${uc.id} - ${uc.name}`;
             card.appendChild(title);
-            
+
             const canvasId = `canvas-${uc.id}`;
             const canvas = document.createElement('canvas');
             canvas.id = canvasId;
             canvas.width = 400;
             canvas.height = 220;
             card.appendChild(canvas);
-            
+
             const btnDiv = document.createElement('div');
             const btn = document.createElement('button');
             btn.className = 'btn-download';
@@ -211,12 +222,13 @@
             btn.onclick = () => downloadCanvas(canvasId, `${uc.id}_${uc.name.replace(/\s+/g, '_')}`);
             btnDiv.appendChild(btn);
             card.appendChild(btnDiv);
-            
+
             grid.appendChild(card);
-            
+
             const ctx = canvas.getContext('2d');
             drawUseCase(ctx, uc.id, uc.name, uc.actor);
         });
     </script>
 </body>
+
 </html>

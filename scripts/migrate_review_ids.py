@@ -1,7 +1,6 @@
 """
 =============================================================================
 scripts/migrate_review_ids.py - Chuyển đổi ID cho Reviews (Review ID Migration)
-scripts/migrate_review_ids.py - Review ID Migration Script
 =============================================================================
 Mô tả / Description:
     Gán UUID duy nhất cho các REVIEWED relationship chưa có ID.

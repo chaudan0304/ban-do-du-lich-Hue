@@ -10,11 +10,9 @@ Mô tả / Description:
     Kiểm tra / Checks:
     - Tổng số địa điểm / Total locations
     - Số địa điểm có avgRating > 0 (đã được đánh giá)
-      Number of locations with avgRating > 0 (have been rated)
     - Tỷ lệ phần trăm đã đánh giá / Percentage rated
     - Điểm Rating trung bình toàn hệ thống / System-wide average rating
     - Cảnh báo nếu dữ liệu quá mỏng (< 10% đã đánh giá)
-      Warning if data too sparse (< 10% rated)
 
 Phụ thuộc / Dependencies:
     - neo4j (kết nối trực tiếp, không qua db module)

@@ -47,20 +47,7 @@ logger = logging.getLogger(__name__)
 # algorithm always reflects the current interaction state.
 # =============================================================
 def toggle_like_location(username, location_name):
-    """
-    Like/Unlike một địa điểm.
-    Like/Unlike a location.
-
-    Trả về / Returns:
-        (is_liked: bool, message: str)
-        - True, "Đã thích địa điểm" — nếu vừa like
-          True, "Liked location" — if just liked
-        - False, "Đã bỏ thích" — nếu vừa unlike
-          False, "Unliked" — if just unliked
-
-    Tự động cập nhật :INTERACTED để thuật toán gợi ý real-time.
-    Auto-updates :INTERACTED for real-time recommendation algorithm.
-    """
+   
     try:
         # 1. Kiểm tra trạng thái hiện tại / Check current state
         check_query = """
@@ -72,25 +59,15 @@ def toggle_like_location(username, location_name):
         params = {"u_name": username, "l_name": location_name}
 
         if existing:
-            # ─────────────────────────────────────────────────
-            # ĐÃ LIKE → XÓA (Unlike) + cập nhật :INTERACTED
-            # ALREADY LIKED → REMOVE (Unlike) + update :INTERACTED
-            # ─────────────────────────────────────────────────
-            # Logic:
-            #   - Nếu còn REVIEWED → giữ INTERACTED với weight = review_score
-            #     If still REVIEWED → keep INTERACTED with weight = review_score
-            #   - Nếu không còn gì → xóa INTERACTED hoàn toàn
-            #     If nothing left → delete INTERACTED entirely
-            # ─────────────────────────────────────────────────
+           
             unlike_query = """
             MATCH (u:User {name: $u_name})-[r:LIKED]->(l:Location {name: $l_name})
             DELETE r
             WITH u, l
-            // Kiểm tra xem còn REVIEWED không / Check if REVIEWED still exists
+            
             OPTIONAL MATCH (u)-[rev:REVIEWED]->(l)
             WITH u, l, rev
-            // Nếu còn REVIEWED, cập nhật weight; nếu không, xóa INTERACTED
-            // If REVIEWED exists, update weight; otherwise, delete INTERACTED
+           
             FOREACH (_ IN CASE WHEN rev IS NOT NULL THEN [1] ELSE [] END |
                 MERGE (u)-[i:INTERACTED]->(l)
                 SET i.weight = rev.rating,
@@ -105,24 +82,17 @@ def toggle_like_location(username, location_name):
             run_query(unlike_query, params)
             return False, "Đã bỏ thích"
         else:
-            # ─────────────────────────────────────────────────
-            # CHƯA LIKE → TẠO LIKED + cập nhật :INTERACTED
-            # NOT LIKED → CREATE LIKED + update :INTERACTED
-            # ─────────────────────────────────────────────────
-            # Trọng số = 1 (liked) + review_score (nếu có)
-            # Weight = 1 (liked) + review_score (if any)
-            # ─────────────────────────────────────────────────
+          
             like_query = """
             MATCH (u:User {name: $u_name})
             MATCH (l:Location {name: $l_name})
             MERGE (u)-[r:LIKED]->(l)
             SET r.timestamp = datetime()
             WITH u, l
-            // Lấy rating từ REVIEWED nếu có / Get rating from REVIEWED if exists
+         
             OPTIONAL MATCH (u)-[rev:REVIEWED]->(l)
             WITH u, l, coalesce(rev.rating, 0) AS review_score
-            // Cập nhật :INTERACTED với weight = 1 (liked) + review_score
-            // Update :INTERACTED with weight = 1 (liked) + review_score
+            
             MERGE (u)-[i:INTERACTED]->(l)
             SET i.weight = 1 + review_score,
                 i.liked_score = 1,

@@ -6,7 +6,7 @@ Chương này trình bày các cơ sở lý thuyết liên quan đến đề tà
 
 ### 1.1.1. Tình hình nghiên cứu ngoài nước
 
-Hệ thống gợi ý (Recommendation System) đã được nghiên cứu rộng rãi từ giữa những năm 1990. Nghiên cứu tiên phong của Goldberg và cộng sự (1992) về hệ thống Tapestry đã đặt nền móng cho lĩnh vực lọc cộng tác (Collaborative Filtering). Từ đó, nhiều công trình quan trọng đã được công bố:
+Hệ thống gợi ý (Recommendation System) đã được nghiên cứu rộng rãi từ giữa những năm 1990. Nghiên cứu tiên phong của Goldberg và cộng sự (1992) [33] về hệ thống Tapestry đã đặt nền móng cho lĩnh vực lọc cộng tác (Collaborative Filtering). Từ đó, nhiều công trình quan trọng đã được công bố:
 
 - **Ricci và cộng sự (2015)** [7] đã hệ thống hóa toàn diện các phương pháp xây dựng hệ thống gợi ý trong cuốn _Recommender Systems Handbook_, bao gồm: lọc cộng tác, lọc theo nội dung, phương pháp lai và các kỹ thuật đánh giá hiệu quả.
 
@@ -87,8 +87,8 @@ Theo Ricci và cộng sự (2015) [7], có 3 phương pháp chính trong xây d�
 
 **Có 2 loại chính:**
 
-- **User-Based CF:** Tìm nhóm người dùng có sở thích tương tự, gợi ý từ hành vi của nhóm này [9].
-- **Item-Based CF:** Tìm các items được đánh giá tương tự bởi cùng nhóm người dùng, gợi ý items có hành vi tương đồng [29].
+- **Lọc cộng tác dựa trên người dùng (User-Based CF):** Tìm nhóm người dùng có sở thích tương tự, gợi ý từ hành vi của nhóm này [9].
+- **Lọc cộng tác dựa trên Item (Item-Based CF):** Tìm các items được đánh giá tương tự bởi cùng nhóm người dùng, gợi ý items có hành vi tương đồng [29].
 
 **Ưu điểm:**
 
@@ -133,19 +133,29 @@ Theo Burke (2002) [11], có nhiều chiến lược kết hợp:
 - **Edges (Cạnh/Quan hệ):** Đại diện cho mối quan hệ giữa các thực thể. *Ví dụ:* :LIKED, :REVIEWED, :HAS_CATEGORY.
 - **Properties (Thuộc tính):** Các cặp key-value gắn liền với nodes hoặc edges. *Ví dụ:* name, rating, weight.
 
-```
-Ví dụ mô hình đồ thị trong du lịch:
+Ví dụ mô hình đồ thị trong du lịch (trích xuất từ dữ liệu thực tế trong Neo4j):
 
-   (User: Châu Đàn)
-        │
-        │── [:LIKED] ──→ (Location: Đại Nội)
-        │                       │
-        │                       └── [:HAS_CATEGORY] ──→ (Category: Di tích)
-        │
-        └── [:REVIEWED {rating: 5}] ──→ (Location: Chùa Thiên Mụ)
-                                              │
-                                              └── [:HAS_CATEGORY] ──→ (Category: Tâm linh)
+```mermaid
+graph TD
+    %% Định nghĩa CSS class cho các node
+    classDef user fill:#FFDDC1,stroke:#FF9999,stroke-width:2px,color:#333,rx:10,ry:10;
+    classDef location fill:#C1E1C1,stroke:#66CC66,stroke-width:2px,color:#333,rx:10,ry:10;
+    classDef category fill:#C1D4FF,stroke:#6699FF,stroke-width:2px,color:#333,rx:10,ry:10;
+
+    %% Định nghĩa các Node
+    U1["(:User)<br/>name: 'nguyenvana'"]:::user
+    L1["(:Location)<br/>name: 'Quốc Tử Giám (Huế)'"]:::location
+    L2["(:Location)<br/>name: 'Hoàng Thành Huế'"]:::location
+    C1["(:Category)<br/>name: 'Di tích'"]:::category
+
+    %% Định nghĩa các Relationship
+    U1 -->|"[:LIKED]<br/>timestamp: 2026-05-03T15:00:00"| L1
+    U1 -->|"[:REVIEWED]<br/>rating: 4.0<br/>sentiment: 'Neutral'<br/>topics: ['Không gian']"| L2
+    
+    L1 -->|"[:HAS_CATEGORY]"| C1
+    L2 -->|"[:HAS_CATEGORY]"| C1
 ```
+
 
 ### 1.3.2. So sánh với Cơ sở dữ liệu Quan hệ (RDBMS)
 
@@ -275,7 +285,7 @@ Như vậy, một địa điểm nhận được đánh giá 5 sao sẽ có tr�
 
 ## 1.6. Thuật toán Lọc Cộng tác (Collaborative Filtering)
 
-### 1.6.1. User-Based Collaborative Filtering
+### 1.6.1. Lọc cộng tác dựa trên người dùng (User-Based Collaborative Filtering)
 
 **Nguyên lý:** Tìm nhóm người dùng có sở thích tương tự (similar users) với người dùng hiện tại, sau đó gợi ý các items mà nhóm này đã thích nhưng người dùng hiện tại chưa biết [9].
 
@@ -311,48 +321,56 @@ Trong đó A, B là tập hợp các items mà mỗi user đã tương tác. Gi�
 
 **Lý do chọn Jaccard:** Đề tài sử dụng dữ liệu tương tác dạng nhị phân (đã/chưa tương tác) trên đồ thị Neo4j, và Neo4j GDS hỗ trợ sẵn thuật toán Node Similarity dựa trên Jaccard Index [16], phù hợp với đặc điểm dữ liệu.
 
-### 1.6.3. Item-Based Collaborative Filtering
+### 1.6.3. Lọc cộng tác dựa trên Item (Item-Based Collaborative Filtering)
 
 **Nguyên lý:** Thay vì so sánh người dùng, phương pháp này so sánh các items. Nếu người dùng thích item A, hệ thống sẽ tìm các items tương tự với A (dựa trên tập người dùng đã tương tác với chúng) để gợi ý [29].
 
-**Ưu điểm so với User-Based:**
+**Ưu điểm so với phương pháp dựa trên người dùng (User-Based):**
 
 - Ổn định hơn vì đặc trưng item ít thay đổi theo thời gian.
 - Có thể tính toán trước (offline) rồi phục vụ trực tuyến.
 
 ### 1.6.4. Triển khai trên Graph Database
 
-Một lợi thế quan trọng của Graph Database là khả năng triển khai Collaborative Filtering dưới dạng **duyệt đồ thị (Graph Traversal)** thay vì phép nhân ma trận truyền thống [6]. Quy trình được biểu diễn qua sơ đồ:
+Một lợi thế quan trọng của Graph Database là khả năng triển khai Collaborative Filtering dưới dạng **duyệt đồ thị (Graph Traversal)** thay vì phép nhân ma trận truyền thống [6]. Quy trình duyệt đồ thị 3 bước nhảy (3-hop traversal) được biểu diễn qua sơ đồ:
 
-```
-User hiện tại ──[:INTERACTED]──→ Location chung ←──[:INTERACTED]── User tương đồng
-                                                                          │
-                                                                   [:INTERACTED]
-                                                                          │
-                                                                          ▼
-                                                                Location MỚI
-                                                                (chưa tương tác)
-                                                                          │
-                                                                          ▼
-                                                                    GỢI Ý cho
-                                                                  User hiện tại
-```
+*Hình 1.1. Sơ đồ Graph Traversal — Collaborative Filtering trên Graph Database*
 
-Với cách tiếp cận này, việc tìm kiếm gợi ý trở thành bài toán duyệt đường đi trên đồ thị (3 bước nhảy), tận dụng lợi thế tốc độ truy vấn quan hệ của Neo4j.
+![Sơ đồ Graph Traversal — Collaborative Filtering trên Graph Database](images/So_do_Graph_Traversal_CF.png)
+
+Quy trình 3 bước nhảy (3-hop traversal) hoạt động như sau:
+
+- **Bước 1 — Tìm Location chung:** Xuất phát từ User hiện tại (User A), duyệt qua quan hệ `:INTERACTED` để tìm tất cả các địa điểm mà User A đã tương tác (ví dụ: Đại Nội Huế, Chùa Thiên Mụ).
+
+- **Bước 2 — Tìm User tương đồng:** Từ các Location chung đó, duyệt ngược qua `:INTERACTED` để tìm những người dùng khác (User B, User C) cũng đã tương tác với cùng các địa điểm — đây chính là nhóm User tương đồng.
+
+- **Bước 3 — Lấy Location MỚI:** Từ nhóm User tương đồng, tiếp tục duyệt qua `:INTERACTED` để tìm các địa điểm mà họ đã thích nhưng User A chưa biết (ví dụ: Lăng Tự Đức, Lăng Khải Định) → đưa vào danh sách gợi ý.
+
+Với cách tiếp cận này, việc tìm kiếm gợi ý trở thành bài toán duyệt đường đi trên đồ thị (3 bước nhảy), tận dụng lợi thế tốc độ truy vấn quan hệ O(1) cho mỗi bước nhảy của Neo4j — không phụ thuộc vào kích thước tổng thể của đồ thị.
 
 ## 1.7. Thuật toán Lọc theo Nội dung (Content-Based Filtering)
 
 ### 1.7.1. Nguyên lý Hoạt động
 
-**Content-Based Filtering** phân tích nội dung và đặc điểm (features) của items để tìm items tương tự với những gì người dùng đã thể hiện sự quan tâm [10], [30].
+**Content-Based Filtering (CBF)** là phương pháp gợi ý dựa trên việc phân tích nội dung và đặc điểm (features) của items, từ đó tìm các items có đặc trưng tương tự với những items mà người dùng đã thể hiện sự quan tâm trước đó [10], [30]. Khác với Collaborative Filtering (cần dữ liệu từ nhiều người dùng), CBF chỉ cần dữ liệu từ **chính người dùng hiện tại** kết hợp với **đặc trưng nội dung** của items.
 
-Các đặc trưng thường được sử dụng:
+**Quy trình hoạt động 3 bước:**
 
-| Loại đặc trưng | Kỹ thuật biểu diễn | Ví dụ |
-|---|---|---|
-| **Văn bản (Text)** | TF-IDF, Word Embeddings | Mô tả địa điểm, bình luận |
-| **Danh mục (Category)** | One-hot Encoding | Di tích, Ẩm thực, Tâm linh |
-| **Metadata** | Feature Vector | Tags, thuộc tính, vị trí địa lý |
+- **Bước 1 — Trích xuất đặc trưng (Feature Extraction):** Mỗi item được biểu diễn dưới dạng tập hợp các đặc trưng. Trong bài toán du lịch, đặc trưng chính của mỗi địa điểm là **danh mục** (Category) mà nó thuộc về — ví dụ: "Di tích lịch sử", "Ẩm thực", "Tâm linh".
+
+- **Bước 2 — Xây dựng hồ sơ sở thích (User Profile Construction):** Hệ thống phân tích hành vi của người dùng (đã thích, đã đánh giá) để xác định các đặc trưng mà họ ưu tiên. Ví dụ: nếu người dùng đã thích 3 địa điểm thuộc danh mục "Di tích lịch sử", hồ sơ của họ sẽ có trọng số cao cho danh mục này.
+
+- **Bước 3 — So khớp và Gợi ý (Similarity Matching):** So sánh đặc trưng của các items chưa tương tác với hồ sơ sở thích, ưu tiên những items có mức độ trùng khớp cao nhất.
+
+**Lựa chọn đặc trưng cho đề tài:**
+
+Trong lý thuyết chung, CBF có thể sử dụng nhiều loại đặc trưng: văn bản (TF-IDF, Word Embeddings), metadata (tags, vị trí), hoặc danh mục (nhãn phân loại) [10]. Tuy nhiên, các kỹ thuật xử lý văn bản đòi hỏi tập dữ liệu lớn và mô hình NLP phức tạp — không phù hợp với quy mô đề tài.
+
+Đề tài sử dụng kỹ thuật **So khớp nhãn danh mục (Category Label Matching)** trên cơ sở dữ liệu đồ thị, cụ thể:
+
+- **Đặc trưng sử dụng:** Danh mục (Category) của địa điểm — mỗi địa điểm được gắn nhãn như "Di tích lịch sử", "Ẩm thực", "Tâm linh" thông qua quan hệ `:HAS_CATEGORY` trong Neo4j.
+- **Phương pháp so khớp:** Duyệt đồ thị (Graph Traversal) — từ địa điểm đã thích, duyệt qua node `:Category` chung để tìm các địa điểm có cùng danh mục. Hai địa điểm chia sẻ cùng node Category được coi là có nội dung tương tự.
+- **Lý do lựa chọn:** (1) Dữ liệu du lịch có danh mục phân loại rõ ràng, sẵn có; (2) Tận dụng trực tiếp cấu trúc đồ thị của Neo4j mà không cần thư viện NLP bổ sung; (3) Kết quả trực quan, dễ giải thích cho người dùng.
 
 ### 1.7.2. Ứng dụng trong đề tài
 
@@ -440,7 +458,7 @@ Chương này đã trình bày đầy đủ các cơ sở lý thuyết và công
 
 4. **Thuật toán PageRank:** Nguyên lý, công thức toán học, biến thể Weighted PageRank với trọng số tương tác và các tham số điều chỉnh.
 
-5. **Collaborative Filtering:** User-Based, Item-Based, các độ đo tương đồng (Cosine, Jaccard) và triển khai dạng Graph Traversal trên Neo4j.
+5. **Collaborative Filtering:** Lọc cộng tác dựa trên người dùng (User-Based), Lọc cộng tác dựa trên Item (Item-Based), các độ đo tương đồng (Cosine, Jaccard) và triển khai dạng Graph Traversal trên Neo4j.
 
 6. **Content-Based Filtering:** Lọc theo danh mục và đồng xuất hiện, ứng dụng trong bài toán du lịch.
 

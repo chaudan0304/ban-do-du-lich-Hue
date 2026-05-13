@@ -184,3 +184,137 @@
   color: var(--primary);
   border-bottom-color: var(--primary);
 }
+
+/* --------------------------------------------------------------------------
+   TAB HOẠT ĐỘNG PHỤ / ACTIVITY SUB-TABS
+   Tab chuyển đổi giữa Đã thích, Đánh giá, Lộ trình
+   Toggle between Liked, Reviews, Plans tabs
+   -------------------------------------------------------------------------- */
+.activity-tabs-box {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  background: var(--bg-body, #f1f5f9);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.activity-tab-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #64748b);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.activity-tab-btn:hover { background: rgba(0,0,0,0.04); }
+
+.activity-tab-btn.active {
+  background: white;
+  color: var(--primary, #2563eb);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* --------------------------------------------------------------------------
+   CONTAINER DANH SÁCH HOẠT ĐỘNG / ACTIVITY LIST CONTAINER
+   -------------------------------------------------------------------------- */
+.activity-content-container {
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding-right: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   ITEM LỊCH SỬ / HISTORY ITEM
+   Mỗi dòng trong danh sách Đã thích / Đánh giá / Lộ trình
+   Each row in Liked / Reviews / Plans list
+   -------------------------------------------------------------------------- */
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.history-item:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* Ảnh đại diện địa điểm / Location thumbnail */
+.item-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Thông tin địa điểm / Location info */
+.item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main, #1e293b);
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-cat {
+  font-size: 11px;
+  color: var(--text-muted, #94a3b8);
+}
+
+/* --------------------------------------------------------------------------
+   NÚT XÓA / DELETE BUTTON
+   Nút xóa trong danh sách Đã thích và Lộ trình
+   Delete button in Liked and Plans lists
+   -------------------------------------------------------------------------- */
+.delete-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #ef4444;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.history-item:hover .delete-btn {
+  opacity: 1;
+}
+
+.delete-btn:hover {
+  background: #ef4444 !important;
+  color: white !important;
+  border-color: #ef4444 !important;
+  opacity: 1;
+  transform: scale(1.1);
+}

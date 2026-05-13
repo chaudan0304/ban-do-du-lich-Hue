@@ -1,6 +1,6 @@
 # CHƯƠNG 3: XÂY DỰNG ỨNG DỤNG WEB VÀ TÍCH HỢP HỆ KHUYẾN NGHỊ
 
-Chương này trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI dựa trên bản thiết kế ở Chương 2, bao gồm: môi trường và công nghệ phát triển; cấu trúc tổ chức mã nguồn; triển khai cơ sở dữ liệu đồ thị; triển khai các thuật toán gợi ý lai (Hybrid Recommendation); và triển khai ứng dụng web cùng module AI Planner.
+Chương này trình bày chi tiết quá trình triển khai hệ thống Huế Travel AI dựa trên bản thiết kế ở Chương 2, bao gồm: môi trường và công nghệ phát triển; cấu trúc tổ chức mã nguồn; triển khai cơ sở dữ liệu đồ thị; triển khai các thuật toán khuyến nghị lai (Hybrid Recommendation); module phân tích cảm xúc (Sentiment Analysis); và triển khai ứng dụng web cùng module AI Planner.
 
 ## 3.1. Môi trường và Công nghệ Phát triển
 
@@ -126,9 +126,9 @@ Kết hợp 2 nguồn tín hiệu để xây dựng mạng liên kết giữa c�
 
 *Ví dụ:* Đại Nội và Lăng Tự Đức có 3 users chung và cùng danh mục "Di tích lịch sử" → `RELATED_TO.weight = (3 × 1.2) + 0.8 = 4.4`.
 
-## 3.4. Triển khai Thuật toán Gợi ý (Core AI)
+## 3.4. Triển khai Thuật toán Khuyến nghị (Recommendation Engine)
 
-Đây là phần cốt lõi của hệ thống, triển khai mô hình **Hybrid Recommendation System** kết hợp 3 phương pháp chính (đã trình bày lý thuyết ở Chương 1).
+Đây là phần cốt lõi của hệ thống, triển khai mô hình **Hybrid Recommendation System** kết hợp 3 phương pháp chính (đã trình bày lý thuyết ở Chương 1). Cần phân biệt rõ: phần này chỉ bao gồm **thuật toán khuyến nghị** (Recommendation Algorithm) — tức logic xếp hạng và gợi ý địa điểm cá nhân hóa. Mô-đun phân tích cảm xúc (Sentiment Analysis) sẽ được trình bày riêng ở mục 3.4.6 vì đó là một module xử lý ngôn ngữ tự nhiên (NLP) độc lập, phục vụ riêng cho chức năng đánh giá.
 
 ### 3.4.1. Thuật toán Weighted PageRank
 
@@ -195,7 +195,7 @@ pagerankNorm = pagerankScore / max(pagerankScore)
 pagerankConnectNorm = pagerankConnect / max(pagerankConnect)
 ```
 
-### 3.4.2. Thuật toán Collaborative Filtering
+### 3.4.2. Thuật toán Lọc cộng tác dựa trên người dùng (User-Based Collaborative Filtering)
 
 Sử dụng thuật toán **Node Similarity** (Jaccard Index) từ thư viện Neo4j GDS (đã trình bày lý thuyết ở mục 1.6.2) để tìm người dùng có sở thích tương đồng.
 
@@ -234,9 +234,9 @@ YIELD nodesCompared, relationshipsWritten, similarityDistribution
 
 Kết quả tạo ra relationship `(:User)-[:SIMILAR_TO {score}]-(:User)`. Khi gợi ý cho user A, hệ thống duyệt đồ thị: tìm users tương đồng → lấy địa điểm họ đã thích mà A chưa đi → tính điểm dựa trên số lượng users tương đồng và trung bình trọng số.
 
-### 3.4.3. Thuật toán Content-Based Filtering
+### 3.4.3. Thuật toán Lọc cộng tác dựa trên Item (Item-Based Collaborative Filtering)
 
-Gợi ý địa điểm có cùng danh mục với những nơi người dùng đã thích, bổ trợ cho Collaborative Filtering khi địa điểm mới chưa có đủ tương tác.
+Thay vì tìm người dùng tương đồng, hệ thống tìm các địa điểm tương đồng dựa trên tập người dùng đã tương tác chung. Thuật toán này chủ yếu bổ trợ cho việc hiển thị "Các địa điểm tương tự" (Similar Locations) khi người dùng xem chi tiết một địa điểm cụ thể.
 
 **a) Triển khai GDS Node Similarity cho Location:**
 
@@ -259,7 +259,7 @@ CALL gds.nodeSimilarity.write('loc_similarity_graph', {
 
 **b) Tham số thuật toán:**
 
-*Bảng 3.8. Tham số Content-Based Filtering (Location Similarity)*
+*Bảng 3.8. Tham số Item-Based Collaborative Filtering (Location Similarity)*
 
 | Tham số | Giá trị | Ý nghĩa |
 |---|---|---|
@@ -268,20 +268,69 @@ CALL gds.nodeSimilarity.write('loc_similarity_graph', {
 | `similarityCutoff` | 0.15 | Ngưỡng cao hơn User Similarity (15% > 10%) do cần chính xác hơn |
 | `orientation` | `'REVERSE'` | Đảo hướng INTERACTED để nhìn từ Location về User |
 
-**c) So sánh 2 thuật toán:**
+**c) So sánh hai phương pháp Lọc cộng tác:**
 
-*Bảng 3.9. So sánh Collaborative Filtering và Content-Based Filtering*
+*Bảng 3.9. So sánh hai phương pháp Lọc cộng tác*
 
-| Tiêu chí | Collaborative Filtering | Content-Based Filtering |
+| Tiêu chí | Lọc cộng tác dựa trên người dùng | Lọc cộng tác dựa trên Item |
 |---|---|---|
 | Đối tượng so sánh | User ↔ User | Location ↔ Location |
-| Dựa trên | Tập địa điểm đã tương tác | Tập users đã tương tác + Category |
+| Dựa trên | Tập địa điểm đã tương tác | Tập users đã tương tác |
 | Relationship tạo ra | `SIMILAR_TO` (User) | `LOC_SIMILAR` (Location) |
 | topK | 10 | 5 |
 | similarityCutoff | 0.1 (10%) | 0.15 (15%) |
-| Câu hỏi giải quyết | "Người giống bạn thích gì?" | "Nơi giống nơi bạn thích?" |
+| Câu hỏi giải quyết | "Người giống bạn thích gì?" | "Những người thích nơi này còn thích gì?" |
 
-### 3.4.4. Mô hình Gợi ý Lai và Chiến lược Trọng số (Adaptive Hybrid)
+### 3.4.4. Thuật toán Content-Based Filtering (Lọc dựa trên nội dung)
+
+Khác với Collaborative Filtering (dựa trên hành vi người dùng tương đồng), **Content-Based Filtering** phân tích đặc trưng nội dung của địa điểm để tìm những nơi có tính chất tương tự với sở thích hiện tại của người dùng (đã trình bày lý thuyết ở mục 1.7). Trong hệ thống, phương pháp này được áp dụng tại **hai khâu** quan trọng, mỗi khâu phục vụ một mục đích khác nhau:
+
+**a) Tiền xử lý đồ thị — Tạo mạng liên kết nội dung (Graph Pre-processing):**
+
+Trong giai đoạn tiền xử lý (script `setup_algo.py`, Bước 3b), hệ thống quét toàn bộ các cặp địa điểm có **cùng danh mục** (`Category`) và tự động tạo mối quan hệ `:RELATED_TO` giữa chúng. Mối quan hệ này được gán một trọng số cố định `WEIGHT_CATEGORY = 0.8`, phản ánh sự tương đồng về mặt nội dung giữa hai địa điểm:
+
+```cypher
+-- Tìm các cặp Location cùng danh mục và tạo liên kết
+MATCH (l1:Location)-[:HAS_CATEGORY]->(cat:Category)<-[:HAS_CATEGORY]-(l2:Location)
+WHERE elementId(l1) < elementId(l2)
+MERGE (l1)-[r:RELATED_TO]-(l2)
+SET r.weight = coalesce(r.weight, 0) + 0.8
+```
+
+Trọng số này được **cộng dồn** với trọng số Co-occurrence (nếu có) trên cùng mối quan hệ `:RELATED_TO`, tạo nên tín hiệu tổng hợp từ cả hai nguồn (xem mục 3.3.2). Kết quả là một mạng liên kết giữa các địa điểm — làm đầu vào cho thuật toán **PageRank Kết nối** (mục 3.4.1b), giúp xác định các địa điểm "trung tâm" trong mạng lưới du lịch.
+
+**b) Truy vấn gợi ý trực tiếp — Điểm thưởng danh mục (Real-time Category Bonus):**
+
+Trong quá trình tính điểm cho mô hình Gợi ý Lai (Bước 2 của pipeline, xem mục 3.4.5), hệ thống thực hiện so khớp danh mục theo hai bước:
+
+1. Duyệt các địa điểm mà người dùng đã tương tác, lấy danh mục (`Category`) của chúng;
+2. Với mỗi địa điểm ứng viên, kiểm tra xem danh mục của nó có trùng khớp với các danh mục đã thích hay không.
+
+Nếu có sự trùng khớp, điểm thưởng (bonus) được cộng trực tiếp vào điểm tổng hợp. Đồng thời, hệ thống cũng tận dụng trọng số từ quan hệ `:RELATED_TO` (bao gồm cả Co-occurrence và Category) để tính điểm Content-Based chi tiết hơn:
+
+```cypher
+-- Bước 2 trong pipeline Hybrid: Content-Based Filtering
+OPTIONAL MATCH (me)-[:INTERACTED]->(liked_loc:Location)
+OPTIONAL MATCH (liked_loc)-[:HAS_CATEGORY]->(cat:Category)<-[:HAS_CATEGORY]-(l_content:Location)
+WHERE NOT (me)-[:INTERACTED]->(l_content) AND NOT (me)-[:LIKED]->(l_content)
+OPTIONAL MATCH (liked_loc)-[r:RELATED_TO]-(l_content)
+WITH me, l_content, sum(1 + coalesce(r.weight, 0)) AS score_content
+```
+
+*Ví dụ:* Nếu người dùng đã thích "Chùa Thiên Mụ" (danh mục: Tâm linh), hệ thống sẽ tìm các địa điểm khác cũng thuộc danh mục "Tâm linh" (như Chùa Từ Đàm, Điện Hòn Chén). Nếu "Chùa Từ Đàm" vừa cùng danh mục, vừa có 2 users chung tương tác → `score_content = 1 + (2 × 1.2 + 0.8) = 4.2`, cao hơn đáng kể so với địa điểm chỉ cùng danh mục đơn thuần (`score_content = 1 + 0.8 = 1.8`).
+
+**c) Tóm tắt vai trò của Content-Based Filtering trong hệ thống:**
+
+*Bảng 3.9.1. Hai khâu áp dụng Content-Based Filtering*
+
+| Khâu | Thời điểm | Đầu vào | Đầu ra | Tác động |
+|---|---|---|---|---|
+| Tiền xử lý đồ thị | Offline (khi chạy `setup_algo.py`) | Quan hệ `:HAS_CATEGORY` | Trọng số `:RELATED_TO` (+0.8) | Cải thiện PageRank Kết nối |
+| Truy vấn gợi ý | Real-time (khi user yêu cầu gợi ý) | Danh mục đã thích + `:RELATED_TO` | Điểm `score_content` | Ưu tiên địa điểm cùng sở thích |
+
+Sự kết hợp cả hai khâu giúp Content-Based Filtering đóng góp vào hệ thống ở cả tầng cấu trúc đồ thị (ảnh hưởng gián tiếp qua PageRank) lẫn tầng truy vấn cá nhân hóa (ảnh hưởng trực tiếp qua điểm thưởng danh mục).
+
+### 3.4.5. Mô hình Gợi ý Lai và Chiến lược Trọng số (Adaptive Hybrid)
 
 Đây là phần tích hợp trung tâm, kết hợp kết quả từ 3 thuật toán trên thành một pipeline thống nhất.
 
@@ -331,7 +380,7 @@ Chiến lược trọng số 60-30-10 được thiết kế dựa trên đặc t
 
 Đối với người dùng mới chưa có tương tác (chưa LIKED hoặc INTERACTED), hệ thống bỏ qua Collaborative và Content-Based Filtering, thay vào đó sử dụng **Fallback Query** chỉ dựa trên điểm PageRank tổng hợp (công thức 60-30-10) để đảm bảo mọi người dùng đều nhận được gợi ý ngay từ lần truy cập đầu tiên.
 
-### 3.4.5. Explainable AI (Giải thích kết quả gợi ý)
+### 3.4.6. Explainable AI (Giải thích kết quả gợi ý)
 
 Mỗi địa điểm trong danh sách gợi ý đều kèm theo thông tin giải thích chi tiết, giúp người dùng hiểu *tại sao* hệ thống chọn nơi đó — tăng tính minh bạch và độ tin cậy của hệ thống.
 
@@ -343,6 +392,17 @@ Mỗi địa điểm trong danh sách gợi ý đều kèm theo thông tin giả
 | `reason_icon` | Emoji trực quan tương ứng | 👥 Collab, 🎯 Content, 🔥 PageRank |
 | `reason_type` | Phân loại lý do | `collab`, `content`, `pagerank`, `default` |
 | `reason_details` | Dữ liệu chi tiết cho biểu đồ UI | Điểm và % đóng góp từng thành phần, danh sách users tương đồng, biểu đồ tròn |
+
+### 3.4.7. Module Phân tích Cảm xúc (Sentiment Analysis)
+
+Khác với thuật toán khuyến nghị ở các mục 3.4.1–3.4.5 (chịu trách nhiệm xếp hạng và gợi ý địa điểm), module **Phân tích Cảm xúc** là một thành phần xử lý ngôn ngữ tự nhiên (NLP) độc lập, được triển khai trong file `utils.py`. Module này phục vụ riêng cho chức năng đánh giá (Review), không tham gia vào pipeline tính điểm khuyến nghị.
+
+**Vai trò và phạm vi:**
+
+- **`analyze_sentiment(comment)`:** Phân tích cảm xúc bình luận (tích cực / tiêu cực / trung lập) dựa trên từ điển từ khóa tiếng Việt. Kết quả được lưu vào thuộc tính `sentiment` của relationship `:REVIEWED` để hiển thị nhãn cảm xúc trên giao diện.
+- **`classify_comment_topic(comment)`:** Phân loại chủ đề bình luận (phong cảnh, dịch vụ, giá cả, ẩm thực...) dựa trên keyword matching.
+
+**Lưu ý quan trọng:** Module này sử dụng phương pháp keyword-based đơn giản, không áp dụng mô hình học máy. Kết quả sentiment chỉ phục vụ việc hiển thị trực quan cho người dùng, không được sử dụng làm đầu vào cho thuật toán khuyến nghị Hybrid.
 
 ## 3.5. Triển khai Ứng dụng Web
 
@@ -375,9 +435,9 @@ Hệ thống tách biệt logic truy vấn cơ sở dữ liệu vào thư mục 
 | `db/admin.py` | Truy vấn quản trị (thống kê, danh sách user) |
 | `db/sync.py` | Đồng bộ dữ liệu Location từ Neo4j ↔ Excel |
 
-**Module tiện ích (`utils.py`):**
+**Module Phân tích Cảm xúc (`utils.py`) — *độc lập với thuật toán khuyến nghị*:**
 
-File `utils.py` cung cấp các hàm phân tích văn bản tự động, được tích hợp vào quy trình thêm đánh giá:
+File `utils.py` chứa module Sentiment Analysis, là thành phần NLP riêng biệt phục vụ chức năng đánh giá — không thuộc pipeline thuật toán khuyến nghị (xem mục 3.4.7):
 
 - **`analyze_sentiment(comment)`:** Phân tích cảm xúc bình luận (tích cực / tiêu cực / trung lập) dựa trên từ điển từ khóa tiếng Việt.
 - **`classify_comment_topic(comment)`:** Phân loại chủ đề bình luận (phong cảnh, dịch vụ, giá cả, ẩm thực...) dựa trên keyword matching.
@@ -509,12 +569,14 @@ Chương này đã trình bày chi tiết quá trình triển khai hệ thống 
 
 3. **Cơ sở dữ liệu đồ thị:** Triển khai lược đồ 5 node, 9 relationship trên Neo4j với quy trình tiền xử lý tự động (INTERACTED, RELATED_TO, SIMILAR_TO, LOC_SIMILAR).
 
-4. **Thuật toán gợi ý lai:** Triển khai thành công pipeline 4 bước kết hợp Weighted PageRank (dampingFactor=0.88), Collaborative Filtering (Jaccard, topK=10), Content-Based Filtering (topK=5), PageRank Diversity Pool (Top 20) và chiến lược trọng số thích ứng 60-30-10.
+4. **Thuật toán khuyến nghị lai (Recommendation Engine):** Triển khai thành công pipeline kết hợp Weighted PageRank (dampingFactor=0.88), Lọc cộng tác dựa trên người dùng (Jaccard, topK=10), Lọc cộng tác dựa trên Item (topK=5), Content-Based Filtering từ danh mục, PageRank Diversity Pool (Top 20) và chiến lược trọng số thích ứng 60-30-10.
 
 5. **Explainable AI:** Mỗi gợi ý kèm lý do bằng ngôn ngữ tự nhiên, biểu đồ phân tích và dữ liệu chi tiết.
 
-6. **Ứng dụng web:** Backend Flask modular (4 Blueprint, 7 module DAL), Frontend Vanilla JS (9 module), tích hợp Leaflet.js cho bản đồ tương tác.
+6. **Module Phân tích Cảm xúc (Sentiment Analysis):** Triển khai riêng biệt với thuật toán khuyến nghị, phục vụ chức năng đánh giá — phân tích cảm xúc và phân loại chủ đề bình luận bằng phương pháp keyword-based.
 
-7. **Tiện ích xếp lộ trình:** Tích hợp tính năng phụ trợ giúp sắp xếp thứ tự tham quan theo ngày dựa trên nguyên tắc gần nhất nhằm hoàn thiện giao diện phục vụ thực nghiệm người dùng.
+7. **Ứng dụng web:** Backend Flask modular (4 Blueprint, 7 module DAL), Frontend Vanilla JS (9 module), tích hợp Leaflet.js cho bản đồ tương tác.
 
-8. **Demo website:** Minh họa giao diện thực tế qua 12 ảnh chụp màn hình, bao gồm: trang chủ bản đồ, đăng ký/đăng nhập, chi tiết địa điểm, đánh giá + sentiment, gợi ý AI + Explainable AI, lập lộ trình, lịch sử hoạt động và trang quản trị.
+8. **Tiện ích xếp lộ trình:** Tích hợp tính năng phụ trợ giúp sắp xếp thứ tự tham quan theo ngày dựa trên nguyên tắc gần nhất nhằm hoàn thiện giao diện phục vụ thực nghiệm người dùng.
+
+9. **Demo website:** Minh họa giao diện thực tế qua 12 ảnh chụp màn hình, bao gồm: trang chủ bản đồ, đăng ký/đăng nhập, chi tiết địa điểm, đánh giá + sentiment, gợi ý AI + Explainable AI, lập lộ trình, lịch sử hoạt động và trang quản trị.

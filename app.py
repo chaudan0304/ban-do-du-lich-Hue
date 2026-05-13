@@ -1,17 +1,12 @@
 """
 =============================================================================
 app.py - Điểm khởi chạy chính của ứng dụng Flask
-app.py - Main entry point for the Flask application
 =============================================================================
 Mô tả / Description:
     - Khởi tạo ứng dụng Flask và cấu hình các thành phần cốt lõi.
-      Initializes the Flask application and configures core components.
     - Thiết lập Flask-Login để quản lý phiên người dùng (session).
-      Sets up Flask-Login for user session management.
     - Đăng ký các Blueprint (auth, admin, api, main) để tổ chức route.
-      Registers Blueprints (auth, admin, api, main) for route organization.
     - Đóng kết nối Neo4j khi ứng dụng tắt (cleanup).
-      Closes Neo4j connection on application shutdown (cleanup).
 
 Phụ thuộc / Dependencies:
     - Flask, Flask-Login, python-dotenv
@@ -73,7 +68,7 @@ app.secret_key = secret
 # ======================================================
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "main.index"  # Redirect về trang chủ nếu chưa login / Redirect to homepage if not logged in
+login_manager.login_view = "main.index"  # type: ignore # Redirect về trang chủ nếu chưa login / Redirect to homepage if not logged in
 
 
 # -----------------------------------------------------------

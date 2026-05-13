@@ -467,7 +467,7 @@ Hệ thống được thiết kế theo mô hình **kiến trúc 3 tầng (3-Tie
 | Tầng | Tên gọi | Công nghệ | Vai trò |
 |------|---------|-----------|---------|
 | **Presentation Tier** | Tầng trình bày | HTML5, CSS3, JavaScript, Leaflet.js, Chart.js | Hiển thị giao diện bản đồ tương tác, sidebar, modal, biểu đồ phân tích AI |
-| **Business Logic Tier** | Tầng xử lý nghiệp vụ | Flask (Python), Flask-Login, Blueprint | Xử lý logic nghiệp vụ: xác thực, gợi ý AI, phân tích cảm xúc, tạo lộ trình |
+| **Business Logic Tier** | Tầng xử lý nghiệp vụ | Flask (Python), Flask-Login, Blueprint | Xử lý logic nghiệp vụ: xác thực, thuật toán khuyến nghị Hybrid, phân tích cảm xúc (NLP), tiện ích lộ trình |
 | **Data Tier** | Tầng dữ liệu | Neo4j (Cypher), Neo4j GDS, neo4j-python-driver | Lưu trữ dữ liệu đồ thị, thực thi thuật toán PageRank, Jaccard Similarity |
 
 ### 2.5.2. Tổ chức module hệ thống
@@ -483,8 +483,8 @@ Tầng Business Logic được tổ chức theo mô hình **Blueprint** của Fl
 | **API** | `routes/api.py` | API dữ liệu chính: địa điểm, gợi ý AI, đánh giá, lộ trình, like |
 | **Admin** | `routes/admin.py` | Quản trị: CRUD địa điểm, quản lý user, thống kê, trigger thuật toán |
 | **DB Package** | `db/` | Tầng truy cập dữ liệu: connection, user, location, planner, itinerary, sync |
-| **AI Engine** | `setup_algo.py` | Thuật toán Hybrid: PageRank, User/Location Similarity |
-| **Utils** | `utils.py` | Phân tích cảm xúc (Sentiment), phân loại chủ đề (Topic Classification) |
+| **Recommendation Engine** | `setup_algo.py` | Thuật toán Khuyến nghị Hybrid: PageRank, User/Location Similarity |
+| **Sentiment Analysis** | `utils.py` | Module NLP riêng biệt: Phân tích cảm xúc (Sentiment), phân loại chủ đề (Topic Classification) |
 
 ## 2.6. Thiết kế Cơ sở dữ liệu Đồ thị
 
@@ -522,7 +522,7 @@ Hệ thống sử dụng Neo4j — cơ sở dữ liệu đồ thị — với 5 
 | `:SIMILAR_TO` | User → User | Độ tương đồng giữa users (Jaccard, GDS) | `score` (0-1) |
 | `:LOC_SIMILAR` | Location → Location | Độ tương đồng giữa địa điểm (Jaccard, GDS) | `score` (0-1) |
 
-*Ghi chú:* Các relationship `:INTERACTED`, `:RELATED_TO`, `:SIMILAR_TO`, `:LOC_SIMILAR` được tạo tự động bởi thuật toán AI (file `setup_algo.py`) khi Admin kích hoạt "Chạy thuật toán AI" (UC18).
+*Ghi chú:* Các relationship `:INTERACTED`, `:RELATED_TO`, `:SIMILAR_TO`, `:LOC_SIMILAR` được tạo tự động bởi thuật toán khuyến nghị (Recommendation Engine — file `setup_algo.py`) khi Admin kích hoạt "Chạy thuật toán AI" (UC18).
 
 ### 2.6.3. Ràng buộc và Chỉ mục
 
