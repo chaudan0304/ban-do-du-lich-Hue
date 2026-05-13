@@ -171,7 +171,7 @@ function renderActivityList() {
                     <p class="item-name">${escapeHTML(item.location)}</p>
                     <span class="item-cat">${escapeHTML(item.category) || "Địa điểm"}</span>
                 </div>
-                <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                <button type="button" class="delete-btn"><i class="fas fa-trash"></i></button>
             `;
             // Click item → xem chi tiết / Click item → view detail
             div.addEventListener("click", () => showDetailFromData(item.location));
@@ -201,7 +201,7 @@ function renderActivityList() {
                     <p class="item-name">${escapeHTML(item.title)}</p>
                     <span class="item-cat">${item.days} ngày - ${new Date(item.created_at).toLocaleDateString('vi-VN')}</span>
                 </div>
-                <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                <button type="button" class="delete-btn"><i class="fas fa-trash"></i></button>
             `;
             // Click item → xem lộ trình đã lưu / Click item → view saved itinerary
             div.addEventListener("click", () => {

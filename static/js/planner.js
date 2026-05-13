@@ -770,8 +770,9 @@ async function loadUserItinerariesList() {
         if(!listContainer) return;
         
         listContainer.innerHTML = "";
-        if (res && res.length > 0) {
-            res.forEach(it => {
+        const items = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+        if (items.length > 0) {
+            items.forEach(it => {
                 const div = document.createElement("div");
                 div.className = "saved-itinerary-item"; 
                 div.innerHTML = `

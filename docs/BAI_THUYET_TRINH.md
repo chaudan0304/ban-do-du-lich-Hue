@@ -54,23 +54,17 @@ Nội dung nghiên cứu của khóa luận được chia thành 3 phần chính
 
 **Nội dung 1: Xây dựng cơ sở dữ liệu đồ thị.**
 
-Hệ thống lưu trữ dữ liệu dưới dạng Node — tức là các đỉnh — và Relationship — tức là các cạnh. So với cơ sở dữ liệu quan hệ truyền thống, mô hình đồ thị giúp truy vấn các mối quan hệ phức tạp nhanh hơn và trực quan hơn. Đặc biệt, mô hình này rất phù hợp với bài toán gợi ý, bởi nó cho phép mô hình hóa tự nhiên mối quan hệ giữa Người dùng, Địa điểm và Danh mục.
+Đầu tiên là xây dựng mô hình đồ thị. Hệ thống biểu diễn dữ liệu bằng các Node như User, Location, Category và các Relationship như LIKED, REVIEWED. Tiếp theo, hệ thống sử dụng Graph Data Science để phân tích và tạo ra các mối quan hệ ẩn phức tạp hơn, ví dụ như độ tương đồng giữa các người dùng (`SIMILAR_TO`) hoặc giữa các địa điểm (`LOC_SIMILAR`). Nhờ vậy, chúng ta có thể tối ưu hóa truy vấn bằng cách khai thác lợi thế của Neo4j để trích xuất các đồ thị con (sub-graph) phục vụ thuật toán khuyến nghị nhanh chóng hơn nhiều so với việc dùng lệnh JOIN phức tạp trong CSDL quan hệ truyền thống.
 
 **Nội dung 2: Hệ khuyến nghị và thuật toán đồ thị.**
 
-Hệ thống sử dụng 3 phương pháp chính:
-- Content-Based Filtering — gợi ý dựa trên đặc trưng nội dung;
-- Collaborative Filtering — gợi ý dựa trên hành vi của những người dùng có sở thích tương tự;
-- Hybrid — kết hợp cả hai phương pháp trên nhằm khắc phục hạn chế riêng lẻ.
+Thay vì chỉ dùng một thuật toán đơn lẻ, hệ thống áp dụng một pipeline Hybrid Recommendation. Cụ thể, hệ thống kết hợp Collaborative Filtering dựa trên độ tương đồng Jaccard giữa các người dùng, và Content-Based Filtering dựa trên danh mục địa điểm đã thích.
 
-Về thuật toán đồ thị, em sử dụng PageRank để đánh giá mức độ quan trọng của mỗi địa điểm dựa trên cấu trúc liên kết, và Độ tương đồng Jaccard để đo lường sự giống nhau giữa các người dùng, phục vụ cho Collaborative Filtering.
+Đặc biệt, hệ thống sử dụng thuật toán PageRank của Neo4j để đánh giá độ nổi tiếng của địa điểm, từ đó tạo ra một "Diversity Pool" giúp gợi ý đa dạng hơn, giải quyết vấn đề bong bóng lọc (Filter Bubble). Cuối cùng, hệ thống tích hợp tính năng Explainable AI, giúp tính toán và hiển thị trực quan tỷ lệ đóng góp của từng thuật toán để giải thích cho người dùng hiểu tại sao một địa điểm lại được gợi ý.
 
 **Nội dung 3: Các công nghệ sử dụng.**
 
-- Neo4j — hệ quản trị cơ sở dữ liệu đồ thị, kết hợp thư viện Graph Data Science;
-- Flask — framework Python dùng xây dựng RESTful API cho phía backend;
-- Leaflet.js — thư viện hiển thị bản đồ tương tác trên trình duyệt;
-- HTML, CSS, JavaScript — dùng xây dựng giao diện người dùng phía frontend.
+Về mặt nền tảng công nghệ, cốt lõi lưu trữ và xử lý của hệ thống dựa trên hệ quản trị cơ sở dữ liệu đồ thị Neo4j cùng thư viện Graph Data Science. Ở phía backend, em sử dụng framework Flask của Python để phát triển hệ thống RESTful API bảo mật và xử lý logic ứng dụng. Phía frontend, giao diện được xây dựng bằng HTML, CSS, JavaScript kết hợp với thư viện Leaflet.js để hiển thị bản đồ tương tác, mang lại trải nghiệm khám phá trực quan và mượt mà cho du khách.
 
 ### 2.3. Ý nghĩa của đề tài
 

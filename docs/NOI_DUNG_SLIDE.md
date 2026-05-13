@@ -70,29 +70,22 @@ Nội dung nghiên cứu
 **Nội dung 1: Xây dựng cơ sở dữ liệu đồ thị** 
 
 
-* Lưu trữ dữ liệu dưới dạng Node (đỉnh) và Relationship (cạnh).
+* **Xây dựng mô hình đồ thị (Graph Model):** Biểu diễn dữ liệu bằng các Node (User, Location, Category) và Relationship (LIKED, REVIEWED, HAS_CATEGORY).
 
+* **Xác định các mối quan hệ phức tạp:** Phân tích và tạo các mối quan hệ ẩn như độ tương đồng giữa người dùng (`SIMILAR_TO`) hoặc giữa các địa điểm (`LOC_SIMILAR`) bằng Graph Data Science (GDS).
 
-* Mang lại ưu điểm vượt trội so với CSDL quan hệ: truy vấn các mối quan hệ phức tạp nhanh hơn và trực quan hơn.
-
-
-* Rất phù hợp với bài toán gợi ý.
+* **Tối ưu hóa truy vấn:** Khai thác lợi thế của Neo4j để truy xuất đồ thị con (sub-graph) phục vụ thuật toán khuyến nghị nhanh chóng hơn so với JOIN trong CSDL quan hệ.
 
 
 
 
-* 
-**Nội dung 2: Hệ khuyến nghị và thuật toán đồ thị** 
+* **Nội dung 2: Hệ khuyến nghị và thuật toán đồ thị** 
 
+* **Phương pháp cốt lõi:** Kết hợp Content-Based Filtering (dựa trên danh mục yêu thích) và Collaborative Filtering (dựa trên Jaccard Similarity giữa các user).
 
-* 
-*Phương pháp chính:* Content-Based Filtering (gợi ý dựa trên đặc trưng nội dung) , Collaborative Filtering (gợi ý dựa trên hành vi người dùng tương tự) , và Hybrid (kết hợp cả hai phương pháp trên nhằm khắc phục hạn chế của từng phương pháp riêng lẻ).
+* **PageRank Diversity Pool:** Sử dụng thuật toán PageRank để đánh giá mức độ nổi bật của địa điểm, làm màng lọc chống hiện tượng "bong bóng lọc" (Filter Bubble).
 
-
-* 
-*Thuật toán đồ thị sử dụng:* PageRank (đánh giá mức độ quan trọng của node dựa trên cấu trúc liên kết) và Độ tương đồng Jaccard (đo lường độ tương đồng giữa hai tập hợp, dùng cho CF).
-
-
+* **Explainable AI (XAI):** Thuật toán tính toán chi tiết tỷ trọng đóng góp của từng phương pháp (Collab, Content, PageRank) và đưa ra lý do giải thích minh bạch cho người dùng.
 
 
 * 

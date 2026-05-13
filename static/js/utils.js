@@ -161,11 +161,9 @@ function showNotification({ type, title, message, btnText, onConfirm, showCancel
   modal.classList.add("active");
   
   // Focus vào nút phù hợp / Focus on the appropriate button
-  if (showCancel) {
-      if(document.getElementById("notif-cancel-btn")) document.getElementById("notif-cancel-btn").focus(); 
-  } else {
-      newBtn.focus();
-  }
+  // Luôn focus nút chính (Xóa/Đồng ý) để Enter = xác nhận
+  // Always focus main button (Delete/OK) so Enter = confirm
+  newBtn.focus();
 }
 
 // ── HÀM ĐỊNH DẠNG THỜI GIAN / TIME FORMAT FUNCTION ──
